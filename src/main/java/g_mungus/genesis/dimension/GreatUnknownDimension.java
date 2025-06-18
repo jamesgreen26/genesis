@@ -13,11 +13,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.*;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GreatUnknownDimension {
     public static void registerEffects(RegisterDimensionSpecialEffectsEvent event) {
@@ -30,7 +30,15 @@ public class GreatUnknownDimension {
             createStars();
         }
 
-        private VertexBuffer starBuffer;
+        private final int starBufferCount = 3;
+
+        private final List<VertexBuffer> starBuffers = new ArrayList<>(starBufferCount);
+
+        private final List<Vector4fc> starColors = List.of(
+                new Vector4f(1f, 1f, 1f, 0.8f),
+                new Vector4f(0.8f, 0.8f, 1f, 0.8f),
+                new Vector4f(1f, 1f, 0.8f, 0.8f)
+        );
 
         public Vec3 getBrightnessDependentFogColor(Vec3 arg, float f) {
             return new Vec3(0,0,0);
@@ -54,31 +62,41 @@ public class GreatUnknownDimension {
         public boolean renderSky(ClientLevel level, int ticks, float partialTick, Matrix4f modelViewMatrix, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
             PoseStack posestack = new PoseStack();
             posestack.mulPose(modelViewMatrix);
-            RenderSystem.setShaderColor(1f, 1f, 1f, 0.8f);
+
             FogRenderer.setupNoFog();
-            this.starBuffer.bind();
-            this.starBuffer.drawWithShader(posestack.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
-            VertexBuffer.unbind();
+
+            for (int i = 0; i < starBufferCount; i++) {
+                Vector4fc color = starColors.get(i);
+                RenderSystem.setShaderColor(color.x(), color.y(), color.z(), color.w());
+                VertexBuffer starBuffer = starBuffers.get(i);
+                starBuffer.bind();
+                starBuffer.drawWithShader(posestack.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
+                VertexBuffer.unbind();
+            }
+
             return true;
         }
 
         private void createStars() {
-            if (this.starBuffer != null) {
-                this.starBuffer.close();
-            }
 
-            this.starBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
-            this.starBuffer.bind();
-            this.starBuffer.upload(this.drawStars(Tesselator.getInstance()));
-            VertexBuffer.unbind();
+            starBuffers.forEach(VertexBuffer::close);
+            starBuffers.clear();
+
+            for(int i = 0; i < starBufferCount; i++) {
+                VertexBuffer starBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+                starBuffer.bind();
+                starBuffer.upload(this.drawStars(Tesselator.getInstance(), 10842L / (i + 4)));
+                VertexBuffer.unbind();
+                starBuffers.add(starBuffer);
+            }
         }
 
-        private MeshData drawStars(Tesselator arg) {
-            RandomSource randomsource = RandomSource.create(10842L);
+        private MeshData drawStars(Tesselator arg, long seed) {
+            RandomSource randomsource = RandomSource.create(seed);
 
             BufferBuilder bufferbuilder = arg.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
-            for(int j = 0; j < 1500; ++j) {
+            for(int j = 0; j < 1600; ++j) {
                 float f1 = randomsource.nextFloat() * 2.0F - 1.0F;
                 float f2 = randomsource.nextFloat() * 2.0F - 1.0F;
                 float f3 = randomsource.nextFloat() * 2.0F - 1.0F;
