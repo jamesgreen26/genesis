@@ -4,6 +4,11 @@ import g_mungus.genesis.dimension.GreatUnknownDimension;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.bus.api.IEventBus;
@@ -21,6 +26,9 @@ public final class GenesisMod {
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
 
+    private static final ResourceLocation entityScale = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "entity_scale");
+
+
     public GenesisMod(IEventBus eventBus) {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         // However, some things (like registries and resources) may still be uninitialized.
@@ -35,6 +43,22 @@ public final class GenesisMod {
             ResourceKey<Level> dimension = serverLevel.dimension();
             if (dimension.location().equals(SPACE_DIM))
                 VSGameUtilsKt.getShipObjectWorld(serverLevel).updateDimension(dimension.registry() + ":" + dimension.location(), new Vector3d());
+        }
+    }
+
+    public static void refreshEntityScaling(Entity entity, Boolean miniScale) {
+        if (entity instanceof LivingEntity livingEntity) {
+            AttributeInstance scale = livingEntity.getAttributes().getInstance(Attributes.SCALE);
+            if (miniScale) {
+                if (scale != null) {
+                    AttributeModifier attributeModifier = new AttributeModifier(entityScale, -15.0 / 16.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+                    scale.addOrReplacePermanentModifier(attributeModifier);
+                }
+            } else {
+                if (scale != null) {
+                    scale.removeModifier(entityScale);
+                }
+            }
         }
     }
 }

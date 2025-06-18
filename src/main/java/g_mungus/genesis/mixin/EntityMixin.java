@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -55,4 +56,13 @@ public abstract class EntityMixin {
         return vec3;
     }
 
+    @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z", at = @At("HEAD"))
+    private void startRidingMixin(Entity arg, boolean bl, CallbackInfoReturnable<Boolean> cir) {
+        GenesisMod.refreshEntityScaling((Entity)(Object) this, false);
+    }
+
+    @Inject(method = "removeVehicle", at = @At("HEAD"))
+    private void removeVehicleMixin(CallbackInfo ci) {
+        GenesisMod.refreshEntityScaling((Entity)(Object) this, genesis$isInSpace());
+    }
 }
