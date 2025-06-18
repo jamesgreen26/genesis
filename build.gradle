@@ -1,0 +1,102 @@
+plugins {
+    id 'dev.architectury.loom' version '1.10-SNAPSHOT'
+    id 'maven-publish'
+}
+
+group = project.maven_group
+version = project.mod_version
+
+base {
+    archivesName = project.archives_name
+}
+
+repositories {
+    // Add NeoForged repository.
+    maven {
+        name = 'NeoForged'
+        url = 'https://maven.neoforged.net/releases'
+    }
+
+    maven {
+        name = 'BlameJared Maven (CrT / Bookshelf)'
+        url = 'https://maven.blamejared.com'
+    }
+
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+
+    maven {
+        name = "Valkyrien Skies Internal"
+        url = 'https://maven.valkyrienskies.org'
+    }
+
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+    }
+}
+
+loom {
+    silentMojangMappingsLicense()
+}
+
+dependencies {
+    minecraft "net.minecraft:minecraft:$project.minecraft_version"
+    mappings loom.officialMojangMappings()
+    neoForge "net.neoforged:neoforge:$project.neoforge_version"
+
+    implementation("foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}") {
+        exclude group: "maven.modrinth"
+        exclude group: "me.fallenbreath"
+    }
+
+    compileOnly ("org.valkyrienskies.core:api:$vs_core_version") { transitive = false }
+    compileOnly ("org.valkyrienskies.core:api-game:$vs_core_version") { transitive = false }
+    compileOnly ("org.valkyrienskies.core:util:$vs_core_version") { transitive = false }
+    compileOnly ("org.valkyrienskies.core:impl:$vs_core_version") { transitive = false }
+
+    compileOnlyApi("org.valkyrienskies:valkyrienskies-1-21-1-forge:$vs2_version")
+
+    implementation("thedarkcolour:kotlinforforge-neoforge:5.8.0")
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand version: project.version
+    }
+}
+
+java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+// Configure Maven publishing.
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
+}
