@@ -100,7 +100,7 @@ public class GreatUnknownDimension {
                 float f1 = randomsource.nextFloat() * 2.0F - 1.0F;
                 float f2 = randomsource.nextFloat() * 2.0F - 1.0F;
                 float f3 = randomsource.nextFloat() * 2.0F - 1.0F;
-                float f4 = 0.15F + randomsource.nextFloat() * 0.1F;
+                float f4 = 0.05F + randomsource.nextFloat() * 0.2F;
                 float f5 = Mth.lengthSquared(f1, f2, f3);
                 if (!(f5 <= 0.010000001F) && !(f5 >= 1.0F)) {
                     Vector3f vector3f = (new Vector3f(f1, f2, f3)).normalize(100.0F);
