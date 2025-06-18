@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -15,10 +16,19 @@ public abstract class EntityMixin {
     @Shadow
     private Level level;
 
+    @Shadow public abstract Level level();
+
     @Inject(method = "onBelowWorld", at = @At("HEAD"), cancellable = true)
     private void onBelowWorldMixin(CallbackInfo ci) {
         if(level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "isNoGravity", at = @At("HEAD"), cancellable = true)
+    public void isNoGravityMixin(CallbackInfoReturnable<Boolean> cir) {
+        if (level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+            cir.setReturnValue(true);
         }
     }
 }
