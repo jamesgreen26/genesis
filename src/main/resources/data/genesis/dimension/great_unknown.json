@@ -1,0 +1,12 @@
+{
+  "type": "genesis:great_unknown",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "genesis:great_unknown",
+      "layers": [
+      ],
+      "structure_overrides": []
+    }
+  }
+}
