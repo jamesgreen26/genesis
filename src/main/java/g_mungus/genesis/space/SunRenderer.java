@@ -1,7 +1,9 @@
 package g_mungus.genesis.space;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import g_mungus.genesis.GenesisMod;
 import g_mungus.genesis.PlanetRegistry;
@@ -37,11 +39,18 @@ public class SunRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) return;
 
+        Matrix4f oldProj = RenderSystem.getProjectionMatrix();
+
+        Matrix4f newProj = createFarProjectionMatrix(0.05f, 100000.0f);
+        RenderSystem.setProjectionMatrix(newProj, VertexSorting.ORTHOGRAPHIC_Z);
+
         renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5));
 
         PlanetRegistry.planets.forEach((key, value) -> {
             renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
         });
+
+        RenderSystem.setProjectionMatrix(oldProj, VertexSorting.ORTHOGRAPHIC_Z);
     }
 
     private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize, Vector3fc rot) {
@@ -143,5 +152,25 @@ public class SunRenderer {
     private static Quaternionf eulerToQuaternion(Vector3fc eulerAnglesRad) {
         return new Quaternionf()
                 .rotationXYZ(eulerAnglesRad.x(), eulerAnglesRad.y(), eulerAnglesRad.z());
+    }
+
+    public static Matrix4f createFarProjectionMatrix(float near, float far) {
+        float fov = (float)Math.toRadians(70.0); // Minecraft’s default FOV
+        float aspect = (float)Minecraft.getInstance().getWindow().getWidth() / Minecraft.getInstance().getWindow().getHeight();
+
+        float yScale = 1.0f / (float)Math.tan(fov / 2.0f);
+        float xScale = yScale / aspect;
+        float frustumLength = far - near;
+
+        Matrix4f matrix = new Matrix4f();
+
+        matrix.m00(xScale);
+        matrix.m11(yScale);
+        matrix.m22(-((far + near) / frustumLength));
+        matrix.m23(-1.0f);
+        matrix.m32(-((2 * near * far) / frustumLength));
+        matrix.m33(0.0f);
+
+        return matrix;
     }
 }
