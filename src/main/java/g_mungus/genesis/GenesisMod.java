@@ -5,10 +5,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.bus.api.IEventBus;
@@ -18,6 +14,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import org.joml.Vector3d;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import virtuoel.pehkui.api.ScaleData;
+import virtuoel.pehkui.api.ScaleTypes;
 
 @EventBusSubscriber
 @Mod(GenesisMod.MOD_ID)
@@ -25,9 +23,6 @@ public final class GenesisMod {
     public static final String MOD_ID = "genesis";
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
-
-    private static final ResourceLocation entityScale = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "entity_scale");
-
 
     public GenesisMod(IEventBus eventBus) {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -47,18 +42,13 @@ public final class GenesisMod {
     }
 
     public static void refreshEntityScaling(Entity entity, Boolean miniScale) {
-        if (entity instanceof LivingEntity livingEntity) {
-            AttributeInstance scale = livingEntity.getAttributes().getInstance(Attributes.SCALE);
-            if (miniScale) {
-                if (scale != null) {
-                    AttributeModifier attributeModifier = new AttributeModifier(entityScale, -15.0 / 16.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-                    scale.addOrReplacePermanentModifier(attributeModifier);
-                }
-            } else {
-                if (scale != null) {
-                    scale.removeModifier(entityScale);
-                }
-            }
+
+        ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
+        scaleData.setPersistence(true);
+        if (miniScale) {
+            scaleData.setScale(1 / 16f);
+        } else {
+            scaleData.setScale(1f);
         }
     }
 }

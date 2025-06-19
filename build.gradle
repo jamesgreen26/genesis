@@ -60,6 +60,8 @@ dependencies {
     compileOnlyApi("org.valkyrienskies:valkyrienskies-1-21-1-forge:$vs2_version")
 
     implementation("thedarkcolour:kotlinforforge-neoforge:5.8.0")
+
+    modImplementation("maven.modrinth:pehkui:3.8.3+1.21-neoforge")
 }
 
 processResources {
