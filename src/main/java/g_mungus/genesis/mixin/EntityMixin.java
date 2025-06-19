@@ -14,14 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
 
-    @Shadow
-    private Level level;
-
     @Shadow public abstract Level level();
 
     @Unique
     private boolean genesis$isInSpace() {
-        return level.dimension().location().equals(GenesisMod.SPACE_DIM);
+        return level().dimension().location().equals(GenesisMod.SPACE_DIM);
     }
 
     @Inject(method = "onBelowWorld", at = @At("HEAD"), cancellable = true)
