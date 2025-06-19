@@ -13,6 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import virtuoel.pehkui.api.ScaleData;
@@ -29,7 +30,7 @@ public final class GenesisMod {
     public GenesisMod(IEventBus eventBus) {
         eventBus.addListener(GreatUnknownDimension::registerEffects);
 
-        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("overworld"), 64, new Vector3i(0, 0, 0));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("overworld"), 24, new Vector3i(2048, -64, 32), new Vector3f(30, 20, 10));
     }
 
     @SubscribeEvent

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import g_mungus.genesis.GenesisMod;
+import g_mungus.genesis.PlanetRegistry;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -14,7 +15,9 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
+import org.joml.*;
+
+import java.lang.Math;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public class SunRenderer {
@@ -34,12 +37,14 @@ public class SunRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) return;
 
-        renderBody(event, sunRenderType, 0, 0, 0, 64f);
+        renderBody(event, sunRenderType, 0, 0, 0, 64f, new Vector3f(15, 45, 5));
 
-        renderBody(event, sunRenderType, 200, -200, 40, 24f);
+        PlanetRegistry.planets.forEach((key, value) -> {
+            renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
+        });
     }
 
-    private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize) {
+    private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize, Vector3fc rot) {
         PoseStack poseStack = event.getPoseStack();
         Camera camera = event.getCamera();
 
@@ -63,6 +68,7 @@ public class SunRenderer {
         Matrix4f matrix;
         if (distanceSq <= maxRealRenderDist * maxRealRenderDist) {
             poseStack.translate(-camX, -camY, -camZ);
+            poseStack.rotateAround(eulerToQuaternion(rot), cubeX, cubeY, cubeZ);
             matrix = poseStack.last().pose();
             drawCube(buffer, matrix, (float) cubeX, (float) cubeY, (float) cubeZ, baseSize);
         } else {
@@ -78,6 +84,7 @@ public class SunRenderer {
             float fakeZ = (float) (camZ + dirZ * maxRealRenderDist);
 
             poseStack.translate(-camX, -camY, -camZ);
+            poseStack.rotateAround(eulerToQuaternion(rot), fakeX, fakeY, fakeZ);
             Matrix4f matrix4f = poseStack.last().pose();
             drawCube(buffer, matrix4f, fakeX, fakeY, fakeZ, scale);
         }
@@ -133,4 +140,8 @@ public class SunRenderer {
     }
 
 
+    private static Quaternionf eulerToQuaternion(Vector3fc eulerAnglesRad) {
+        return new Quaternionf()
+                .rotationXYZ(eulerAnglesRad.x(), eulerAnglesRad.y(), eulerAnglesRad.z());
+    }
 }
