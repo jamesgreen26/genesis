@@ -59,6 +59,11 @@ public class GreatUnknownDimension {
         }
 
         @Override
+        public boolean tickRain(ClientLevel level, int ticks, Camera camera) {
+            return true;
+        }
+
+        @Override
         public boolean renderSky(ClientLevel level, int ticks, float partialTick, Matrix4f modelViewMatrix, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
             PoseStack posestack = new PoseStack();
             posestack.mulPose(modelViewMatrix);
