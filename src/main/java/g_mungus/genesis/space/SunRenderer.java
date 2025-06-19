@@ -25,8 +25,8 @@ public class SunRenderer {
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
-        RenderType renderType = VeilRenderType.get(SUN_RENDER_TYPE);
-        if (renderType == null) {
+        RenderType sunRenderType = VeilRenderType.get(SUN_RENDER_TYPE);
+        if (sunRenderType == null) {
             System.out.println("Could not load render type");
             return;
         }
@@ -34,6 +34,12 @@ public class SunRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) return;
 
+        renderBody(event, sunRenderType, 0, 0, 0, 64f);
+
+        renderBody(event, sunRenderType, 200, -200, 40, 24f);
+    }
+
+    private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize) {
         PoseStack poseStack = event.getPoseStack();
         Camera camera = event.getCamera();
 
@@ -42,10 +48,6 @@ public class SunRenderer {
         double camY = camera.getPosition().y;
         double camZ = camera.getPosition().z;
 
-        double cubeX = 0;
-        double cubeY = 0;
-        double cubeZ = 0;
-
 
         double dx = cubeX - camX;
         double dy = cubeY - camY;
@@ -53,7 +55,6 @@ public class SunRenderer {
 
         double distanceSq = dx * dx + dy * dy + dz * dz;
         double maxRealRenderDist = 100.0;
-        float baseSize = 64.0f;
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(renderType);
