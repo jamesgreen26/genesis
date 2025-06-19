@@ -1,0 +1,14 @@
+{
+  "format": "POSITION_TEX",
+  "mode": "QUADS",
+  "bufferSize": "TRANSIENT",
+  "sort": true,
+  "affectsCrumbling": false,
+  "outline": false,
+  "layers": [
+    {
+      "type": "veil:shader",
+      "name": "genesis:sun"
+    }
+  ]
+}
