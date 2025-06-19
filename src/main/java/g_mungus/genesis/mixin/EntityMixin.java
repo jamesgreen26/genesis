@@ -34,14 +34,4 @@ public abstract class EntityMixin {
             cir.setReturnValue(true);
         }
     }
-
-    @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z", at = @At("HEAD"))
-    private void startRidingMixin(Entity arg, boolean bl, CallbackInfoReturnable<Boolean> cir) {
-        GenesisMod.refreshEntityScaling((Entity)(Object) this, false);
-    }
-
-    @Inject(method = "removeVehicle", at = @At("HEAD"))
-    private void removeVehicleMixin(CallbackInfo ci) {
-        GenesisMod.refreshEntityScaling((Entity)(Object) this, genesis$isInSpace());
-    }
 }
