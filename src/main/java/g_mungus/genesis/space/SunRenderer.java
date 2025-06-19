@@ -1,4 +1,4 @@
-package g_mungus.genesis.dimension;
+package g_mungus.genesis.space;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
