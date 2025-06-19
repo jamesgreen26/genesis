@@ -58,8 +58,6 @@ public class AtmosphericCollisionHandler {
         );
 
         if (destLevel != null) {
-            destLevel.setChunkForced(0,0, true);
-
             VSGameUtilsKt.getShipObjectWorld(fromLevel).teleportShip(ship, teleportData);
         }
     }
