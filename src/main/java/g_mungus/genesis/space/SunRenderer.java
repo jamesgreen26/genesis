@@ -37,7 +37,7 @@ public class SunRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) return;
 
-        renderBody(event, sunRenderType, 0, 0, 0, 64f, new Vector3f(15, 45, 5));
+        renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5));
 
         PlanetRegistry.planets.forEach((key, value) -> {
             renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
