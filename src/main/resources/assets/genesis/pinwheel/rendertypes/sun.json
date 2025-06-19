@@ -2,13 +2,18 @@
   "format": "POSITION_TEX",
   "mode": "QUADS",
   "bufferSize": "TRANSIENT",
-  "sort": true,
+  "sort": false,
   "affectsCrumbling": false,
   "outline": false,
   "layers": [
     {
       "type": "veil:shader",
       "name": "genesis:sun"
+    },
+    {
+      "type": "minecraft:write_mask",
+      "color": true,
+      "depth": true
     }
   ]
 }
