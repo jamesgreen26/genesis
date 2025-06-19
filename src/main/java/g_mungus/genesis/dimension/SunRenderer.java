@@ -52,7 +52,7 @@ public class SunRenderer {
         double dz = cubeZ - camZ;
 
         double distanceSq = dx * dx + dy * dy + dz * dz;
-        double maxRealRenderDist = 128.0;
+        double maxRealRenderDist = 100.0;
         float baseSize = 64.0f;
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -66,16 +66,15 @@ public class SunRenderer {
             drawCube(buffer, matrix, (float) cubeX, (float) cubeY, (float) cubeZ, baseSize);
         } else {
             double distance = Math.sqrt(distanceSq);
-            float renderDist = 128.0f;
-            float scale = (float) (baseSize * (renderDist / distance));
+            float scale = (float) (baseSize * (maxRealRenderDist / distance));
 
             double dirX = dx / distance;
             double dirY = dy / distance;
             double dirZ = dz / distance;
 
-            float fakeX = (float) (camX + dirX * renderDist);
-            float fakeY = (float) (camY + dirY * renderDist);
-            float fakeZ = (float) (camZ + dirZ * renderDist);
+            float fakeX = (float) (camX + dirX * maxRealRenderDist);
+            float fakeY = (float) (camY + dirY * maxRealRenderDist);
+            float fakeZ = (float) (camZ + dirZ * maxRealRenderDist);
 
             poseStack.translate(-camX, -camY, -camZ);
             Matrix4f matrix4f = poseStack.last().pose();
