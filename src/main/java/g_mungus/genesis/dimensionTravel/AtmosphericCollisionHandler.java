@@ -58,7 +58,7 @@ public class AtmosphericCollisionHandler {
         );
 
         if (destLevel != null) {
-            VSGameUtilsKt.getShipObjectWorld(fromLevel).teleportShip(ship, teleportData);
+            ValkyrienSkiesMod.vsCore.teleportShip(VSGameUtilsKt.getShipObjectWorld(fromLevel), ship, teleportData);
         }
     }
 
