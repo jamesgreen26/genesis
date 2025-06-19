@@ -25,13 +25,15 @@ import java.lang.Math;
 public class SunRenderer {
 
     private static final ResourceLocation SUN_RENDER_TYPE = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun");
+    private static final ResourceLocation PLANET_RENDER_TYPE = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet");
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
         RenderType sunRenderType = VeilRenderType.get(SUN_RENDER_TYPE);
-        if (sunRenderType == null) {
+        RenderType planetRenderTYpe = VeilRenderType.get(PLANET_RENDER_TYPE);
+        if (sunRenderType == null || planetRenderTYpe == null) {
             System.out.println("Could not load render type");
             return;
         }
@@ -41,16 +43,15 @@ public class SunRenderer {
 
         Matrix4f oldProj = RenderSystem.getProjectionMatrix();
 
-        Matrix4f newProj = createFarProjectionMatrix(0.05f, 100000.0f);
+        Matrix4f newProj = createFarProjectionMatrix(0.05f, 1000000000000.0f);
         RenderSystem.setProjectionMatrix(newProj, VertexSorting.ORTHOGRAPHIC_Z);
 
         renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5));
 
         PlanetRegistry.planets.forEach((key, value) -> {
-            renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
+            //renderBody(event, planetRenderTYpe, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
         });
 
-        RenderSystem.setProjectionMatrix(oldProj, VertexSorting.ORTHOGRAPHIC_Z);
     }
 
     private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize, Vector3fc rot) {
@@ -62,41 +63,17 @@ public class SunRenderer {
         double camY = camera.getPosition().y;
         double camZ = camera.getPosition().z;
 
-
-        double dx = cubeX - camX;
-        double dy = cubeY - camY;
-        double dz = cubeZ - camZ;
-
-        double distanceSq = dx * dx + dy * dy + dz * dz;
-        double maxRealRenderDist = 100.0;
-
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(renderType);
 
         poseStack.pushPose();
         Matrix4f matrix;
-        if (distanceSq <= maxRealRenderDist * maxRealRenderDist) {
-            poseStack.translate(-camX, -camY, -camZ);
-            poseStack.rotateAround(eulerToQuaternion(rot), cubeX, cubeY, cubeZ);
-            matrix = poseStack.last().pose();
-            drawCube(buffer, matrix, (float) cubeX, (float) cubeY, (float) cubeZ, baseSize);
-        } else {
-            double distance = Math.sqrt(distanceSq);
-            float scale = (float) (baseSize * (maxRealRenderDist / distance));
 
-            double dirX = dx / distance;
-            double dirY = dy / distance;
-            double dirZ = dz / distance;
+        poseStack.translate(-camX, -camY, -camZ);
+        poseStack.rotateAround(eulerToQuaternion(rot), cubeX, cubeY, cubeZ);
+        matrix = poseStack.last().pose();
+        drawCube(buffer, matrix, (float) cubeX, (float) cubeY, (float) cubeZ, baseSize);
 
-            float fakeX = (float) (camX + dirX * maxRealRenderDist);
-            float fakeY = (float) (camY + dirY * maxRealRenderDist);
-            float fakeZ = (float) (camZ + dirZ * maxRealRenderDist);
-
-            poseStack.translate(-camX, -camY, -camZ);
-            poseStack.rotateAround(eulerToQuaternion(rot), fakeX, fakeY, fakeZ);
-            Matrix4f matrix4f = poseStack.last().pose();
-            drawCube(buffer, matrix4f, fakeX, fakeY, fakeZ, scale);
-        }
         poseStack.popPose();
     }
 
@@ -155,10 +132,11 @@ public class SunRenderer {
     }
 
     public static Matrix4f createFarProjectionMatrix(float near, float far) {
-        float fov = (float)Math.toRadians(70.0); // Minecraft’s default FOV
-        float aspect = (float)Minecraft.getInstance().getWindow().getWidth() / Minecraft.getInstance().getWindow().getHeight();
+        float fov = (float) Math.toRadians(70.0); // Minecraft default FOV
+        float aspect = (float) Minecraft.getInstance().getWindow().getWidth() /
+                (float) Minecraft.getInstance().getWindow().getHeight();
 
-        float yScale = 1.0f / (float)Math.tan(fov / 2.0f);
+        float yScale = (float)(1.0 / Math.tan(fov / 2.0));
         float xScale = yScale / aspect;
         float frustumLength = far - near;
 
@@ -166,11 +144,12 @@ public class SunRenderer {
 
         matrix.m00(xScale);
         matrix.m11(yScale);
-        matrix.m22(-((far + near) / frustumLength));
+        matrix.m22(-(far + near) / frustumLength);
         matrix.m23(-1.0f);
-        matrix.m32(-((2 * near * far) / frustumLength));
+        matrix.m32(-(2 * near * far) / frustumLength);
         matrix.m33(0.0f);
 
         return matrix;
     }
+
 }
