@@ -11,7 +11,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import org.joml.*;
 import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.impl.game.ShipTeleportDataImpl;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 
@@ -40,7 +42,26 @@ public class AtmosphericCollisionHandler {
     }
 
     private static void moveShipToSpace(ServerShip ship, ServerLevel fromLevel, PlanetRegistry.PlanetData data) {
-        // VLib save me
+
+        Vector3dc newPos = new Vector3d(data.location().x() + data.size() + 2, data.location().y(), data.location().z());
+
+        ServerLevel destLevel = getLevel(GenesisMod.SPACE_DIM);
+
+        ShipTeleportDataImpl teleportData = new ShipTeleportDataImpl(
+                newPos,
+                new Quaterniond(),
+                new Vector3d(),
+                new Vector3d(),
+                "minecraft:dimension:" + GenesisMod.SPACE_DIM,
+                1/16.0,
+                null
+        );
+
+        if (destLevel != null) {
+            destLevel.setChunkForced(0,0, true);
+
+            VSGameUtilsKt.getShipObjectWorld(fromLevel).teleportShip(ship, teleportData);
+        }
     }
 
     public static ServerLevel getLevel(ResourceLocation dimensionID) {
