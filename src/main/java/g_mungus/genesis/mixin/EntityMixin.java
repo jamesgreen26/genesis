@@ -1,5 +1,6 @@
 package g_mungus.genesis.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import g_mungus.genesis.GenesisMod;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -28,10 +29,8 @@ public abstract class EntityMixin {
         }
     }
 
-    @Inject(method = "isNoGravity", at = @At("HEAD"), cancellable = true)
-    public void isNoGravityMixin(CallbackInfoReturnable<Boolean> cir) {
-        if (genesis$isInSpace()) {
-            cir.setReturnValue(true);
-        }
+    @ModifyExpressionValue(method = "getGravity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;isNoGravity()Z"))
+    private boolean getGravityMixin(boolean original) {
+        return original || genesis$isInSpace();
     }
 }
