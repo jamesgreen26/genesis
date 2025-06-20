@@ -30,8 +30,22 @@ public final class GenesisMod {
     public GenesisMod(IEventBus eventBus) {
         eventBus.addListener(GreatUnknownDimension::registerEffects);
 
-        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("overworld"), 48, new Vector3i(2048, -64, 32), new Vector3f(30, 20, 10));
-        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("the_end"), 24, new Vector3i(6000, -64, 200), new Vector3f(30, 20, 10));
+        registerPlanets();
+    }
+
+    private static void registerPlanets() {
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("overworld"), 256, new Vector3i(50000, -64, 32), new Vector3f(30, 20, 10));
+
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("a"), 144, new Vector3i(20000, -32800, -500), new Vector3f(0, 70, 0));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("b"), 108, new Vector3i(-12500, 10000, 3750), new Vector3f(30, 45, 10));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("c"), 180, new Vector3i(30000, -20000, 6250), new Vector3f(0, 90, 0));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("d"), 132, new Vector3i(8000, 15500, -11250), new Vector3f(15, 30, 45));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("e"), 96, new Vector3i(-17500, -7500, 1750), new Vector3f(60, 0, 20));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("f"), 156, new Vector3i(25000, 25000, 25000), new Vector3f(0, 180, 0));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("g"), 120, new Vector3i(-30000, 5000, -15000), new Vector3f(90, 45, 0));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("h"), 168, new Vector3i(10000, -10000, 5000), new Vector3f(0, 135, 15));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("i"), 114, new Vector3i(30000, 0, 23000), new Vector3f(10, 10, 10));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("j"), 150, new Vector3i(16000, -23000, 7750), new Vector3f(5, 60, 30));
     }
 
     @SubscribeEvent
