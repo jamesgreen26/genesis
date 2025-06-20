@@ -1,9 +1,7 @@
 package g_mungus.genesis.space;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import g_mungus.genesis.GenesisMod;
 import g_mungus.genesis.PlanetRegistry;
@@ -19,8 +17,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.*;
 
-import java.lang.Math;
-
 @EventBusSubscriber(value = Dist.CLIENT)
 public class SunRenderer {
 
@@ -28,7 +24,7 @@ public class SunRenderer {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
         RenderType sunRenderType = VeilRenderType.get(SUN_RENDER_TYPE);
         if (sunRenderType == null) {
@@ -39,17 +35,6 @@ public class SunRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) return;
 
-        Camera camera = event.getCamera();
-
-        double camX = camera.getPosition().x;
-        double camY = camera.getPosition().y;
-        double camZ = camera.getPosition().z;
-
-        double fov = 2 * Math.atan(1.0 / RenderSystem.getProjectionMatrix().get(1,1));
-
-        Matrix4f newProj = createFarProjectionMatrix(0.001f, 1000000.0f, fov);
-
-        RenderSystem.setProjectionMatrix(newProj, VertexSorting.byDistance(((float) camX), (float) camY, (float) camZ));
 
         renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5), 0);
 
@@ -135,25 +120,4 @@ public class SunRenderer {
         return new Quaternionf()
                 .rotationXYZ(eulerAnglesRad.x(), eulerAnglesRad.y(), eulerAnglesRad.z());
     }
-
-    public static Matrix4f createFarProjectionMatrix(float near, float far, double fov) {
-        float aspect = (float) Minecraft.getInstance().getWindow().getWidth() /
-                (float) Minecraft.getInstance().getWindow().getHeight();
-
-        float yScale = (float)(1.0 / Math.tan(fov / 2.0));
-        float xScale = yScale / aspect;
-        float frustumLength = far - near;
-
-        Matrix4f matrix = new Matrix4f();
-
-        matrix.m00(xScale);
-        matrix.m11(yScale);
-        matrix.m22(-(far + near) / frustumLength);
-        matrix.m23(-1.0f);
-        matrix.m32(-(2 * near * far) / frustumLength);
-        matrix.m33(0.0f);
-
-        return matrix;
-    }
-
 }
