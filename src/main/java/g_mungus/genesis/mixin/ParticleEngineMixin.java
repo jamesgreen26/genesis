@@ -6,12 +6,16 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.BreakingItemParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ParticleEngine.class)
@@ -41,6 +45,23 @@ public class ParticleEngineMixin {
             }
         }
     }
+
+    @Inject(method = "destroy", at = @At("HEAD"), cancellable = true)
+    public void destroyMixin(BlockPos arg, BlockState arg2, CallbackInfo ci) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null || level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "crack", at = @At("HEAD"), cancellable = true)
+    public void crackMixin(BlockPos arg, Direction arg2, CallbackInfo ci) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null || level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+            ci.cancel();
+        }
+    }
+
 
     @Shadow
     public void add(Particle particle) {
