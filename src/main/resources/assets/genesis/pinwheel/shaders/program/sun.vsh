@@ -1,7 +1,7 @@
 in vec3 position;
-in vec2 UV0;
+in vec4 COLOR;
 
-out vec2 texCoord0;
+out vec4 texCoord0;
 
 uniform mat4 ProjMat;
 uniform mat4 ModelViewMat;
@@ -9,5 +9,5 @@ uniform mat4 ModelViewMat;
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(position, 1.0);
 
-    texCoord0 = UV0;
+    texCoord0 = COLOR;
 }

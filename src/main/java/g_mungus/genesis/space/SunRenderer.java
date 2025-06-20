@@ -25,15 +25,13 @@ import java.lang.Math;
 public class SunRenderer {
 
     private static final ResourceLocation SUN_RENDER_TYPE = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun");
-    private static final ResourceLocation PLANET_RENDER_TYPE = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet");
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
         RenderType sunRenderType = VeilRenderType.get(SUN_RENDER_TYPE);
-        RenderType planetRenderTYpe = VeilRenderType.get(PLANET_RENDER_TYPE);
-        if (sunRenderType == null || planetRenderTYpe == null) {
+        if (sunRenderType == null) {
             System.out.println("Could not load render type");
             return;
         }
@@ -53,15 +51,15 @@ public class SunRenderer {
 
         RenderSystem.setProjectionMatrix(newProj, VertexSorting.byDistance(((float) camX), (float) camY, (float) camZ));
 
-        renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5));
+        renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5), 0);
 
         PlanetRegistry.planets.forEach((key, value) -> {
-            renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
+            renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles(), 1);
         });
 
     }
 
-    private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize, Vector3fc rot) {
+    private static void renderBody(RenderLevelStageEvent event, RenderType renderType, int cubeX, int cubeY, int cubeZ, float baseSize, Vector3fc rot, float type) {
         PoseStack poseStack = event.getPoseStack();
         Camera camera = event.getCamera();
 
@@ -79,13 +77,13 @@ public class SunRenderer {
         poseStack.translate(-camX, -camY, -camZ);
         poseStack.rotateAround(eulerToQuaternion(rot), cubeX, cubeY, cubeZ);
         matrix = poseStack.last().pose();
-        drawCube(buffer, matrix, (float) cubeX, (float) cubeY, (float) cubeZ, baseSize);
+        drawCube(buffer, matrix, (float) cubeX, (float) cubeY, (float) cubeZ, baseSize, type);
 
         poseStack.popPose();
     }
 
 
-    private static void drawCube(VertexConsumer buffer, Matrix4f matrix, float centerX, float centerY, float centerZ, float size) {
+    private static void drawCube(VertexConsumer buffer, Matrix4f matrix, float centerX, float centerY, float centerZ, float size, float type) {
         float half = size / 2f;
 
         float x0 = centerX - half;
@@ -96,40 +94,40 @@ public class SunRenderer {
         float z1 = centerZ + half;
 
         // Front face (toward positive Z)
-        buffer.addVertex(matrix, x0, y0, z1).setUv(0f, 0f);
-        buffer.addVertex(matrix, x1, y0, z1).setUv(1f, 0f);
-        buffer.addVertex(matrix, x1, y1, z1).setUv(1f, 1f);
-        buffer.addVertex(matrix, x0, y1, z1).setUv(0f, 1f);
+        buffer.addVertex(matrix, x0, y0, z1).setColor(type, 0f, 0f, 0f);
+        buffer.addVertex(matrix, x1, y0, z1).setColor(type, 0f, 1f, 0f);
+        buffer.addVertex(matrix, x1, y1, z1).setColor(type, 0f, 1f, 1f);
+        buffer.addVertex(matrix, x0, y1, z1).setColor(type, 0f, 0f, 1f);
 
         // Back face (toward negative Z)
-        buffer.addVertex(matrix, x1, y0, z0).setUv(0f, 0f);
-        buffer.addVertex(matrix, x0, y0, z0).setUv(1f, 0f);
-        buffer.addVertex(matrix, x0, y1, z0).setUv(1f, 1f);
-        buffer.addVertex(matrix, x1, y1, z0).setUv(0f, 1f);
+        buffer.addVertex(matrix, x1, y0, z0).setColor(type, 0f, 0f, 0f);
+        buffer.addVertex(matrix, x0, y0, z0).setColor(type, 0f, 1f, 0f);
+        buffer.addVertex(matrix, x0, y1, z0).setColor(type, 0f, 1f, 1f);
+        buffer.addVertex(matrix, x1, y1, z0).setColor(type, 0f, 0f, 1f);
 
         // Left face
-        buffer.addVertex(matrix, x0, y0, z0).setUv(0f, 0f);
-        buffer.addVertex(matrix, x0, y0, z1).setUv(1f, 0f);
-        buffer.addVertex(matrix, x0, y1, z1).setUv(1f, 1f);
-        buffer.addVertex(matrix, x0, y1, z0).setUv(0f, 1f);
+        buffer.addVertex(matrix, x0, y0, z0).setColor(type, 0f, 0f, 0f);
+        buffer.addVertex(matrix, x0, y0, z1).setColor(type, 0f, 1f, 0f);
+        buffer.addVertex(matrix, x0, y1, z1).setColor(type, 0f, 1f, 1f);
+        buffer.addVertex(matrix, x0, y1, z0).setColor(type, 0f, 0f, 1f);
 
         // Right face
-        buffer.addVertex(matrix, x1, y0, z1).setUv(0f, 0f);
-        buffer.addVertex(matrix, x1, y0, z0).setUv(1f, 0f);
-        buffer.addVertex(matrix, x1, y1, z0).setUv(1f, 1f);
-        buffer.addVertex(matrix, x1, y1, z1).setUv(0f, 1f);
+        buffer.addVertex(matrix, x1, y0, z1).setColor(type, 0f, 0f, 0f);
+        buffer.addVertex(matrix, x1, y0, z0).setColor(type, 0f, 1f, 0f);
+        buffer.addVertex(matrix, x1, y1, z0).setColor(type, 0f, 1f, 1f);
+        buffer.addVertex(matrix, x1, y1, z1).setColor(type, 0f, 0f, 1f);
 
         // Top face
-        buffer.addVertex(matrix, x0, y1, z1).setUv(0f, 0f);
-        buffer.addVertex(matrix, x1, y1, z1).setUv(1f, 0f);
-        buffer.addVertex(matrix, x1, y1, z0).setUv(1f, 1f);
-        buffer.addVertex(matrix, x0, y1, z0).setUv(0f, 1f);
+        buffer.addVertex(matrix, x0, y1, z1).setColor(type, 0f, 0f, 0f);
+        buffer.addVertex(matrix, x1, y1, z1).setColor(type, 0f, 1f, 0f);
+        buffer.addVertex(matrix, x1, y1, z0).setColor(type, 0f, 1f, 1f);
+        buffer.addVertex(matrix, x0, y1, z0).setColor(type, 0f, 0f, 1f);
 
         // Bottom face
-        buffer.addVertex(matrix, x0, y0, z0).setUv(0f, 0f);
-        buffer.addVertex(matrix, x1, y0, z0).setUv(1f, 0f);
-        buffer.addVertex(matrix, x1, y0, z1).setUv(1f, 1f);
-        buffer.addVertex(matrix, x0, y0, z1).setUv(0f, 1f);
+        buffer.addVertex(matrix, x0, y0, z0).setColor(type, 0f, 0f, 0f);
+        buffer.addVertex(matrix, x1, y0, z0).setColor(type, 0f, 1f, 0f);
+        buffer.addVertex(matrix, x1, y0, z1).setColor(type, 0f, 1f, 1f);
+        buffer.addVertex(matrix, x0, y0, z1).setColor(type, 0f, 0f, 1f);
     }
 
 
