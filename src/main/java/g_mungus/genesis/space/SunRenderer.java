@@ -28,7 +28,7 @@ public class SunRenderer {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) return;
 
         RenderType sunRenderType = VeilRenderType.get(SUN_RENDER_TYPE);
         if (sunRenderType == null) {
