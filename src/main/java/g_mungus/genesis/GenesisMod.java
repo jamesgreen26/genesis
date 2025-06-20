@@ -30,7 +30,8 @@ public final class GenesisMod {
     public GenesisMod(IEventBus eventBus) {
         eventBus.addListener(GreatUnknownDimension::registerEffects);
 
-        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("overworld"), 24, new Vector3i(2048, -64, 32), new Vector3f(30, 20, 10));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("overworld"), 48, new Vector3i(2048, -64, 32), new Vector3f(30, 20, 10));
+        PlanetRegistry.registerPlanet(ResourceLocation.withDefaultNamespace("the_end"), 24, new Vector3i(6000, -64, 200), new Vector3f(30, 20, 10));
     }
 
     @SubscribeEvent

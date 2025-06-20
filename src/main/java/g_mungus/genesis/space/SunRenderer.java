@@ -41,15 +41,22 @@ public class SunRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) return;
 
-        Matrix4f oldProj = RenderSystem.getProjectionMatrix();
+        Camera camera = event.getCamera();
 
-        Matrix4f newProj = createFarProjectionMatrix(0.05f, 1000000000000.0f);
-        RenderSystem.setProjectionMatrix(newProj, VertexSorting.ORTHOGRAPHIC_Z);
+        double camX = camera.getPosition().x;
+        double camY = camera.getPosition().y;
+        double camZ = camera.getPosition().z;
+
+        double fov = 2 * Math.atan(1.0 / RenderSystem.getProjectionMatrix().get(1,1));
+
+        Matrix4f newProj = createFarProjectionMatrix(0.001f, 1000000.0f, fov);
+
+        RenderSystem.setProjectionMatrix(newProj, VertexSorting.byDistance(((float) camX), (float) camY, (float) camZ));
 
         renderBody(event, sunRenderType, 0, 0, 0, 2048f, new Vector3f(15, 45, 5));
 
         PlanetRegistry.planets.forEach((key, value) -> {
-            //renderBody(event, planetRenderTYpe, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
+            renderBody(event, sunRenderType, value.location().x(), value.location().y(), value.location().z(), value.size(), value.eulerAngles());
         });
 
     }
@@ -131,8 +138,7 @@ public class SunRenderer {
                 .rotationXYZ(eulerAnglesRad.x(), eulerAnglesRad.y(), eulerAnglesRad.z());
     }
 
-    public static Matrix4f createFarProjectionMatrix(float near, float far) {
-        float fov = (float) Math.toRadians(70.0); // Minecraft default FOV
+    public static Matrix4f createFarProjectionMatrix(float near, float far, double fov) {
         float aspect = (float) Minecraft.getInstance().getWindow().getWidth() /
                 (float) Minecraft.getInstance().getWindow().getHeight();
 
