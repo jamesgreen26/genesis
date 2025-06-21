@@ -36,14 +36,14 @@ public class TestingStickItem extends Item {
         Random rand = new Random(seed);
 
         // Vary base size and shape per asteroid
-        int baseRadius = 8 + Math.min(rand.nextInt(20), rand.nextInt(25)); // 8–13 block radius
+        int baseRadius = 5; // 8–13 block radius
 
         // Random axis scaling: squash or stretch
-        double scaleX = 1.0 + (rand.nextDouble() * 2.0 - 0.5); // 0.7 – 1.3
-        double scaleY = 1.0 + (rand.nextDouble() * 2.0 - 0.5);
-        double scaleZ = 1.0 + (rand.nextDouble() * 2.0 - 0.5);
+        double scaleX = 1.0 + (rand.nextDouble() * 0.5);
+        double scaleY = 1.0 + (rand.nextDouble() * 0.5);
+        double scaleZ = 1.0 + (rand.nextDouble() * 0.5);
 
-        double noiseScale = 0.02;
+        double noiseScale = 0.04;
         Vec3 centerVec = new Vec3(center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5);
 
         int xRadius = (int) Math.ceil(baseRadius * scaleX * 1.5);
@@ -70,7 +70,7 @@ public class TestingStickItem extends Item {
 
                     double noise = (n1 * 0.6 + n2 * 0.3 + n3 * 0.1);
 
-                    double threshold = baseRadius - dist + noise * 6;
+                    double threshold = baseRadius - dist + noise * 4;
 
                     if (threshold > 1.5) {
                         level.setBlock(current, getAsteroidBlock(current.getCenter(), seed), 3);
