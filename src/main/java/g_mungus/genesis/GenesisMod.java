@@ -1,7 +1,6 @@
 package g_mungus.genesis;
 
 import g_mungus.genesis.asteroid.AsteroidBlock;
-import g_mungus.genesis.asteroid.AsteroidGenerator;
 import g_mungus.genesis.item.TestingStickItem;
 import g_mungus.genesis.space.GreatUnknownDimension;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,10 +17,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.joml.Vector3d;
 import org.joml.Vector3f;

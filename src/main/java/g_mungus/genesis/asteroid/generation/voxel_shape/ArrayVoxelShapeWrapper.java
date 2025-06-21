@@ -1,4 +1,4 @@
-package g_mungus.genesis.asteroid.generation;
+package g_mungus.genesis.asteroid.generation.voxel_shape;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,7 +20,7 @@ public class ArrayVoxelShapeWrapper implements Serializable {
     private final List<Double> ys;
     private final List<Double> zs;
 
-    private final BitDiscreteVoxelShapeWrapper shape;
+    private final BitSetDiscreteVoxelShapeWrapper shape;
 
     public ArrayVoxelShapeWrapper(ArrayVoxelShape source) {
         ArrayVoxelShapeAccessor accessor = (ArrayVoxelShapeAccessor) source;
@@ -35,7 +35,7 @@ public class ArrayVoxelShapeWrapper implements Serializable {
         DiscreteVoxelShape discreteShape = ((VoxelShapeAccessor) source).getShape();
 
         if (discreteShape instanceof BitSetDiscreteVoxelShape bitSetShape) {
-            this.shape = new BitDiscreteVoxelShapeWrapper(bitSetShape);
+            this.shape = new BitSetDiscreteVoxelShapeWrapper(bitSetShape);
         } else {
             throw new IllegalArgumentException("Wrong type of shape");
         }
@@ -46,7 +46,7 @@ public class ArrayVoxelShapeWrapper implements Serializable {
             @JsonProperty("xs") List<Double> xs,
             @JsonProperty("ys") List<Double> ys,
             @JsonProperty("zs") List<Double> zs,
-            @JsonProperty("shape") BitDiscreteVoxelShapeWrapper shape
+            @JsonProperty("shape") BitSetDiscreteVoxelShapeWrapper shape
     ) {
         this.xs = xs;
         this.ys = ys;
@@ -66,6 +66,6 @@ public class ArrayVoxelShapeWrapper implements Serializable {
     public List<Double> getXs() { return xs; }
     public List<Double> getYs() { return ys; }
     public List<Double> getZs() { return zs; }
-    public BitDiscreteVoxelShapeWrapper getShape() { return shape; }
+    public BitSetDiscreteVoxelShapeWrapper getShape() { return shape; }
 }
 

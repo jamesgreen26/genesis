@@ -1,0 +1,12 @@
+{
+  "composition": [
+    {
+      "type": "minecraft:stone",
+      "amount": 10
+    },
+    {
+      "type": "minecraft:iron_ore",
+      "amount": 5
+    }
+  ]
+}

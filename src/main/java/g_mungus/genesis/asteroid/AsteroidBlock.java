@@ -1,5 +1,6 @@
 package g_mungus.genesis.asteroid;
 
+import g_mungus.genesis.asteroid.generation.AsteroidGenerator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -13,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static g_mungus.genesis.asteroid.AsteroidGenerator.ASTEROID_COUNT;
+import static g_mungus.genesis.asteroid.generation.AsteroidGenerator.ASTEROID_COUNT;
 
 public class AsteroidBlock extends Block {
     public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, ASTEROID_COUNT);
-    static final List<VoxelShape> asteroidShapes = new ArrayList<>(ASTEROID_COUNT);
+    public static final List<VoxelShape> asteroidShapes = new ArrayList<>(ASTEROID_COUNT);
 
 
     public AsteroidBlock(Properties arg) {
