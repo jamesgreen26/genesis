@@ -1,5 +1,6 @@
 package g_mungus.genesis;
 
+import g_mungus.genesis.asteroid.AsteroidBlock;
 import g_mungus.genesis.item.TestingStickItem;
 import g_mungus.genesis.space.GreatUnknownDimension;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -10,6 +11,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -34,15 +37,19 @@ public final class GenesisMod {
     public static final int atmosphereCollisionHeight = 2048;
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MOD_ID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, MOD_ID);
 
     public static final DeferredHolder<Item, TestingStickItem> TESTING_STICK_ITEM = ITEMS.register("testing_stick",
             () -> new TestingStickItem(new Item.Properties()));
 
+    public static final DeferredHolder<Block, AsteroidBlock> ASTEROID_BLOCK = BLOCKS.register("asteroid_block",
+            () -> new AsteroidBlock(BlockBehaviour.Properties.of()));
 
     public GenesisMod(IEventBus eventBus) {
         eventBus.addListener(GreatUnknownDimension::registerEffects);
 
         ITEMS.register(eventBus);
+        BLOCKS.register(eventBus);
         registerPlanets();
     }
 
