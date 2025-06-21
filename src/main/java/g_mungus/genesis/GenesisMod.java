@@ -52,8 +52,6 @@ public final class GenesisMod {
         ITEMS.register(eventBus);
         BLOCKS.register(eventBus);
         registerPlanets();
-
-        AsteroidGenerator.generateAndSaveAll();
     }
 
     private static void registerPlanets() {

@@ -1,5 +1,7 @@
 package g_mungus.genesis.asteroid.generation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import g_mungus.genesis.mixin.ArrayVoxelShapeAccessor;
 import g_mungus.genesis.mixin.VoxelShapeAccessor;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
@@ -37,6 +39,19 @@ public class ArrayVoxelShapeWrapper implements Serializable {
         } else {
             throw new IllegalArgumentException("Wrong type of shape");
         }
+    }
+
+    @JsonCreator
+    public ArrayVoxelShapeWrapper(
+            @JsonProperty("xs") List<Double> xs,
+            @JsonProperty("ys") List<Double> ys,
+            @JsonProperty("zs") List<Double> zs,
+            @JsonProperty("shape") BitDiscreteVoxelShapeWrapper shape
+    ) {
+        this.xs = xs;
+        this.ys = ys;
+        this.zs = zs;
+        this.shape = shape;
     }
 
     public ArrayVoxelShape get() {

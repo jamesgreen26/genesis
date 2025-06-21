@@ -1,5 +1,7 @@
 package g_mungus.genesis.asteroid.generation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import g_mungus.genesis.mixin.BSDVSAccessor;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 
@@ -48,6 +50,23 @@ public class BitDiscreteVoxelShapeWrapper implements Serializable {
         this.xMax = shape.getXMax();
         this.yMax = shape.getYMax();
         this.zMax = shape.getZMax();
+    }
+
+    @JsonCreator
+    public BitDiscreteVoxelShapeWrapper(
+            @JsonProperty("xmin") int xMin,
+            @JsonProperty("ymin") int yMin,
+            @JsonProperty("zmin") int zMin,
+            @JsonProperty("xmax") int xMax,
+            @JsonProperty("ymax") int yMax,
+            @JsonProperty("zmax") int zMax
+    ) {
+        this.xMin = xMin;
+        this.yMin = yMin;
+        this.zMin = zMin;
+        this.xMax = xMax;
+        this.yMax = yMax;
+        this.zMax = zMax;
     }
 
     public BitSetDiscreteVoxelShape get() {

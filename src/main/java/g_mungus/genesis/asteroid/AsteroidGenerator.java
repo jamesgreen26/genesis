@@ -2,14 +2,22 @@ package g_mungus.genesis.asteroid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import g_mungus.genesis.asteroid.generation.ArrayVoxelShapeWrapper;
+import g_mungus.genesis.asteroid.generation.AsteroidDataLoader;
+import g_mungus.genesis.mixin.ArrayVoxelShapeAccessor;
+import g_mungus.genesis.mixin.BSDVSAccessor;
+import g_mungus.genesis.mixin.VoxelShapeAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.ArrayVoxelShape;
+import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import open_simplex_2.java.OpenSimplex2;
 
@@ -23,22 +31,35 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+//@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class AsteroidGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static List<VoxelShape> asteroidShapes;
+    private static final List<VoxelShape> asteroidShapes = new ArrayList<>(256);
 
     public static List<VoxelShape> getAsteroidShapes() {
         return asteroidShapes;
     }
 
+    public static VoxelShape getShape(int i) {
+        return asteroidShapes.get(i);
+    }
+
+
     public static void loadFromDisk() {
-        
+        for (int i = 0; i < 256; i++) {
+            try {
+                ArrayVoxelShape shape = AsteroidDataLoader.load("asteroid/voxel_shape/asteroid_" + i + ".json").get();
+                asteroidShapes.add(shape);
+            } catch (Exception e) {
+                System.out.println("failed to create voxel shape for asteroid: " + i);
+            }
+        }
     }
 
     public static void generateAndSaveAll() {
         int asteroidCount = 255;
-        int numberOfThreads = 10; // CPU-bound, 6-core machine
+        int numberOfThreads = 10;
 
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 
