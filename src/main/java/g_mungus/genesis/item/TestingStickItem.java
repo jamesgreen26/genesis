@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import open_simplex_2.java.OpenSimplex2;
 
+import java.util.Random;
+
 public class TestingStickItem extends Item {
 
     public TestingStickItem(Properties arg) {
@@ -29,22 +31,46 @@ public class TestingStickItem extends Item {
     }
 
     private void generateAsteroid(ServerLevel level, BlockPos center, long seed) {
-        int radius = 10;
-        double scale = 0.1;
+        Random rand = new Random(seed);
 
-        Vec3 centerVec = new Vec3(center.getX(), center.getY(), center.getZ());
+        // Vary base size and shape per asteroid
+        int baseRadius = 8 + rand.nextInt(10); // 8–13 block radius
 
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
+        // Random axis scaling: squash or stretch
+        double scaleX = 1.0 + (rand.nextDouble() * 2.0 - 0.5); // 0.7 – 1.3
+        double scaleY = 1.0 + (rand.nextDouble() * 2.0 - 0.5);
+        double scaleZ = 1.0 + (rand.nextDouble() * 2.0 - 0.5);
+
+        double noiseScale = 0.02;
+        Vec3 centerVec = new Vec3(center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5);
+
+        int xRadius = (int) Math.ceil(baseRadius * scaleX * 1.5);
+        int yRadius = (int) Math.ceil(baseRadius * scaleY * 1.5);
+        int zRadius = (int) Math.ceil(baseRadius * scaleZ * 1.5);
+
+        for (int dx = -xRadius; dx <= xRadius; dx++) {
+            for (int dy = -yRadius; dy <= yRadius; dy++) {
+                for (int dz = -zRadius; dz <= zRadius; dz++) {
                     BlockPos current = center.offset(dx, dy, dz);
-                    Vec3 currentVec = new Vec3(current.getX(), current.getY(), current.getZ());
+                    Vec3 posVec = new Vec3(current.getX() + 0.5, current.getY() + 0.5, current.getZ() + 0.5);
 
-                    double distance = centerVec.distanceTo(currentVec);
-                    double noiseValue = OpenSimplex2.noise3_ImproveXZ(seed, current.getX() * scale, current.getY() * scale, current.getZ() * scale);
+                    // Apply inverse scaling to get into "spherical blob space"
+                    double x = (posVec.x - centerVec.x) / scaleX;
+                    double y = (posVec.y - centerVec.y) / scaleY;
+                    double z = (posVec.z - centerVec.z) / scaleZ;
 
-                    // Threshold based on distance and noise
-                    if (distance + noiseValue * 6 < radius) {
+                    double dist = Math.sqrt(x * x + y * y + z * z);
+
+                    // Multi-layer OpenSimplex2 noise
+                    double n1 = OpenSimplex2.noise3_ImproveXZ(seed, posVec.x * noiseScale, posVec.y * noiseScale, posVec.z * noiseScale);
+                    double n2 = OpenSimplex2.noise3_ImproveXZ(seed + 1, posVec.x * noiseScale * 2, posVec.y * noiseScale * 2, posVec.z * noiseScale * 2);
+                    double n3 = OpenSimplex2.noise3_ImproveXZ(seed + 2, posVec.x * noiseScale * 4, posVec.y * noiseScale * 4, posVec.z * noiseScale * 4);
+
+                    double noise = (n1 * 0.6 + n2 * 0.3 + n3 * 0.1);
+
+                    double threshold = baseRadius - dist + noise * 6;
+
+                    if (threshold > 1.5) {
                         level.setBlock(current, Blocks.STONE.defaultBlockState(), 3);
                     }
                 }
