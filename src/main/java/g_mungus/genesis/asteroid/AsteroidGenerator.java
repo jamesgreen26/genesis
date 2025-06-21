@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class AsteroidGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
-    public static final int ASTEROID_COUNT = 1;
+    public static final int ASTEROID_COUNT = 8;
 
     @SubscribeEvent
     public static void loadFromDisk(FMLCommonSetupEvent event) {
@@ -57,7 +57,7 @@ public class AsteroidGenerator {
         module.addDeserializer(BitSet.class, new AsteroidDataLoader.BitSetDeserializer());
         mapper.registerModule(module);
 
-        int numberOfThreads = 10;
+        int numberOfThreads = 8;
 
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 
