@@ -19,7 +19,7 @@ public class AsteroidBlock extends Block {
     public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, 255);
 
 
-    VoxelShape shape = compileShape(AsteroidGenerator.generateAsteroid(0));
+    VoxelShape shape = compileShape(AsteroidGenerator.generateAsteroid(230));
 
     public AsteroidBlock(Properties arg) {
         super(arg);
@@ -40,12 +40,19 @@ public class AsteroidBlock extends Block {
     }
 
     private VoxelShape compileShape(List<BlockPos> points) {
-        return points.stream()
-                .map(pos -> Block.box(
-                        pos.getX(), pos.getY(), pos.getZ(),
-                        pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))
-                .reduce(Shapes::or)
-                .orElse(Shapes.empty());
+        System.out.println("compiling shape");
+        VoxelShape result = Shapes.empty();
+
+        System.out.println("size: " + points.size());
+
+        for (int i = 0; i < points.size(); i++) {
+            System.out.println(i);
+            BlockPos blockPos = points.get(i);
+            result = Shapes.or(result, Block.box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1));
+
+        }
+        System.out.println("compiled shape");
+        return result.optimize();
     }
 
     @Override
