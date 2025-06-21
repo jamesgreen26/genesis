@@ -28,11 +28,11 @@ public class AsteroidGenerator {
 
     public static void generateAndSaveAll() {
         int asteroidCount = 255;
-        int numberOfThreads = 6; // CPU-bound, 6-core machine
+        int numberOfThreads = 10; // CPU-bound, 6-core machine
 
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 
-        for (int i = 0; i < asteroidCount; i++) {
+        for (int i = asteroidCount; i >= 0; i--) {
             final int taskId = i;
             executor.submit(() -> generateAndSave(taskId));
         }
@@ -50,6 +50,9 @@ public class AsteroidGenerator {
 
     public static void generateAndSave(long seed) {
         List<BlockPos> rawShape = generateAsteroid(seed);
+        if (rawShape.size() > 50_000) {
+            System.out.println("skipping asteroid " + seed + " with size: " + rawShape.size());
+        }
         ArrayVoxelShapeWrapper shape = compileShape(rawShape);
         saveVoxelShape(shape, seed);
     }
