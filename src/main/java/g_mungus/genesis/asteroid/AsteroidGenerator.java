@@ -33,7 +33,7 @@ public class AsteroidGenerator {
     static void saveVoxelShape(ArrayVoxelShapeWrapper shape, long seed) {
         Path gameDir = FMLPaths.GAMEDIR.get();
         Path outputDir = gameDir.resolve("genesis_mod");
-        Path outputFile = outputDir.resolve("asteroid-" + seed + ".json");
+        Path outputFile = outputDir.resolve("asteroid_" + seed + ".json");
 
         try {
             Files.createDirectories(outputDir);
@@ -50,7 +50,7 @@ public class AsteroidGenerator {
 
         System.out.println("size: " + points.size());
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < points.size(); i++) {
             System.out.println(i);
             BlockPos blockPos = points.get(i);
             result = Shapes.or(result, Block.box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1));
