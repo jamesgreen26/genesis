@@ -47,5 +47,10 @@ public class ArrayVoxelShapeWrapper implements Serializable {
 
         return ArrayVoxelShapeAccessor.create(shape.get(), dxs, dys, dzs);
     }
+
+    public List<Double> getXs() { return xs; }
+    public List<Double> getYs() { return ys; }
+    public List<Double> getZs() { return zs; }
+    public BitDiscreteVoxelShapeWrapper getShape() { return shape; }
 }
 

@@ -12,6 +12,31 @@ public class BitDiscreteVoxelShapeWrapper implements Serializable {
     private final int zMin;
     private final int xMax;
     private final int yMax;
+
+    public int getZMax() {
+        return zMax;
+    }
+
+    public int getYMax() {
+        return yMax;
+    }
+
+    public int getXMax() {
+        return xMax;
+    }
+
+    public int getZMin() {
+        return zMin;
+    }
+
+    public int getYMin() {
+        return yMin;
+    }
+
+    public int getXMin() {
+        return xMin;
+    }
+
     private final int zMax;
 
     public BitDiscreteVoxelShapeWrapper(BitSetDiscreteVoxelShape source) {
