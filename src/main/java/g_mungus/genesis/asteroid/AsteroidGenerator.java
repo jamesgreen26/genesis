@@ -1,18 +1,67 @@
 package g_mungus.genesis.asteroid;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import g_mungus.genesis.asteroid.generation.ArrayVoxelShapeWrapper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.ArrayVoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.fml.loading.FMLPaths;
 import open_simplex_2.java.OpenSimplex2;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class AsteroidGenerator {
-    public static List<BlockPos> generateAsteroid(long seed) {
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+
+    public static void generateAndSave(long seed) {
+        List<BlockPos> rawShape = generateAsteroid(seed);
+        ArrayVoxelShapeWrapper shape = compileShape(rawShape);
+        saveVoxelShape(shape, seed);
+    }
+
+    static void saveVoxelShape(ArrayVoxelShapeWrapper shape, long seed) {
+        Path gameDir = FMLPaths.GAMEDIR.get();
+        Path outputDir = gameDir.resolve("genesis_mod");
+        Path outputFile = outputDir.resolve("asteroid-" + seed + ".json");
+
+        try {
+            Files.createDirectories(outputDir);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile.toFile(), shape);
+            System.out.println("Shape written to: " + outputFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static ArrayVoxelShapeWrapper compileShape(List<BlockPos> points) {
+        System.out.println("compiling shape");
+        VoxelShape result = Shapes.empty();
+
+        System.out.println("size: " + points.size());
+
+        for (int i = 0; i < 100; i++) {
+            System.out.println(i);
+            BlockPos blockPos = points.get(i);
+            result = Shapes.or(result, Block.box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1));
+
+        }
+        System.out.println("compiled shape");
+        return new ArrayVoxelShapeWrapper((ArrayVoxelShape) result.optimize());
+    }
+
+
+    static List<BlockPos> generateAsteroid(long seed) {
         List<BlockPos> result = new ArrayList<>();
         Random rand = new Random(seed);
         BlockPos center = new BlockPos(7, 7, 7);

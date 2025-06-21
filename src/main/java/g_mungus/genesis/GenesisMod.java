@@ -1,6 +1,7 @@
 package g_mungus.genesis;
 
 import g_mungus.genesis.asteroid.AsteroidBlock;
+import g_mungus.genesis.asteroid.AsteroidGenerator;
 import g_mungus.genesis.item.TestingStickItem;
 import g_mungus.genesis.space.GreatUnknownDimension;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -51,6 +52,8 @@ public final class GenesisMod {
         ITEMS.register(eventBus);
         BLOCKS.register(eventBus);
         registerPlanets();
+
+        AsteroidGenerator.generateAndSave(0);
     }
 
     private static void registerPlanets() {
