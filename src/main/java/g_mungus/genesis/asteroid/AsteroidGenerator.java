@@ -19,9 +19,33 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class AsteroidGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    public static void generateAndSaveAll() {
+        int asteroidCount = 255;
+        int numberOfThreads = 6; // CPU-bound, 6-core machine
+
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+
+        for (int i = 0; i < asteroidCount; i++) {
+            final int taskId = i;
+            executor.submit(() -> generateAndSave(taskId));
+        }
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(12, TimeUnit.HOURS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
+    }
 
 
     public static void generateAndSave(long seed) {
@@ -45,18 +69,15 @@ public class AsteroidGenerator {
     }
 
     static ArrayVoxelShapeWrapper compileShape(List<BlockPos> points) {
-        System.out.println("compiling shape");
         VoxelShape result = Shapes.empty();
 
-        System.out.println("size: " + points.size());
+        System.out.println("Compiling shape with size: " + points.size());
 
         for (int i = 0; i < points.size(); i++) {
-            System.out.println(i);
             BlockPos blockPos = points.get(i);
             result = Shapes.or(result, Block.box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1));
 
         }
-        System.out.println("compiled shape");
         return new ArrayVoxelShapeWrapper((ArrayVoxelShape) result.optimize());
     }
 
