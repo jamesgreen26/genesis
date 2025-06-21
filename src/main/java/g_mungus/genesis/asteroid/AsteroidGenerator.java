@@ -35,22 +35,12 @@ import java.util.concurrent.TimeUnit;
 public class AsteroidGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final List<VoxelShape> asteroidShapes = new ArrayList<>(256);
-
-    public static List<VoxelShape> getAsteroidShapes() {
-        return asteroidShapes;
-    }
-
-    public static VoxelShape getShape(int i) {
-        return asteroidShapes.get(i);
-    }
-
 
     public static void loadFromDisk() {
         for (int i = 0; i < 256; i++) {
             try {
                 ArrayVoxelShape shape = AsteroidDataLoader.load("asteroid/voxel_shape/asteroid_" + i + ".json").get();
-                asteroidShapes.add(shape);
+                AsteroidBlock.asteroidShapes.add(shape);
             } catch (Exception e) {
                 System.out.println("failed to create voxel shape for asteroid: " + i);
             }

@@ -77,6 +77,8 @@ public final class GenesisMod {
             if (dimension.location().equals(SPACE_DIM))
                 VSGameUtilsKt.getShipObjectWorld(serverLevel).updateDimension(dimension.registry() + ":" + dimension.location(), new Vector3d());
         }
+
+        AsteroidGenerator.loadFromDisk();
     }
 
     public static void refreshEntityScaling(Entity entity, Boolean miniScale) {

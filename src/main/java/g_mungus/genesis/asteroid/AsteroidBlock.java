@@ -10,8 +10,12 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AsteroidBlock extends Block {
     public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, 255);
+    static final List<VoxelShape> asteroidShapes = new ArrayList<>(256);
 
 
     public AsteroidBlock(Properties arg) {
@@ -28,8 +32,13 @@ public class AsteroidBlock extends Block {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        int index = state.getValue(INDEX);
 
-        return Shapes.block();
+        try {
+            return asteroidShapes.get(index);
+        } catch (Exception e) {
+            return Shapes.block();
+        }
     }
 
     @Override
