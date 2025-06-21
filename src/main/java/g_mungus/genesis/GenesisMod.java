@@ -1,10 +1,13 @@
 package g_mungus.genesis;
 
+import g_mungus.genesis.item.TestingStickItem;
 import g_mungus.genesis.space.GreatUnknownDimension;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.bus.api.IEventBus;
@@ -12,6 +15,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -27,9 +33,16 @@ public final class GenesisMod {
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final int atmosphereCollisionHeight = 2048;
 
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MOD_ID);
+
+    public static final DeferredHolder<Item, TestingStickItem> TESTING_STICK_ITEM = ITEMS.register("testing_stick",
+            () -> new TestingStickItem(new Item.Properties()));
+
+
     public GenesisMod(IEventBus eventBus) {
         eventBus.addListener(GreatUnknownDimension::registerEffects);
 
+        ITEMS.register(eventBus);
         registerPlanets();
     }
 
