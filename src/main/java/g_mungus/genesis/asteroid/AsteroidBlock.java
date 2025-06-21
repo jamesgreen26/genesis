@@ -40,11 +40,12 @@ public class AsteroidBlock extends Block {
     }
 
     private VoxelShape compileShape(List<BlockPos> points) {
-        AtomicReference<VoxelShape> result = new AtomicReference<>(Shapes.empty());
-        points.forEach((blockPos -> {
-            result.set(Shapes.or(result.get(), Block.box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1)));
-        }));
-        return result.get();
+        return points.stream()
+                .map(pos -> Block.box(
+                        pos.getX(), pos.getY(), pos.getZ(),
+                        pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1))
+                .reduce(Shapes::or)
+                .orElse(Shapes.empty());
     }
 
     @Override
