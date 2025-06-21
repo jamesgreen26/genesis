@@ -26,6 +26,16 @@ import java.util.concurrent.TimeUnit;
 public class AsteroidGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    private static List<VoxelShape> asteroidShapes;
+
+    public static List<VoxelShape> getAsteroidShapes() {
+        return asteroidShapes;
+    }
+
+    public static void loadFromDisk() {
+        
+    }
+
     public static void generateAndSaveAll() {
         int asteroidCount = 255;
         int numberOfThreads = 10; // CPU-bound, 6-core machine
@@ -50,8 +60,11 @@ public class AsteroidGenerator {
 
     public static void generateAndSave(long seed) {
         List<BlockPos> rawShape = generateAsteroid(seed);
-        if (rawShape.size() > 50_000) {
+        long actualSeed = seed;
+        while (rawShape.size() > 50_000) {
             System.out.println("skipping asteroid " + seed + " with size: " + rawShape.size());
+            actualSeed *= seed;
+            rawShape = generateAsteroid(actualSeed);
         }
         ArrayVoxelShapeWrapper shape = compileShape(rawShape);
         saveVoxelShape(shape, seed);
