@@ -9,6 +9,7 @@
     "ParticleMixin"
   ],
   "mixins": [
+    "ArrayVoxelShapeAccessor",
     "BSDVSAccessor",
     "EntityMixin",
     "LivingEntityMixin",

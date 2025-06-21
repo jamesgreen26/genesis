@@ -3,12 +3,9 @@ package g_mungus.genesis.asteroid.generation;
 import g_mungus.genesis.mixin.BSDVSAccessor;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public class BitDiscreteVoxelShapeWrapper implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     private final int xMin;
     private final int yMin;
