@@ -34,7 +34,7 @@ public class TestingStickItem extends Item {
         Random rand = new Random(seed);
 
         // Vary base size and shape per asteroid
-        int baseRadius = 8 + rand.nextInt(10); // 8–13 block radius
+        int baseRadius = 8 + Math.min(rand.nextInt(20), rand.nextInt(25)); // 8–13 block radius
 
         // Random axis scaling: squash or stretch
         double scaleX = 1.0 + (rand.nextDouble() * 2.0 - 0.5); // 0.7 – 1.3
