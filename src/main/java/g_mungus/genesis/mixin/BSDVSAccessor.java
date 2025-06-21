@@ -3,6 +3,7 @@ package g_mungus.genesis.mixin;
 
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.BitSet;
@@ -12,6 +13,10 @@ public interface BSDVSAccessor {
 
     @Accessor("storage")
     BitSet getStorage();
+
+    @Mutable
+    @Accessor("storage")
+    void setStorage(BitSet bitSet);
 
     @Accessor("xMin")
     int getXMin();

@@ -1,18 +1,16 @@
 package g_mungus.genesis.asteroid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import g_mungus.genesis.asteroid.generation.ArrayVoxelShapeWrapper;
 import g_mungus.genesis.asteroid.generation.AsteroidDataLoader;
-import g_mungus.genesis.mixin.ArrayVoxelShapeAccessor;
-import g_mungus.genesis.mixin.BSDVSAccessor;
-import g_mungus.genesis.mixin.VoxelShapeAccessor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.ArrayVoxelShape;
-import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,19 +23,24 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-//@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class AsteroidGenerator {
     private static final ObjectMapper mapper = new ObjectMapper();
+    public static final int ASTEROID_COUNT = 1;
+
+    @SubscribeEvent
+    public static void loadFromDisk(FMLCommonSetupEvent event) {
+        //generateAndSaveAll();
 
 
-    public static void loadFromDisk() {
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < ASTEROID_COUNT; i++) {
             try {
                 ArrayVoxelShape shape = AsteroidDataLoader.load("asteroid/voxel_shape/asteroid_" + i + ".json").get();
                 AsteroidBlock.asteroidShapes.add(shape);
@@ -48,12 +51,17 @@ public class AsteroidGenerator {
     }
 
     public static void generateAndSaveAll() {
-        int asteroidCount = 255;
+        SimpleModule module = new SimpleModule();
+
+        module.addSerializer(BitSet.class, new AsteroidDataLoader.BitSetSerializer());
+        module.addDeserializer(BitSet.class, new AsteroidDataLoader.BitSetDeserializer());
+        mapper.registerModule(module);
+
         int numberOfThreads = 10;
 
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 
-        for (int i = asteroidCount; i >= 0; i--) {
+        for (int i = ASTEROID_COUNT; i >= 0; i--) {
             final int taskId = i;
             executor.submit(() -> generateAndSave(taskId));
         }

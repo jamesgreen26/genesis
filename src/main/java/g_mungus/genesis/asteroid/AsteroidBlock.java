@@ -13,9 +13,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static g_mungus.genesis.asteroid.AsteroidGenerator.ASTEROID_COUNT;
+
 public class AsteroidBlock extends Block {
-    public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, 255);
-    static final List<VoxelShape> asteroidShapes = new ArrayList<>(256);
+    public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, ASTEROID_COUNT);
+    static final List<VoxelShape> asteroidShapes = new ArrayList<>(ASTEROID_COUNT);
 
 
     public AsteroidBlock(Properties arg) {
@@ -32,6 +34,17 @@ public class AsteroidBlock extends Block {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        int index = state.getValue(INDEX);
+
+        try {
+            return asteroidShapes.get(index);
+        } catch (Exception e) {
+            return Shapes.block();
+        }
+    }
+
+    @Override
+    protected VoxelShape getInteractionShape(BlockState state, BlockGetter arg2, BlockPos arg3) {
         int index = state.getValue(INDEX);
 
         try {
