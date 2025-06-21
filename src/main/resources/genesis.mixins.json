@@ -9,9 +9,11 @@
     "ParticleMixin"
   ],
   "mixins": [
+    "BSDVSAccessor",
     "EntityMixin",
     "LivingEntityMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "VoxelShapeAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

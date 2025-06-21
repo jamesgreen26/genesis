@@ -1,5 +1,7 @@
 package g_mungus.genesis.asteroid;
 
+import g_mungus.genesis.asteroid.generation.BitDiscreteVoxelShapeWrapper;
+import g_mungus.genesis.mixin.VoxelShapeAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -7,6 +9,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -19,7 +22,7 @@ public class AsteroidBlock extends Block {
     public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, 255);
 
 
-    VoxelShape shape = compileShape(AsteroidGenerator.generateAsteroid(230));
+    VoxelShape shape = compileShape(AsteroidGenerator.generateAsteroid(0));
 
     public AsteroidBlock(Properties arg) {
         super(arg);
@@ -45,12 +48,13 @@ public class AsteroidBlock extends Block {
 
         System.out.println("size: " + points.size());
 
-        for (int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < 100; i++) {
             System.out.println(i);
             BlockPos blockPos = points.get(i);
             result = Shapes.or(result, Block.box(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1));
 
         }
+        BitDiscreteVoxelShapeWrapper wrapper = new BitDiscreteVoxelShapeWrapper((BitSetDiscreteVoxelShape) ((VoxelShapeAccessor)result).getShape());
         System.out.println("compiled shape");
         return result.optimize();
     }
