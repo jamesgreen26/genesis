@@ -72,32 +72,7 @@ public class VoxelSetToJson {
         ObjectNode faceObj = mapper.createObjectNode();
         ArrayNode uv = mapper.createArrayNode();
 
-        switch (face) {
-            case "north" -> {
-                // North face: faces -Z → plane is X,Y
-                uv.add(pos.x).add(16 - pos.y - 1).add(pos.x + 1).add(16 - pos.y); // Y is flipped
-            }
-            case "south" -> {
-                // South face: faces +Z → plane is X,Y
-                uv.add(pos.x).add(16 - pos.y - 1).add(pos.x + 1).add(16 - pos.y);
-            }
-            case "east" -> {
-                // East face: faces +X → plane is Z,Y
-                uv.add(pos.z).add(16 - pos.y - 1).add(pos.z + 1).add(16 - pos.y);
-            }
-            case "west" -> {
-                // West face: faces -X → plane is Z,Y
-                uv.add(pos.z).add(16 - pos.y - 1).add(pos.z + 1).add(16 - pos.y);
-            }
-            case "up" -> {
-                // Up face: faces +Y → plane is X,Z
-                uv.add(pos.x).add(16 - pos.z - 1).add(pos.x + 1).add(16 - pos.z);
-            }
-            case "down" -> {
-                // Down face: faces -Y → plane is X,Z
-                uv.add(pos.x).add(16 - pos.z - 1).add(pos.x + 1).add(16 - pos.z);
-            }
-        }
+        uv.add(0).add(0).add(16).add(16);
 
         faceObj.set("uv", uv);
         faceObj.put("texture", "#0");
