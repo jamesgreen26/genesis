@@ -2,7 +2,7 @@ package g_mungus.genesis;
 
 import g_mungus.genesis.asteroid.AsteroidBlock;
 import g_mungus.genesis.item.TestingStickItem;
-import g_mungus.genesis.space.GreatUnknownDimension;
+import g_mungus.genesis.client.GreatUnknownDimension;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
