@@ -22,7 +22,9 @@
     "final_density": {
       "type": "genesis:random_noise",
       "scale": 0.5,
-      "frequency": 0.1
+      "frequency": {
+        "type": "genesis:asteroid_belt"
+      }
     },
     "fluid_level_floodedness": 0.0,
     "fluid_level_spread": 0.0,

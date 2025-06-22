@@ -3,32 +3,35 @@ package g_mungus.genesis.worldgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunction;
-
-import java.util.Random;
+import org.jetbrains.annotations.NotNull;
 
 public class RandomNoise implements DensityFunction {
 
     public static final MapCodec<RandomNoise> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.DOUBLE.fieldOf("scale").forGetter(r -> r.scale),
-                    Codec.DOUBLE.fieldOf("frequency").forGetter(r -> r.frequency)
+                    DensityFunction.CODEC.fieldOf("frequency").forGetter(r -> r.frequency)
             ).apply(instance, RandomNoise::new)
     );
 
     public static final KeyDispatchDataCodec<RandomNoise> KEY_CODEC = KeyDispatchDataCodec.of(MAP_CODEC);
 
     private final double scale;
-    private final double frequency;
+    private final Holder<DensityFunction> frequency;
 
-    public RandomNoise(double scale, double frequency) {
+
+    public RandomNoise(double scale, Holder<DensityFunction> frequency) {
         this.scale = scale;
         this.frequency = frequency;
     }
 
     @Override
-    public double compute(FunctionContext context) {
+    public double compute(@NotNull FunctionContext context) {
+        double frequency = this.frequency.value().compute(context);
+
         int x = context.blockX();
         int y = context.blockY();
         int z = context.blockZ();
