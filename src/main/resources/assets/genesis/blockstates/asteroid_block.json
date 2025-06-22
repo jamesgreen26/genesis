@@ -1,0 +1,12 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "index": 0
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_0"
+      }
+    }
+  ]
+}
