@@ -29,16 +29,40 @@ public class RandomNoise implements DensityFunction {
 
     @Override
     public double compute(FunctionContext context) {
-        long seed = getSeed(context.blockX(), context.blockY(), context.blockZ());
-        Random random = new Random(seed);
+        int x = context.blockX();
+        int y = context.blockY();
+        int z = context.blockZ();
 
-        if (random.nextDouble() < frequency) {
-            // Apply positive noise value
-            return (random.nextDouble() * 2 - 1) * scale;
-        } else {
-            // Zero noise at this point
-            return 0.0;
-        }
+        double center = getNoise(x, y, z);
+        double scale = 1.0;
+
+        if (getNoise(x + 25320, y * 4 - 3453, z * 2 + 534) > frequency) return 0.0;
+
+        // Compare with adjacent blocks
+        if (center < getNoise(x + 1, y, z)) return 0.0;
+        if (center < getNoise(x - 1, y, z)) return 0.0;
+        if (center < getNoise(x, y + 1, z)) return 0.0;
+        if (center < getNoise(x, y - 1, z)) return 0.0;
+        if (center < getNoise(x, y, z + 1)) return 0.0;
+        if (center < getNoise(x, y, z - 1)) return 0.0;
+
+        // Confirm it's strong enough
+        double scaled = center * scale;
+        return scaled > 0.1 ? scaled : 0.0;
+    }
+
+    private double getNoise(int x, int y, int z) {
+        // Mix coordinates more smoothly to reduce axis-aligned artifacts
+        long seed = x * 3129871L ^ z * 116129781L ^ y * 42317861L;
+        seed = seed * seed * 42317861L + seed * 11L;
+
+        // Spread value out
+        seed ^= (seed >>> 13);
+        seed *= 0x5DEECE66DL;
+        seed ^= (seed >>> 17);
+
+        // Return in [0.0, 1.0]
+        return (double)(seed & 0xFFFFFFF) / (double)0xFFFFFFF;
     }
 
     private long getSeed(int x, int y, int z) {
