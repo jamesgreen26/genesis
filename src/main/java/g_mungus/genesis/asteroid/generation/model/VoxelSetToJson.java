@@ -40,13 +40,13 @@ public class VoxelSetToJson {
             ObjectNode faces = mapper.createObjectNode();
 
             if (voxel.north) {
-                faces.set("north", faceJson(mapper, pos, "north"));
+                faces.set("south", faceJson(mapper, pos, "north"));
             }
             if (voxel.east) {
                 faces.set("east", faceJson(mapper, pos, "east"));
             }
             if (voxel.south) {
-                faces.set("south", faceJson(mapper, pos, "south"));
+                faces.set("north", faceJson(mapper, pos, "south"));
             }
             if (voxel.west) {
                 faces.set("west", faceJson(mapper, pos, "west"));

@@ -52,7 +52,7 @@ public final class GenesisMod {
         BLOCKS.register(eventBus);
         registerPlanets();
 
-        //ModelGenerator.generateAndSaveModel(0);
+        ModelGenerator.generateAndSaveModel(0);
     }
 
     private static void registerPlanets() {
