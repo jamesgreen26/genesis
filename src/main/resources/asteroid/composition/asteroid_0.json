@@ -1,12 +1,1 @@
-{
-  "composition": [
-    {
-      "type": "minecraft:stone",
-      "amount": 10
-    },
-    {
-      "type": "minecraft:iron_ore",
-      "amount": 5
-    }
-  ]
-}
+{"composition":[{"type":"minecraft:deepslate_copper_ore","amount":7},{"type":"minecraft:deepslate_redstone_ore","amount":124},{"type":"minecraft:deepslate_coal_ore","amount":136},{"type":"minecraft:deepslate","amount":3954},{"type":"minecraft:deepslate_iron_ore","amount":10}]}

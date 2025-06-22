@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 public class AsteroidGenerator {
-    public static final int ASTEROID_COUNT = 8;
+    public static final int ASTEROID_COUNT = 64;
 
     public static List<BlockPos> generateAsteroid(long seed) {
         List<BlockPos> result = new ArrayList<>();
