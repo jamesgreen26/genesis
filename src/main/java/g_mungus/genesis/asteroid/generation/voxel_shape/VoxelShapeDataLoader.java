@@ -24,7 +24,7 @@ public class VoxelShapeDataLoader {
         for (int i = 0; i < ASTEROID_COUNT; i++) {
             try {
                 ArrayVoxelShape shape = load("asteroid/voxel_shape/asteroid_" + i + ".json").get();
-                AsteroidBlock.asteroidShapes.add(shape);
+                AsteroidBlock.asteroidShapes.put(i, shape);
             } catch (Exception e) {
                 System.out.println("failed to create voxel shape for asteroid: " + i);
             }

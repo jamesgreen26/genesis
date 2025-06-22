@@ -11,14 +11,14 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static g_mungus.genesis.asteroid.generation.AsteroidGenerator.ASTEROID_COUNT;
 
 public class AsteroidBlock extends Block {
     public static final IntegerProperty INDEX = IntegerProperty.create("index", 0, ASTEROID_COUNT);
-    public static final List<VoxelShape> asteroidShapes = new ArrayList<>(ASTEROID_COUNT);
+    public static final ConcurrentMap<Integer, VoxelShape> asteroidShapes = new ConcurrentHashMap<>();
 
 
     public AsteroidBlock(Properties arg) {
@@ -37,22 +37,7 @@ public class AsteroidBlock extends Block {
     protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         int index = state.getValue(INDEX);
 
-        try {
-            return asteroidShapes.get(index);
-        } catch (Exception e) {
-            return Shapes.block();
-        }
-    }
-
-    @Override
-    protected VoxelShape getInteractionShape(BlockState state, BlockGetter arg2, BlockPos arg3) {
-        int index = state.getValue(INDEX);
-
-        try {
-            return asteroidShapes.get(index);
-        } catch (Exception e) {
-            return Shapes.block();
-        }
+        return asteroidShapes.getOrDefault(index, Shapes.block());
     }
 
     @Override
