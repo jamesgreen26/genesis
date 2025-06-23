@@ -41,6 +41,9 @@ repositories {
 
 loom {
     silentMojangMappingsLicense()
+
+    accessWidenerPath = file("src/main/resources/genesis.accesswidener")
+
 }
 
 dependencies {

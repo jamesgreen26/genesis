@@ -41,9 +41,6 @@
   "sea_level": -200,
   "spawn_target": [],
   "surface_rule": {
-    "type": "minecraft:block",
-    "result_state": {
-      "Name": "genesis:asteroid_block"
-    }
+    "type": "genesis:asteroid_block_surface_rule"
   }
 }
