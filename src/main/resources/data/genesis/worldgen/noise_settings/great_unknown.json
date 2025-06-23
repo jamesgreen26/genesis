@@ -43,7 +43,7 @@
   "surface_rule": {
     "type": "minecraft:block",
     "result_state": {
-      "Name": "minecraft:stone"
+      "Name": "genesis:asteroid_block"
     }
   }
 }

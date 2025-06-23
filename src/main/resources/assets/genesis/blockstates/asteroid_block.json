@@ -7,6 +7,518 @@
       "apply": {
         "model": "genesis:block/asteroid_0"
       }
+    },
+    {
+      "when": {
+        "index": 1
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_1"
+      }
+    },
+    {
+      "when": {
+        "index": 2
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_2"
+      }
+    },
+    {
+      "when": {
+        "index": 3
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_3"
+      }
+    },
+    {
+      "when": {
+        "index": 4
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_4"
+      }
+    },
+    {
+      "when": {
+        "index": 5
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_5"
+      }
+    },
+    {
+      "when": {
+        "index": 6
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_6"
+      }
+    },
+    {
+      "when": {
+        "index": 7
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_7"
+      }
+    },
+    {
+      "when": {
+        "index": 8
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_8"
+      }
+    },
+    {
+      "when": {
+        "index": 9
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_9"
+      }
+    },
+    {
+      "when": {
+        "index": 10
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_10"
+      }
+    },
+    {
+      "when": {
+        "index": 11
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_11"
+      }
+    },
+    {
+      "when": {
+        "index": 12
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_12"
+      }
+    },
+    {
+      "when": {
+        "index": 13
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_13"
+      }
+    },
+    {
+      "when": {
+        "index": 14
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_14"
+      }
+    },
+    {
+      "when": {
+        "index": 15
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_15"
+      }
+    },
+    {
+      "when": {
+        "index": 16
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_16"
+      }
+    },
+    {
+      "when": {
+        "index": 17
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_17"
+      }
+    },
+    {
+      "when": {
+        "index": 18
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_18"
+      }
+    },
+    {
+      "when": {
+        "index": 19
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_19"
+      }
+    },
+    {
+      "when": {
+        "index": 20
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_20"
+      }
+    },
+    {
+      "when": {
+        "index": 21
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_21"
+      }
+    },
+    {
+      "when": {
+        "index": 22
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_22"
+      }
+    },
+    {
+      "when": {
+        "index": 23
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_23"
+      }
+    },
+    {
+      "when": {
+        "index": 24
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_24"
+      }
+    },
+    {
+      "when": {
+        "index": 25
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_25"
+      }
+    },
+    {
+      "when": {
+        "index": 26
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_26"
+      }
+    },
+    {
+      "when": {
+        "index": 27
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_27"
+      }
+    },
+    {
+      "when": {
+        "index": 28
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_28"
+      }
+    },
+    {
+      "when": {
+        "index": 29
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_29"
+      }
+    },
+    {
+      "when": {
+        "index": 30
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_30"
+      }
+    },
+    {
+      "when": {
+        "index": 31
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_31"
+      }
+    },
+    {
+      "when": {
+        "index": 32
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_32"
+      }
+    },
+    {
+      "when": {
+        "index": 33
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_33"
+      }
+    },
+    {
+      "when": {
+        "index": 34
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_34"
+      }
+    },
+    {
+      "when": {
+        "index": 35
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_35"
+      }
+    },
+    {
+      "when": {
+        "index": 36
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_36"
+      }
+    },
+    {
+      "when": {
+        "index": 37
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_37"
+      }
+    },
+    {
+      "when": {
+        "index": 38
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_38"
+      }
+    },
+    {
+      "when": {
+        "index": 39
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_39"
+      }
+    },
+    {
+      "when": {
+        "index": 40
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_40"
+      }
+    },
+    {
+      "when": {
+        "index": 41
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_41"
+      }
+    },
+    {
+      "when": {
+        "index": 42
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_42"
+      }
+    },
+    {
+      "when": {
+        "index": 43
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_43"
+      }
+    },
+    {
+      "when": {
+        "index": 44
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_44"
+      }
+    },
+    {
+      "when": {
+        "index": 45
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_45"
+      }
+    },
+    {
+      "when": {
+        "index": 46
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_46"
+      }
+    },
+    {
+      "when": {
+        "index": 47
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_47"
+      }
+    },
+    {
+      "when": {
+        "index": 48
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_48"
+      }
+    },
+    {
+      "when": {
+        "index": 49
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_49"
+      }
+    },
+    {
+      "when": {
+        "index": 50
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_50"
+      }
+    },
+    {
+      "when": {
+        "index": 51
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_51"
+      }
+    },
+    {
+      "when": {
+        "index": 52
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_52"
+      }
+    },
+    {
+      "when": {
+        "index": 53
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_53"
+      }
+    },
+    {
+      "when": {
+        "index": 54
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_54"
+      }
+    },
+    {
+      "when": {
+        "index": 55
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_55"
+      }
+    },
+    {
+      "when": {
+        "index": 56
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_56"
+      }
+    },
+    {
+      "when": {
+        "index": 57
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_57"
+      }
+    },
+    {
+      "when": {
+        "index": 58
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_58"
+      }
+    },
+    {
+      "when": {
+        "index": 59
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_59"
+      }
+    },
+    {
+      "when": {
+        "index": 60
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_60"
+      }
+    },
+    {
+      "when": {
+        "index": 61
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_61"
+      }
+    },
+    {
+      "when": {
+        "index": 62
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_62"
+      }
+    },
+    {
+      "when": {
+        "index": 63
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_63"
+      }
+    },
+    {
+      "when": {
+        "index": 64
+      },
+      "apply": {
+        "model": "genesis:block/asteroid_64"
+      }
     }
   ]
 }
