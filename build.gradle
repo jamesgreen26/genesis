@@ -39,8 +39,14 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    includeLib
+}
+
 loom {
     silentMojangMappingsLicense()
+
+    processIncludeJars.from(configurations.includeLib)
 
     accessWidenerPath = file("src/main/resources/genesis.accesswidener")
 
@@ -67,8 +73,7 @@ dependencies {
 
     modImplementation("maven.modrinth:pehkui:3.8.3+1.21-neoforge")
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
-
+    includeLib 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
 }
 
 processResources {
@@ -80,9 +85,6 @@ processResources {
 }
 
 java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
     withSourcesJar()
 
     sourceCompatibility = JavaVersion.VERSION_21
@@ -91,21 +93,4 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 21
-}
-
-// Configure Maven publishing.
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
-    }
 }
