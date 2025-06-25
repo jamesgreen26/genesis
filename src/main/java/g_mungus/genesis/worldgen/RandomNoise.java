@@ -30,7 +30,7 @@ public class RandomNoise implements DensityFunction {
 
     @Override
     public double compute(@NotNull FunctionContext context) {
-        double frequency = this.frequency.value().compute(context);
+        double frequency = this.frequency.value().compute(context) / 4.0;
 
         int x = context.blockX();
         int y = context.blockY();
