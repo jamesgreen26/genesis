@@ -10,18 +10,17 @@ base {
     archivesName = project.archives_name
 }
 
+loom {
+    silentMojangMappingsLicense()
+
+    accessWidenerPath = file("src/main/resources/genesis.accesswidener")
+
+    forge {
+        mixinConfig 'genesis.mixins.json'
+    }
+}
+
 repositories {
-    // Add NeoForged repository.
-    maven {
-        name = 'NeoForged'
-        url = 'https://maven.neoforged.net/releases'
-    }
-
-    maven {
-        name = 'BlameJared Maven (CrT / Bookshelf)'
-        url = 'https://maven.blamejared.com'
-    }
-
     maven {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
@@ -36,61 +35,73 @@ repositories {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
     }
+    maven { url = 'https://maven.blamejared.com/' }
+    maven {
+        name 'Curios maven'
+        url = "https://maven.theillusivec4.top/"
+    }
     mavenCentral()
-}
-
-configurations {
-    includeLib
-}
-
-loom {
-    silentMojangMappingsLicense()
-
-    processIncludeJars.from(configurations.includeLib)
-
-    accessWidenerPath = file("src/main/resources/genesis.accesswidener")
-
 }
 
 dependencies {
     minecraft "net.minecraft:minecraft:$project.minecraft_version"
     mappings loom.officialMojangMappings()
-    neoForge "net.neoforged:neoforge:$project.neoforge_version"
+    forge "net.minecraftforge:forge:$project.forge_version"
 
-    implementation("foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}") {
-        exclude group: "maven.modrinth"
-        exclude group: "me.fallenbreath"
-    }
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0"))
+    implementation("io.github.llamalad7:mixinextras-forge:0.5.0")
 
     compileOnly ("org.valkyrienskies.core:api:$vs_core_version") { transitive = false }
     compileOnly ("org.valkyrienskies.core:api-game:$vs_core_version") { transitive = false }
     compileOnly ("org.valkyrienskies.core:util:$vs_core_version") { transitive = false }
     compileOnly ("org.valkyrienskies.core:impl:$vs_core_version") { transitive = false }
 
-    compileOnlyApi("org.valkyrienskies:valkyrienskies-1-21-1-forge:$vs2_version")
 
-    implementation("thedarkcolour:kotlinforforge-neoforge:5.8.0")
+    modImplementation("maven.modrinth:valkyrien-skies:1.20.1-forge-2.3.0-beta.7")
 
-    modImplementation("maven.modrinth:pehkui:3.8.3+1.21-neoforge")
 
-    includeLib 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+    modImplementation("maven.modrinth:curios:5.14.1+1.20.1")
+    modImplementation("maven.modrinth:lodestonelib:1.20.1-1.6.4.1")
+
+    modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge")
+
 }
 
 processResources {
     inputs.property 'version', project.version
 
-    filesMatching('META-INF/neoforge.mods.toml') {
+    filesMatching('META-INF/mods.toml') {
         expand version: project.version
     }
 }
 
 java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    it.options.release = 17
+}
+
+// Configure Maven publishing.
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
 }

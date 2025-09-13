@@ -1,21 +1,17 @@
 {
   "required": true,
-  "package": "g_mungus.genesis.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "package": "shipwrights.genesis.mixin",
+  "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
-    "BlockElementDeserializerMixin",
     "GameRendererMixin",
     "ParticleEngineMixin",
     "ParticleMixin"
   ],
   "mixins": [
-    "ArrayVoxelShapeAccessor",
-    "BSDVSAccessor",
     "EntityMixin",
     "LivingEntityMixin",
-    "ServerLevelMixin",
-    "VoxelShapeAccessor"
+    "ServerLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
