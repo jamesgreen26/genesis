@@ -1,6 +1,5 @@
 package shipwrights.genesis.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -25,55 +24,55 @@ public class PlanetRenderer {
 
     private static LodestoneRenderType getSunRenderType() {
         if (SUN_RENDER_TYPE == null) {
-            SUN_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("sun_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
+            SUN_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("sun_render_type", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
                     .setShaderState(SUN_SHADER)
             );
         }
         return SUN_RENDER_TYPE;
     }
 
-        @SubscribeEvent
-        public static void onRenderLevel(RenderLevelStageEvent event) {
-            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
+    @SubscribeEvent
+    public static void onRenderLevel(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.level == null || !minecraft.level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
-                return;
-            }
-
-            renderSun(event);
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null || !minecraft.level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+            return;
         }
 
-        private static void renderSun(RenderLevelStageEvent event) {
-            PoseStack poseStack = event.getPoseStack();
-            poseStack.pushPose();
+        renderSun(event);
+    }
 
-            poseStack.translate(-event.getCamera().getPosition().x,
-                    -event.getCamera().getPosition().y,
-                    -event.getCamera().getPosition().z);
+    private static void renderSun(RenderLevelStageEvent event) {
+        PoseStack poseStack = event.getPoseStack();
+        poseStack.pushPose();
 
-            poseStack.mulPose(new Quaternionf().rotationXYZ(15, 45, 5));
+        poseStack.translate(-event.getCamera().getPosition().x,
+                -event.getCamera().getPosition().y,
+                -event.getCamera().getPosition().z);
 
-            MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-            VertexConsumer buffer = bufferSource.getBuffer(getSunRenderType());
+        poseStack.mulPose(new Quaternionf().rotationXYZ(15, 45, 5));
 
-            float size = 512.0f;
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        VertexConsumer buffer = bufferSource.getBuffer(getSunRenderType());
 
-            addCubeFace(poseStack.last().pose(), buffer, -size, -size, size, size, -size, size, size, size, size, -size, size, size);
-            addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size);
-            addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, -size, -size, size, -size, size, size, -size, size, -size);
-            addCubeFace(poseStack.last().pose(), buffer, size, -size, -size, size, size, -size, size, size, size, size, -size, size);
-            addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, size, -size, -size, size, -size, size, -size, -size, size);
-            addCubeFace(poseStack.last().pose(), buffer, -size, size, -size, -size, size, size, size, size, size, size, size, -size);
+        float size = 512.0f;
 
-            poseStack.popPose();
-        }
+        addCubeFace(poseStack.last().pose(), buffer, -size, -size, size, size, -size, size, size, size, size, -size, size, size);
+        addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size);
+        addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, -size, -size, size, -size, size, size, -size, size, -size);
+        addCubeFace(poseStack.last().pose(), buffer, size, -size, -size, size, size, -size, size, size, size, size, -size, size);
+        addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, size, -size, -size, size, -size, size, -size, -size, size);
+        addCubeFace(poseStack.last().pose(), buffer, -size, size, -size, -size, size, size, size, size, size, size, size, -size);
 
-        private static void addCubeFace(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
-                                        float x3, float y3, float z3, float x4, float y4, float z4) {
-            buffer.vertex(matrix, x1, y1, z1).color(0.0f, 0, 0, 0).endVertex();
-            buffer.vertex(matrix, x2, y2, z2).color(0.0f, 0, 1, 0).endVertex();
-            buffer.vertex(matrix, x3, y3, z3).color(0.0f, 0, 1, 1).endVertex();
-            buffer.vertex(matrix, x4, y4, z4).color(0.0f, 0, 0, 1).endVertex();
-        }
+        poseStack.popPose();
+    }
+
+    private static void addCubeFace(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
+                                    float x3, float y3, float z3, float x4, float y4, float z4) {
+        buffer.vertex(matrix, x1, y1, z1).uv(0, 0).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).uv(1, 0).endVertex();
+        buffer.vertex(matrix, x3, y3, z3).uv(1, 1).endVertex();
+        buffer.vertex(matrix, x4, y4, z4).uv(0, 1).endVertex();
+    }
 }

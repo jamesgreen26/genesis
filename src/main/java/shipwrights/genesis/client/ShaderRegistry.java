@@ -14,7 +14,7 @@ import static team.lodestar.lodestone.registry.client.LodestoneShaderRegistry.re
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ShaderRegistry {
 
-    public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_COLOR);
+    public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_TEX);
 
     @SubscribeEvent
     public static void shaderRegistry(RegisterShadersEvent event) {

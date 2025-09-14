@@ -8,7 +8,7 @@
   "fragment": "genesis:sun",
   "attributes": [
     "Position",
-    "Color"
+    "UV0"
   ],
   "samplers": [
   ],
