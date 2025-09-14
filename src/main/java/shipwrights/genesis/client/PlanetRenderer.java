@@ -9,6 +9,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import shipwrights.genesis.GenesisMod;
 import team.lodestar.lodestone.registry.client.LodestoneRenderTypeRegistry;
 import team.lodestar.lodestone.systems.rendering.LodestoneRenderType;
@@ -50,6 +51,8 @@ public class PlanetRenderer {
             poseStack.translate(-event.getCamera().getPosition().x,
                     -event.getCamera().getPosition().y,
                     -event.getCamera().getPosition().z);
+
+            poseStack.mulPose(new Quaternionf().rotationXYZ(15, 45, 5));
 
             MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
             VertexConsumer buffer = bufferSource.getBuffer(getSunRenderType());
