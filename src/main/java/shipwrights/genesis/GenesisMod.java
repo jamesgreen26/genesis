@@ -1,23 +1,14 @@
 package shipwrights.genesis;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.RegisterEvent;
-import org.joml.Vector3d;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
-import shipwrights.genesis.client.DimensionEffects;
-import shipwrights.genesis.worldgen.AsteroidBelt;
-import shipwrights.genesis.worldgen.AsteroidBlockSurfaceRule;
-import shipwrights.genesis.worldgen.RandomNoise;
+import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
+import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -34,17 +25,19 @@ public final class GenesisMod {
     public GenesisMod() {}
 
     @SubscribeEvent
-    public static void onLevelStartup(LevelEvent.Load event) {
-        LevelAccessor level = event.getLevel();
-        if (level instanceof ServerLevel serverLevel) {
-            ResourceKey<Level> dimension = serverLevel.dimension();
-            if (dimension.location().equals(SPACE_DIM)) {
-                // this works, just needs a newer VS core version than is released
-                // VSGameUtilsKt.getShipObjectWorld(serverLevel).updateDimension(dimension.registry() + ":" + dimension.location(), new Vector3d());
+    public static void modifyFov(ViewportEvent.ComputeFov event) {
+        AbstractClientPlayer player = Minecraft.getInstance().player;
+        if (
+            player != null &&
+            player.level().dimension().location().equals(GenesisMod.SPACE_DIM) &&
+            !Minecraft.getInstance().options.getCameraType().isFirstPerson() &&
+            player.isPassenger()
+        ) {
+            Entity vehicle = player.getVehicle();
+            if (vehicle != null && VSEntityManager.INSTANCE.getHandler(vehicle) == DefaultShipyardEntityHandler.INSTANCE) {
+                event.setFOV(event.getFOV() * 0.25);
             }
         }
-
-
     }
 
     public static void refreshEntityScaling(Entity entity, Boolean miniScale) {
