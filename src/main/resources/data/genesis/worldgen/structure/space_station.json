@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "genesis:great_unknown",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "start_pool": "genesis:space_station/station_core",
+  "size": 7,
+  "spawn_overrides": {},
+  "adapt_noise": false,
+  "start_height": {
+    "absolute": 0
+  },
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}

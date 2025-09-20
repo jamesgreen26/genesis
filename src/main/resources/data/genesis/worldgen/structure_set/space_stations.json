@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "genesis:space_station",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "random_spread",
+
+    "spacing": 40,
+    "separation": 20,
+    "salt": 3634534
+  }
+}
