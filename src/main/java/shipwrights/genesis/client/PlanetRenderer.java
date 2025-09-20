@@ -1,5 +1,6 @@
 package shipwrights.genesis.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -33,7 +34,7 @@ public class PlanetRenderer {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
 
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || !minecraft.level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
@@ -45,27 +46,39 @@ public class PlanetRenderer {
 
     private static void renderSun(RenderLevelStageEvent event) {
         PoseStack poseStack = event.getPoseStack();
-        poseStack.pushPose();
 
-        poseStack.translate(-event.getCamera().getPosition().x,
-                -event.getCamera().getPosition().y,
-                -event.getCamera().getPosition().z);
+        Matrix4f matrix;
+        try {
+            matrix = (Matrix4f) poseStack.last().pose().clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
 
-        poseStack.mulPose(new Quaternionf().rotationXYZ(15, 45, 5));
+        matrix.translate((float) -event.getCamera().getPosition().x,
+                (float) -event.getCamera().getPosition().y,
+                (float) -event.getCamera().getPosition().z);
+
+        matrix.rotate(new Quaternionf().rotationXYZ(15, 45, 5));
+
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(getSunRenderType());
 
         float size = 512.0f;
 
-        addCubeFace(poseStack.last().pose(), buffer, -size, -size, size, size, -size, size, size, size, size, -size, size, size);
-        addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size);
-        addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, -size, -size, size, -size, size, size, -size, size, -size);
-        addCubeFace(poseStack.last().pose(), buffer, size, -size, -size, size, size, -size, size, size, size, size, -size, size);
-        addCubeFace(poseStack.last().pose(), buffer, -size, -size, -size, size, -size, -size, size, -size, size, -size, -size, size);
-        addCubeFace(poseStack.last().pose(), buffer, -size, size, -size, -size, size, size, size, size, size, size, size, -size);
+        addCubeFace(matrix, buffer, -size, -size, size, size, -size, size, size, size, size, -size, size, size);
+        addCubeFace(matrix, buffer, -size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size);
+        addCubeFace(matrix, buffer, -size, -size, -size, -size, -size, size, -size, size, size, -size, size, -size);
+        addCubeFace(matrix, buffer, size, -size, -size, size, size, -size, size, size, size, size, -size, size);
+        addCubeFace(matrix, buffer, -size, -size, -size, size, -size, -size, size, -size, size, -size, -size, size);
+        addCubeFace(matrix, buffer, -size, size, -size, -size, size, size, size, size, size, size, size, -size);
 
-        poseStack.popPose();
+        bufferSource.endBatch();
+
+        RenderSystem.enableDepthTest();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
     }
 
     private static void addCubeFace(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
