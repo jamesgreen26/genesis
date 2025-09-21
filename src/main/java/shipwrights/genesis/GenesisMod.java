@@ -5,24 +5,58 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.eventbus.EventBus;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.ApiStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
+import shipwrights.genesis.planets.PlanetData;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod.EventBusSubscriber
 @Mod(GenesisMod.MOD_ID)
 public final class GenesisMod {
     public static final String MOD_ID = "genesis";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final ResourceLocation ASTEROID_RULE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "asteroid_block_surface_rule");
 
     public static final int atmosphereCollisionHeight = 2048;
 
-    public GenesisMod() {}
+    public static final double earthDist = 15_000;
+    public static final double earthSize = 96;
+
+    public static final List<PlanetData> planets = new ArrayList<>();
+
+    public GenesisMod() {
+        registerPlanet(ResourceLocation.withDefaultNamespace("aadsfads"), 1.0, 1.0, 1, 1, 1);
+        registerPlanet(ResourceLocation.withDefaultNamespace("bkbnvc"), 1.0, 1.0, 1, 1, 1);
+        registerPlanet(ResourceLocation.withDefaultNamespace("cekjvfo"), 1.0, 1.0, 1, 1, 1);
+        registerPlanet(ResourceLocation.withDefaultNamespace("diubvc8"), 1.0, 1.0, 1, 1, 1);
+        registerPlanet(ResourceLocation.withDefaultNamespace("eewknjve"), 1.0, 1.0, 1, 1, 1);
+
+        for (var planet: planets) {
+            LOGGER.warn(planet.toString());
+        }
+
+    }
+
+    /// @param size relative to earth
+    /// @param sunDist relative to earth
+    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, int r, int g, int b) {
+        planets.add(new PlanetData(dimensionID, size, sunDist, r, g, b));
+    }
 
     @SubscribeEvent
     public static void modifyFov(ViewportEvent.ComputeFov event) {

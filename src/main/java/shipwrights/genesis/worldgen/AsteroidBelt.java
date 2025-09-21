@@ -4,6 +4,8 @@ package shipwrights.genesis.worldgen;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunction;
+import org.jetbrains.annotations.NotNull;
+import shipwrights.genesis.GenesisMod;
 
 public class AsteroidBelt implements DensityFunction {
 
@@ -20,7 +22,7 @@ public class AsteroidBelt implements DensityFunction {
         double y = context.blockY() - 100;
         double z = context.blockZ();
 
-        double majorRadius = 15000.0; // distance from center to tube center
+        double majorRadius = GenesisMod.earthDist * 1.6667; // distance from center to the tube center
         double minorRadius = 470.0;    // radius of tube
 
         double q = Math.sqrt(x * x + z * z) - majorRadius;
@@ -31,7 +33,7 @@ public class AsteroidBelt implements DensityFunction {
     }
 
     @Override
-    public void fillArray(double[] arr, ContextProvider provider) {
+    public void fillArray(double[] arr, @NotNull ContextProvider provider) {
         for (int i = 0; i < arr.length; i++) {
             FunctionContext ctx = provider.forIndex(i);
             arr[i] = compute(ctx);
@@ -39,12 +41,12 @@ public class AsteroidBelt implements DensityFunction {
     }
 
     @Override
-    public DensityFunction mapAll(Visitor visitor) {
+    public @NotNull DensityFunction mapAll(@NotNull Visitor visitor) {
         return this; // No children to map
     }
 
     @Override public double minValue() { return 0.0; }
     @Override public double maxValue() { return 1.0; }
-    @Override public KeyDispatchDataCodec<? extends DensityFunction> codec() { return CODEC; }
+    @Override public @NotNull KeyDispatchDataCodec<? extends DensityFunction> codec() { return CODEC; }
 }
 
