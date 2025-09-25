@@ -5,12 +5,10 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.eventbus.EventBus;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
@@ -39,7 +37,11 @@ public final class GenesisMod {
 
     public static final List<PlanetData> planets = new ArrayList<>();
 
-    public GenesisMod() {
+    public GenesisMod(FMLJavaModLoadingContext context) {
+        IEventBus eventBus = context.getModEventBus();;
+
+        GenesisBlocks.BLOCKS.register(eventBus);
+
         registerPlanet(ResourceLocation.withDefaultNamespace("aadsfads"), 1.0, 1.0, 1, 1, 1);
         registerPlanet(ResourceLocation.withDefaultNamespace("bkbnvc"), 1.0, 1.0, 1, 1, 1);
         registerPlanet(ResourceLocation.withDefaultNamespace("cekjvfo"), 1.0, 1.0, 1, 1, 1);

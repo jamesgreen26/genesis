@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "genesis:block/asteroid_0"
+      },
+      {
+        "model": "genesis:block/asteroid_1"
+      },
+      {
+        "model": "genesis:block/asteroid_2"
+      },
+      {
+        "model": "genesis:block/asteroid_3"
+      },
+      {
+        "model": "genesis:block/asteroid_4"
+      },
+      {
+        "model": "genesis:block/asteroid_5"
+      },
+      {
+        "model": "genesis:block/asteroid_6"
+      },
+      {
+        "model": "genesis:block/asteroid_7"
+      },
+      {
+        "model": "genesis:block/asteroid_8"
+      },
+      {
+        "model": "genesis:block/asteroid_9"
+      }
+    ]
+  }
+}

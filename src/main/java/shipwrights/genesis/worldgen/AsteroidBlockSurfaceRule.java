@@ -2,10 +2,10 @@ package shipwrights.genesis.worldgen;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.util.KeyDispatchDataCodec;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.jetbrains.annotations.NotNull;
+import shipwrights.genesis.GenesisBlocks;
 
 import java.util.List;
 
@@ -36,5 +36,7 @@ public class AsteroidBlockSurfaceRule implements SurfaceRules.RuleSource {
         return Math.abs(h);
     }
 
-    private final List<BlockState> states = List.of(Blocks.STONE.defaultBlockState(), Blocks.DEEPSLATE.defaultBlockState(), Blocks.ANDESITE.defaultBlockState());
+    private final List<BlockState> states = List.of(
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState()
+    );
 }
