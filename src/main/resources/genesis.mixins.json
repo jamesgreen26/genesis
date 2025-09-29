@@ -8,12 +8,17 @@
     "EntityRenderDispatcherMixin",
     "GameRendererMixin",
     "ParticleEngineMixin",
-    "ParticleMixin"
+    "ParticleMixin",
+    "dataplanets.ClientLanguageMixin",
+    "dataplanets.LevelRendererMixin"
   ],
   "mixins": [
     "EntityMixin",
     "LivingEntityMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "dataplanets.MappedRegistryMixin",
+    "dataplanets.MinecraftServerMixin",
+    "dataplanets.ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
