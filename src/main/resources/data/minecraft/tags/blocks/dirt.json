@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "gcyr:moon_stone",
+    "gcyr:moon_cobblestone",
+    "gcyr:venusian_regolith",
+    "gcyr:martian_rock"
+  ]
+}
