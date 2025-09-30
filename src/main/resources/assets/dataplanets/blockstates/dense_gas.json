@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "dataplanets:block/dense_gas"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "itemGroup.dataplanets": "Dataplanets for GTCEu",
+  "item.dataplanets.theory": "'Theory for a new Star System'",
+  "item.dataplanets.portable_telescope": "Portable Telescope",
+  "item.dataplanets.research": "Research Document",
+  "item.dataplanets.test_item": "Test Item Please Ignore",
+  "block.dataplanets.observatory": "Visible Light Observatory",
+  "block.dataplanets.radio_telescope": "Radio Telescope",
+  "block.dataplanets.research_computer": "Research Computer",
+  "dataplanets.observatory_recipe_type": "Visible Theory Discovery",
+  "dataplanets.radio_recipe_type": "Radio Theory Discovery"
+}

@@ -1,7 +1,7 @@
 package shipwrights.dataplanets.radio;
 
+import ace.actually.radios.RadioSpec;
 import shipwrights.dataplanets.MutableTags;
-import shipwrights.radios.RadioSpec;
 import net.minecraft.core.BlockPos;
 
 public class StaticRadioActions {
