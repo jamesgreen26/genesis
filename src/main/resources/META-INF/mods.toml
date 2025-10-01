@@ -13,6 +13,14 @@ description = '''
 '''
 logoFile = "assets/genesis/icon.png"
 
+
+[[mods]]
+modId="dataplanets" #mandatory
+# The version number of the mod
+version="0.1.0" #mandatory
+# A display name for the mod
+displayName="DataPlanets"
+
 [[dependencies.genesis]]
 modId = "forge"
 mandatory = true
@@ -21,6 +29,20 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.genesis]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.dataplanets]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.dataplanets]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.20.1,)"

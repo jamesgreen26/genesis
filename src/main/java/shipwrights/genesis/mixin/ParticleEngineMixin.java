@@ -31,10 +31,6 @@ public class ParticleEngineMixin {
             Particle particle = this.makeParticle(arg, d, e, f, g, h, i);
             if (particle != null) {
 
-                if (particle instanceof BreakingItemParticle) {
-                    return;
-                }
-
                 particle.scale(1 / 16f);
                 this.add(particle);
                 cir.setReturnValue(particle);

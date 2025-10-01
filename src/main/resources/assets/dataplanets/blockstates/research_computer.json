@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "dataplanets:block/research_computer",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "dataplanets:block/research_computer"
+    },
+    "facing=south": {
+      "model": "dataplanets:block/research_computer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dataplanets:block/research_computer",
+      "y": 270
+    }
+  }
+}
