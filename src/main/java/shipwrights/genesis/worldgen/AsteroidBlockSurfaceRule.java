@@ -37,6 +37,15 @@ public class AsteroidBlockSurfaceRule implements SurfaceRules.RuleSource {
     }
 
     private final List<BlockState> states = List.of(
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState()
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 0),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 1),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 2),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 3),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 4),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 5),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 6),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 7),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 8),
+        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 9)
     );
 }

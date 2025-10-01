@@ -1,36 +1,34 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "genesis:block/asteroid_0"
-      },
-      {
-        "model": "genesis:block/asteroid_1"
-      },
-      {
-        "model": "genesis:block/asteroid_2"
-      },
-      {
-        "model": "genesis:block/asteroid_3"
-      },
-      {
-        "model": "genesis:block/asteroid_4"
-      },
-      {
-        "model": "genesis:block/asteroid_5"
-      },
-      {
-        "model": "genesis:block/asteroid_6"
-      },
-      {
-        "model": "genesis:block/asteroid_7"
-      },
-      {
-        "model": "genesis:block/asteroid_8"
-      },
-      {
-        "model": "genesis:block/asteroid_9"
-      }
-    ]
+    "variant=0": {
+      "model": "genesis:block/asteroid_0"
+    },
+    "variant=1": {
+      "model": "genesis:block/asteroid_1"
+    },
+    "variant=2": {
+      "model": "genesis:block/asteroid_2"
+    },
+    "variant=3": {
+      "model": "genesis:block/asteroid_3"
+    },
+    "variant=4": {
+      "model": "genesis:block/asteroid_4"
+    },
+    "variant=5": {
+      "model": "genesis:block/asteroid_5"
+    },
+    "variant=6": {
+      "model": "genesis:block/asteroid_6"
+    },
+    "variant=7": {
+      "model": "genesis:block/asteroid_7"
+    },
+    "variant=8": {
+      "model": "genesis:block/asteroid_8"
+    },
+    "variant=9": {
+      "model": "genesis:block/asteroid_9"
+    }
   }
 }

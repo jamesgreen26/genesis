@@ -7,12 +7,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
 
 public class AsteroidBlock extends Block {
 
+    public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 9);
+
     public AsteroidBlock(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(VARIANT, 0));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(VARIANT);
     }
 
     @Override
