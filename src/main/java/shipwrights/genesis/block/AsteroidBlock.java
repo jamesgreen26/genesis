@@ -133,8 +133,9 @@ public class AsteroidBlock extends Block {
                     fallingBlock.setDeltaMovement(dirX, dirY, dirZ);
 
                     ((FallingBlockEntityExtension) fallingBlock).genesis$setRotation(new Vector3d(rotation));
+                    fallingBlock.dropItem = false;
 
-                    fallingBlock.time = 500;
+                    fallingBlock.time = 400 + level.random.nextInt(0, 100);
 
                     serverLevel.addFreshEntity(fallingBlock);
                 }
