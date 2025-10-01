@@ -154,7 +154,7 @@ public class AsteroidBlock extends Block {
                         continue;
                     }
 
-                    if (serverLevel.random.nextBoolean()) {
+                    if (serverLevel.random.nextDouble() > 0.125) {
                         continue;
                     }
 
