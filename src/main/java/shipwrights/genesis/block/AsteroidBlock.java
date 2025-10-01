@@ -12,13 +12,72 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3d;
-import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.extension.FallingBlockEntityExtension;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AsteroidBlock extends Block {
 
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 9);
+    private static final ConcurrentHashMap<BlockPos, Damage> damageMap = new ConcurrentHashMap<>();
+    private static final long DAMAGE_TIMEOUT_MS = 120_000; // 1 minute
+    private static final int DESTROY_THRESHOLD = 64;
+    private static final int CLEANUP_INTERVAL = 20;
+    private static final AtomicInteger damageCounter = new AtomicInteger(0);
+
+    private static class Damage {
+        private final AtomicLong lastUpdatedTime;
+        private final AtomicInteger numHits;
+
+        public Damage(long lastUpdatedTime) {
+            this.lastUpdatedTime = new AtomicLong(lastUpdatedTime);
+            this.numHits = new AtomicInteger(0);
+        }
+
+        public void update(long time, int amount) {
+            lastUpdatedTime.set(time);
+            numHits.addAndGet(amount);
+        }
+
+        public int getHits() {
+            return numHits.get();
+        }
+
+        public long getLastUpdatedTime() {
+            return lastUpdatedTime.get();
+        }
+    }
+
+    public static void applyDamage(Level level, BlockPos pos, int amount) {
+        if (level.isClientSide()) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+
+        Damage damage = damageMap.computeIfAbsent(pos, k -> new Damage(now));
+        damage.update(now, amount);
+
+        if (damage.getHits() > DESTROY_THRESHOLD) {
+            if (damageMap.remove(pos) != null) {
+                level.destroyBlock(pos, false);
+            }
+        }
+
+        if (damageCounter.incrementAndGet() % CLEANUP_INTERVAL == 0) {
+            cleanupExpiredDamage(now);
+        }
+    }
+
+    private static void cleanupExpiredDamage(long now) {
+        long cutoffTime = now - DAMAGE_TIMEOUT_MS;
+        damageMap.entrySet().removeIf(entry ->
+                entry.getValue().getLastUpdatedTime() < cutoffTime
+        );
+    }
 
     public AsteroidBlock(Properties properties) {
         super(properties);
@@ -47,7 +106,8 @@ public class AsteroidBlock extends Block {
     }
 
     public void onProjectileHit(Level level, BlockState blockState, BlockHitResult arg3, Projectile arg4) {
-        level.destroyBlock(arg3.getBlockPos(), false);
+        double speed = arg4.getDeltaMovement().length();
+        applyDamage(level, arg3.getBlockPos(), (int) Math.ceil(speed * 10));
     }
 
     @Override
