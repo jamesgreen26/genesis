@@ -122,7 +122,7 @@ public class AsteroidBlock extends Block {
                     double dirZ = rotated.z;
 
                     double length = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-                    double driftStrength = 0.25;
+                    double driftStrength = 0.25 + (level.random.nextDouble() / 4);
 
                     if (length > 0) {
                         dirX = (dirX / length) * driftStrength;
