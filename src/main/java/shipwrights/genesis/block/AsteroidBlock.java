@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.joml.Vector3d;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.extension.FallingBlockEntityExtension;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
 
 public class AsteroidBlock extends Block {
@@ -129,6 +131,8 @@ public class AsteroidBlock extends Block {
                     }
 
                     fallingBlock.setDeltaMovement(dirX, dirY, dirZ);
+
+                    ((FallingBlockEntityExtension) fallingBlock).genesis$setRotation(new Vector3d(rotation));
 
                     fallingBlock.time = 500;
 
