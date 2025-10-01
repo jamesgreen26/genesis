@@ -1,5 +1,7 @@
 package shipwrights.genesis.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -11,6 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.extension.FallingBlockEntityExtension;
 
 @Mixin(FallingBlockEntity.class)
@@ -64,6 +67,19 @@ public class FallingBlockEntityMixin implements FallingBlockEntityExtension {
                     compound.getDouble("genesis_rotY"),
                     compound.getDouble("genesis_rotZ")
             ));
+        }
+    }
+
+    @WrapOperation(
+            method = "tick",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/entity/item/FallingBlockEntity;discard()V"
+            )
+    )
+    private void genesis$preventEarlyDespawn(FallingBlockEntity entity, Operation<Void> original) {
+        if (entity.time >= 600 || !entity.level().dimension().location().equals(GenesisMod.SPACE_DIM) || entity.getBlockState().isAir()) {
+            original.call(entity);
         }
     }
 }
