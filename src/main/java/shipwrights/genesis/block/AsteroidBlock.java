@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import org.joml.Vector3d;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
 
 public class AsteroidBlock extends Block {
@@ -25,18 +26,57 @@ public class AsteroidBlock extends Block {
         builder.add(VARIANT);
     }
 
+    public static Vector3d getRotation(int variant) {
+        return switch (variant) {
+            case 0 -> new Vector3d();
+            case 1 -> new Vector3d(0, Math.toRadians(22.5), 0);
+            case 2 -> new Vector3d(0, Math.toRadians(45), 0);
+            case 3 -> new Vector3d(0, Math.toRadians(-22.5), 0);
+            case 4 -> new Vector3d(Math.toRadians(22.5), 0, 0);
+            case 5 -> new Vector3d(Math.toRadians(45), 0, 0);
+            case 6 -> new Vector3d(Math.toRadians(-22.5), 0, 0);
+            case 7 -> new Vector3d(0, 0, Math.toRadians(22.5));
+            case 8 -> new Vector3d(0, 0, Math.toRadians(45));
+            case 9 -> new Vector3d(0, 0, Math.toRadians(-22.5));
+            default -> new Vector3d(0, 0, 0);
+        };
+    }
+
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide && !state.is(newState.getBlock())) {
-            spawnFallingBlocks(level, pos);
+            spawnFallingBlocks(level, pos, state);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
-    private void spawnFallingBlocks(Level level, BlockPos pos) {
+    private static Vector3d rotatePoint(double x, double y, double z, Vector3d eulerAngles) {
+        double cosX = Math.cos(eulerAngles.x);
+        double sinX = Math.sin(eulerAngles.x);
+        double cosY = Math.cos(eulerAngles.y);
+        double sinY = Math.sin(eulerAngles.y);
+        double cosZ = Math.cos(eulerAngles.z);
+        double sinZ = Math.sin(eulerAngles.z);
+
+        double y1 = y * cosX - z * sinX;
+        double z1 = y * sinX + z * cosX;
+
+        double x2 = x * cosY + z1 * sinY;
+        double z2 = -x * sinY + z1 * cosY;
+
+        double x3 = x2 * cosZ - y1 * sinZ;
+        double y3 = x2 * sinZ + y1 * cosZ;
+
+        return new Vector3d(x3, y3, z2);
+    }
+
+    private void spawnFallingBlocks(Level level, BlockPos pos, BlockState state) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
+
+        int variant = state.getValue(VARIANT);
+        Vector3d rotation = getRotation(variant);
 
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
@@ -50,9 +90,15 @@ public class AsteroidBlock extends Block {
                         continue;
                     }
 
-                    double offsetX = x / 16.0;
-                    double offsetY = y / 16.0;
-                    double offsetZ = z / 16.0;
+                    double relX = (x + 0.5) - 8.0;
+                    double relY = (y + 0.5) - 8.0;
+                    double relZ = (z + 0.5) - 8.0;
+
+                    Vector3d rotated = rotatePoint(relX, relY, relZ, rotation);
+
+                    double offsetX = (rotated.x + 8.0) / 16.0;
+                    double offsetY = (rotated.y + 8.0) / 16.0;
+                    double offsetZ = (rotated.z + 8.0) / 16.0;
 
                     BlockState blockState = switch (serverLevel.random.nextInt(4)) {
                         case 1 -> Blocks.ANDESITE.defaultBlockState();
@@ -69,13 +115,9 @@ public class AsteroidBlock extends Block {
                             blockState
                     );
 
-                    double centerX = 7.5;
-                    double centerY = 7.5;
-                    double centerZ = 7.5;
-
-                    double dirX = (x + 0.5) - centerX;
-                    double dirY = (y + 0.5) - centerY;
-                    double dirZ = (z + 0.5) - centerZ;
+                    double dirX = rotated.x;
+                    double dirY = rotated.y;
+                    double dirZ = rotated.z;
 
                     double length = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
                     double driftStrength = 0.25;
