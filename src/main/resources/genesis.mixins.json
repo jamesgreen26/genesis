@@ -12,6 +12,7 @@
   ],
   "mixins": [
     "EntityMixin",
+    "FallingBlockEntityAccessor",
     "LivingEntityMixin",
     "ServerLevelMixin"
   ],
