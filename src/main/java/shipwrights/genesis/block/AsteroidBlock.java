@@ -3,12 +3,14 @@ package shipwrights.genesis.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.extension.FallingBlockEntityExtension;
@@ -42,6 +44,10 @@ public class AsteroidBlock extends Block {
             case 9 -> new Vector3d(0, 0, Math.toRadians(-22.5));
             default -> new Vector3d(0, 0, 0);
         };
+    }
+
+    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult arg3, Projectile arg4) {
+        level.destroyBlock(arg3.getBlockPos(), false);
     }
 
     @Override
