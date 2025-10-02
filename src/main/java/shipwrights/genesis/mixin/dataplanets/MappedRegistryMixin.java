@@ -1,5 +1,7 @@
 package shipwrights.genesis.mixin.dataplanets;
 
+import net.minecraft.client.Minecraft;
+import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.interfaces.IUnfreezableRegistry;
 import shipwrights.dataplanets.space.DynamicSystems;
 import net.minecraft.core.MappedRegistry;
@@ -19,6 +21,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import shipwrights.dataplanets.space.StarSystemCreator;
+
+import java.io.File;
 
 @Mixin(MappedRegistry.class)
 public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
@@ -94,6 +99,14 @@ public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
         {
             DynamicSystems.frozeTimes++;
             //System.out.println("frozen "+DynamicSystems.frozeTimes);
+            File storage = new File("./dataplanets_dynamic_data.dat");
+            if(!storage.exists())
+            {
+
+                System.out.println("Last Level Name: "+ Dataplanets.LAST_WORLD_ID);
+
+                StarSystemCreator.makeSystem();
+            }
             DynamicSystems.loadDynamicResources();
         }
 

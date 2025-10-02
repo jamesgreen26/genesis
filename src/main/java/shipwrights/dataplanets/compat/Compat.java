@@ -1,7 +1,11 @@
 package shipwrights.dataplanets.compat;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.Tags;
 import shipwrights.dataplanets.DPPackets;
+import shipwrights.dataplanets.MutableTags;
 import shipwrights.dataplanets.space.S2PSyncPacket;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.Holder;
@@ -41,7 +45,7 @@ public class Compat {
      */
     public static void postLoadPlanet(CompoundTag planetData)
     {
-
+        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")),planetData.getInt("scaleClient"),planetData.getInt("radiusClient"),1,1,1);
     }
 
     public static void loadCompat(String compatmod)

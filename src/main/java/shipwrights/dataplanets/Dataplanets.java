@@ -1,5 +1,7 @@
 package shipwrights.dataplanets;
 
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.registry.*;
 import shipwrights.dataplanets.space.S2PSyncPacket;
@@ -30,6 +32,7 @@ public class Dataplanets
 
     public static final UUID LOW_GRAVITY = UUID.fromString("662A6B8D-DA3E-4C1C-1112-96EA6097278D");
 
+    public static String LAST_WORLD_ID = "";
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Dataplanets()
@@ -53,6 +56,7 @@ public class Dataplanets
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         Compat.modEventBusLoad(bus);
+
 
 
     }

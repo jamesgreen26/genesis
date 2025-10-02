@@ -11,7 +11,8 @@
     "ParticleEngineMixin",
     "ParticleMixin",
     "dataplanets.ClientLanguageMixin",
-    "dataplanets.LevelRendererMixin"
+    "dataplanets.LevelRendererMixin",
+    "dataplanets.WorldSelectionMixin"
   ],
   "mixins": [
     "EntityMixin",

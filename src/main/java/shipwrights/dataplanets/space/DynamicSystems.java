@@ -788,8 +788,6 @@ public class DynamicSystems {
 
                         //makeDynamicWorld(server,planetId+"_orbit",makeOrbit(planetData));
                     }
-                    //TODO: move next bit to a compat class at some point
-                    GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetId),planetData.getInt("scaleClient"),planetData.getInt("radiusClient"),1,1,1);
                 }
             }
         }

@@ -142,12 +142,6 @@ public class StarSystemCreator {
 
 
 
-            //TODO: this could be moved to biomeCompound
-            genLakes(planetData,uuid,random);
-            genRocks(planetData,uuid,random);
-            genOre(random,uuid,planetData);
-
-
 
 
             planetData.putFloat("nr1", (float) random.nextInt(1800) /1000f);
@@ -189,9 +183,12 @@ public class StarSystemCreator {
                 biomeCompound.putFloat("wierd",random.nextFloat()/2f);
                 biomeCompound.putString("generalBlock",planetData.getString("generalBlock"));
                 biomeCompound.putInt("temperature",planetData.getInt("temperature")+random.nextInt(-20,20));
-                biomeCompound.put("biome_ores",planetData.getList("planet_ores",ListTag.TAG_STRING));
-                biomeCompound.put("rock_blocks",planetData.getList("rock_blocks",ListTag.TAG_STRING));
-                biomeCompound.put("lakeFluids",planetData.getList("lakeFluids",ListTag.TAG_STRING));
+                //biomeCompound.put("biome_ores",planetData.getList("planet_ores",ListTag.TAG_STRING));
+                genOre(biomeCompound,random);
+                //biomeCompound.put("rock_blocks",planetData.getList("rock_blocks",ListTag.TAG_STRING));
+                genRocks(biomeCompound,random);
+                //biomeCompound.put("lakeFluids",planetData.getList("lakeFluids",ListTag.TAG_STRING));
+                genLakes(biomeCompound,random);
                 byte[] flavour = new byte[10];
                 for(int z=0; z<flavour.length; z++)
                 {
@@ -269,14 +266,14 @@ public class StarSystemCreator {
         }
     }
 
-    private static void genOre(RandomSource random, String uuid, CompoundTag planetData)
+    private static void genOre(CompoundTag biomeData,RandomSource random)
     {
 
 
         ListTag ores;
-        if(planetData.contains("planet_ores"))
+        if(biomeData.contains("biome_ores"))
         {
-            ores = (ListTag) planetData.get("planet_ores");
+            ores = (ListTag) biomeData.get("biome_ores");
         }
         else
         {
@@ -287,12 +284,12 @@ public class StarSystemCreator {
             ResourceLocation orerl = candidate[random.nextInt(candidate.length)];
             String ore = orerl.toString();
             ores.add(StringTag.valueOf(ore));
-            planetData.put("planet_ores",ores);
+            biomeData.put("biome_ores",ores);
         }
 
     }
 
-    private static void genLakes(CompoundTag planetData, String uuid, RandomSource randomSource)
+    private static void genLakes(CompoundTag biomeData, RandomSource randomSource)
     {
         for (int i = 0; i < 1; i++) {
 
@@ -302,13 +299,13 @@ public class StarSystemCreator {
 
                 //if the fluid temperature is >300 it's not set as a liquid at room temperature so is *probably* molten.
                 //in this case, we need the planet to be warmer than its liquid state
-                if(temp<=planetData.getInt("temperature") && temp>300)
+                if(temp<=biomeData.getInt("temperature") && temp>300)
                 {
                     return true;
                 }
                 //if the fluid temeperature <301 you probably need to cool it to get it as a liquid, or its liquid at room temperature
                 //in this case, we want the planet to be colder than its liquid state
-                if(planetData.getInt("temperature")<=temp && temp<301)
+                if(biomeData.getInt("temperature")<=temp && temp<301)
                 {
                     return true;
                 }
@@ -323,11 +320,11 @@ public class StarSystemCreator {
 
             //these first two conditions should only trigger if a planet is really, really hot or really, really cold.
             //and they should only trigger at all if we are in a gamestate where we have no other fluids
-            if(materials.isEmpty() && planetData.getInt("temperature")<301)
+            if(materials.isEmpty() && biomeData.getInt("temperature")<301)
             {
                 fluidName = "minecraft:packed_ice";
             }
-            else if(materials.isEmpty() && planetData.getInt("temperature")>300)
+            else if(materials.isEmpty() && biomeData.getInt("temperature")>300)
             {
                 fluidName = "minecraft:lava";
             }
@@ -337,9 +334,9 @@ public class StarSystemCreator {
             }
 
             ListTag lakes;
-            if(planetData.contains("lakeFluids"))
+            if(biomeData.contains("lakeFluids"))
             {
-                lakes = (ListTag) planetData.get("lakeFluids");
+                lakes = (ListTag) biomeData.get("lakeFluids");
             }
             else
             {
@@ -347,21 +344,18 @@ public class StarSystemCreator {
             }
             lakes.add(StringTag.valueOf(fluidName));
 
-            planetData.put("lakeFluids",lakes);
+            biomeData.put("lakeFluids",lakes);
 
         }
 
 
     }
-    private static void genRocks(CompoundTag planetData, String uuid, RandomSource randomSource)
+    private static void genRocks(CompoundTag biomeData, RandomSource randomSource)
     {
-
-
-
         ListTag rocks;
-        if(planetData.contains("rock_blocks"))
+        if(biomeData.contains("rock_blocks"))
         {
-            rocks = (ListTag) planetData.get("rock_blocks");
+            rocks = (ListTag) biomeData.get("rock_blocks");
         }
         else
         {
@@ -374,7 +368,7 @@ public class StarSystemCreator {
 
 
 
-        planetData.put("rock_blocks",rocks);
+        biomeData.put("rock_blocks",rocks);
 
 
     }
