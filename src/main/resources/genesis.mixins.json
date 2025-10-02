@@ -22,7 +22,7 @@
     "ServerLevelMixin",
     "dataplanets.MappedRegistryMixin",
     "dataplanets.MinecraftServerMixin",
-    "dataplanets.ServerPlayerMixin"
+    "dataplanets.ServerPlayerMixin",
     "ServerLevelMixin",
     "ServerShipObjectWorldAccessor",
     "dataplanets.MappedRegistryMixin",

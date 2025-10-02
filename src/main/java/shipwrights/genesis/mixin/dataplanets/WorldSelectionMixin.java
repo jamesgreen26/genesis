@@ -12,8 +12,8 @@ import shipwrights.dataplanets.Dataplanets;
 public class WorldSelectionMixin {
 
 
-    @Inject(method = "loadLevel", at = @At("HEAD"))
-    private void load(Screen arg, String string, CallbackInfo ci)
+    @Inject(method = "doLoadLevel(Lnet/minecraft/client/gui/screens/Screen;Ljava/lang/String;ZZZ)V", at = @At("HEAD"))
+    private void load(Screen arg, String string, boolean bl, boolean bl2, boolean confirmExperimentalWarning, CallbackInfo ci)
     {
         System.out.println("LOADING LEVEL!");
         Dataplanets.LAST_WORLD_ID = string;
