@@ -6,6 +6,7 @@
   "client": [
     "ChunkBorderRendererMixin",
     "EntityRenderDispatcherMixin",
+    "FallingBlockRendererMixin",
     "GameRendererMixin",
     "ParticleEngineMixin",
     "ParticleMixin",
@@ -14,8 +15,15 @@
   ],
   "mixins": [
     "EntityMixin",
+    "FallingBlockEntityAccessor",
+    "FallingBlockEntityMixin",
     "LivingEntityMixin",
     "ServerLevelMixin",
+    "dataplanets.MappedRegistryMixin",
+    "dataplanets.MinecraftServerMixin",
+    "dataplanets.ServerPlayerMixin"
+    "ServerLevelMixin",
+    "ServerShipObjectWorldAccessor",
     "dataplanets.MappedRegistryMixin",
     "dataplanets.MinecraftServerMixin",
     "dataplanets.ServerPlayerMixin"

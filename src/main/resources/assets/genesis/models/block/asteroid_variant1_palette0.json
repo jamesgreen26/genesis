@@ -1,6 +1,6 @@
 {
 	"textures": {
-		"0": "genesis:block/asteroid_0",
+		"0": "genesis:block/asteroid_palette_0",
 		"particle": "minecraft:block/stone"
 	},
 	"elements": [

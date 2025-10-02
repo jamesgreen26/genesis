@@ -1,36 +1,64 @@
 {
   "variants": {
-    "": [
-      {
-        "model": "genesis:block/asteroid_0"
-      },
-      {
-        "model": "genesis:block/asteroid_1"
-      },
-      {
-        "model": "genesis:block/asteroid_2"
-      },
-      {
-        "model": "genesis:block/asteroid_3"
-      },
-      {
-        "model": "genesis:block/asteroid_4"
-      },
-      {
-        "model": "genesis:block/asteroid_5"
-      },
-      {
-        "model": "genesis:block/asteroid_6"
-      },
-      {
-        "model": "genesis:block/asteroid_7"
-      },
-      {
-        "model": "genesis:block/asteroid_8"
-      },
-      {
-        "model": "genesis:block/asteroid_9"
-      }
-    ]
+    "variant=0,palette=0": {
+      "model": "genesis:block/asteroid_variant0_palette0"
+    },
+    "variant=0,palette=1": {
+      "model": "genesis:block/asteroid_variant0_palette1"
+    },
+    "variant=1,palette=0": {
+      "model": "genesis:block/asteroid_variant1_palette0"
+    },
+    "variant=1,palette=1": {
+      "model": "genesis:block/asteroid_variant1_palette1"
+    },
+    "variant=2,palette=0": {
+      "model": "genesis:block/asteroid_variant2_palette0"
+    },
+    "variant=2,palette=1": {
+      "model": "genesis:block/asteroid_variant2_palette1"
+    },
+    "variant=3,palette=0": {
+      "model": "genesis:block/asteroid_variant3_palette0"
+    },
+    "variant=3,palette=1": {
+      "model": "genesis:block/asteroid_variant3_palette1"
+    },
+    "variant=4,palette=0": {
+      "model": "genesis:block/asteroid_variant4_palette0"
+    },
+    "variant=4,palette=1": {
+      "model": "genesis:block/asteroid_variant4_palette1"
+    },
+    "variant=5,palette=0": {
+      "model": "genesis:block/asteroid_variant5_palette0"
+    },
+    "variant=5,palette=1": {
+      "model": "genesis:block/asteroid_variant5_palette1"
+    },
+    "variant=6,palette=0": {
+      "model": "genesis:block/asteroid_variant6_palette0"
+    },
+    "variant=6,palette=1": {
+      "model": "genesis:block/asteroid_variant6_palette1"
+    },
+    "variant=7,palette=0": {
+      "model": "genesis:block/asteroid_variant7_palette0"
+    },
+    "variant=7,palette=1": {
+      "model": "genesis:block/asteroid_variant7_palette1"
+    },
+    "variant=8,palette=0": {
+      "model": "genesis:block/asteroid_variant8_palette0"
+    },
+    "variant=8,palette=1": {
+      "model": "genesis:block/asteroid_variant8_palette1"
+    },
+    "variant=9,palette=0": {
+      "model": "genesis:block/asteroid_variant9_palette0"
+    },
+    "variant=9,palette=1": {
+      "model": "genesis:block/asteroid_variant9_palette1"
+    }
   }
 }
