@@ -19,6 +19,7 @@
     "FallingBlockEntityMixin",
     "LivingEntityMixin",
     "ServerLevelMixin",
+    "ServerShipObjectWorldAccessor",
     "dataplanets.MappedRegistryMixin",
     "dataplanets.MinecraftServerMixin",
     "dataplanets.ServerPlayerMixin"

@@ -30,7 +30,8 @@ public final class GenesisMod {
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final ResourceLocation ASTEROID_RULE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "asteroid_block_surface_rule");
 
-    public static final int atmosphereCollisionHeight = 2048;
+    public static final int atmosphereExitHeight = 4096;
+    public static final int atmosphereEntryHeight = 2048;
 
     public static final double earthDist = 15_000;
     public static final double earthSize = 96;
@@ -41,6 +42,8 @@ public final class GenesisMod {
         IEventBus eventBus = context.getModEventBus();;
 
         GenesisBlocks.BLOCKS.register(eventBus);
+
+        registerPlanet(ResourceLocation.parse("minecraft:overworld"), 1.0, 1.0, 1, 1, 1);
 
         registerPlanet(ResourceLocation.withDefaultNamespace("aadsfads"), 1.0, 1.0, 1, 1, 1);
         registerPlanet(ResourceLocation.withDefaultNamespace("bkbnvc"), 1.0, 1.0, 1, 1, 1);
