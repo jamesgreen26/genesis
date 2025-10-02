@@ -6,13 +6,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.GenesisBlocks;
+import shipwrights.genesis.block.AsteroidBlock;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class AsteroidBlockSurfaceRule implements SurfaceRules.RuleSource {
     public static final KeyDispatchDataCodec<AsteroidBlockSurfaceRule> CODEC =
             KeyDispatchDataCodec.of(MapCodec.unit(new AsteroidBlockSurfaceRule()));
+
+    private static List<BlockState> states;
 
     AsteroidBlockSurfaceRule() {}
 
@@ -24,8 +28,8 @@ public class AsteroidBlockSurfaceRule implements SurfaceRules.RuleSource {
     @Override
     public SurfaceRules.SurfaceRule apply(SurfaceRules.Context arg) {
         return (i, j, k) -> {
-            int index = (int) (hash3(i, j, k) % states.size());
-            return states.get(index);
+            int index = (int) (hash3(i, j, k) % getStates().size());
+            return getStates().get(index);
         };
     }
 
@@ -36,16 +40,35 @@ public class AsteroidBlockSurfaceRule implements SurfaceRules.RuleSource {
         return Math.abs(h);
     }
 
-    private final List<BlockState> states = List.of(
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 0),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 1),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 2),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 3),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 4),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 5),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 6),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 7),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 8),
-        GenesisBlocks.ASTEROID_0.get().defaultBlockState().setValue(shipwrights.genesis.block.AsteroidBlock.VARIANT, 9)
-    );
+    private static List<BlockState> getStates() {
+        if (states == null) {
+            states = buildStates();
+        }
+        return states;
+    }
+
+    private static List<BlockState> buildStates() {
+        List<BlockState> result = new ArrayList<>();
+        BlockState baseState = GenesisBlocks.ASTEROID_0.get().defaultBlockState();
+
+        int maxVariant = AsteroidBlock.VARIANT.getPossibleValues().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+
+        int maxPalette = AsteroidBlock.PALETTE.getPossibleValues().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+
+        for (int palette = 0; palette <= maxPalette; palette++) {
+            for (int variant = 0; variant <= maxVariant; variant++) {
+                result.add(baseState
+                        .setValue(AsteroidBlock.VARIANT, variant)
+                        .setValue(AsteroidBlock.PALETTE, palette));
+            }
+        }
+
+        return result;
+    }
 }

@@ -15,6 +15,7 @@ import org.joml.Vector3d;
 import shipwrights.genesis.extension.FallingBlockEntityExtension;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AsteroidBlock extends Block {
 
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 9);
+    public static final IntegerProperty PALETTE = IntegerProperty.create("palette", 0, 1);
     private static final ConcurrentHashMap<BlockPos, Damage> damageMap = new ConcurrentHashMap<>();
     private static final long DAMAGE_TIMEOUT_MS = 120_000; // 1 minute
     private static final int DESTROY_THRESHOLD = 64;
@@ -81,12 +83,12 @@ public class AsteroidBlock extends Block {
 
     public AsteroidBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(VARIANT, 0));
+        this.registerDefaultState(this.stateDefinition.any().setValue(VARIANT, 0).setValue(PALETTE, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(VARIANT);
+        builder.add(VARIANT, PALETTE);
     }
 
     public static Vector3d getRotation(int variant) {
@@ -138,13 +140,59 @@ public class AsteroidBlock extends Block {
         return new Vector3d(x3, y3, z2);
     }
 
+    private static class WeightedBlockState {
+        final BlockState state;
+        final int weight;
+
+        WeightedBlockState(BlockState state, int weight) {
+            this.state = state;
+            this.weight = weight;
+        }
+    }
+
+    private static final List<List<WeightedBlockState>> PALETTE_BLOCKS = List.of(
+        // Palette 0: Stone-based
+        List.of(
+            new WeightedBlockState(Blocks.STONE.defaultBlockState(), 1),
+            new WeightedBlockState(Blocks.ANDESITE.defaultBlockState(), 1),
+            new WeightedBlockState(Blocks.GRAVEL.defaultBlockState(), 1),
+            new WeightedBlockState(Blocks.COAL_ORE.defaultBlockState(), 1)
+        ),
+        // Palette 1: Deepslate-based
+        List.of(
+            new WeightedBlockState(Blocks.SMOOTH_BASALT.defaultBlockState(), 24),
+            new WeightedBlockState(Blocks.DEEPSLATE.defaultBlockState(), 24),
+            new WeightedBlockState(Blocks.COBBLED_DEEPSLATE.defaultBlockState(), 24),
+            new WeightedBlockState(Blocks.DEEPSLATE_COAL_ORE.defaultBlockState(), 24),
+            new WeightedBlockState(Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), 4)
+        )
+    );
+
+    private static BlockState selectWeightedRandom(List<WeightedBlockState> blocks, net.minecraft.util.RandomSource random) {
+        int totalWeight = blocks.stream().mapToInt(w -> w.weight).sum();
+        int randomValue = random.nextInt(totalWeight);
+
+        int currentWeight = 0;
+        for (WeightedBlockState weighted : blocks) {
+            currentWeight += weighted.weight;
+            if (randomValue < currentWeight) {
+                return weighted.state;
+            }
+        }
+
+        return blocks.get(0).state;
+    }
+
     private void spawnFallingBlocks(Level level, BlockPos pos, BlockState state) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
         }
 
         int variant = state.getValue(VARIANT);
+        int palette = state.getValue(PALETTE);
         Vector3d rotation = getRotation(variant);
+
+        List<WeightedBlockState> paletteBlocks = PALETTE_BLOCKS.get(palette);
 
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
@@ -168,12 +216,7 @@ public class AsteroidBlock extends Block {
                     double offsetY = (rotated.y + 8.0) / 16.0;
                     double offsetZ = (rotated.z + 8.0) / 16.0;
 
-                    BlockState blockState = switch (serverLevel.random.nextInt(4)) {
-                        case 1 -> Blocks.ANDESITE.defaultBlockState();
-                        case 2 -> Blocks.GRAVEL.defaultBlockState();
-                        case 3 -> Blocks.COAL_ORE.defaultBlockState();
-                        default -> Blocks.STONE.defaultBlockState();
-                    };
+                    BlockState blockState = selectWeightedRandom(paletteBlocks, serverLevel.random);
 
                     FallingBlockEntity fallingBlock = FallingBlockEntityAccessor.invokeConstructor(
                             serverLevel,
