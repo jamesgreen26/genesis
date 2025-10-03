@@ -13,7 +13,9 @@ public class PlanetData {
     public final double size;
     public final float color;
 
-    public PlanetData(ResourceLocation dimensionID, double size, double sunDist, int r, int g, int b) {
+    public final int hash;
+
+    public PlanetData(ResourceLocation dimensionID, double size, double sunDist, float r, float g, float b) {
 
         int hash = dimensionID.toString().hashCode();
         Random rand = new Random(hash);
@@ -23,6 +25,7 @@ public class PlanetData {
         this.rot = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
         this.size = size * GenesisMod.earthSize;
         this.color = rgbToFloat(r, g, b);
+        this.hash = dimensionID.hashCode();
     }
 
     private Vector3d randomPos(Random rand, double sunDist) {
@@ -45,14 +48,14 @@ public class PlanetData {
         return Float.intBitsToFloat(packed);
     }
 
-    public static float[] floatToRgb(float packedFloat) {
+    public static int[] floatToRgb(float packedFloat) {
         int packed = Float.floatToIntBits(packedFloat);
 
-        float r = ((packed >> 16) & 0xFF) / 255.0f;
-        float g = ((packed >> 8) & 0xFF) / 255.0f;
-        float b = (packed & 0xFF) / 255.0f;
+        int r = ((packed >> 16) & 0xFF);
+        int g = ((packed >> 8) & 0xFF);
+        int b = (packed & 0xFF);
 
-        return new float[] { r, g, b };
+        return new int[] { r, g, b };
     }
 
     @Override

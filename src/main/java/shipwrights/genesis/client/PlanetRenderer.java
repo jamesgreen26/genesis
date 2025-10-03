@@ -78,19 +78,24 @@ public class PlanetRenderer {
 
         float halfSize = (float) (data.size / 2);
 
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize);
-        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize);
-        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize);
+        int textureScale = data.hash % 256;
+
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, data.color);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, data.color);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, data.color);
+        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, data.color);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, data.color);
+        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, data.color);
     }
 
-    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
-                                       float x3, float y3, float z3, float x4, float y4, float z4) {
-        buffer.vertex(matrix, x1, y1, z1).color(x1 < 0 ? 0 : 255, y1 < 0 ? 0 : 255, z1 < 0 ? 0 : 255, 0).uv(0, 0).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(x2 < 0 ? 0 : 255, y2 < 0 ? 0 : 255, z2 < 0 ? 0 : 255, 0).uv(1, 0).endVertex();
-        buffer.vertex(matrix, x3, y3, z3).color(x3 < 0 ? 0 : 255, y3 < 0 ? 0 : 255, z3 < 0 ? 0 : 255, 0).uv(1, 1).endVertex();
-        buffer.vertex(matrix, x4, y4, z4).color(x4 < 0 ? 0 : 255, y4 < 0 ? 0 : 255, z4 < 0 ? 0 : 255, 0).uv(0, 1).endVertex();
+    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color) {
+        int[] rgb = PlanetData.floatToRgb(color);
+        int r = rgb[0], g = rgb[1], b = rgb[2];
+
+
+        buffer.vertex(matrix, x1, y1, z1).color(r, g, b, textureScale).uv((x1 < 0 ? 0 : 0.25f) + (y1 < 0 ? 0 : 0.5f), z1 < 0 ? 0 : 1).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).color(r, g, b, textureScale).uv((x2 < 0 ? 0 : 0.25f) + (y2 < 0 ? 0 : 0.5f), z2 < 0 ? 0 : 1).endVertex();
+        buffer.vertex(matrix, x3, y3, z3).color(r, g, b, textureScale).uv((x3 < 0 ? 0 : 0.25f) + (y3 < 0 ? 0 : 0.5f), z3 < 0 ? 0 : 1).endVertex();
+        buffer.vertex(matrix, x4, y4, z4).color(r, g, b, textureScale).uv((x4 < 0 ? 0 : 0.25f) + (y4 < 0 ? 0 : 0.5f), z4 < 0 ? 0 : 1).endVertex();
     }
 }

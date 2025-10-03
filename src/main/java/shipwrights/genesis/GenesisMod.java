@@ -43,7 +43,7 @@ public final class GenesisMod {
 
         GenesisBlocks.BLOCKS.register(eventBus);
 
-        registerPlanet(ResourceLocation.parse("minecraft:overworld"), 1.0, 1.0, 1, 1, 1);
+        registerPlanet(ResourceLocation.parse("minecraft:overworld"), 1.0, 1.0, 0, 0.5f, 0.8f);
 
         registerPlanet(ResourceLocation.withDefaultNamespace("aadsfads"), 1.0, 1.0, 1, 1, 1);
         registerPlanet(ResourceLocation.withDefaultNamespace("bkbnvc"), 1.0, 1.0, 1, 1, 1);
@@ -59,7 +59,7 @@ public final class GenesisMod {
 
     /// @param size relative to earth
     /// @param sunDist relative to earth
-    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, int r, int g, int b) {
+    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, float r, float g, float b) {
         planets.add(new PlanetData(dimensionID, size, sunDist, r, g, b));
     }
 

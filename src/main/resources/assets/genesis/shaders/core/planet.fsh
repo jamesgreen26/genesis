@@ -1,7 +1,8 @@
 #version 150
 
-in vec2 texCoord0;
-in vec4 vertexColor; // xyz coords in .rgb (0-1)
+in vec3 positionData;
+in float textureScale;
+in vec3 vertexColor;
 
 out vec4 frag_color;
 
@@ -32,18 +33,13 @@ float noise(vec3 p) {
 }
 
 void main() {
-    float dist = max(abs(0.5 - texCoord0.x), abs(0.5 - texCoord0.y));
-
-    vec3 pos = vertexColor.rgb * 8.0;
+    vec3 pos = positionData * 8.0 * textureScale;
 
     float n = noise(pos * 3.0);
 
     float swirl = sin(pos.x * 8.0 + n * 6.283) * 0.5 + 0.5;
 
-    float c = 1.0 - dist * 0.6;
-    vec3 baseColor = vec3(0.3, 0.3, 0.3);
-
-    vec3 finalColor = mix(baseColor, baseColor * (0.5 + 0.5*swirl), 0.6);
+    vec3 finalColor = mix(vertexColor, vertexColor * (0.5 + 0.5*swirl), 0.6);
 
     frag_color = vec4(finalColor, 1.0);
 }
