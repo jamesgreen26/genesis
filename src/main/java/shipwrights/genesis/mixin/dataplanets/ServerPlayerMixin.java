@@ -1,5 +1,6 @@
 package shipwrights.genesis.mixin.dataplanets;
 
+import net.minecraft.server.MinecraftServer;
 import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.registries.Registries;
@@ -81,22 +82,24 @@ public abstract class ServerPlayerMixin extends Entity {
 
 
             }
-            if(!level().isClientSide)
+            final MinecraftServer server = this.getServer();
+            if(!level().isClientSide && server != null)
             {
+                final MinecraftServerAccessor serverAccessor = (MinecraftServerAccessor) server;
                 if(getOnPos().getY()>400 && !this.level().dimension().location().getPath().contains("orbit"))
                 {
-                    ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",this.level().dimension().location().getPath()+"_orbit"));
-                    if(this.getServer().levels.containsKey(resourcekey))
+                    ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.fromNamespaceAndPath("dataplanets",this.level().dimension().location().getPath()+"_orbit"));
+                    if(serverAccessor.getLevels().containsKey(resourcekey))
                     {
-                        teleportTo(this.getServer().levels.get(resourcekey),getOnPos().getX(),100,getOnPos().getZ(),Set.of(),0,0);
+                        teleportTo(serverAccessor.getLevels().get(resourcekey),getOnPos().getX(),100,getOnPos().getZ(),Set.of(),0,0);
                     }
                 }
                 if(getOnPos().getY()<10 && this.level().dimension().location().getPath().contains("orbit"))
                 {
-                    ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",this.level().dimension().location().getPath().replace("_orbit","")));
-                    if(this.getServer().levels.containsKey(resourcekey))
+                    ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.fromNamespaceAndPath("dataplanets",this.level().dimension().location().getPath().replace("_orbit","")));
+                    if(serverAccessor.getLevels().containsKey(resourcekey))
                     {
-                        teleportTo(this.getServer().levels.get(resourcekey),getOnPos().getX(),300,getOnPos().getZ(),Set.of(),0,0);
+                        teleportTo(serverAccessor.getLevels().get(resourcekey),getOnPos().getX(),300,getOnPos().getZ(),Set.of(),0,0);
                     }
                 }
                 if(!planetData.getBoolean("hasAtmosphere") || !planetData.getBoolean("hasOxygen"))

@@ -45,7 +45,82 @@ public class Compat {
      */
     public static void postLoadPlanet(CompoundTag planetData)
     {
-        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")),planetData.getInt("scaleClient") / 10d,planetData.getInt("radiusClient"),1,1,1);
+
+        float[] color = getPlanetColor(planetData);
+
+        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")),planetData.getInt("scaleClient") / 10d,planetData.getInt("radiusClient"),color[0],color[1],color[2]);
+    }
+
+    private static float[] getPlanetColor(CompoundTag planetData) {
+        int temperature = planetData.getInt("temperature");
+        String planetType = planetData.getString("planetType");
+        String seaBlock = planetData.getString("seaBlock");
+        String generalBlock = planetData.getString("generalBlock");
+
+        float r = 0.5f, g = 0.5f, b = 0.5f;
+
+        // Color based on planet type
+        if ("gaseous".equals(planetType)) {
+            // Gas giants - pale blues/purples
+            r = 0.7f;
+            g = 0.75f;
+            b = 0.85f;
+        } else if ("ocean".equals(planetType)) {
+            // Ocean worlds - blue
+            r = 0.2f;
+            g = 0.4f;
+            b = 0.8f;
+        } else if ("icy".equals(planetType)) {
+            // Ice worlds - white/cyan
+            r = 0.85f;
+            g = 0.9f;
+            b = 0.95f;
+        } else {
+            // Rocky planets - color based on surface block and temperature
+            if (generalBlock.contains("magma")) {
+                // Hot volcanic - red/orange
+                r = 0.9f;
+                g = 0.3f;
+                b = 0.1f;
+            } else if (generalBlock.contains("netherrack")) {
+                r = 0.7f;
+                g = 0.3f;
+                b = 0.3f;
+            } else if (generalBlock.contains("end_stone")) {
+                r = 0.9f;
+                g = 0.9f;
+                b = 0.7f;
+            } else if (generalBlock.contains("sandstone")) {
+                r = 0.85f;
+                g = 0.7f;
+                b = 0.5f;
+            } else if (generalBlock.contains("basalt") || generalBlock.contains("blackstone")) {
+                r = 0.25f;
+                g = 0.25f;
+                b = 0.3f;
+            } else {
+                // Default rocky - gray/brown
+                r = 0.5f;
+                g = 0.45f;
+                b = 0.4f;
+            }
+
+            // Adjust for temperature
+            if (temperature > 600) {
+                r = Math.min(1.0f, r + 0.3f);
+                g = Math.max(0.0f, g - 0.1f);
+                b = Math.max(0.0f, b - 0.2f);
+            } else if (temperature < 273) {
+                r = Math.min(1.0f, r + 0.2f);
+                g = Math.min(1.0f, g + 0.2f);
+                b = Math.min(1.0f, b + 0.3f);
+            }
+        }
+        float[] rgb = new float[3];
+        rgb[0] = r;
+        rgb[1] = g;
+        rgb[2] = b;
+        return rgb;
     }
 
     public static void loadCompat(String compatmod)

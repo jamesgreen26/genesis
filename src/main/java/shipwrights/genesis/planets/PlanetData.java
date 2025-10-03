@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
 
+import java.text.NumberFormat;
 import java.util.Random;
 
 public class PlanetData {
@@ -26,6 +27,8 @@ public class PlanetData {
         this.size = size * GenesisMod.earthSize;
         this.color = rgbToFloat(r, g, b);
         this.hash = dimensionID.hashCode();
+
+        GenesisMod.LOGGER.info("new planet {} at: {}", dimensionID, pos.toString(NumberFormat.getIntegerInstance()));
     }
 
     private Vector3d randomPos(Random rand, double sunDist) {
