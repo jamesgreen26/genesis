@@ -45,7 +45,7 @@ public class Compat {
      */
     public static void postLoadPlanet(CompoundTag planetData)
     {
-        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")),planetData.getInt("scaleClient"),planetData.getInt("radiusClient"),1,1,1);
+        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")),planetData.getInt("scaleClient") / 10d,planetData.getInt("radiusClient"),1,1,1);
     }
 
     public static void loadCompat(String compatmod)
