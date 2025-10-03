@@ -35,7 +35,7 @@ public class Dataplanets
     public static String LAST_WORLD_ID = "";
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
-    public Dataplanets()
+    public Dataplanets(FMLJavaModLoadingContext context)
     {
 
 
@@ -54,12 +54,10 @@ public class Dataplanets
 
         MinecraftForge.EVENT_BUS.register(this);
 
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+        var bus = context.getModEventBus();
         Compat.modEventBusLoad(bus);
-
-
-
     }
+
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void playerLogsIn(PlayerEvent.PlayerLoggedInEvent event)

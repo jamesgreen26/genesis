@@ -48,7 +48,7 @@ public class Compat {
 
         float[] color = getPlanetColor(planetData);
 
-        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets",planetData.getString("name")),planetData.getInt("scaleClient") / 10d,planetData.getInt("radiusClient"),color[0],color[1],color[2]);
+        GenesisMod.registerPlanet(ResourceLocation.fromNamespaceAndPath("dataplanets", planetData.getString("name")), planetData.getInt("scaleClient") / 10d, planetData.getInt("radiusClient") / 3d, color[0], color[1], color[2]);
     }
 
     private static float[] getPlanetColor(CompoundTag planetData) {
