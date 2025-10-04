@@ -1,5 +1,6 @@
 package shipwrights.dataplanets.entities;
 
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import shipwrights.dataplanets.factions.Questable;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -20,7 +21,8 @@ public class NeumEntity extends PathfinderMob {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, (double)1.0F));
+        this.goalSelector.addGoal(1, new LookAtPlayerGoal(this,Player.class,1));
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0F));
     }
 
     @Override

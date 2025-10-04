@@ -98,15 +98,7 @@ public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
         if(shouldMake)
         {
             DynamicSystems.frozeTimes++;
-            //System.out.println("frozen "+DynamicSystems.frozeTimes);
-            File storage = new File("./dataplanets_dynamic_data.dat");
-            if(!storage.exists())
-            {
 
-                System.out.println("Last Level Name: "+ Dataplanets.LAST_WORLD_ID);
-
-                StarSystemCreator.makeSystem(8, 12);
-            }
             DynamicSystems.loadDynamicResources();
         }
 

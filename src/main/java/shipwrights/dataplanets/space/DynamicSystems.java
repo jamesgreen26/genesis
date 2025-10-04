@@ -1,5 +1,6 @@
 package shipwrights.dataplanets.space;
 
+import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.interfaces.IUnfreezableRegistry;
 import shipwrights.dataplanets.registry.DPBlocks;
@@ -62,6 +63,7 @@ import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.event.level.LevelEvent;
 import shipwrights.genesis.GenesisMod;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -90,6 +92,15 @@ public class DynamicSystems {
         //I would have thought this would have more problems on a smaller modpack actually...
         if(DynamicSystems.allRegistriesFrozen() && frozeTimes>20)
         {
+            File storage = new File("./dataplanets_dynamic_data.dat");
+            if(!storage.exists())
+            {
+
+                System.out.println("Last Level Name: "+ Dataplanets.LAST_WORLD_ID);
+
+                StarSystemCreator.makeSystem(8,12);
+            }
+
 
             CompoundTag tag = StarSystemCreator.getDynamicDataOrNew();
             for(String system: tag.getAllKeys())
