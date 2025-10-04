@@ -54,7 +54,11 @@ public final class GenesisMod {
     /// @param size relative to earth
     /// @param sunDist relative to earth
     public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, float r, float g, float b) {
-        planets.add(new PlanetData(dimensionID, size, sunDist, r, g, b));
+        if (sunDist * earthDist > 2048) {
+            planets.add(new PlanetData(dimensionID, size, sunDist, r, g, b));
+        } else {
+            LOGGER.warn("Failed to register planet {}, it is too close to the sun!", dimensionID);
+        }
     }
 
     @SubscribeEvent
