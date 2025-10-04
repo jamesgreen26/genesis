@@ -14,7 +14,7 @@ public class ParticleMixin {
     @WrapMethod(method = "move")
     public void wrapMove(double d, double e, double f, Operation<Void> original) {
         ClientLevel level = Minecraft.getInstance().level;
-        if (level != null && level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (level != null && GenesisMod.isMiniScale(level)) {
             original.call(d / 16, e / 16, f / 16);
         } else {
             original.call(d, e, f);

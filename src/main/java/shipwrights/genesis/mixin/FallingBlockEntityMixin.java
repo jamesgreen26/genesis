@@ -78,7 +78,7 @@ public class FallingBlockEntityMixin implements FallingBlockEntityExtension {
             )
     )
     private void genesis$preventEarlyDespawn(FallingBlockEntity entity, Operation<Void> original) {
-        if (entity.time >= 600 || !entity.level().dimension().location().equals(GenesisMod.SPACE_DIM) || entity.getBlockState().isAir()) {
+        if (entity.time >= 600 || !GenesisMod.shouldCancelVoidDamage(entity.level()) || entity.getBlockState().isAir()) {
             original.call(entity);
         }
     }

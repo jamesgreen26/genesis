@@ -26,7 +26,7 @@ public class ParticleEngineMixin {
     @Inject(method = "createParticle", at = @At("HEAD"), cancellable = true)
     public void createParticleMixin(ParticleOptions arg, double d, double e, double f, double g, double h, double i, CallbackInfoReturnable<Particle> cir) {
         ClientLevel level = Minecraft.getInstance().level;
-        if (level != null && level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (level != null && GenesisMod.isMiniScale(level)) {
 
             Particle particle = this.makeParticle(arg, d, e, f, g, h, i);
             if (particle != null) {
@@ -43,7 +43,7 @@ public class ParticleEngineMixin {
     @Inject(method = "destroy", at = @At("HEAD"), cancellable = true)
     public void destroyMixin(BlockPos arg, BlockState arg2, CallbackInfo ci) {
         ClientLevel level = Minecraft.getInstance().level;
-        if (level != null && level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (level != null && GenesisMod.isMiniScale(level)) {
 
             for (int i = 0; i < 10; i++) {
                 level.addParticle(
@@ -64,7 +64,7 @@ public class ParticleEngineMixin {
     @Inject(method = "crack", at = @At("HEAD"), cancellable = true)
     public void crackMixin(BlockPos arg, Direction arg2, CallbackInfo ci) {
         ClientLevel level = Minecraft.getInstance().level;
-        if (level == null || level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (level == null || GenesisMod.isMiniScale(level)) {
             ci.cancel();
         }
     }

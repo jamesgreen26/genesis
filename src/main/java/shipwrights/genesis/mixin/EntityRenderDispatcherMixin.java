@@ -35,7 +35,7 @@ public class EntityRenderDispatcherMixin {
     )
     private static double shortenBlueLineInSpace(double original) {
         Entity entity = genesis$currentEntity.get();
-        if (entity != null && entity.level().dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (entity != null && GenesisMod.isMiniScale(entity.level())) {
             return original / 16.0;
         }
         return original;

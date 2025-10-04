@@ -17,18 +17,13 @@ public abstract class ServerLevelMixin {
 
     @Shadow public abstract ServerLevel getLevel();
 
-    @Unique
-    private boolean genesis$isSpace() {
-        return getLevel().dimension().location().equals(GenesisMod.SPACE_DIM);
-    }
-
     @Inject(method = "addEntity", at = @At("HEAD"))
     private void addEntityMixin(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-        GenesisMod.refreshEntityScaling(entity, genesis$isSpace());
+        GenesisMod.refreshEntityScaling(entity, getLevel());
     }
 
     @Inject(method = "addPlayer", at = @At("HEAD"))
     private void addPlayerMixin(ServerPlayer arg, CallbackInfo ci) {
-        GenesisMod.refreshEntityScaling(arg, genesis$isSpace());
+        GenesisMod.refreshEntityScaling(arg, getLevel());
     }
 }

@@ -15,7 +15,7 @@ public class GameRendererMixin {
     @Inject(method = "getDepthFar", at = @At("HEAD"), cancellable = true)
     public void getDepthFarMixin(CallbackInfoReturnable<Float> cir) {
         ClientLevel level = Minecraft.getInstance().level;
-        if (level != null && level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (level != null && GenesisMod.isSpaceDimension(level)) {
             cir.setReturnValue(50000f);
         }
     }

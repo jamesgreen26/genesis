@@ -2,8 +2,10 @@ package shipwrights.genesis;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -78,7 +80,7 @@ public final class GenesisMod {
         AbstractClientPlayer player = Minecraft.getInstance().player;
         if (
             player != null &&
-            player.level().dimension().location().equals(GenesisMod.SPACE_DIM) &&
+            isSpaceDimension(player.level()) &&
             !Minecraft.getInstance().options.getCameraType().isFirstPerson() &&
             player.isPassenger()
         ) {
@@ -89,15 +91,51 @@ public final class GenesisMod {
         }
     }
 
-    public static void refreshEntityScaling(Entity entity, Boolean miniScale) {
+    public static void refreshEntityScaling(Entity entity, Level level) {
         ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
         scaleData.setPersistence(true);
-        if (miniScale) {
+        if (isMiniScale(level)) {
             scaleData.setScale(1 / 16f);
             entity.setNoGravity(true);
         } else {
             scaleData.setScale(1f);
             entity.setNoGravity(false);
         }
+    }
+
+    public static boolean isMiniScale(ResourceLocation dimensionLocation) {
+        return dimensionLocation.equals(SPACE_DIM);
+    }
+
+    public static boolean isMiniScale(ResourceKey<Level> dimension) {
+        return isMiniScale(dimension.location());
+    }
+
+    public static boolean isMiniScale(Level level) {
+        return isMiniScale(level.dimension().location());
+    }
+
+    public static boolean shouldCancelVoidDamage(ResourceLocation dimensionLocation) {
+        return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
+    }
+
+    public static boolean shouldCancelVoidDamage(ResourceKey<Level> dimension) {
+        return shouldCancelVoidDamage(dimension.location());
+    }
+
+    public static boolean shouldCancelVoidDamage(Level level) {
+        return shouldCancelVoidDamage(level.dimension().location());
+    }
+
+    public static boolean isSpaceDimension(ResourceLocation dimensionLocation) {
+        return dimensionLocation.equals(SPACE_DIM);
+    }
+
+    public static boolean isSpaceDimension(ResourceKey<Level> dimension) {
+        return isSpaceDimension(dimension.location());
+    }
+
+    public static boolean isSpaceDimension(Level level) {
+        return isSpaceDimension(level.dimension().location());
     }
 }

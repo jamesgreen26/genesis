@@ -27,7 +27,7 @@ public class ChunkBorderRendererMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     public void renderMixin(PoseStack poseStack, MultiBufferSource bufferSource, double camX, double camY, double camZ, CallbackInfo ci) {
         ClientLevel level = this.minecraft.level;
-        if (level == null || !level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (level == null || !GenesisMod.isMiniScale(level)) {
             return;
         }
 

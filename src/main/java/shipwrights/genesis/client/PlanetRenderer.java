@@ -31,7 +31,7 @@ public class PlanetRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || !minecraft.level.dimension().location().equals(GenesisMod.SPACE_DIM)) {
+        if (minecraft.level == null || !GenesisMod.isSpaceDimension(minecraft.level)) {
             return;
         }
 
