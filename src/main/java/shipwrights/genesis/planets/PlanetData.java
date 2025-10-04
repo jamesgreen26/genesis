@@ -32,9 +32,12 @@ public class PlanetData {
     }
 
     private Vector3d randomPos(Random rand, double sunDist) {
+        for (int i = 0; i < rand.nextInt(2, 20); i++) {
+            rand.nextDouble();
+        }
 
         double theta = rand.nextDouble() * 2 * Math.PI;   // longitude
-        double phi   = Math.acos(2 * rand.nextDouble() - 1); // latitude (uniform sphere)
+        double phi   = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude (uniform sphere)
         double x = Math.sin(phi) * Math.cos(theta);
         double y = Math.sin(phi) * Math.sin(theta);
         double z = Math.cos(phi);
