@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "dormant=false": {
+            "model": "genesis:block/void_core_dormant"
+        },
+        "dormant=true": {
+            "model": "genesis:block/void_core_dormant"
+        }
+    }
+} 

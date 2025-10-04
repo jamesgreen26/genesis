@@ -28,6 +28,7 @@ public final class GenesisMod {
 
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
+    public static final ResourceLocation WORMHOLE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "wormhole");
     public static final ResourceLocation ASTEROID_RULE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "asteroid_block_surface_rule");
 
     public static final int atmosphereExitHeight = 2048;
@@ -42,6 +43,10 @@ public final class GenesisMod {
         IEventBus eventBus = context.getModEventBus();;
 
         GenesisBlocks.BLOCKS.register(eventBus);
+        shipwrights.genesis.blockentity.GenesisBlockEntities.BLOCK_ENTITIES.register(eventBus);
+        shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
+        shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
+        shipwrights.genesis.item.GenesisCreativeTabs.register(eventBus);
 
         registerPlanet(ResourceLocation.parse("minecraft:overworld"), 1.0, 1.0, 0, 0.5f, 0.8f);
 
@@ -54,6 +59,13 @@ public final class GenesisMod {
     /// @param size relative to earth
     /// @param sunDist relative to earth
     public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, float r, float g, float b) {
+        for (PlanetData planet : planets) {
+            if (planet.dimensionID.equals(dimensionID)) {
+                LOGGER.warn("Failed to register planet {}, a planet with this dimension ID already exists!", dimensionID);
+                return;
+            }
+        }
+
         if (sunDist * earthDist > 2048) {
             planets.add(new PlanetData(dimensionID, size, sunDist, r, g, b));
         } else {

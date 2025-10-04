@@ -21,9 +21,15 @@ public abstract class EntityMixin {
         return level().dimension().location().equals(GenesisMod.SPACE_DIM);
     }
 
+    @Unique
+    private boolean genesis$isWithoutVoid() {
+        return level().dimension().location().equals(GenesisMod.SPACE_DIM) ||
+               level().dimension().location().equals(GenesisMod.WORMHOLE_DIM);
+    }
+
     @Inject(method = "onBelowWorld", at = @At("HEAD"), cancellable = true)
     private void onBelowWorldMixin(CallbackInfo ci) {
-        if(genesis$isInSpace()) {
+        if(genesis$isWithoutVoid()) {
             ci.cancel();
         }
     }

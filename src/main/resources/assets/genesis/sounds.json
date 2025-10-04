@@ -1,0 +1,8 @@
+{
+  "void_engine_start": {
+    "subtitle": "subtitles.genesis.void_engine_start",
+    "sounds": [
+      "genesis:void_engine_start"
+    ]
+  }
+}

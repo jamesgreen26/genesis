@@ -21,7 +21,8 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void hurtMixin(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (source == this.damageSources().fellOutOfWorld()) {
-            if (this.level().dimension().location().equals(GenesisMod.SPACE_DIM)) {
+            if (this.level().dimension().location().equals(GenesisMod.SPACE_DIM) ||
+                this.level().dimension().location().equals(GenesisMod.WORMHOLE_DIM)) {
                 cir.setReturnValue(false);
             }
         }

@@ -1,0 +1,12 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "down": "genesis:block/void_engine_frame",
+        "up": "genesis:block/void_engine_frame",
+        "north": "genesis:block/void_engine_frame",
+        "south": "genesis:block/void_engine_frame",
+        "east": "genesis:block/void_engine_frame",
+        "west": "genesis:block/void_engine_frame",
+        "particle": "genesis:block/void_engine_frame"
+    }
+} 

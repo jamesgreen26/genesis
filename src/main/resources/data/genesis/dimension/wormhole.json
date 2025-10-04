@@ -1,0 +1,12 @@
+{
+  "type": "genesis:wormhole",
+  "generator": {
+    "type": "minecraft:noise",
+    "seed": 0,
+    "settings": "genesis:wormhole",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "genesis:wormhole"
+    }
+  }
+}

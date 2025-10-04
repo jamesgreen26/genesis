@@ -10,7 +10,7 @@ import java.util.Random;
 public class PlanetData {
     public final ResourceLocation dimensionID;
     public final Vector3d pos;
-    public final Vector3d rot;
+    public Vector3d rot;
     public final double size;
     public final float color;
 

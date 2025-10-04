@@ -1,0 +1,14 @@
+{
+  "block.genesis.nav_projector": "Navigation Projector",
+  "block.genesis.void_engine_interface": "Void Engine Interface",
+  "block.genesis.void_engine_frame": "Void Engine Frame",
+  "block.genesis.void_core": "Void Core",
+  "block.genesis.void_engine_viewport": "Void Engine Viewport",
+  "item.genesis.nav_projector": "Navigation Projector",
+  "item.genesis.void_engine_interface": "Void Engine Interface",
+  "item.genesis.void_engine_frame": "Void Engine Frame",
+  "item.genesis.void_core": "Void Core",
+  "item.genesis.void_engine_viewport": "Void Engine Viewport",
+  "creativetab.genesis_tab": "Genesis",
+  "subtitles.genesis.void_engine_start": "Void Engine starts"
+}

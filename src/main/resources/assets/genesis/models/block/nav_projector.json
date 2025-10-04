@@ -1,0 +1,12 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "down": "genesis:block/nav_projector_bottom",
+        "up": "genesis:block/nav_projector_top",
+        "north": "genesis:block/nav_projector_side",
+        "south": "genesis:block/nav_projector_side",
+        "east": "genesis:block/nav_projector_side",
+        "west": "genesis:block/nav_projector_side",
+        "particle": "genesis:block/nav_projector_bottom"
+    }
+} 
