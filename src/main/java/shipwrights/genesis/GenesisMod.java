@@ -104,7 +104,7 @@ public final class GenesisMod {
     }
 
     public static boolean isMiniScale(ResourceLocation dimensionLocation) {
-        return dimensionLocation.equals(SPACE_DIM);
+        return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
     }
 
     public static boolean isMiniScale(ResourceKey<Level> dimension) {

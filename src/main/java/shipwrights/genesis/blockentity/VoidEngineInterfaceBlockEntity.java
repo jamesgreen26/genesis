@@ -123,10 +123,10 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                             ServerLevel wormholeLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, GenesisMod.WORMHOLE_DIM));
                             if (wormholeLevel != null) {
                                 // Use Genesis TeleportationHandler
-                                TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, wormholeLevel, true);
+                                TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, wormholeLevel, false);
 
                                 // Teleport ship to wormhole - scale position down
-                                Vector3dc targetPos = ship.getTransform().getPositionInWorld();
+                                Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(1 / 32.0, new Vector3d());
                                 teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
                                 teleportationHandler.finalizeTeleport();
                             }
@@ -137,10 +137,10 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                         // Auto-return to saved dimension when in wormhole
                         ServerLevel returnLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, voidEngineInterface.returningDim));
                         if (returnLevel != null) {
-                            TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, returnLevel, false);
+                            TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, returnLevel, true);
 
                             // Teleport ship back - scale position up
-                            Vector3dc targetPos = ship.getTransform().getPositionInWorld();
+                            Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(32.0, new Vector3d());
                             teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
                             teleportationHandler.finalizeTeleport();
                         }

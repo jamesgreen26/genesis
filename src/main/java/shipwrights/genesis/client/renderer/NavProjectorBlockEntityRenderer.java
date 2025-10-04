@@ -64,6 +64,12 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             Quaterniondc rot = ship.getTransform().getShipToWorldRotation().invert(new Quaterniond());
             poseStack.mulPose(new Quaternionf(rot.x(), rot.y(), rot.z(), rot.w()));
             shipPos = ship.getWorldAABB().center(new Vector3d());
+            ResourceLocation currentDimension = Objects.requireNonNull(blockEntity.getLevel()).dimension().location();
+
+            if (currentDimension.toString().equals(GenesisMod.WORMHOLE_DIM.toString())) {
+                shipPos = shipPos.mul(32.0, new Vector3d());
+            }
+
             poseStack.translate((float) -shipPos.x() / scale_factor, (float) -shipPos.y() / scale_factor, (float) -shipPos.z() / scale_factor);
         }
 
