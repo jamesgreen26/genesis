@@ -20,7 +20,7 @@ public class VoidCoreBlockEntityRenderer implements BlockEntityRenderer<VoidCore
 
     @Override
     public void render(VoidCoreBlockEntity blockEntity, float partialTick, PoseStack poseStack,
-                      MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+                       MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         BlockState state = blockEntity.getBlockState();
 
         if (state.hasProperty(VoidCoreBlock.DORMANT)) {
@@ -57,7 +57,7 @@ public class VoidCoreBlockEntityRenderer implements BlockEntityRenderer<VoidCore
     }
 
     private void drawPortalFace(VertexConsumer consumer, Matrix4f matrix,
-                              float scale, float size, float normalX, float normalY, float normalZ) {
+                                float scale, float size, float normalX, float normalY, float normalZ) {
         // Rotate the face based on its normal
         PoseStack tempStack = new PoseStack();
         if (normalX != 0) {
@@ -87,7 +87,7 @@ public class VoidCoreBlockEntityRenderer implements BlockEntityRenderer<VoidCore
                     .color(0, 0, 0, 255)
                     .uv(1, 1)
                     .endVertex();
-            consumer.vertex(rotatedMatrix, size , size , x + y + z)
+            consumer.vertex(rotatedMatrix, -size, size, x + y + z)
                     .color(0, 0, 0, 255)
                     .uv(0, 1)
                     .endVertex();
@@ -114,6 +114,6 @@ public class VoidCoreBlockEntityRenderer implements BlockEntityRenderer<VoidCore
 
     @Override
     public boolean shouldRenderOffScreen(VoidCoreBlockEntity blockEntity) {
-        return true;
+        return false;
     }
 }
