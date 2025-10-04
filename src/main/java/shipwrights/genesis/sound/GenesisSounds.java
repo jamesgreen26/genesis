@@ -13,4 +13,7 @@ public class GenesisSounds {
 
     public static final RegistryObject<SoundEvent> VOID_ENGINE_START = SOUND_EVENTS.register("void_engine_start",
         () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "void_engine_start")));
+
+    public static final RegistryObject<SoundEvent> WORMHOLE_AMBIANCE = SOUND_EVENTS.register("wormhole_ambiance",
+        () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole_ambiance")));
 }

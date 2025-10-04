@@ -4,5 +4,11 @@
     "sounds": [
       "genesis:void_engine_start"
     ]
+  },
+  "wormhole_ambiance": {
+    "subtitle": "subtitles.genesis.wormhole_ambiance",
+    "sounds": [
+      "genesis:wormhole_ambiance"
+    ]
   }
 }
