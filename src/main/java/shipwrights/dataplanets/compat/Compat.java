@@ -125,7 +125,24 @@ public class Compat {
 
     public static void loadCompat(String compatmod)
     {
-        SURFACE_BLOCKS = new String[]{"minecraft:stone","minecraft:cobblestone","minecraft:end_stone","minecraft:netherrack","minecraft:blackstone","minecraft:sandstone","minecraft:red_sandstone","minecraft:basalt"};
+        SURFACE_BLOCKS = new String[]{
+                "minecraft:stone",
+                "minecraft:cobblestone",
+                "minecraft:end_stone",
+                "minecraft:netherrack",
+                "minecraft:blackstone",
+                "minecraft:sandstone",
+                "minecraft:red_sandstone",
+                "minecraft:basalt",
+                "genesis:voidstone",
+                "genesis:riftrock",
+                "genesis:nullstone",
+                "genesis:echostone",
+                "genesis:phaserock",
+                "genesis:warpstone",
+                "genesis:lunar_dust",
+                "genesis:stellar_sand"
+        };
         SPACE_BIOME = ResourceKey.create(Registries.BIOME,GenesisMod.SPACE_DIM);
         SPACE_DIMENSION_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE,GenesisMod.SPACE_DIM);
     }
