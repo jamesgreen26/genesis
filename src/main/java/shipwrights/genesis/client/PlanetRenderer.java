@@ -10,6 +10,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.planets.PlanetData;
@@ -80,22 +82,40 @@ public class PlanetRenderer {
 
         int textureScale = data.hash % 256;
 
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, data.color);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, data.color);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, data.color);
-        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, data.color);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, data.color);
-        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, data.color);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, data.color, data.pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, data.color, data.pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, data.color, data.pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, data.color, data.pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, data.color, data.pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, data.color, data.pos, data.rot);
     }
 
-    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color) {
+    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color, Vector3d planetPos, Vector3d planetRot) {
         int[] rgb = PlanetData.floatToRgb(color);
         int r = rgb[0], g = rgb[1], b = rgb[2];
 
+        Vector3d lightDir = new Vector3d(-planetPos.x, -planetPos.y, -planetPos.z).normalize();
 
-        buffer.vertex(matrix, x1, y1, z1).color(r, g, b, textureScale).uv((x1 < 0 ? 0 : 0.25f) + (y1 < 0 ? 0 : 0.5f), z1 < 0 ? 0 : 1).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(r, g, b, textureScale).uv((x2 < 0 ? 0 : 0.25f) + (y2 < 0 ? 0 : 0.5f), z2 < 0 ? 0 : 1).endVertex();
-        buffer.vertex(matrix, x3, y3, z3).color(r, g, b, textureScale).uv((x3 < 0 ? 0 : 0.25f) + (y3 < 0 ? 0 : 0.5f), z3 < 0 ? 0 : 1).endVertex();
-        buffer.vertex(matrix, x4, y4, z4).color(r, g, b, textureScale).uv((x4 < 0 ? 0 : 0.25f) + (y4 < 0 ? 0 : 0.5f), z4 < 0 ? 0 : 1).endVertex();
+        Quaternionf rotation = new Quaternionf().rotationXYZ((float) planetRot.x, (float) planetRot.y, (float) planetRot.z);
+
+        addVertexWithLighting(matrix, buffer, x1, y1, z1, r, g, b, textureScale, lightDir, rotation);
+        addVertexWithLighting(matrix, buffer, x2, y2, z2, r, g, b, textureScale, lightDir, rotation);
+        addVertexWithLighting(matrix, buffer, x3, y3, z3, r, g, b, textureScale, lightDir, rotation);
+        addVertexWithLighting(matrix, buffer, x4, y4, z4, r, g, b, textureScale, lightDir, rotation);
+    }
+
+    private static void addVertexWithLighting(Matrix4f matrix, VertexConsumer buffer, float x, float y, float z, int r, int g, int b, int textureScale, Vector3d lightDir, Quaternionf rotation) {
+        Vector3f vertexNormal = new Vector3f(x, y, z).normalize();
+
+        rotation.transform(vertexNormal);
+
+        Vector3d worldNormal = new Vector3d(vertexNormal.x, vertexNormal.y, vertexNormal.z);
+        float lighting = (float) Math.max(0.0, worldNormal.dot(lightDir));
+
+        int litR = (int) (r * lighting);
+        int litG = (int) (g * lighting);
+        int litB = (int) (b * lighting);
+
+        buffer.vertex(matrix, x, y, z).color(litR, litG, litB, textureScale).uv((x < 0 ? 0 : 0.25f) + (y < 0 ? 0 : 0.5f), z < 0 ? 0 : 1).endVertex();
     }
 }
