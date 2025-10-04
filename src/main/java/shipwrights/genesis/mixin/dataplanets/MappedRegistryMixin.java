@@ -105,7 +105,7 @@ public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
 
                 System.out.println("Last Level Name: "+ Dataplanets.LAST_WORLD_ID);
 
-                StarSystemCreator.makeSystem();
+                StarSystemCreator.makeSystem(8, 12);
             }
             DynamicSystems.loadDynamicResources();
         }

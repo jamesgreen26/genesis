@@ -18,10 +18,10 @@ import java.util.UUID;
 
 public class StarSystemCreator {
 
-    public static void makeSystem()
+    public static void makeSystem(int minPlanetCount, int maxPlanetCount)
     {
         String uuid = UUID.randomUUID().toString();
-        inventSystem(uuid);
+        inventSystem(uuid, minPlanetCount, maxPlanetCount);
     }
 
     private static String truth(boolean truth)
@@ -32,7 +32,7 @@ public class StarSystemCreator {
 
     private static final String[] CODE = new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
 
-    private static void inventSystem(String uuid)
+    private static void inventSystem(String uuid, int minPlanetCount, int maxPlanetCount)
     {
         RandomSource random = RandomSource.create();
         String systemName = CODE[random.nextInt(CODE.length)]+CODE[random.nextInt(CODE.length)]+random.nextInt(1000);
@@ -42,7 +42,7 @@ public class StarSystemCreator {
         CompoundTag systemData = new CompoundTag();
         systemData.putString("systemName",systemName);
         systemData.putInt("rocketTier",rocketTier);
-        systemData.putInt("planets",random.nextInt(0,6));
+        systemData.putInt("planets",random.nextInt(minPlanetCount, maxPlanetCount));
 
 
 

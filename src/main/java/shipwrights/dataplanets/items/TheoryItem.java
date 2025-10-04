@@ -33,7 +33,7 @@ public class TheoryItem extends Item {
             {
                 if(world.random.nextInt(MAX_LEVEL)==0)
                 {
-                    StarSystemCreator.makeSystem();
+                    StarSystemCreator.makeSystem(0, 6);
                     didPass=true;
                 }
             }
