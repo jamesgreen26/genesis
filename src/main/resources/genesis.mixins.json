@@ -15,6 +15,7 @@
     "dataplanets.WorldSelectionMixin"
   ],
   "mixins": [
+    "EntityDraggerMixin",
     "EntityMixin",
     "FallingBlockEntityAccessor",
     "FallingBlockEntityMixin",
