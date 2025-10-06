@@ -2,6 +2,7 @@ package shipwrights.genesis.mixin.dataplanets;
 
 import net.minecraft.server.MinecraftServer;
 import shipwrights.dataplanets.Dataplanets;
+import shipwrights.dataplanets.MutableTags;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -46,11 +47,11 @@ public abstract class ServerPlayerMixin extends Entity {
     @Inject(method = "equipmentHasChanged", at = @At("TAIL"))
     private void equip(ItemStack oldItem, ItemStack newItem, CallbackInfoReturnable<Boolean> cir)
     {
-        if(oldItem.is(Items.LEATHER_HELMET))
+        if(oldItem.is(MutableTags.PROVIDES_OXYGEN))
         {
             removeTag("has_oxygen");
         }
-        if(newItem.is(Items.LEATHER_HELMET))
+        if(newItem.is(MutableTags.PROVIDES_OXYGEN))
         {
             addTag("has_oxygen");
         }

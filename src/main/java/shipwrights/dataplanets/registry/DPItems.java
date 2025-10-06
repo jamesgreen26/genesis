@@ -17,6 +17,7 @@ public class DPItems {
     public static ItemEntry<TaskListItem> TASK_LIST = Reg.REGISTRATE.item("task_list",TaskListItem::new).properties((a)->a).lang("Task List").register();
     public static ItemEntry<Item> NEUM_TRACKS = Reg.REGISTRATE.item("neum_tracks",Item::new).properties((a)->a).lang("Neum Tracks").register();
     public static ItemEntry<Item> NEUM_HEAD = Reg.REGISTRATE.item("neum_head",Item::new).properties((a)->a).lang("Neum Head").register();
+    public static ItemEntry<SpaceHelmetItem> SPACE_HELMET = Reg.REGISTRATE.item("space_helmet",SpaceHelmetItem::new).properties((a)->a).lang("Space Helmet").register();
 
     public static void init() {}
 }

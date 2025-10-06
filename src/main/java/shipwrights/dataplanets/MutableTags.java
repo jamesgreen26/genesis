@@ -19,6 +19,7 @@ public class MutableTags {
     public static final TagKey<Structure> QUEST_STRUCTURES = TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath("dataplanets","quest_structures"));
     public static final TagKey<Item> QUEST_ITEMS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("dataplanets","quest_items"));
     public static final TagKey<Block> SURFACE_BLOCKS = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("dataplanets","surface_blocks"));
+    public static final TagKey<Item> PROVIDES_OXYGEN = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("dataplanets","provides_oxygen"));
 
 
     public static String[] getBlocksInTag(TagKey<Block> blockTag)
