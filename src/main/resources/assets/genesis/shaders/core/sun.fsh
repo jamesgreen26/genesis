@@ -19,7 +19,7 @@ vec3 temperatureToColor(float t) {
     t = clamp(t, 0.0, 1.0);
 
     const vec3 red    = vec3(1.0, 0.0, 0.0);
-    const vec3 orange = vec3(1.0, 0.5, 0.0);
+    const vec3 orange = vec3(1.0, 0.1, 0.0);
     const vec3 yellow = vec3(1.0, 0.8, 0.15);
     const vec3 white  = vec3(1.0, 1.0, 1.0);
 
