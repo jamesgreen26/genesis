@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisMod;
 import team.lodestar.lodestone.registry.client.LodestoneRenderTypeRegistry;
 import team.lodestar.lodestone.systems.rendering.LodestoneRenderType;
+import team.lodestar.lodestone.systems.rendering.StateShards;
 import team.lodestar.lodestone.systems.rendering.shader.ShaderHolder;
 
 import static team.lodestar.lodestone.registry.client.LodestoneShaderRegistry.registerShader;
@@ -33,9 +34,9 @@ public class ShaderRegistry {
 
     public static LodestoneRenderType getSunRenderType() {
         if (SUN_RENDER_TYPE == null) {
-            SUN_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("sun_render_type", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
+            SUN_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("sun_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
                     .setShaderState(SUN_SHADER)
-                    .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
+                    .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
