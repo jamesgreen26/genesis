@@ -18,3 +18,4 @@ Whilst this mod functions coherently as one (for the sake of integration its in 
 ### Credits & Attributions
 
 - Dimension travel code was generously provided to us by the [Starlance team](https://github.com/jcm236/Starlance/)
+- Armour template originally from [moddingtutorials.org](https://moddingtutorials.org/1.19.2/tools-armor/) [This can be removed later probably]

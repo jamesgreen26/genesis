@@ -52,6 +52,7 @@ public class Dataplanets
         DPBlocks.init();
         DPEntities.init();
 
+
         MinecraftForge.EVENT_BUS.register(this);
 
         var bus = context.getModEventBus();
@@ -70,6 +71,7 @@ public class Dataplanets
     {
         //event.registerEntityRenderer(DPEntities.NEUM.get(), NeumEntityRenderer::new);
     }
+
 
     @SubscribeEvent
     public void place(BlockEvent.EntityPlaceEvent event)

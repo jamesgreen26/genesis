@@ -3,6 +3,7 @@ package shipwrights.genesis.mixin.dataplanets;
 import net.minecraft.server.MinecraftServer;
 import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.MutableTags;
+import shipwrights.dataplanets.items.SpaceArmourItem;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -54,6 +55,25 @@ public abstract class ServerPlayerMixin extends Entity {
         if(newItem.is(MutableTags.PROVIDES_OXYGEN))
         {
             addTag("has_oxygen");
+        }
+        if(oldItem.getItem() instanceof SpaceArmourItem)
+        {
+            if(SpaceArmourItem.hasModule(oldItem,"heat"))
+            {
+                removeTag("has_heat");
+            }
+            if(SpaceArmourItem.hasModule(newItem,"heat"))
+            {
+                addTag("has_heat");
+            }
+            if(SpaceArmourItem.hasModule(oldItem,"cooling"))
+            {
+                removeTag("has_cooling");
+            }
+            if(SpaceArmourItem.hasModule(newItem,"cooling"))
+            {
+                addTag("has_cooling");
+            }
         }
     }
 
