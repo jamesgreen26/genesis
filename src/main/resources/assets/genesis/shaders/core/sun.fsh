@@ -10,16 +10,25 @@ const vec3 v_cube_center = vec3(0);
 const float cube_half_size = 720.0;
 const vec3 cube_rotationXYZ = vec3(0, 0, 0);
 const float euler = 2.718281828459;
+const float corner_roundness = 0.15; // Higher values = more rounded corners (0.0 = sharp, 0.5 = very round)
 
 float smoothNormalize(float it) {
     return -log(1/euler + pow(euler, -4 * (it + 0.11467)));
 }
 
+float smoothMax3(vec3 p, float roundness) {
+    vec3 q = abs(p);
+    float m = max(max(q.x, q.y), q.z);
+
+    return clamp(m, 0, cube_half_size);
+}
+
+
 vec3 temperatureToColor(float t) {
     t = clamp(t, 0.0, 1.0);
 
     const vec3 red    = vec3(1.0, 0.0, 0.0);
-    const vec3 orange = vec3(1.0, 0.1, 0.0);
+    const vec3 orange = vec3(1.0, 0.0, 0.0);
     const vec3 yellow = vec3(1.0, 0.8, 0.15);
     const vec3 white  = vec3(1.0, 1.0, 1.0);
 
@@ -101,25 +110,82 @@ void main() {
         thickness = 0.0;
     }
 
-    vec3 ray_midpoint = v_entry_position + ray_direction * (thickness * 0.5);
+    // Calculate minimum of distance components at intersections with 6 diagonal planes
+    float minDist = 1e10;
 
-    vec3 diff = ray_midpoint - v_cube_center;
+    // Transform ray to local cube space
+    mat3 invRot = transpose(rot);
+    vec3 localRayStart = invRot * (v_entry_position - v_cube_center);
+    vec3 localRayDir = invRot * ray_direction;
 
-    float distanceFromCenter = max(max(abs(diff.x), abs(diff.y)), abs(diff.z)) * 2.5;
+    // Check intersection with each of the 6 diagonal planes
+    float roundness_factor = 0.5;
 
-    float maxDistance = cube_half_size * 2 * 1.732;
-    float normalizedDistance = clamp(distanceFromCenter / maxDistance, 0.0, 1.0);
+    // Plane: y=x (normal: y-x=0)
+    if (abs(localRayDir.y - localRayDir.x) > 0.0001) {
+        float t = (localRayStart.x - localRayStart.y) / (localRayDir.y - localRayDir.x);
+        if (t >= 0.0 && t <= thickness) {
+            vec3 intersection = localRayStart + localRayDir * t;
+            float dist = smoothMax3(vec3(abs(intersection.x), abs(intersection.y), abs(intersection.z)), roundness_factor);
+            minDist = min(minDist, dist);
+        }
+    }
 
-    float brightness = min(1, 1 - normalizedDistance);
+    // Plane: y=-x (normal: y+x=0)
+    if (abs(localRayDir.y + localRayDir.x) > 0.0001) {
+        float t = -(localRayStart.x + localRayStart.y) / (localRayDir.y + localRayDir.x);
+        if (t >= 0.0 && t <= thickness) {
+            vec3 intersection = localRayStart + localRayDir * t;
+            float dist = smoothMax3(vec3(abs(intersection.x), abs(intersection.y), abs(intersection.z)), roundness_factor);
+            minDist = min(minDist, dist);
+        }
+    }
 
-    brightness = brightness * brightness;
+    // Plane: y=z (normal: y-z=0)
+    if (abs(localRayDir.y - localRayDir.z) > 0.0001) {
+        float t = (localRayStart.z - localRayStart.y) / (localRayDir.y - localRayDir.z);
+        if (t >= 0.0 && t <= thickness) {
+            vec3 intersection = localRayStart + localRayDir * t;
+            float dist = smoothMax3(vec3(abs(intersection.x), abs(intersection.y), abs(intersection.z)), roundness_factor);
+            minDist = min(minDist, dist);
+        }
+    }
 
-    float maxThickness = cube_half_size * 1.732;
-    float normalizedThickness = thickness / maxThickness;
+    // Plane: y=-z (normal: y+z=0)
+    if (abs(localRayDir.y + localRayDir.z) > 0.0001) {
+        float t = -(localRayStart.z + localRayStart.y) / (localRayDir.y + localRayDir.z);
+        if (t >= 0.0 && t <= thickness) {
+            vec3 intersection = localRayStart + localRayDir * t;
+            float dist = smoothMax3(vec3(abs(intersection.x), abs(intersection.y), abs(intersection.z)), roundness_factor);
+            minDist = min(minDist, dist);
+        }
+    }
 
-    float temp = mix(smoothNormalize(normalizedThickness), 1.5, smoothNormalize(brightness));
+    // Plane: x=z (normal: x-z=0)
+    if (abs(localRayDir.x - localRayDir.z) > 0.0001) {
+        float t = (localRayStart.z - localRayStart.x) / (localRayDir.x - localRayDir.z);
+        if (t >= 0.0 && t <= thickness) {
+            vec3 intersection = localRayStart + localRayDir * t;
+            float dist = smoothMax3(vec3(abs(intersection.x), abs(intersection.y), abs(intersection.z)), roundness_factor);
+            minDist = min(minDist, dist);
+        }
+    }
 
-    vec3 color = temperatureToColor(temp / 1.5);
+    // Plane: x=-z (normal: x+z=0)
+    if (abs(localRayDir.x + localRayDir.z) > 0.0001) {
+        float t = -(localRayStart.z + localRayStart.x) / (localRayDir.x + localRayDir.z);
+        if (t >= 0.0 && t <= thickness) {
+            vec3 intersection = localRayStart + localRayDir * t;
+            float dist = smoothMax3(vec3(abs(intersection.x), abs(intersection.y), abs(intersection.z)), roundness_factor);
+            minDist = min(minDist, dist);
+        }
+    }
 
-    frag_color = vec4(color, clamp(normalizedThickness * normalizedThickness * 4, 0, 1));
+    float distanceFromCenter = minDist / cube_half_size;
+
+    float brightness = 1 - distanceFromCenter;
+
+    vec3 color = temperatureToColor(pow(0.5 * sin(3.1415 * (sqrt(2 * brightness + 0.25) - 1)) + 0.5, 0.3));
+
+    frag_color = vec4(color, pow(5 * brightness, 2));
 }
