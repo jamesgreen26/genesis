@@ -61,7 +61,6 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.event.level.LevelEvent;
-import shipwrights.genesis.GenesisMod;
 
 import java.io.File;
 import java.util.*;
@@ -225,7 +224,7 @@ public class DynamicSystems {
         }
 
 
-         features = makeDelta(biomeData);
+        features = makeDelta(biomeData);
         for(ResourceKey<PlacedFeature> feature: features)
         {
             builder.addFeature(0,PLACED_FEATURES.getHolder(feature).get());
@@ -631,50 +630,13 @@ public class DynamicSystems {
         if(!LEVEL_STEMS.containsKey(resourcekey))
         {
 
-            Holder<NormalNoise.NoiseParameters> OFFSET = NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","offset")));
+            Holder<NormalNoise.NoiseParameters> offset = NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","offset")));
 
             NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
                     NoiseSettings.create(-64, 384, 2, 2),
                     BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("generalBlock"))).defaultBlockState(),
                     BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("seaBlock"))).defaultBlockState(),
-                    new NoiseRouter(
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.shiftedNoise2d(
-                                    DensityFunctions.shiftA(OFFSET),
-                                    DensityFunctions.shiftB(OFFSET),
-                                    0.25F,
-                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","temperature")))
-                                    ),
-                            DensityFunctions.shiftedNoise2d(
-                                    DensityFunctions.shiftA(OFFSET),
-                                    DensityFunctions.shiftB(OFFSET),
-                                    0.25F,
-                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","vegetation")))
-                            ),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.shiftedNoise2d(
-                                    DensityFunctions.shiftA(OFFSET),
-                                    DensityFunctions.shiftB(OFFSET),
-                                    0.25F,
-                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","erosion")))
-                            ),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.shiftedNoise2d(
-                                    DensityFunctions.shiftA(OFFSET),
-                                    DensityFunctions.shiftB(OFFSET),
-                                    0.25F,
-                                    NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","ridge")))
-                            ),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.add(
-                                    DensityFunctions.yClampedGradient(-64,320,1,-1),
-                                    DensityFunctions.noise(NOISE.getHolderOrThrow(Noises.GRAVEL),planetData.getFloat("nr1"),planetData.getFloat("nr2"))),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0),
-                            DensityFunctions.constant(0)),
+                    getNoiseRouter(offset, planetData),
                     planetarySurfaceRuleSource(planetData.getBoolean("hasOxygen")&&planetData.getBoolean("hasAtmosphere")),
                     new OverworldBiomeBuilder().spawnTarget(),
                     planetData.getInt("seaLevel"),
@@ -718,6 +680,52 @@ public class DynamicSystems {
 
         Compat.postLoadPlanet(planetData);
         return LEVEL_STEMS.get(resourcekey);
+    }
+
+    private static NoiseRouter getNoiseRouter(Holder<NormalNoise.NoiseParameters> offset, CompoundTag planetData) {
+
+
+        DensityFunction finalDensity = DensityFunctions.add(
+                DensityFunctions.yClampedGradient(-64, 320, 1, -1),
+                DensityFunctions.noise(NOISE.getHolderOrThrow(Noises.GRAVEL), planetData.getFloat("nr1"), planetData.getFloat("nr2")));
+
+        return new NoiseRouter(
+                DensityFunctions.constant(0),
+                DensityFunctions.constant(0),
+                DensityFunctions.constant(0),
+                DensityFunctions.constant(0),
+                DensityFunctions.shiftedNoise2d(
+                        DensityFunctions.shiftA(offset),
+                        DensityFunctions.shiftB(offset),
+                        0.25F,
+                        NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","temperature")))
+                ),
+                DensityFunctions.shiftedNoise2d(
+                        DensityFunctions.shiftA(offset),
+                        DensityFunctions.shiftB(offset),
+                        0.25F,
+                        NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","vegetation")))
+                ),
+                DensityFunctions.constant(0),
+                DensityFunctions.shiftedNoise2d(
+                        DensityFunctions.shiftA(offset),
+                        DensityFunctions.shiftB(offset),
+                        0.25F,
+                        NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","erosion")))
+                ),
+                DensityFunctions.constant(0),
+                DensityFunctions.shiftedNoise2d(
+                        DensityFunctions.shiftA(offset),
+                        DensityFunctions.shiftB(offset),
+                        0.25F,
+                        NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","ridge")))
+                ),
+                DensityFunctions.constant(0),
+                finalDensity,
+                DensityFunctions.constant(0),
+                DensityFunctions.constant(0),
+                DensityFunctions.constant(0)
+        );
     }
 
     public static LevelStem makeOrbit(CompoundTag planetData)
