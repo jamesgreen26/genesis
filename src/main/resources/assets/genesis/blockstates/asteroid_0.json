@@ -1,64 +1,244 @@
 {
   "variants": {
-    "variant=0,palette=0": {
-      "model": "genesis:block/asteroid_variant0_palette0"
-    },
-    "variant=0,palette=1": {
-      "model": "genesis:block/asteroid_variant0_palette1"
-    },
-    "variant=1,palette=0": {
-      "model": "genesis:block/asteroid_variant1_palette0"
-    },
-    "variant=1,palette=1": {
-      "model": "genesis:block/asteroid_variant1_palette1"
-    },
-    "variant=2,palette=0": {
-      "model": "genesis:block/asteroid_variant2_palette0"
-    },
-    "variant=2,palette=1": {
-      "model": "genesis:block/asteroid_variant2_palette1"
-    },
-    "variant=3,palette=0": {
-      "model": "genesis:block/asteroid_variant3_palette0"
-    },
-    "variant=3,palette=1": {
-      "model": "genesis:block/asteroid_variant3_palette1"
-    },
-    "variant=4,palette=0": {
-      "model": "genesis:block/asteroid_variant4_palette0"
-    },
-    "variant=4,palette=1": {
-      "model": "genesis:block/asteroid_variant4_palette1"
-    },
-    "variant=5,palette=0": {
-      "model": "genesis:block/asteroid_variant5_palette0"
-    },
-    "variant=5,palette=1": {
-      "model": "genesis:block/asteroid_variant5_palette1"
-    },
-    "variant=6,palette=0": {
-      "model": "genesis:block/asteroid_variant6_palette0"
-    },
-    "variant=6,palette=1": {
-      "model": "genesis:block/asteroid_variant6_palette1"
-    },
-    "variant=7,palette=0": {
-      "model": "genesis:block/asteroid_variant7_palette0"
-    },
-    "variant=7,palette=1": {
-      "model": "genesis:block/asteroid_variant7_palette1"
-    },
-    "variant=8,palette=0": {
-      "model": "genesis:block/asteroid_variant8_palette0"
-    },
-    "variant=8,palette=1": {
-      "model": "genesis:block/asteroid_variant8_palette1"
-    },
-    "variant=9,palette=0": {
-      "model": "genesis:block/asteroid_variant9_palette0"
-    },
-    "variant=9,palette=1": {
-      "model": "genesis:block/asteroid_variant9_palette1"
-    }
+    "variant=0,palette=0": [
+      {"model": "genesis:block/asteroid_variant0_palette0a"},
+      {"model": "genesis:block/asteroid_variant0_palette0b"}
+    ],
+    "variant=0,palette=1": [
+      {"model": "genesis:block/asteroid_variant0_palette1a"},
+      {"model": "genesis:block/asteroid_variant0_palette1b"}
+    ],
+    "variant=0,palette=2": [
+      {"model": "genesis:block/asteroid_variant0_palette2a"},
+      {"model": "genesis:block/asteroid_variant0_palette2b"}
+    ],
+    "variant=0,palette=3": [
+      {"model": "genesis:block/asteroid_variant0_palette3a"},
+      {"model": "genesis:block/asteroid_variant0_palette3b"}
+    ],
+    "variant=0,palette=4": [
+      {"model": "genesis:block/asteroid_variant0_palette4a"},
+      {"model": "genesis:block/asteroid_variant0_palette4b"}
+    ],
+    "variant=0,palette=5": [
+      {"model": "genesis:block/asteroid_variant0_palette5a"},
+      {"model": "genesis:block/asteroid_variant0_palette5b"}
+    ],
+    "variant=1,palette=0": [
+      {"model": "genesis:block/asteroid_variant1_palette0a"},
+      {"model": "genesis:block/asteroid_variant1_palette0b"}
+    ],
+    "variant=1,palette=1": [
+      {"model": "genesis:block/asteroid_variant1_palette1a"},
+      {"model": "genesis:block/asteroid_variant1_palette1b"}
+    ],
+    "variant=1,palette=2": [
+      {"model": "genesis:block/asteroid_variant1_palette2a"},
+      {"model": "genesis:block/asteroid_variant1_palette2b"}
+    ],
+    "variant=1,palette=3": [
+      {"model": "genesis:block/asteroid_variant1_palette3a"},
+      {"model": "genesis:block/asteroid_variant1_palette3b"}
+    ],
+    "variant=1,palette=4": [
+      {"model": "genesis:block/asteroid_variant1_palette4a"},
+      {"model": "genesis:block/asteroid_variant1_palette4b"}
+    ],
+    "variant=1,palette=5": [
+      {"model": "genesis:block/asteroid_variant1_palette5a"},
+      {"model": "genesis:block/asteroid_variant1_palette5b"}
+    ],
+    "variant=2,palette=0": [
+      {"model": "genesis:block/asteroid_variant2_palette0a"},
+      {"model": "genesis:block/asteroid_variant2_palette0b"}
+    ],
+    "variant=2,palette=1": [
+      {"model": "genesis:block/asteroid_variant2_palette1a"},
+      {"model": "genesis:block/asteroid_variant2_palette1b"}
+    ],
+    "variant=2,palette=2": [
+      {"model": "genesis:block/asteroid_variant2_palette2a"},
+      {"model": "genesis:block/asteroid_variant2_palette2b"}
+    ],
+    "variant=2,palette=3": [
+      {"model": "genesis:block/asteroid_variant2_palette3a"},
+      {"model": "genesis:block/asteroid_variant2_palette3b"}
+    ],
+    "variant=2,palette=4": [
+      {"model": "genesis:block/asteroid_variant2_palette4a"},
+      {"model": "genesis:block/asteroid_variant2_palette4b"}
+    ],
+    "variant=2,palette=5": [
+      {"model": "genesis:block/asteroid_variant2_palette5a"},
+      {"model": "genesis:block/asteroid_variant2_palette5b"}
+    ],
+    "variant=3,palette=0": [
+      {"model": "genesis:block/asteroid_variant3_palette0a"},
+      {"model": "genesis:block/asteroid_variant3_palette0b"}
+    ],
+    "variant=3,palette=1": [
+      {"model": "genesis:block/asteroid_variant3_palette1a"},
+      {"model": "genesis:block/asteroid_variant3_palette1b"}
+    ],
+    "variant=3,palette=2": [
+      {"model": "genesis:block/asteroid_variant3_palette2a"},
+      {"model": "genesis:block/asteroid_variant3_palette2b"}
+    ],
+    "variant=3,palette=3": [
+      {"model": "genesis:block/asteroid_variant3_palette3a"},
+      {"model": "genesis:block/asteroid_variant3_palette3b"}
+    ],
+    "variant=3,palette=4": [
+      {"model": "genesis:block/asteroid_variant3_palette4a"},
+      {"model": "genesis:block/asteroid_variant3_palette4b"}
+    ],
+    "variant=3,palette=5": [
+      {"model": "genesis:block/asteroid_variant3_palette5a"},
+      {"model": "genesis:block/asteroid_variant3_palette5b"}
+    ],
+    "variant=4,palette=0": [
+      {"model": "genesis:block/asteroid_variant4_palette0a"},
+      {"model": "genesis:block/asteroid_variant4_palette0b"}
+    ],
+    "variant=4,palette=1": [
+      {"model": "genesis:block/asteroid_variant4_palette1a"},
+      {"model": "genesis:block/asteroid_variant4_palette1b"}
+    ],
+    "variant=4,palette=2": [
+      {"model": "genesis:block/asteroid_variant4_palette2a"},
+      {"model": "genesis:block/asteroid_variant4_palette2b"}
+    ],
+    "variant=4,palette=3": [
+      {"model": "genesis:block/asteroid_variant4_palette3a"},
+      {"model": "genesis:block/asteroid_variant4_palette3b"}
+    ],
+    "variant=4,palette=4": [
+      {"model": "genesis:block/asteroid_variant4_palette4a"},
+      {"model": "genesis:block/asteroid_variant4_palette4b"}
+    ],
+    "variant=4,palette=5": [
+      {"model": "genesis:block/asteroid_variant4_palette5a"},
+      {"model": "genesis:block/asteroid_variant4_palette5b"}
+    ],
+    "variant=5,palette=0": [
+      {"model": "genesis:block/asteroid_variant5_palette0a"},
+      {"model": "genesis:block/asteroid_variant5_palette0b"}
+    ],
+    "variant=5,palette=1": [
+      {"model": "genesis:block/asteroid_variant5_palette1a"},
+      {"model": "genesis:block/asteroid_variant5_palette1b"}
+    ],
+    "variant=5,palette=2": [
+      {"model": "genesis:block/asteroid_variant5_palette2a"},
+      {"model": "genesis:block/asteroid_variant5_palette2b"}
+    ],
+    "variant=5,palette=3": [
+      {"model": "genesis:block/asteroid_variant5_palette3a"},
+      {"model": "genesis:block/asteroid_variant5_palette3b"}
+    ],
+    "variant=5,palette=4": [
+      {"model": "genesis:block/asteroid_variant5_palette4a"},
+      {"model": "genesis:block/asteroid_variant5_palette4b"}
+    ],
+    "variant=5,palette=5": [
+      {"model": "genesis:block/asteroid_variant5_palette5a"},
+      {"model": "genesis:block/asteroid_variant5_palette5b"}
+    ],
+    "variant=6,palette=0": [
+      {"model": "genesis:block/asteroid_variant6_palette0a"},
+      {"model": "genesis:block/asteroid_variant6_palette0b"}
+    ],
+    "variant=6,palette=1": [
+      {"model": "genesis:block/asteroid_variant6_palette1a"},
+      {"model": "genesis:block/asteroid_variant6_palette1b"}
+    ],
+    "variant=6,palette=2": [
+      {"model": "genesis:block/asteroid_variant6_palette2a"},
+      {"model": "genesis:block/asteroid_variant6_palette2b"}
+    ],
+    "variant=6,palette=3": [
+      {"model": "genesis:block/asteroid_variant6_palette3a"},
+      {"model": "genesis:block/asteroid_variant6_palette3b"}
+    ],
+    "variant=6,palette=4": [
+      {"model": "genesis:block/asteroid_variant6_palette4a"},
+      {"model": "genesis:block/asteroid_variant6_palette4b"}
+    ],
+    "variant=6,palette=5": [
+      {"model": "genesis:block/asteroid_variant6_palette5a"},
+      {"model": "genesis:block/asteroid_variant6_palette5b"}
+    ],
+    "variant=7,palette=0": [
+      {"model": "genesis:block/asteroid_variant7_palette0a"},
+      {"model": "genesis:block/asteroid_variant7_palette0b"}
+    ],
+    "variant=7,palette=1": [
+      {"model": "genesis:block/asteroid_variant7_palette1a"},
+      {"model": "genesis:block/asteroid_variant7_palette1b"}
+    ],
+    "variant=7,palette=2": [
+      {"model": "genesis:block/asteroid_variant7_palette2a"},
+      {"model": "genesis:block/asteroid_variant7_palette2b"}
+    ],
+    "variant=7,palette=3": [
+      {"model": "genesis:block/asteroid_variant7_palette3a"},
+      {"model": "genesis:block/asteroid_variant7_palette3b"}
+    ],
+    "variant=7,palette=4": [
+      {"model": "genesis:block/asteroid_variant7_palette4a"},
+      {"model": "genesis:block/asteroid_variant7_palette4b"}
+    ],
+    "variant=7,palette=5": [
+      {"model": "genesis:block/asteroid_variant7_palette5a"},
+      {"model": "genesis:block/asteroid_variant7_palette5b"}
+    ],
+    "variant=8,palette=0": [
+      {"model": "genesis:block/asteroid_variant8_palette0a"},
+      {"model": "genesis:block/asteroid_variant8_palette0b"}
+    ],
+    "variant=8,palette=1": [
+      {"model": "genesis:block/asteroid_variant8_palette1a"},
+      {"model": "genesis:block/asteroid_variant8_palette1b"}
+    ],
+    "variant=8,palette=2": [
+      {"model": "genesis:block/asteroid_variant8_palette2a"},
+      {"model": "genesis:block/asteroid_variant8_palette2b"}
+    ],
+    "variant=8,palette=3": [
+      {"model": "genesis:block/asteroid_variant8_palette3a"},
+      {"model": "genesis:block/asteroid_variant8_palette3b"}
+    ],
+    "variant=8,palette=4": [
+      {"model": "genesis:block/asteroid_variant8_palette4a"},
+      {"model": "genesis:block/asteroid_variant8_palette4b"}
+    ],
+    "variant=8,palette=5": [
+      {"model": "genesis:block/asteroid_variant8_palette5a"},
+      {"model": "genesis:block/asteroid_variant8_palette5b"}
+    ],
+    "variant=9,palette=0": [
+      {"model": "genesis:block/asteroid_variant9_palette0a"},
+      {"model": "genesis:block/asteroid_variant9_palette0b"}
+    ],
+    "variant=9,palette=1": [
+      {"model": "genesis:block/asteroid_variant9_palette1a"},
+      {"model": "genesis:block/asteroid_variant9_palette1b"}
+    ],
+    "variant=9,palette=2": [
+      {"model": "genesis:block/asteroid_variant9_palette2a"},
+      {"model": "genesis:block/asteroid_variant9_palette2b"}
+    ],
+    "variant=9,palette=3": [
+      {"model": "genesis:block/asteroid_variant9_palette3a"},
+      {"model": "genesis:block/asteroid_variant9_palette3b"}
+    ],
+    "variant=9,palette=4": [
+      {"model": "genesis:block/asteroid_variant9_palette4a"},
+      {"model": "genesis:block/asteroid_variant9_palette4b"}
+    ],
+    "variant=9,palette=5": [
+      {"model": "genesis:block/asteroid_variant9_palette5a"},
+      {"model": "genesis:block/asteroid_variant9_palette5b"}
+    ]
   }
 }

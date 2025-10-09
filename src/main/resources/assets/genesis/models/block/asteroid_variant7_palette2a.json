@@ -1,0 +1,6 @@
+{
+  "parent": "genesis:block/asteroid_variant7",
+  "textures": {
+    "all": "genesis:block/asteroid_palette_2a"
+  }
+}

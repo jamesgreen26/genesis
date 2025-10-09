@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public class AsteroidTextureGenerator {
 
@@ -17,13 +18,18 @@ public class AsteroidTextureGenerator {
         }
     }
 
+
+    private static final String moj_assets_path = "/Users/<user>/.gradle/caches/fabric-loom/1.20.1/forge/1.20.1-47.4.0/client-extra/assets/minecraft/textures/block/";
+    private static final String genesis_assets_path = "src/main/resources/assets/genesis/textures/block/";
+
     public static void generate() throws IOException {
         // Define rock/stone textures to use
         String[] rockTextures = {
-            "src/main/resources/assets/genesis/textures/block/echostone.png",
-            "src/main/resources/assets/genesis/textures/block/nullstone.png",
-            "src/main/resources/assets/genesis/textures/block/phaserock.png",
-            "src/main/resources/assets/genesis/textures/block/riftrock.png"
+                moj_assets_path + "tuff.png",
+                moj_assets_path + "deepslate_iron_ore.png",
+                moj_assets_path + "deepslate_copper_ore.png",
+                moj_assets_path + "deepslate.png",
+
         };
 
         generate("asteroid", 16, rockTextures);
@@ -72,7 +78,7 @@ public class AsteroidTextureGenerator {
 
         // Save the output image
         String outputFilename = String.format("%s_combined.png", baseName);
-        File outputFile = new File(outputFilename);
+        File outputFile = new File(new Random().nextInt(9999) + outputFilename);
         ImageIO.write(outputImage, "png", outputFile);
         System.out.println("Generated texture: " + outputFilename + " (" + imageSize + "x" + imageSize + " pixels)");
     }

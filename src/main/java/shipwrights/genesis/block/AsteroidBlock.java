@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3d;
+import shipwrights.genesis.GenesisBlocks;
 import shipwrights.genesis.extension.FallingBlockEntityExtension;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
 
@@ -23,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AsteroidBlock extends Block {
 
     public static final IntegerProperty VARIANT = IntegerProperty.create("variant", 0, 9);
-    public static final IntegerProperty PALETTE = IntegerProperty.create("palette", 0, 1);
+    public static final IntegerProperty PALETTE = IntegerProperty.create("palette", 0, 5);
     private static final ConcurrentHashMap<BlockPos, Damage> damageMap = new ConcurrentHashMap<>();
     private static final long DAMAGE_TIMEOUT_MS = 120_000; // 1 minute
     private static final int DESTROY_THRESHOLD = 64;
@@ -150,23 +151,48 @@ public class AsteroidBlock extends Block {
         }
     }
 
-    private static final List<List<WeightedBlockState>> PALETTE_BLOCKS = List.of(
-        // Palette 0: Stone-based
-        List.of(
-            new WeightedBlockState(Blocks.STONE.defaultBlockState(), 1),
-            new WeightedBlockState(Blocks.ANDESITE.defaultBlockState(), 1),
-            new WeightedBlockState(Blocks.GRAVEL.defaultBlockState(), 1),
-            new WeightedBlockState(Blocks.COAL_ORE.defaultBlockState(), 1)
-        ),
-        // Palette 1: Deepslate-based
-        List.of(
-            new WeightedBlockState(Blocks.SMOOTH_BASALT.defaultBlockState(), 24),
-            new WeightedBlockState(Blocks.DEEPSLATE.defaultBlockState(), 24),
-            new WeightedBlockState(Blocks.COBBLED_DEEPSLATE.defaultBlockState(), 24),
-            new WeightedBlockState(Blocks.DEEPSLATE_COAL_ORE.defaultBlockState(), 24),
-            new WeightedBlockState(Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), 4)
-        )
-    );
+    private void setupPalettes() {
+        PALETTE_BLOCKS = List.of(
+                List.of(
+                        new WeightedBlockState(Blocks.STONE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.ANDESITE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.GRAVEL.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.COAL_ORE.defaultBlockState(), 1)
+                ),
+                List.of(
+                        new WeightedBlockState(Blocks.SMOOTH_BASALT.defaultBlockState(), 1),
+                        new WeightedBlockState(GenesisBlocks.NULLSTONE.get().defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.COBBLED_DEEPSLATE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.DEEPSLATE_COAL_ORE.defaultBlockState(), 1)
+                ),
+                List.of(
+                        new WeightedBlockState(Blocks.COAL_BLOCK.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.OBSIDIAN.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.BLACKSTONE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.GILDED_BLACKSTONE.defaultBlockState(), 1)
+                ),
+                List.of(
+                        new WeightedBlockState(Blocks.PACKED_MUD.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.GRANITE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.RAW_COPPER_BLOCK.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.DRIPSTONE_BLOCK.defaultBlockState(), 1)
+                ),
+                List.of(
+                        new WeightedBlockState(GenesisBlocks.WARPSTONE.get().defaultBlockState(), 1),
+                        new WeightedBlockState(GenesisBlocks.WARPSTONE_ORE.get().defaultBlockState(), 1),
+                        new WeightedBlockState(GenesisBlocks.RIFTROCK.get().defaultBlockState(), 1),
+                        new WeightedBlockState(GenesisBlocks.ECHOSTONE.get().defaultBlockState(), 1)
+                ),
+                List.of(
+                        new WeightedBlockState(Blocks.TUFF.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.DEEPSLATE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), 1),
+                        new WeightedBlockState(Blocks.DEEPSLATE_COPPER_ORE.defaultBlockState(), 1)
+                )
+        );
+    }
+
+    private static List<List<WeightedBlockState>> PALETTE_BLOCKS = null;
 
     private static BlockState selectWeightedRandom(List<WeightedBlockState> blocks, net.minecraft.util.RandomSource random) {
         int totalWeight = blocks.stream().mapToInt(w -> w.weight).sum();
@@ -186,6 +212,10 @@ public class AsteroidBlock extends Block {
     private void spawnFallingBlocks(Level level, BlockPos pos, BlockState state) {
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
+        }
+
+        if (PALETTE_BLOCKS == null) {
+            setupPalettes();
         }
 
         int variant = state.getValue(VARIANT);
