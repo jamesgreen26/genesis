@@ -22,7 +22,7 @@ public class NeumEntity extends PathfinderMob {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new LookAtPlayerGoal(this,Player.class,1));
-        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0F));
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 0.2F));
     }
 
     @Override

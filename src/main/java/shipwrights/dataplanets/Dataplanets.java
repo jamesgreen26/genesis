@@ -1,7 +1,14 @@
 package shipwrights.dataplanets;
 
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.registry.*;
 import shipwrights.dataplanets.space.S2PSyncPacket;
@@ -19,6 +26,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file

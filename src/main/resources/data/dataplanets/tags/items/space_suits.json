@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "dataplanets:space_helmet",
+    "dataplanets:space_chestplate",
+    "dataplanets:space_leggings",
+    "dataplanets:space_boots"
+  ]
+}

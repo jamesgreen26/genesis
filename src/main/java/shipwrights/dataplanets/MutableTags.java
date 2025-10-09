@@ -24,6 +24,8 @@ public class MutableTags {
     public static final TagKey<Block> SURFACE_BLOCKS = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("dataplanets","surface_blocks"));
     public static final TagKey<Item> PROVIDES_OXYGEN = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("dataplanets","provides_oxygen"));
 
+    public static final TagKey<Item> SPACE_SUITS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("dataplanets","space_suits"));
+
 
     public static String[] getBlocksInTag(TagKey<Block> blockTag)
     {
