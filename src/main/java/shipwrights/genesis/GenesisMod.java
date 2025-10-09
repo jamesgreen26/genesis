@@ -63,8 +63,7 @@ public final class GenesisMod {
     public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, float r, float g, float b) {
         for (PlanetData planet : planets) {
             if (planet.dimensionID.equals(dimensionID)) {
-                LOGGER.warn("Failed to register planet {}, a planet with this dimension ID already exists!", dimensionID);
-                return;
+                return; //fixme
             }
         }
 
