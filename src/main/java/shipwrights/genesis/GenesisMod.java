@@ -19,8 +19,8 @@ import shipwrights.genesis.planets.PlanetData;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mod.EventBusSubscriber
 @Mod(GenesisMod.MOD_ID)
@@ -39,7 +39,7 @@ public final class GenesisMod {
     public static final double earthDist = 15_000;
     public static final double earthSize = 96;
 
-    public static final List<PlanetData> planets = new ArrayList<>();
+    public static final List<PlanetData> planets = new CopyOnWriteArrayList<>();
 
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();;

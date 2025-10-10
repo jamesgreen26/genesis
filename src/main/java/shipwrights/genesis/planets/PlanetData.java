@@ -39,8 +39,8 @@ public class PlanetData {
         double theta = rand.nextDouble() * 2 * Math.PI;   // longitude
         double phi   = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude (uniform sphere)
         double x = Math.sin(phi) * Math.cos(theta);
-        double y = Math.sin(phi) * Math.sin(theta);
-        double z = Math.cos(phi);
+        double y = Math.cos(phi);
+        double z = Math.sin(phi) * Math.sin(theta);
         return new Vector3d(x, y, z).normalize(sunDist * GenesisMod.earthDist);
     }
 
