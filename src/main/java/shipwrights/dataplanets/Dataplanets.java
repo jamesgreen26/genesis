@@ -25,6 +25,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
+import shipwrights.dataplanets.space.UpdateDimensionsPacket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +56,12 @@ public class Dataplanets
                 .encoder(S2PSyncPacket::encoder)
                 .decoder(S2PSyncPacket::decoder)
                 .consumerMainThread(S2PSyncPacket::messageConsumer)
+                .add();
+
+        DPPackets.INSTANCE.messageBuilder(UpdateDimensionsPacket.class, 1)
+                .encoder(UpdateDimensionsPacket::write)
+                .decoder(UpdateDimensionsPacket::read)
+                .consumerMainThread(UpdateDimensionsPacket::handle)
                 .add();
 
         DPItems.init();

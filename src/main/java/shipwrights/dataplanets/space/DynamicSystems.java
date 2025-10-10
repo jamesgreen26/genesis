@@ -61,6 +61,7 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.event.level.LevelEvent;
+import shipwrights.genesis.mixin.dataplanets.MinecraftServerAccessor;
 
 import java.io.File;
 import java.util.*;
@@ -757,18 +758,20 @@ public class DynamicSystems {
     {
         ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryBuild("dataplanets",name));
 
-        if(!server.levels.containsKey(dimensionKey))
+        if(!((MinecraftServerAccessor) server).getLevels().containsKey(dimensionKey))
         {
-            ChunkProgressListener listener = server.progressListenerFactory.create(server.getWorldData().getGameRules().getInt(GameRules.RULE_SPAWN_RADIUS));
+            DimensionManager.INSTANCE.queueLevelForRegistration(dimensionKey,stem);
 
-            ServerLevelData serverleveldata = server.getWorldData().overworldData();
-
-            DerivedLevelData derivedleveldata = new DerivedLevelData(server.getWorldData(), serverleveldata);
-            ServerLevel serverlevel1 = new ServerLevel(server, Util.backgroundExecutor(), server.storageSource, derivedleveldata, dimensionKey, stem, listener, server.getWorldData().isDebugWorld(), BiomeManager.obfuscateSeed(server.getWorldData().worldGenOptions().seed()), ImmutableList.of(), false, server.overworld().getRandomSequences());
-            server.overworld().getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
-
-            server.levels.put(dimensionKey, serverlevel1);
-            MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
+//            ChunkProgressListener listener = server.progressListenerFactory.create(server.getWorldData().getGameRules().getInt(GameRules.RULE_SPAWN_RADIUS));
+//
+//            ServerLevelData serverleveldata = server.getWorldData().overworldData();
+//
+//            DerivedLevelData derivedleveldata = new DerivedLevelData(server.getWorldData(), serverleveldata);
+//            ServerLevel serverlevel1 = new ServerLevel(server, Util.backgroundExecutor(), server.storageSource, derivedleveldata, dimensionKey, stem, listener, server.getWorldData().isDebugWorld(), BiomeManager.obfuscateSeed(server.getWorldData().worldGenOptions().seed()), ImmutableList.of(), false, server.overworld().getRandomSequences());
+//            server.overworld().getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
+//
+//            server.levels.put(dimensionKey, serverlevel1);
+//            MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
             Compat.postLoadWorld();
 
 
