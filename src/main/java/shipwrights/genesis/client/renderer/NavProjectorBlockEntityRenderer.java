@@ -26,7 +26,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
     static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , 15, 0, 1, 1, 1);
 
     static {
-        sunData.rot = new Vector3d(15, 45, 5);
+        sunData.rot = new Vector3d(0, 0, 0);
     }
 
     @Override
