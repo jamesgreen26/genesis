@@ -50,7 +50,7 @@ public class AtmosphericCollision {
 		}
 
 		final ResourceKey<Level> dimension = level.dimension();
-		final Vec3 planetPos = new Vec3(planet.pos.x, planet.pos.y, planet.pos.z);
+		final Vector3dc planetPos = planet.getCurrentPos(level.getGameTime());
 		final double atmoHeight = GenesisMod.atmosphereExitHeight;
 
 		final TeleportationHandler teleportHandler = TELEPORT_HANDLER;
@@ -75,7 +75,7 @@ public class AtmosphericCollision {
 			final Vector3d targetPos = new Vector3d(0, planet.size / 2 + 120, 0);
 			final Quaterniond rotation = PlanetUtil.getPlanetRotation(planet);
 			rotation.transform(targetPos);
-			targetPos.add(planetPos.x, planetPos.y, planetPos.z);
+			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
 
 			MinecraftForge.EVENT_BUS.post(new PreTravelEvent.PlanetToSpace(dimension, shipPos, targetDimension, targetPos, rotation));
 

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,9 +32,12 @@ public class PlanetRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || !GenesisMod.isSpaceDimension(minecraft.level)) {
+        Level level = minecraft.level;
+        if (level == null || !GenesisMod.isSpaceDimension(level)) {
             return;
         }
+
+        long ticks = level.getGameTime();
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
@@ -47,7 +51,7 @@ public class PlanetRenderer {
         VertexConsumer planetBuffer = bufferSource.getBuffer(getPlanetRenderType());
 
         for (var planet: GenesisMod.planets) {
-            renderPlanet(event, planet, planetBuffer);
+            renderPlanet(event, planet, planetBuffer, ticks);
         }
 
         bufferSource.endBatch(getPlanetRenderType());
@@ -62,7 +66,7 @@ public class PlanetRenderer {
         RenderSystem.enableCull();
     }
 
-    private static void renderPlanet(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer) {
+    private static void renderPlanet(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
         PoseStack poseStack = event.getPoseStack();
 
         Matrix4f matrix;
@@ -71,10 +75,12 @@ public class PlanetRenderer {
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
+        
+        Vector3d pos = data.getCurrentPos(ticks, event.getPartialTick());
 
-        matrix.translate((float) (data.pos.x -event.getCamera().getPosition().x),
-                (float) (data.pos.y -event.getCamera().getPosition().y),
-                (float) (data.pos.z -event.getCamera().getPosition().z));
+        matrix.translate((float) (pos.x -event.getCamera().getPosition().x),
+                (float) (pos.y -event.getCamera().getPosition().y),
+                (float) (pos.z -event.getCamera().getPosition().z));
 
         matrix.rotate(new Quaternionf().rotationXYZ((float) data.rot.x, (float) data.rot.y, (float) data.rot.z));
 
@@ -82,12 +88,12 @@ public class PlanetRenderer {
 
         int textureScale = data.hash % 256;
 
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, data.color, data.pos, data.rot);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, data.color, data.pos, data.rot);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, data.color, data.pos, data.rot);
-        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, data.color, data.pos, data.rot);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, data.color, data.pos, data.rot);
-        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, data.color, data.pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, data.color, pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, data.color, pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, data.color, pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, data.color, pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, data.color, pos, data.rot);
+        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, data.color, pos, data.rot);
     }
 
     private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color, Vector3d planetPos, Vector3d planetRot) {

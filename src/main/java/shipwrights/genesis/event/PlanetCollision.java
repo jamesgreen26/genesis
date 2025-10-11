@@ -9,6 +9,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.joml.primitives.AABBdc;
 import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
@@ -61,7 +62,7 @@ public class PlanetCollision {
 			final Vec3 shipCenter = VectorConversionsMCKt.toMinecraft(ship.getWorldAABB().center(new Vector3d()));
 
 			// Find nearest planet
-			final PlanetUtil.PlanetWithDistance nearestPlanetData = PlanetUtil.getNearestPlanet(shipCenter).orElse(null);
+			final PlanetUtil.PlanetWithDistance nearestPlanetData = PlanetUtil.getNearestPlanet(shipCenter, level.getGameTime()).orElse(null);
 			if (nearestPlanetData == null) {
 				continue;
 			}
@@ -121,11 +122,13 @@ public class PlanetCollision {
 				SectionPos.sectionToBlockCoord(landingChunkPos.z)
 			);
 
+			final Vector3dc planetPos = planet.getCurrentPos(level.getGameTime());
+
 			// Calculate rotation based on planet position
 			final Vector3d directionToPlanet = new Vector3d(
-				shipCenter.x - planet.pos.x,
-				shipCenter.y - planet.pos.y,
-				shipCenter.z - planet.pos.z
+				shipCenter.x - planetPos.x(),
+				shipCenter.y - planetPos.y(),
+				shipCenter.z - planetPos.z()
 			).normalize();
 			final Quaterniond rotation = new Quaterniond().rotateTo(new Vector3d(0, 1, 0), directionToPlanet);
 			final Quaterniond planetRotation = PlanetUtil.getPlanetRotation(planet);

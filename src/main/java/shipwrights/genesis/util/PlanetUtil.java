@@ -50,10 +50,10 @@ public class PlanetUtil {
     /**
      * Get the nearest planet to a position in space
      */
-    public static Optional<PlanetWithDistance> getNearestPlanet(Vec3 position) {
+    public static Optional<PlanetWithDistance> getNearestPlanet(Vec3 position, long ticks) {
         return GenesisMod.planets.stream()
             .map(planet -> {
-                Vector3d planetPos = planet.pos;
+                Vector3d planetPos = planet.getCurrentPos(ticks);
                 double distance = Math.sqrt(
                     Math.pow(position.x - planetPos.x, 2) +
                     Math.pow(position.y - planetPos.y, 2) +

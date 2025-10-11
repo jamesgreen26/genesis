@@ -2,6 +2,7 @@ package shipwrights.genesis.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.blockentity.NavProjectorBlockEntity;
 import shipwrights.genesis.planets.PlanetData;
@@ -35,12 +36,20 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
 
+        Level level = blockEntity.getLevel();
+
+        if (level == null) {
+            return;
+        }
+
+        long ticks = level.getGameTime();
+
         // Move to center of block
         poseStack.translate(0.5D, 1.5D, 0.5D);
         poseStack.scale(0.02f, 0.02f, 0.02f);
         BlockPos pos = blockEntity.getBlockPos();
 
-        Ship ship = VSGameUtilsKt.getShipManagingPos(blockEntity.getLevel(), pos);
+        Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
         boolean isOnShip = ship != null;
 
         Vector3dc shipPos = null;
@@ -75,17 +84,17 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         // Render planets from Genesis planet registry
         for (PlanetData planet : GenesisMod.planets) {
-            renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, planet, isOnShip, shipPos, pos, scale_factor, blockRenderer);
+            renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, planet, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick);
         }
 
-        renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, sunData, isOnShip, shipPos, pos, scale_factor, blockRenderer);
+        renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, sunData, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick);
 
 
         poseStack.popPose();
     }
 
-    private static void renderPlanetProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, PlanetData planet, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer) {
-        Vector3d planetPos = new Vector3d(planet.pos);
+    private static void renderPlanetProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, PlanetData planet, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick) {
+        Vector3d planetPos = planet.getCurrentPos(ticks, partialTick);
 
         if (isOnShip) {
             if (planetPos.sub(new Vector3d(shipPos), new Vector3d()).length() > 120000) return;
@@ -96,7 +105,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         float scale = (float) (2 * Math.sqrt(planet.size) / Math.sqrt(scale_factor));
         if (scale > 0) {
-            poseStack.translate(planet.pos.x / scale_factor, planet.pos.y / scale_factor, planet.pos.z / scale_factor);
+            poseStack.translate(planetPos.x / scale_factor, planetPos.y / scale_factor, planetPos.z / scale_factor);
             poseStack.scale(scale, scale, scale);
 
             Quaternionf rot = new Quaternionf().rotateXYZ((float) planet.rot.x, (float) planet.rot.y, (float) planet.rot.z);
@@ -104,7 +113,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
             poseStack.translate(-0.5D, -0.5D, -0.5D);
 
-            if (planet.pos.lengthSquared() == 0) {
+            if (planetPos.lengthSquared() == 0) {
                 blockRenderer.renderSingleBlock(Blocks.WHITE_STAINED_GLASS.defaultBlockState(),
                         poseStack,
                         bufferSource,
@@ -124,7 +133,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
             poseStack.mulPose(rot.invert());
             poseStack.scale(1 / scale, 1 / scale, 1 / scale);
-            poseStack.translate(-planet.pos.x / scale_factor, -planet.pos.y / scale_factor, -planet.pos.z / scale_factor);
+            poseStack.translate(-planetPos.x / scale_factor, -planetPos.y / scale_factor, -planetPos.z / scale_factor);
         }
     }
 
