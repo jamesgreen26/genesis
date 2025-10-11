@@ -8,24 +8,26 @@ import java.util.Random;
 public class PlanetData {
     public final ResourceLocation dimensionID;
     public final double sunDist;
-    private final double theta;
-    private final double phi;
-    public Vector3d rot;
+    private final double orbitalTheta;
+    private final double orbitalPhi;
     public final int orbitalPeriod = 256 * 24000;
+    public Vector3d rotation;
     public final double size;
+    public final int yearLength;
     public final float color;
 
     public final int hash;
 
-    public PlanetData(ResourceLocation dimensionID, double size, double sunDist, float r, float g, float b) {
+    public PlanetData(ResourceLocation dimensionID, double size, double sunDist, int yearLength, float r, float g, float b) {
 
         int hash = dimensionID.toString().hashCode();
         Random rand = new Random(hash);
 
         this.dimensionID = dimensionID;
         this.sunDist = sunDist;
-        this.rot = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
+        this.rotation = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
         this.size = size * GenesisMod.earthSize;
+        this.yearLength = yearLength;
         this.color = rgbToFloat(r, g, b);
         this.hash = dimensionID.hashCode();
 
@@ -33,15 +35,15 @@ public class PlanetData {
             rand.nextDouble();
         }
 
-        this.theta = rand.nextDouble() * 2 * Math.PI;   // longitude
-        this.phi   = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
+        this.orbitalTheta = rand.nextDouble() * 2 * Math.PI;   // longitude
+        this.orbitalPhi   = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
     }
 
     public Vector3d getCurrentPos(long ticks, float subticks) {
         Vector3d out = new Vector3d(1, 0, 0);
         out = out.rotateY(Math.PI * 2 * (ticks + subticks) / orbitalPeriod);
-        out = out.rotateY(theta);
-        out = out.rotateX(phi + Math.PI / 2);
+        out = out.rotateY(orbitalTheta);
+        out = out.rotateX(orbitalPhi + Math.PI / 2);
         return out.normalize(sunDist * GenesisMod.earthDist);
     }
 

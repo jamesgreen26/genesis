@@ -23,10 +23,10 @@ import java.util.Objects;
 public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavProjectorBlockEntity> {
     public NavProjectorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
-    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , 15, 0, 1, 1, 1);
+    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , 15, 0, 0, 1, 1, 1);
 
     static {
-        sunData.rot = new Vector3d(0, 0, 0);
+        sunData.rotation = new Vector3d(0, 0, 0);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate(planetPos.x / scale_factor, planetPos.y / scale_factor, planetPos.z / scale_factor);
             poseStack.scale(scale, scale, scale);
 
-            Quaternionf rot = new Quaternionf().rotateXYZ((float) planet.rot.x, (float) planet.rot.y, (float) planet.rot.z);
+            Quaternionf rot = new Quaternionf().rotateXYZ((float) planet.rotation.x, (float) planet.rotation.y, (float) planet.rotation.z);
             poseStack.mulPose(rot);
 
             poseStack.translate(-0.5D, -0.5D, -0.5D);
