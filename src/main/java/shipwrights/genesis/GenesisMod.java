@@ -78,12 +78,16 @@ public final class GenesisMod {
     public static void refreshEntityScaling(Entity entity, Level level) {
         try {
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
+            ScaleData explosionScaleData = ScaleTypes.EXPLOSIONS.getScaleData(entity);
             scaleData.setPersistence(true);
+            explosionScaleData.setPersistence(true);
             if (isMiniScale(level)) {
                 scaleData.setScale(1 / 16f);
+                explosionScaleData.setScale(16f);
                 entity.setNoGravity(true);
             } else {
                 scaleData.setScale(1f);
+                explosionScaleData.setScale(1f);
                 entity.setNoGravity(false);
             }
         } catch (Exception ignored) { /* not really sure what causes this, but I don't think it's critical */ }
