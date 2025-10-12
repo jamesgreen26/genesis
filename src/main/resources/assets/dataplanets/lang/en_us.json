@@ -11,6 +11,7 @@
   "item.dataplanets.space_boots": "Space Boots",
   "block.dataplanets.observatory": "Visible Light Observatory",
   "block.dataplanets.radio_telescope": "Radio Telescope",
+  "block.dataplanets.suit_table": "Space Suit Modification Table",
   "block.dataplanets.research_computer": "Research Computer",
   "dataplanets.observatory_recipe_type": "Visible Theory Discovery",
   "dataplanets.radio_recipe_type": "Radio Theory Discovery"

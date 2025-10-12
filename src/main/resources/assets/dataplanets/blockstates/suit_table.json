@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "dataplanets:block/suit_table",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "dataplanets:block/suit_table"
+    },
+    "facing=south": {
+      "model": "dataplanets:block/suit_table",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "dataplanets:block/suit_table",
+      "y": 270
+    }
+  }
+}

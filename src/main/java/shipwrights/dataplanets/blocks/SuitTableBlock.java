@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,6 +30,11 @@ public class SuitTableBlock extends BaseEntityBlock {
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos arg, BlockState arg2) {
         return new SuitTableBE(DPBlocks.SUIT_TABLE_BE.get(),arg,arg2);
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState arg) {
+        return RenderShape.MODEL;
     }
 
     @Override
