@@ -75,22 +75,6 @@ public final class GenesisMod {
         }
     }
 
-    @SubscribeEvent
-    public static void modifyFov(ViewportEvent.ComputeFov event) {
-        AbstractClientPlayer player = Minecraft.getInstance().player;
-        if (
-            player != null &&
-            isSpaceDimension(player.level()) &&
-            !Minecraft.getInstance().options.getCameraType().isFirstPerson() &&
-            player.isPassenger()
-        ) {
-            Entity vehicle = player.getVehicle();
-            if (vehicle != null && VSEntityManager.INSTANCE.getHandler(vehicle) == DefaultShipyardEntityHandler.INSTANCE) {
-                event.setFOV(event.getFOV() * 0.25);
-            }
-        }
-    }
-
     public static void refreshEntityScaling(Entity entity, Level level) {
         ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
         scaleData.setPersistence(true);

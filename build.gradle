@@ -44,6 +44,10 @@ repositories {
 
     maven { url = "https://maven.ithundxr.dev/mirror" }
 
+    maven { url = "https://maven.bawnorton.com/releases" }
+
+    maven { url = "https://maven.enjarai.dev/mirrors" }
+
     mavenCentral()
 }
 
@@ -56,6 +60,9 @@ dependencies {
 
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0"))
     implementation("io.github.llamalad7:mixinextras-forge:0.5.0")
+
+    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.6-beta.1"))
+    implementation(include("com.github.bawnorton.mixinsquared:mixinsquared-forge:0.3.6-beta.1"))
 
     compileOnly ("org.valkyrienskies.core:api:$vs_core_version") { transitive = false }
     compileOnly ("org.valkyrienskies.core:api-game:$vs_core_version") { transitive = false }
