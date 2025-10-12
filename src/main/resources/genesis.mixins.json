@@ -11,6 +11,7 @@
     "HugeExplosionSeedParticleMixin",
     "ParticleEngineMixin",
     "ParticleMixin",
+    "SoundMixin",
     "dataplanets.ClientLanguageMixin",
     "dataplanets.LevelRendererMixin",
     "dataplanets.WorldSelectionMixin"
