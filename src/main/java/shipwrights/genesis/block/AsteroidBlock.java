@@ -1,9 +1,11 @@
 package shipwrights.genesis.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -119,6 +121,11 @@ public class AsteroidBlock extends Block {
             spawnFallingBlocks(level, pos, state);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
+    public boolean isFlammable(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        return false;
     }
 
     private static Vector3d rotatePoint(double x, double y, double z, Vector3d eulerAngles) {
