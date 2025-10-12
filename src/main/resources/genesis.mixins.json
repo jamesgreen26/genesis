@@ -24,6 +24,7 @@
     "LivingEntityMixin",
     "ServerLevelMixin",
     "ServerShipObjectWorldAccessor",
+    "VSExplosionForceMixin",
     "VSMountedCameraMixin",
     "dataplanets.MappedRegistryMixin",
     "dataplanets.MinecraftServerAccessor",
