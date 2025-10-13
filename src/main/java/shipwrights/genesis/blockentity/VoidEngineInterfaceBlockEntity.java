@@ -1,5 +1,7 @@
 package shipwrights.genesis.blockentity;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import org.joml.Quaterniond;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
@@ -110,12 +112,13 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                             GenesisMod.LOGGER.info("Current dimension id: {}", level.dimension().location());
                             if (!level.dimension().location().equals(GenesisMod.WORMHOLE_DIM)) {
                                 level.playSound(null, worldPos.x, worldPos.y, worldPos.z, GenesisSounds.VOID_ENGINE_START.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
+                                //Minecraft.getInstance().getSoundManager().stop();
                             }
                         }
                         voidEngineInterface.chargeUpTicks++;
 
                         // Check if we should teleport to wormhole dimension
-                        if (voidEngineInterface.chargeUpTicks == 100 && !level.dimension().location().equals(GenesisMod.WORMHOLE_DIM) && level.getServer() != null) {
+                        if (voidEngineInterface.chargeUpTicks == 128 && !level.dimension().location().equals(GenesisMod.WORMHOLE_DIM) && level.getServer() != null) {
                             // Save current dimension for return
                             voidEngineInterface.returningDim = level.dimension().location();
 
@@ -148,8 +151,16 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                 }
             }
             if (voidEngineInterface.active) {
-                voidEngineInterface.active = false;
-                voidEngineInterface.chargeUpTicks = 0;
+                if (voidEngineInterface.chargeUpTicks > 0) {
+                    voidEngineInterface.chargeUpTicks -= 2;
+                }
+                if (voidEngineInterface.chargeUpTicks <= 0) {
+                    voidEngineInterface.active = false;
+                    voidEngineInterface.chargeUpTicks = -128;
+                }
+            }
+            if (voidEngineInterface.chargeUpTicks < 0) {
+                voidEngineInterface.chargeUpTicks++;
             }
         }
     }
