@@ -1,13 +1,16 @@
 package shipwrights.genesis.planets;
 
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
+
 import java.util.Random;
 
 public class PlanetData {
+    @Nullable public final PlanetData parent;
     public final ResourceLocation dimensionID;
-    public final double sunDist;
+    public final double orbitRadius;
     private final double orbitalTheta;
     private final double orbitalPhi;
     public final int orbitalPeriod = 256 * 24000;
@@ -18,13 +21,14 @@ public class PlanetData {
 
     public final int hash;
 
-    public PlanetData(ResourceLocation dimensionID, double size, double sunDist, int yearLength, float r, float g, float b) {
+    public PlanetData(ResourceLocation dimensionID, @Nullable PlanetData parent, double size, double orbitRadius, int yearLength, float r, float g, float b) {
 
         int hash = dimensionID.toString().hashCode();
         Random rand = new Random(hash);
 
+        this.parent = parent;
         this.dimensionID = dimensionID;
-        this.sunDist = sunDist;
+        this.orbitRadius = orbitRadius;
         this.rotation = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
         this.size = size * GenesisMod.earthSize;
         this.yearLength = yearLength;
@@ -44,7 +48,11 @@ public class PlanetData {
         out = out.rotateY(Math.PI * 2 * (ticks + subticks) / orbitalPeriod);
         out = out.rotateY(orbitalTheta);
         out = out.rotateX(orbitalPhi + Math.PI / 2);
-        return out.normalize(sunDist * GenesisMod.earthDist);
+        out.normalize(orbitRadius * GenesisMod.earthDist);
+        if (parent != null) {
+            out.add(parent.getCurrentPos(ticks, subticks));
+        }
+        return out;
     }
 
     public Vector3d getCurrentPos(long ticks) {

@@ -11,6 +11,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
@@ -41,6 +42,7 @@ public final class GenesisMod {
     public static final int earthYear = 4608000;
 
     public static final List<PlanetData> planets = new CopyOnWriteArrayList<>();
+    private static final List<QueuedMoon> moonQueue = new CopyOnWriteArrayList<>();
 
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();;
@@ -57,15 +59,42 @@ public final class GenesisMod {
     public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, int yearLengthTicks, float r, float g, float b) {
         for (PlanetData planet : planets) {
             if (planet.dimensionID.equals(dimensionID)) {
-                return; //fixme
+                return;
             }
         }
 
         if (sunDist * earthDist > 2048) {
-            planets.add(new PlanetData(dimensionID, size, sunDist, yearLengthTicks, r, g, b));
+            planets.add(new PlanetData(dimensionID, null, size, sunDist, yearLengthTicks, r, g, b));
         } else {
             LOGGER.warn("Failed to register planet {}, it is too close to the sun!", dimensionID);
         }
+    }
+
+    public static void registerMoon(ResourceLocation dimensionID, ResourceLocation orbitingDimensionID, double size, double orbitRadius, double yearLength, float r, float g, float b) {
+        moonQueue.add(new QueuedMoon(dimensionID, orbitingDimensionID, size, orbitRadius, yearLength, r, g, b));
+    }
+
+    @ApiStatus.Internal
+    public static void finalizeMoons() {
+        for (var moon : moonQueue) {
+            PlanetData parent = null;
+
+            for (PlanetData planet : planets) {
+                if (planet.dimensionID.equals(moon.dimensionID)) {
+                    return;
+                } else if (planet.dimensionID.equals(moon.orbitingDimensionID)) {
+                    parent = planet;
+                }
+            }
+
+            if (parent != null) {
+                planets.add(new PlanetData(moon.dimensionID, parent, moon.size, moon.orbitRadius, (int)(moon.yearLength * earthYear), moon.r, moon.g, moon.b));
+            } else {
+                LOGGER.warn("Failed to register moon {}, its parent planet is missing!", moon.dimensionID);
+            }
+        }
+
+        moonQueue.clear();
     }
 
     /// @param size relative to earth
@@ -128,4 +157,15 @@ public final class GenesisMod {
     public static boolean isSpaceDimension(Level level) {
         return isSpaceDimension(level.dimension().location());
     }
+
+    private record QueuedMoon(
+            ResourceLocation dimensionID,
+            ResourceLocation orbitingDimensionID,
+            double size,
+            double orbitRadius,
+            double yearLength,
+            float r,
+            float g,
+            float b
+    ) {}
 }

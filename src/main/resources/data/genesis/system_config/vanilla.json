@@ -3,7 +3,7 @@
     {
       "dimensionID": "minecraft:overworld",
       "size": 1.0,
-      "sunDist": 1.0,
+      "orbitRadius": 1.0,
       "yearLength": 1.0,
       "gravity": 1.0,
       "r": 0.0,

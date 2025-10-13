@@ -54,7 +54,7 @@ public class DataListener {
                             GenesisMod.registerPlanet(
                                 planet.getDimensionID(),
                                     planet.size(),
-                                    planet.sunDist(),
+                                    planet.orbitRadius(),
                                     planet.yearLength(),
                                     planet.r(),
                                     planet.g(),
@@ -64,11 +64,29 @@ public class DataListener {
                             DimensionSettingsManager.INSTANCE.addSettings(planet.getDimensionID(), new DimensionSettings(1.0, planet.gravity(), true));
                             GenesisMod.LOGGER.info("Registered planet from data: {}", planet.dimensionID());
                         }
+
+                        for (SystemConfigModel.MoonJsonModel moon : config.moons()) {
+                            GenesisMod.registerMoon(
+                                    moon.getDimensionID(),
+                                    moon.getParentDimensionID(),
+                                    moon.size(),
+                                    moon.orbitRadius(),
+                                    moon.yearLength(),
+                                    moon.r(),
+                                    moon.g(),
+                                    moon.b()
+                            );
+
+                            DimensionSettingsManager.INSTANCE.addSettings(moon.getDimensionID(), new DimensionSettings(1.0, moon.gravity(), true));
+                            GenesisMod.LOGGER.info("Registered moon from data: {}", moon.dimensionID());
+                        }
                     }
                 } catch (Exception e) {
                     GenesisMod.LOGGER.error("Failed to load system_config data from: {}", location, e);
                 }
             }
+
+            GenesisMod.finalizeMoons();
         }
     }
 }
