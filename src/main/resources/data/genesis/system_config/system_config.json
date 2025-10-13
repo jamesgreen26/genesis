@@ -1,0 +1,13 @@
+{
+  "planets": [
+    {
+      "dimensionID": "minecraft:overworld",
+      "size": 1.0,
+      "sunDist": 1.0,
+      "yearLength": 1.0,
+      "r": 0.0,
+      "g": 0.5,
+      "b": 0.8
+    }
+  ]
+}

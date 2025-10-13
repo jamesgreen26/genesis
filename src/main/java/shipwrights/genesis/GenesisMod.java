@@ -50,18 +50,11 @@ public final class GenesisMod {
         shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
         shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
         shipwrights.genesis.item.GenesisCreativeTabs.register(eventBus);
-
-        registerPlanet(ResourceLocation.parse("minecraft:overworld"), 1.0, 1.0, earthYear, 0, 0.5f, 0.8f);
-
-        for (var planet: planets) {
-            LOGGER.warn(planet.toString());
-        }
-
     }
 
     /// @param size relative to earth
     /// @param sunDist relative to earth
-    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, int yearLength, float r, float g, float b) {
+    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, int yearLengthTicks, float r, float g, float b) {
         for (PlanetData planet : planets) {
             if (planet.dimensionID.equals(dimensionID)) {
                 return; //fixme
@@ -69,10 +62,17 @@ public final class GenesisMod {
         }
 
         if (sunDist * earthDist > 2048) {
-            planets.add(new PlanetData(dimensionID, size, sunDist, yearLength, r, g, b));
+            planets.add(new PlanetData(dimensionID, size, sunDist, yearLengthTicks, r, g, b));
         } else {
             LOGGER.warn("Failed to register planet {}, it is too close to the sun!", dimensionID);
         }
+    }
+
+    /// @param size relative to earth
+    /// @param sunDist relative to earth
+    /// @param yearLength relative to earth
+    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, double yearLength, float r, float g, float b) {
+        registerPlanet(dimensionID, size, sunDist, (int)(yearLength * earthYear), r, g, b);
     }
 
     public static void refreshEntityScaling(Entity entity, Level level) {
