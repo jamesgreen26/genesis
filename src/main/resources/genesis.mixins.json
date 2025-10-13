@@ -12,6 +12,7 @@
     "ParticleEngineMixin",
     "ParticleMixin",
     "SoundMixin",
+    "VSClientLevelBiomeMixin",
     "dataplanets.ClientLanguageMixin",
     "dataplanets.LevelRendererMixin",
     "dataplanets.WorldSelectionMixin"
