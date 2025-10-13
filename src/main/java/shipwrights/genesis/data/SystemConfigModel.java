@@ -3,9 +3,15 @@ package shipwrights.genesis.data;
 
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Collections;
 import java.util.List;
 
 public record SystemConfigModel(List<PlanetJsonModel> planets, List<MoonJsonModel> moons) {
+
+    public SystemConfigModel {
+        planets = planets != null ? planets : Collections.emptyList();
+        moons = moons != null ? moons : Collections.emptyList();
+    }
 
     public record PlanetJsonModel(String dimensionID, double size, double orbitRadius, double yearLength, double gravity, float r, float g, float b) {
         public ResourceLocation getDimensionID() {

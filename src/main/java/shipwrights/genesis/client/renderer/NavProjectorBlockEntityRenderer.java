@@ -23,7 +23,7 @@ import java.util.Objects;
 public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavProjectorBlockEntity> {
     public NavProjectorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
-    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , 15, 0, 0, 1, 1, 1);
+    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , null, 15, 0, 0, 1, 1, 1);
 
     static {
         sunData.rotation = new Vector3d(0, 0, 0);
