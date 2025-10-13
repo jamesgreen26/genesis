@@ -2,6 +2,8 @@ package shipwrights.genesis.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import g_mungus.vlib.data.DimensionSettings;
+import g_mungus.vlib.dimension.DimensionSettingsManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -58,6 +60,8 @@ public class DataListener {
                                     planet.g(),
                                     planet.b()
                             );
+
+                            DimensionSettingsManager.INSTANCE.addSettings(planet.getDimensionID(), new DimensionSettings(1.0, planet.gravity(), true));
                             GenesisMod.LOGGER.info("Registered planet from data: {}", planet.dimensionID());
                         }
                     }
