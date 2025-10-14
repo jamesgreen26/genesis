@@ -18,5 +18,5 @@ void main() {
     float normalizedDist = dist / 0.5;
 
     vec4 color = vertexColor * ColorModulator;
-    fragColor = vec4(color.rgb, 1 - pow(normalizedDist, 0.5));
+    fragColor = vec4(color.rgb, 1 - pow(normalizedDist, 0.125));
 }
