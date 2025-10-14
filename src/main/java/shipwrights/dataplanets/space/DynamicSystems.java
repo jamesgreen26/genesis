@@ -90,6 +90,7 @@ public class DynamicSystems {
     {
         //TODO: 20 is a somewhat arbitrary number, check this works on a big modpack
         //I would have thought this would have more problems on a smaller modpack actually...
+        //Could you replace 20 with the number of mods that are currently loaded?
         if(DynamicSystems.allRegistriesFrozen() && frozeTimes>30)
         {
             File storage = new File("./dataplanets_dynamic_data.dat");

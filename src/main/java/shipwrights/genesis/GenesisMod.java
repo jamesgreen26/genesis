@@ -1,21 +1,19 @@
 package shipwrights.genesis;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
-import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
+import shipwrights.genesis.networking.GenesisNetworking;
+import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
+import shipwrights.genesis.networking.VoidEngineSoundPacket;
+import shipwrights.genesis.networking.WormholeTravelSoundPacket;
 import shipwrights.genesis.planets.PlanetData;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -45,7 +43,25 @@ public final class GenesisMod {
     private static final List<QueuedMoon> moonQueue = new CopyOnWriteArrayList<>();
 
     public GenesisMod(FMLJavaModLoadingContext context) {
-        IEventBus eventBus = context.getModEventBus();;
+        IEventBus eventBus = context.getModEventBus();
+
+        GenesisNetworking.INSTANCE.messageBuilder(WormholeTravelSoundPacket.class, 1)
+                .encoder(WormholeTravelSoundPacket::encode)
+                .decoder(WormholeTravelSoundPacket::decode)
+                .consumerMainThread(WormholeTravelSoundPacket::handle)
+                .add();
+
+        GenesisNetworking.INSTANCE.messageBuilder(VoidEngineSoundPacket.class, 1)
+                .encoder(VoidEngineSoundPacket::encode)
+                .decoder(VoidEngineSoundPacket::decode)
+                .consumerMainThread(VoidEngineSoundPacket::handle)
+                .add();
+
+        GenesisNetworking.INSTANCE.messageBuilder(StopVoidEngineStartSoundPacket.class, 1)
+                .encoder(StopVoidEngineStartSoundPacket::encode)
+                .decoder(StopVoidEngineStartSoundPacket::decode)
+                .consumerMainThread(StopVoidEngineStartSoundPacket::handle)
+                .add();
 
         GenesisBlocks.BLOCKS.register(eventBus);
         shipwrights.genesis.blockentity.GenesisBlockEntities.BLOCK_ENTITIES.register(eventBus);

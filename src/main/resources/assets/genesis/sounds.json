@@ -5,6 +5,18 @@
       "genesis:void_engine_start"
     ]
   },
+  "void_engine_travel": {
+    "subtitle": "subtitles.genesis.void_engine_travel",
+    "sounds": [
+      "genesis:void_engine_travel"
+    ]
+  },
+  "void_engine_stop": {
+    "subtitle": "subtitles.genesis.void_engine_stop",
+    "sounds": [
+      "genesis:void_engine_stop"
+    ]
+  },
   "wormhole_ambiance": {
     "subtitle": "subtitles.genesis.wormhole_ambiance",
     "sounds": [

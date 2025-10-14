@@ -1,5 +1,6 @@
 package shipwrights.genesis;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -10,6 +11,8 @@ import shipwrights.genesis.event.PlanetCollision;
 
 @Mod.EventBusSubscriber
 public class GenesisEvents {
+
+	public static Component message = Component.empty();
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void onLevelTick(final TickEvent.LevelTickEvent event) {
@@ -28,5 +31,10 @@ public class GenesisEvents {
 				PlanetCollision.planetCollisionTick(serverLevel);
 			}
 		}
+		//uncomment for debug display message
+//		event.level.getServer().getPlayerList().getPlayers().forEach(serverPlayerEntity -> {
+//			serverPlayerEntity.displayClientMessage(message, true);
+//
+//		});
 	}
 }

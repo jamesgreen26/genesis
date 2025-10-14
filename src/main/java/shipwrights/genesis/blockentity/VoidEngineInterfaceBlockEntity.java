@@ -1,12 +1,15 @@
 package shipwrights.genesis.blockentity;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.network.chat.Component;
 import org.joml.Quaterniond;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.block.VoidCoreBlock;
+import shipwrights.genesis.networking.GenesisNetworking;
+import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
+import shipwrights.genesis.networking.VoidEngineSoundPacket;
+import shipwrights.genesis.networking.WormholeTravelSoundPacket;
 import shipwrights.genesis.sound.GenesisSounds;
 import shipwrights.genesis.teleportation.TeleportationHandler;
 import net.minecraft.core.BlockPos;
@@ -90,6 +93,8 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                 }
             }
 
+            //GenesisEvents.message = Component.literal("chargeUpTicks = " + voidEngineInterface.chargeUpTicks + " active = " + voidEngineInterface.active);
+
             BlockState core = level.getBlockState(pos.offset(state.getValue(BlockStateProperties.HORIZONTAL_FACING).getNormal().multiply(-1)));
             if (core.hasProperty(VoidCoreBlock.DORMANT) && !core.getValue(VoidCoreBlock.DORMANT)) {
                 Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
@@ -105,62 +110,87 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                     if (isPowered && hasEnergy) {
                         voidEngineInterface.energyStorage.extractEnergy(ENERGY_PER_TICK, false);
 
-                        Vector3d worldPos = ship.getShipToWorld().transformPosition(center.x, center.y, center.z, new Vector3d());
-
-                        if (!voidEngineInterface.active) {
+                        if (!voidEngineInterface.active && voidEngineInterface.chargeUpTicks >= 0) {
                             voidEngineInterface.active = true;
                             GenesisMod.LOGGER.info("Current dimension id: {}", level.dimension().location());
                             if (!level.dimension().location().equals(GenesisMod.WORMHOLE_DIM)) {
+                                //Minecraft.getInstance().getSoundManager().play(new VoidEngineSound(GenesisSounds.VOID_ENGINE_START.get(), SoundSource.BLOCKS, RandomSource.create()));
+                                Vector3d worldPos = ship.getShipToWorld().transformPosition(center.x, center.y, center.z, new Vector3d());
                                 level.playSound(null, worldPos.x, worldPos.y, worldPos.z, GenesisSounds.VOID_ENGINE_START.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
-                                //Minecraft.getInstance().getSoundManager().stop();
+                                //GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new VoidEngineSoundPacket(pos));
+                                //System.out.println("HEY, I TOLD IT TO HAPPEN");
                             }
                         }
-                        voidEngineInterface.chargeUpTicks++;
 
-                        // Check if we should teleport to wormhole dimension
-                        if (voidEngineInterface.chargeUpTicks == 128 && !level.dimension().location().equals(GenesisMod.WORMHOLE_DIM) && level.getServer() != null) {
-                            // Save current dimension for return
-                            voidEngineInterface.returningDim = level.dimension().location();
+                        if (!level.dimension().location().equals(GenesisMod.WORMHOLE_DIM) && level.getServer() != null) {
+                            voidEngineInterface.chargeUpTicks++;
 
-                            // Get wormhole level
-                            ServerLevel wormholeLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, GenesisMod.WORMHOLE_DIM));
-                            if (wormholeLevel != null) {
-                                // Use Genesis TeleportationHandler
-                                TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, wormholeLevel, false);
+                            // Check if we should teleport to wormhole dimension
+                            if (voidEngineInterface.chargeUpTicks == 250) {
 
-                                // Teleport ship to wormhole - scale position down
-                                Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(1 / 32.0, new Vector3d());
-                                teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
-                                teleportationHandler.finalizeTeleport();
+                                voidEngineInterface.chargeUpTicks = 32;
+
+                                // Save current dimension for return
+                                voidEngineInterface.returningDim = level.dimension().location();
+
+                                // Get wormhole level
+                                ServerLevel wormholeLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, GenesisMod.WORMHOLE_DIM));
+                                if (wormholeLevel != null) {
+                                    // Use Genesis TeleportationHandler
+                                    TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, wormholeLevel, false);
+
+                                    // Teleport ship to wormhole - scale position down
+                                    Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(1 / 32.0, new Vector3d());
+                                    teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
+                                    teleportationHandler.finalizeTeleport();
+
+                                    Vector3d worldPos = ship.getShipToWorld().transformPosition(center.x, center.y, center.z, new Vector3d());
+
+                                    //sendWormholeTravelPacket
+                                    GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
+                                }
+                                return;
                             }
-                            voidEngineInterface.chargeUpTicks = 0;
+                        } else {
+                            voidEngineInterface.chargeUpTicks = 32;
                         }
-                        return;
-                    } else if (level.dimension().location().equals(GenesisMod.WORMHOLE_DIM) && level.getServer() != null) {
-                        // Auto-return to saved dimension when in wormhole
-                        ServerLevel returnLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, voidEngineInterface.returningDim));
-                        if (returnLevel != null) {
-                            TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, returnLevel, true);
+                    } else {
+                        if (voidEngineInterface.chargeUpTicks > 0) {
+                            voidEngineInterface.chargeUpTicks--;
+                        }
+                        if (level.dimension().location().equals(GenesisMod.WORMHOLE_DIM) && level.getServer() != null) {
+                            if (voidEngineInterface.chargeUpTicks <= 0) {
+                                voidEngineInterface.chargeUpTicks = -64;
+                                // Auto-return to saved dimension when in wormhole
+                                ServerLevel returnLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, voidEngineInterface.returningDim));
+                                if (returnLevel != null) {
+                                    TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, returnLevel, true);
 
-                            // Teleport ship back - scale position up
-                            Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(32.0, new Vector3d());
-                            teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
-                            teleportationHandler.finalizeTeleport();
+                                    // Teleport ship back - scale position up
+                                    Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(32.0, new Vector3d());
+                                    teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
+                                    teleportationHandler.finalizeTeleport();
+
+                                    //sendWormholeTravelPacket
+                                    GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
+                                }
+                            }
+                        } else {
+                            if (voidEngineInterface.chargeUpTicks > 0) {
+                                voidEngineInterface.chargeUpTicks = 0;
+                                GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new StopVoidEngineStartSoundPacket());
+                            }
                         }
                     }
                 }
             }
-            if (voidEngineInterface.active) {
-                if (voidEngineInterface.chargeUpTicks > 0) {
-                    voidEngineInterface.chargeUpTicks -= 2;
-                }
-                if (voidEngineInterface.chargeUpTicks <= 0) {
-                    voidEngineInterface.active = false;
-                    voidEngineInterface.chargeUpTicks = -128;
-                }
-            }
             if (voidEngineInterface.chargeUpTicks < 0) {
                 voidEngineInterface.chargeUpTicks++;
+            }
+            if (voidEngineInterface.active) {
+                 if (voidEngineInterface.chargeUpTicks == 0) {
+                    voidEngineInterface.active = false;
+                }
             }
         }
     }
