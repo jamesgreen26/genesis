@@ -7,12 +7,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.RegisterEvent;
 import shipwrights.genesis.client.DimensionEffects;
+import shipwrights.genesis.client.WormholeDimensionEffects;
 import shipwrights.genesis.worldgen.AsteroidBelt;
 import shipwrights.genesis.worldgen.AsteroidBlockSurfaceRule;
 import shipwrights.genesis.worldgen.RandomNoise;
 
-import static shipwrights.genesis.GenesisMod.ASTEROID_RULE_ID;
-import static shipwrights.genesis.GenesisMod.SPACE_DIM;
+import static shipwrights.genesis.GenesisMod.*;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModRegistries {
@@ -37,5 +37,6 @@ public class ModRegistries {
     @SubscribeEvent
     public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
         event.register(SPACE_DIM, new DimensionEffects());
+        event.register(WORMHOLE_DIM, new WormholeDimensionEffects());
     }
 }

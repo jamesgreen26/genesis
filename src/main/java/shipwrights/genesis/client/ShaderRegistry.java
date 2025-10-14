@@ -22,11 +22,13 @@ public class ShaderRegistry {
 
     public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_TEX);
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
+    public static final ShaderHolder WORMHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole"), DefaultVertexFormat.POSITION_COLOR_TEX);
 
     @SubscribeEvent
     public static void shaderRegistry(RegisterShadersEvent event) {
         registerShader(event, SUN_SHADER);
         registerShader(event, PLANET_SHADER);
+        registerShader(event, WORMHOLE_SHADER);
     }
 
     private static LodestoneRenderType SUN_RENDER_TYPE;
