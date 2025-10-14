@@ -78,7 +78,7 @@ dependencies {
     modImplementation("maven.modrinth:curios:5.14.1+1.20.1")
     modImplementation("maven.modrinth:lodestonelib:1.20.1-1.6.4.1")
 
-    modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge")
+    include(modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge"))
     modImplementation("ace.actually.radios:radios-1.20.1:1.0.0")
 
     implementation("org.joml:joml-primitives:1.10.0")
