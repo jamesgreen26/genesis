@@ -10,13 +10,16 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisMod;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DataListener {
@@ -38,6 +41,8 @@ public class DataListener {
                 return;
             }
 
+            ModList modList = ModList.get();
+
             for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
                 ResourceLocation location = entry.getKey();
                 Resource resource = entry.getValue();
@@ -51,6 +56,11 @@ public class DataListener {
                         GenesisMod.LOGGER.info("Loading {} planets from {}", config.planets().size(), location);
 
                         for (SystemConfigModel.PlanetJsonModel planet : config.planets()) {
+                            String mod = planet.getDimensionID().getNamespace();
+                            if (!modList.isLoaded(mod) && COMPAT_MODS.contains(mod)) {
+                                continue;
+                            }
+
                             GenesisMod.registerPlanet(
                                 planet.getDimensionID(),
                                     planet.size(),
@@ -66,6 +76,11 @@ public class DataListener {
                         }
 
                         for (SystemConfigModel.MoonJsonModel moon : config.moons()) {
+                            String mod = moon.getDimensionID().getNamespace();
+                            if (!modList.isLoaded(mod) && COMPAT_MODS.contains(mod)) {
+                                continue;
+                            }
+
                             GenesisMod.registerMoon(
                                     moon.getDimensionID(),
                                     moon.getParentDimensionID(),
@@ -89,5 +104,7 @@ public class DataListener {
             GenesisMod.finalizeMoons();
         }
     }
+
+    private static final Set<String> COMPAT_MODS = Set.of("ad_astra");
 }
 
