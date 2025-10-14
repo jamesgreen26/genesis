@@ -1,0 +1,48 @@
+{
+  "planets": [
+    {
+      "dimensionID": "ad_astra:mercury",
+      "size": 0.38,
+      "gravity": 0.37,
+      "orbitRadius": 0.4,
+      "yearLength": 0.24,
+      "r": 0.75,
+      "g": 0.65,
+      "b": 0.55
+    },
+    {
+      "dimensionID": "ad_astra:venus",
+      "size": 0.95,
+      "gravity": 0.887,
+      "orbitRadius": 0.7,
+      "yearLength": 0.62,
+      "r": 1.0,
+      "g": 0.85,
+      "b": 0.55
+    },
+    {
+      "dimensionID": "ad_astra:mars",
+      "size": 0.53,
+      "gravity": 0.372076,
+      "orbitRadius": 1.5,
+      "yearLength": 1.88,
+      "r": 0.9,
+      "g": 0.4,
+      "b": 0.25
+    }
+  ],
+  "moons": [
+    {
+      "dimensionID": "ad_astra:moon",
+      "parentDimensionID": "minecraft:overworld",
+      "size": 0.3,
+      "gravity": 0.1622,
+      "orbitRadius": 0.05,
+      "yearLength": 0.005,
+      "r": 0.55,
+      "g": 0.55,
+      "b": 0.65
+    }
+  ]
+}
+

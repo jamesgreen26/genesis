@@ -13,10 +13,9 @@ public class PlanetData {
     public final double orbitRadius;
     private final double orbitalTheta;
     private final double orbitalPhi;
-    public final int orbitalPeriod = 256 * 24000;
+    public final int orbitalPeriod;
     public Vector3d rotation;
     public final double size;
-    public final int yearLength;
     public final float color;
 
     public final int hash;
@@ -31,7 +30,7 @@ public class PlanetData {
         this.orbitRadius = orbitRadius;
         this.rotation = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
         this.size = size * GenesisMod.earthSize;
-        this.yearLength = yearLength;
+        this.orbitalPeriod = yearLength;
         this.color = rgbToFloat(r, g, b);
         this.hash = dimensionID.hashCode();
 
@@ -50,7 +49,7 @@ public class PlanetData {
         out = out.rotateX(orbitalPhi + Math.PI / 2);
         out.normalize(orbitRadius * GenesisMod.earthDist);
         if (parent != null) {
-            out.add(parent.getCurrentPos(ticks, subticks));
+            out = out.add(parent.getCurrentPos(ticks, subticks), new Vector3d());
         }
         return out;
     }
