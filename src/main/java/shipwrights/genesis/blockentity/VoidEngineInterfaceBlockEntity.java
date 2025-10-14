@@ -128,7 +128,7 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                             // Check if we should teleport to wormhole dimension
                             if (voidEngineInterface.chargeUpTicks == 250) {
 
-                                voidEngineInterface.chargeUpTicks = 32;
+                                voidEngineInterface.chargeUpTicks = 4;
 
                                 // Save current dimension for return
                                 voidEngineInterface.returningDim = level.dimension().location();
