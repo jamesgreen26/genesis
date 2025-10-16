@@ -13,6 +13,9 @@ public class DPBlocks {
     public static BlockEntry<SuitTableBlock> SUIT_TABLE = Reg.REGISTRATE.block("suit_table", SuitTableBlock::new).simpleItem().register();
     public static BlockEntityEntry<SuitTableBE> SUIT_TABLE_BE = Reg.REGISTRATE.blockEntity("suit_table_be",SuitTableBE::new).validBlock(SUIT_TABLE).register();
 
+    public static BlockEntry<OxygenBubbleBlock> OXYGEN_BUBBLE = Reg.REGISTRATE.block("oxygen_bubble", OxygenBubbleBlock::new).simpleItem().register();
+    public static BlockEntityEntry<OxygenBubbleBE> OXYGEN_BUBBLE_BE = Reg.REGISTRATE.blockEntity("oxygen_bubble_be",OxygenBubbleBE::new).validBlock(OXYGEN_BUBBLE).register();
+
 
     public static BlockEntry<GasBlock> DENSE_GAS = Reg.REGISTRATE.block("dense_gas", a->new GasBlock(BlockBehaviour.Properties.of().replaceable().noCollission().noLootTable().air().noOcclusion())).register();
 

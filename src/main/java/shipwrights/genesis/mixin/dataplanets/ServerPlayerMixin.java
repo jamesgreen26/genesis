@@ -1,6 +1,7 @@
 package shipwrights.genesis.mixin.dataplanets;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.effect.MobEffect;
 import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.MutableTags;
 import shipwrights.dataplanets.items.SpaceArmourItem;
@@ -40,6 +41,9 @@ public abstract class ServerPlayerMixin extends Entity {
 
     @Shadow
     public abstract boolean addEffect(MobEffectInstance p_21165_);
+
+    @Shadow
+    public abstract boolean removeEffect(MobEffect arg);
 
     public ServerPlayerMixin(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
@@ -125,9 +129,13 @@ public abstract class ServerPlayerMixin extends Entity {
                 }
                 if(!planetData.getBoolean("hasAtmosphere") || !planetData.getBoolean("hasOxygen"))
                 {
-                    if(!getTags().contains("has_oxygen"))
+                    if(getTags().contains("in_oxygen_bubble"))
                     {
-                        addEffect(new MobEffectInstance(MobEffects.WITHER));
+                        removeTag("in_oxygen_bubble");
+                    }
+                    else if(!getTags().contains("has_oxygen"))
+                    {
+                        hurt(damageSources().drown(),1);
                     }
                 }
                 if(planetData.getInt("temperature")<263)
