@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "suit_table",
+  "key": {
+    "#": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:clock"
+    },
+    "X": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "pattern": [
+    "###",
+    "#X#",
+    "#G#"
+  ],
+  "result": {
+    "item": "dataplanets:suit_table"
+  },
+  "show_notification": true
+}
