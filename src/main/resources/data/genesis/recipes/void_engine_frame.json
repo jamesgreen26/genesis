@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    }
+  },
+  "pattern": [
+    "IOI",
+    "OPO",
+    "IOI"
+  ],
+  "result": {
+    "item": "genesis:void_engine_frame",
+    "count": 4
+  },
+  "show_notification": true
+}
