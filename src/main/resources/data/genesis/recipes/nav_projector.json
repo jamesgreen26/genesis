@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "L": {
+      "item": "minecraft:lapis_block"
+    },
+    "V": {
+      "item": "genesis:void_engine_viewport"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    }
+  },
+  "pattern": [
+    "LVL",
+    "IPI",
+    "IOI"
+  ],
+  "result": {
+    "item": "genesis:nav_projector",
+    "count": 1
+  },
+  "show_notification": true
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "T": {
+      "item": "minecraft:tinted_glass"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "pattern": [
+    " T ",
+    "TET",
+    " T "
+  ],
+  "result": {
+    "item": "genesis:void_engine_viewport",
+    "count": 4
+  },
+  "show_notification": true
+}

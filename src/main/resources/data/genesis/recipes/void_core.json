@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "O": {
+      "item": "minecraft:crying_obsidian"
+    }
+  },
+  "pattern": [
+    " O ",
+    "OEO",
+    " O "
+  ],
+  "result": {
+    "item": "genesis:void_core",
+    "count": 1
+  },
+  "show_notification": true
+}
