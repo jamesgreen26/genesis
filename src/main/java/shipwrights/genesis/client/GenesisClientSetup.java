@@ -2,9 +2,9 @@ package shipwrights.genesis.client;
 
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.blockentity.GenesisBlockEntities;
-import shipwrights.genesis.client.renderer.NavProjectorBlockEntityRenderer;
-import shipwrights.genesis.client.renderer.VoidCoreBlockEntityRenderer;
-import shipwrights.genesis.client.renderer.VoidEngineInterfaceBlockEntityRenderer;
+import shipwrights.genesis.client.blockentityRenderer.NavProjectorBlockEntityRenderer;
+import shipwrights.genesis.client.blockentityRenderer.VoidCoreBlockEntityRenderer;
+import shipwrights.genesis.client.blockentityRenderer.VoidEngineInterfaceBlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

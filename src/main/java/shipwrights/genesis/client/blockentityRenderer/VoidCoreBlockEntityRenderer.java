@@ -1,4 +1,4 @@
-package shipwrights.genesis.client.renderer;
+package shipwrights.genesis.client.blockentityRenderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

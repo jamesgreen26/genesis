@@ -8,3 +8,5 @@ run-data/
 .settings/
 .project
 .classpath
+.DS_Store
+**/.DS_Store
