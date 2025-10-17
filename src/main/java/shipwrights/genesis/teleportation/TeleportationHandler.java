@@ -2,6 +2,7 @@ package shipwrights.genesis.teleportation;
 
 import g_mungus.vlib.dimension.DimensionSettingsManager;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.resources.ResourceLocation;
 import shipwrights.genesis.event.PreShipTravelEvent;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import net.minecraft.resources.ResourceKey;
@@ -275,9 +276,14 @@ public class TeleportationHandler {
 			}
 			shipBoxd.union(shipYardBox.transform(ship.getPrevTickTransform().getShipToWorld()));
 		}
+		double scaledEntityCollectRange = ENTITY_COLLECT_RANGE;
+		if (GenesisMod.isMiniScale(ResourceLocation.parse(ship.getChunkClaimDimension().substring(20)))) {
+			scaledEntityCollectRange /= 16;
+		}
+
 		final AABB inflatedBox = new AABB(
-			shipBoxd.minX - ENTITY_COLLECT_RANGE, shipBoxd.minY - ENTITY_COLLECT_RANGE, shipBoxd.minZ - ENTITY_COLLECT_RANGE,
-			shipBoxd.maxX + ENTITY_COLLECT_RANGE, shipBoxd.maxY + ENTITY_COLLECT_RANGE, shipBoxd.maxZ + ENTITY_COLLECT_RANGE
+			shipBoxd.minX - scaledEntityCollectRange, shipBoxd.minY - scaledEntityCollectRange, shipBoxd.minZ - scaledEntityCollectRange,
+			shipBoxd.maxX + scaledEntityCollectRange, shipBoxd.maxY + scaledEntityCollectRange, shipBoxd.maxZ + scaledEntityCollectRange
 		);
 		for (final Entity entity : this.oldLevel.getEntities(
 			((Entity)(null)),
