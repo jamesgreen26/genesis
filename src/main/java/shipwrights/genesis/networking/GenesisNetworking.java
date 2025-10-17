@@ -18,13 +18,11 @@ public class GenesisNetworking {
 
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.tryBuild(GenesisMod.MOD_ID, "main"),
+            ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "channel"),
             () -> PROTOCOL_VERSION,
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals
     );
-
-    private static int packetId = 0;
 
     public static final PacketDistributor<SimpleChannel> ALL = new PacketDistributor<>(
             (distributor, channelGetter) -> packet -> ServerLifecycleHooks.getCurrentServer()

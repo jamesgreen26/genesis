@@ -45,7 +45,7 @@ public final class GenesisMod {
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
 
-        GenesisNetworking.INSTANCE.messageBuilder(WormholeTravelSoundPacket.class, 1)
+        GenesisNetworking.INSTANCE.messageBuilder(WormholeTravelSoundPacket.class, 0)
                 .encoder(WormholeTravelSoundPacket::encode)
                 .decoder(WormholeTravelSoundPacket::decode)
                 .consumerMainThread(WormholeTravelSoundPacket::handle)
@@ -57,7 +57,7 @@ public final class GenesisMod {
                 .consumerMainThread(VoidEngineSoundPacket::handle)
                 .add();
 
-        GenesisNetworking.INSTANCE.messageBuilder(StopVoidEngineStartSoundPacket.class, 1)
+        GenesisNetworking.INSTANCE.messageBuilder(StopVoidEngineStartSoundPacket.class, 2)
                 .encoder(StopVoidEngineStartSoundPacket::encode)
                 .decoder(StopVoidEngineStartSoundPacket::decode)
                 .consumerMainThread(StopVoidEngineStartSoundPacket::handle)

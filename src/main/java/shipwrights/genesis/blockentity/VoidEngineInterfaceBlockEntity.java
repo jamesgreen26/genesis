@@ -114,11 +114,7 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                             voidEngineInterface.active = true;
                             GenesisMod.LOGGER.info("Current dimension id: {}", level.dimension().location());
                             if (!level.dimension().location().equals(GenesisMod.WORMHOLE_DIM)) {
-                                //Minecraft.getInstance().getSoundManager().play(new VoidEngineSound(GenesisSounds.VOID_ENGINE_START.get(), SoundSource.BLOCKS, RandomSource.create()));
-                                Vector3d worldPos = ship.getShipToWorld().transformPosition(center.x, center.y, center.z, new Vector3d());
-                                level.playSound(null, worldPos.x, worldPos.y, worldPos.z, GenesisSounds.VOID_ENGINE_START.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
-                                //GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new VoidEngineSoundPacket(pos));
-                                //System.out.println("HEY, I TOLD IT TO HAPPEN");
+                                GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new VoidEngineSoundPacket(pos));
                             }
                         }
 
@@ -126,9 +122,9 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                             voidEngineInterface.chargeUpTicks++;
 
                             // Check if we should teleport to wormhole dimension
-                            if (voidEngineInterface.chargeUpTicks == 250) {
+                            if (voidEngineInterface.chargeUpTicks == 244) {
 
-                                voidEngineInterface.chargeUpTicks = 4;
+                                voidEngineInterface.chargeUpTicks = 2;
 
                                 // Save current dimension for return
                                 voidEngineInterface.returningDim = level.dimension().location();

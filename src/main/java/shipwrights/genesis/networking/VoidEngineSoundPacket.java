@@ -36,7 +36,6 @@ public record VoidEngineSoundPacket(BlockPos enginePos) {
         public static void handle(VoidEngineSoundPacket packet) {
             WormholeAmbianceHandler.voidEngineStartPos = packet.enginePos;
             WormholeAmbianceHandler.playVoidEngineStart();
-            System.out.println("HEY, IT'S HAPPENING");
         }
     }
 }
