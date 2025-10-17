@@ -1,11 +1,13 @@
 package shipwrights.genesis;
 
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -13,6 +15,7 @@ import shipwrights.genesis.block.*;
 
 public class GenesisBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, GenesisMod.MOD_ID);
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, GenesisMod.MOD_ID);
 
     public static final RegistryObject<Block> ASTEROID_0 = BLOCKS.register("asteroid_0", () ->
         new AsteroidBlock(BlockBehaviour.Properties.copy(Blocks.BARRIER)
@@ -126,4 +129,9 @@ public class GenesisBlocks {
             .sound(SoundType.SAND)
         )
     );
+
+    public static final RegistryObject<WarpstoneCatalyzerBlock> WARPSTONE_CATALYZER_BLOCK = BLOCKS.register("warpstone_catalyzer_block", WarpstoneCatalyzerBlock::new);
+
+    public static final RegistryObject<MenuType<WarpstoneCatalyzerContainer>> WARPSTONE_CATALYZER_CONTAINER = MENU_TYPES.register("warpstone_catalyzer_block",
+            () -> IForgeMenuType.create((windowId, inv, data) -> new WarpstoneCatalyzerContainer(windowId, inv.player, data.readBlockPos())));
 }

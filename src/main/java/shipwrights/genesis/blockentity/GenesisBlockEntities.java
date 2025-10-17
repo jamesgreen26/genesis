@@ -25,4 +25,7 @@ public class GenesisBlockEntities {
         BLOCK_ENTITIES.register("void_core",
             () -> BlockEntityType.Builder.of(VoidCoreBlockEntity::new,
                 GenesisBlocks.VOID_CORE.get()).build(null));
+
+    public static final RegistryObject<BlockEntityType<WarpstoneCatalyzerBlockEntity>> WARPSTONE_CATALYZER_BLOCK_ENTITY = BLOCK_ENTITIES.register("warpstone_catalyzer_block",
+            () -> BlockEntityType.Builder.of(WarpstoneCatalyzerBlockEntity::new, GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get()).build(null));
 }

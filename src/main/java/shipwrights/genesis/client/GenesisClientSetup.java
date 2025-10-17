@@ -1,5 +1,7 @@
 package shipwrights.genesis.client;
 
+import net.minecraft.client.gui.screens.MenuScreens;
+import shipwrights.genesis.GenesisBlocks;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.blockentity.GenesisBlockEntities;
 import shipwrights.genesis.client.blockentityRenderer.NavProjectorBlockEntityRenderer;
@@ -19,6 +21,11 @@ public class GenesisClientSetup {
             BlockEntityRenderers.register(GenesisBlockEntities.NAV_PROJECTOR.get(), NavProjectorBlockEntityRenderer::new);
             BlockEntityRenderers.register(GenesisBlockEntities.VOID_CORE.get(), VoidCoreBlockEntityRenderer::new);
             BlockEntityRenderers.register(GenesisBlockEntities.VOID_ENGINE_INTERFACE.get(), VoidEngineInterfaceBlockEntityRenderer::new);
+            if (GenesisBlocks.WARPSTONE_CATALYZER_CONTAINER.isPresent()) {
+                MenuScreens.register(GenesisBlocks.WARPSTONE_CATALYZER_CONTAINER.get(), WarpstoneCatalyzerScreen::new);
+            } else {
+                System.out.println("Warpstone Catalyzer registration failed");
+            }
         });
     }
 }

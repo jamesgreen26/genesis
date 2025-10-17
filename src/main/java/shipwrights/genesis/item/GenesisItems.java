@@ -55,4 +55,11 @@ public class GenesisItems {
 
     public static final RegistryObject<Item> STELLAR_SAND = ITEMS.register("stellar_sand",
         () -> new BlockItem(GenesisBlocks.STELLAR_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WARPSTONE_CHUNK = ITEMS.register("warpstone_chunk",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> WARPSTONE_CATALYZER_BLOCK_ITEM = ITEMS.register("warpstone_catalyzer_block",
+        () -> new BlockItem(GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get(), new Item.Properties()));
+
 }
