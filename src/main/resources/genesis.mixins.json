@@ -30,7 +30,10 @@
     "dataplanets.MappedRegistryMixin",
     "dataplanets.MinecraftServerAccessor",
     "dataplanets.MinecraftServerMixin",
-    "dataplanets.ServerPlayerMixin"
+    "dataplanets.PackRepositoryMixin",
+    "dataplanets.ServerPacksSourceMixin",
+    "dataplanets.ServerPlayerMixin",
+    "dataplanets.WorldLoaderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

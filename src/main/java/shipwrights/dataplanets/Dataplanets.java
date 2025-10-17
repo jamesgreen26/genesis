@@ -79,7 +79,7 @@ public class Dataplanets
     @SubscribeEvent
     public void playerLogsIn(PlayerEvent.PlayerLoggedInEvent event)
     {
-        Compat.postLoadWorld();
+        Compat.postLoadWorld(event.getEntity().getServer().overworld().getDataStorage());
     }
 
     @SubscribeEvent
@@ -99,7 +99,7 @@ public class Dataplanets
                 if(level.dimension().location().getNamespace().equals("dataplanets"))
                 {
                     String name = level.dimension().location().getPath();
-                    CompoundTag data = StarSystemCreator.getDynamicDataOrNew();
+                    CompoundTag data = StarSystemCreator.getDynamicDataOrNew(event.getLevel().getServer().overworld().getDataStorage());
                     CompoundTag planetData = data.getCompound(name.substring(0,name.length()-1)).getCompound(name);
                     if(planetData.getBoolean("hasOxygen"))
                     {

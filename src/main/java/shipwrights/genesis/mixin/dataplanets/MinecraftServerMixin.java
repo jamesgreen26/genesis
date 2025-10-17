@@ -11,14 +11,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
 
-    @Inject(method = "saveAllChunks", at = @At("TAIL"))
-    private void checkKey(boolean p_129886_, boolean p_129887_, boolean p_129888_, CallbackInfoReturnable<Boolean> cir)
-    {
-        if(DynamicSystems.frozeTimes!=0)
-        {
-            DynamicSystems.frozeTimes=0;
-        }
-        Compat.postLoadWorld();
-    }
+//    @Inject(method = "saveAllChunks", at = @At("TAIL"))
+//    private void checkKey(boolean p_129886_, boolean p_129887_, boolean p_129888_, CallbackInfoReturnable<Boolean> cir)
+//    {
+//        if(DynamicSystems.frozeTimes!=0)
+//        {
+//            DynamicSystems.frozeTimes=0;
+//        }
+//        Compat.postLoadWorld();
+//    }
 
 }

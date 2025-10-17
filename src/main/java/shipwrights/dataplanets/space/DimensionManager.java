@@ -5,6 +5,7 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.storage.WorldData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -40,7 +42,7 @@ import net.minecraft.world.level.Level;
 public class DimensionManager {
     public static DimensionManager INSTANCE = new DimensionManager();
 
-    private ConcurrentLinkedQueue<Map.Entry<ResourceKey<Level>, LevelStem>> registrationQueue = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Map.Entry<ResourceLocation, LevelStem>> registrationQueue = new ConcurrentLinkedQueue<>();
 
     private DimensionManager(){}
 
@@ -102,15 +104,15 @@ public class DimensionManager {
         DPPackets.sendToAll(DPPackets.INSTANCE,new UpdateDimensionsPacket(Set.of(levelKey), true));
     }
 
-    public void queueLevelForRegistration(ResourceKey<Level> levelKey, LevelStem stem){
+    public void queueLevelForRegistration(ResourceLocation levelKey, LevelStem stem){
         this.registrationQueue.add(new AbstractMap.SimpleEntry<>(levelKey, stem));
     }
 
     @SuppressWarnings("deprecation")
     private void registerQueuedLevels(MinecraftServer server){
         while (!registrationQueue.isEmpty()){
-            Map.Entry<ResourceKey<Level>, LevelStem> element = registrationQueue.poll();
-
+            Map.Entry<ResourceLocation, LevelStem> rawElement = registrationQueue.poll();
+            Map.Entry<ResourceKey<Level>, LevelStem> element = new AbstractMap.SimpleEntry<>(ResourceKey.create(Registries.DIMENSION,rawElement.getKey()),rawElement.getValue());
             // if the world already exists, do nuffin
             if (server.forgeGetWorldMap().get(element.getKey()) != null){
                 return;
@@ -131,6 +133,12 @@ public class DimensionManager {
                 }
             }
         }
+
+        @SubscribeEvent
+        public static void onServerStop(final ServerStoppedEvent event){
+            DimensionManager.INSTANCE.registrationQueue.clear();
+        }
+
     }
 
 }

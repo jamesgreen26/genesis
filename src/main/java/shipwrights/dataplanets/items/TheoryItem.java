@@ -1,5 +1,7 @@
 package shipwrights.dataplanets.items;
 
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.nbt.CompoundTag;
 import shipwrights.dataplanets.space.DynamicSystems;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.ChatFormatting;
@@ -33,7 +35,8 @@ public class TheoryItem extends Item {
             {
                 if(world.random.nextInt(MAX_LEVEL)==0)
                 {
-                    StarSystemCreator.makeSystem(0, 6);
+                    Pair<CompoundTag, String> data = StarSystemCreator.makeSystem(world.getServer().overworld().getDataStorage(), 0, 6);
+                    DynamicSystems.generateNewSystem(data.getFirst(), data.getSecond(), world.getServer().registryAccess(), world.getServer().overworld().getDataStorage());
                     didPass=true;
                 }
             }
@@ -45,7 +48,6 @@ public class TheoryItem extends Item {
                         .append("You theory was successfully proven, new system(s) are confirmed to exist!").copy()
                         .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)));
 
-                DynamicSystems.onGenSetup(world.getServer());
             }
             else
             {

@@ -1,10 +1,12 @@
 package shipwrights.dataplanets.space;
 
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import shipwrights.dataplanets.compat.Compat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -18,10 +20,10 @@ import java.util.UUID;
 
 public class StarSystemCreator {
 
-    public static void makeSystem(int minPlanetCount, int maxPlanetCount)
+    public static Pair<CompoundTag, String> makeSystem(DimensionDataStorage storage,int minPlanetCount, int maxPlanetCount)
     {
         String uuid = UUID.randomUUID().toString();
-        inventSystem(uuid, minPlanetCount, maxPlanetCount);
+        return inventSystem(storage,uuid, minPlanetCount, maxPlanetCount);
     }
 
     private static String truth(boolean truth)
@@ -32,7 +34,7 @@ public class StarSystemCreator {
 
     private static final String[] CODE = new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
 
-    private static void inventSystem(String uuid, int minPlanetCount, int maxPlanetCount)
+    private static Pair<CompoundTag, String> inventSystem(DimensionDataStorage storage ,String uuid, int minPlanetCount, int maxPlanetCount)
     {
         RandomSource random = RandomSource.create();
         String systemName = CODE[random.nextInt(CODE.length)]+CODE[random.nextInt(CODE.length)]+random.nextInt(1000);
@@ -231,45 +233,30 @@ public class StarSystemCreator {
 
             systemData.put(planetName,planetData);
         }
-        CompoundTag tag = getDynamicDataOrNew();
+        CompoundTag tag = getDynamicDataOrNew(storage);
         tag.put(systemName,systemData);
-        writeToDynamic(tag);
-
-
+        writeToDynamic(storage,tag);
+        return new Pair<>(systemData,systemName);
     }
 
-    public static CompoundTag getDynamicDataOrNew()
-    {
-        CompoundTag tag;
-        File storage = new File("./dataplanets_dynamic_data.dat");
-        if(storage.exists())
-        {
-            try {
-                tag = NbtIo.readCompressed(new File("./dataplanets_dynamic_data.dat"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else
-        {
-            tag = new CompoundTag();
-        }
-        return tag;
-    }
-    private static void writeToDynamic(CompoundTag tag)
-    {
-        File storage = new File("./dataplanets_dynamic_data.dat");
-        try {
-            NbtIo.writeCompressed(tag,storage);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static CompoundTag getDynamicDataOrNew() {
+        return getDynamicDataOrNew(ServerLifecycleHooks.getCurrentServer().overworld().getDataStorage());
     }
 
-    private static void genOre(CompoundTag biomeData,RandomSource random)
-    {
+    public static CompoundTag getDynamicDataOrNew(DimensionDataStorage storage) {
+        return storage.computeIfAbsent(DynamicSavedData::new, DynamicSavedData::new, "dataplanets_dynamic_data").getData().copy();
+    }
+
+    private static void writeToDynamic(CompoundTag tag) {
+        writeToDynamic(ServerLifecycleHooks.getCurrentServer().overworld().getDataStorage(), tag);
+    }
+
+    private static void writeToDynamic(DimensionDataStorage storage, CompoundTag tag) {
+        storage.computeIfAbsent(DynamicSavedData::new, DynamicSavedData::new, "dataplanets_dynamic_data").setData(tag);
+    }
 
 
+    private static void genOre(CompoundTag biomeData,RandomSource random) {
         ListTag ores;
         if(biomeData.contains("biome_ores"))
         {

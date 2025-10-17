@@ -3,6 +3,7 @@ package shipwrights.dataplanets.compat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.common.Tags;
 import shipwrights.dataplanets.DPPackets;
 import shipwrights.dataplanets.MutableTags;
@@ -161,9 +162,9 @@ public class Compat {
     /**
      * this method is called immediately after first discovering a system, when all chunks are saved, and whenever a player logs in
      */
-    public static void postLoadWorld()
+    public static void postLoadWorld(DimensionDataStorage storage)
     {
-        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PSyncPacket(StarSystemCreator.getDynamicDataOrNew()));
+        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PSyncPacket(StarSystemCreator.getDynamicDataOrNew(storage)));
 
     }
 }
