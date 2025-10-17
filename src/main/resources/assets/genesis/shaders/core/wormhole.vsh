@@ -35,5 +35,5 @@ void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(rotatedPosition, 1.0);
 
     texCoord0 = UV0;
-    vertexColor = vec4(0, Color.gba);
+    vertexColor = vec4(min(Color.r, min(Color.g, Color.b)), Color.gba);
 }
