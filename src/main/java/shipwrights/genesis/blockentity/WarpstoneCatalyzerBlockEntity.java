@@ -27,9 +27,9 @@ public class WarpstoneCatalyzerBlockEntity extends BlockEntity {
     public static final String ITEMS_TAG = "Inventory";
     public static final String ENERGY_TAG = "Energy";
 
-    public static final int GENERATE = 50;
+    public static final int GENERATE = 200;
     public static final int MAXTRANSFER = 1000;
-    public static final int CAPACITY = 100000;
+    public static final int CAPACITY = 2000000;
 
     public static int SLOT_COUNT = 1;
     public static int SLOT = 0;
