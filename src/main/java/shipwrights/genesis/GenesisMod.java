@@ -64,6 +64,7 @@ public final class GenesisMod {
                 .add();
 
         GenesisBlocks.BLOCKS.register(eventBus);
+        GenesisBlocks.MENU_TYPES.register(eventBus);
         shipwrights.genesis.blockentity.GenesisBlockEntities.BLOCK_ENTITIES.register(eventBus);
         shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
         shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
