@@ -43,6 +43,13 @@ public class PlanetData {
     }
 
     public Vector3d getCurrentPos(long ticks, float subticks) {
+        if (orbitalPeriod == 0 || orbitRadius == 0) {
+            if (parent != null) {
+                return parent.getCurrentPos(ticks, subticks);
+            }
+            return new Vector3d(0, 0, 0);
+        }
+
         Vector3d out = new Vector3d(1, 0, 0);
         out = out.rotateY(Math.PI * 2 * (ticks + subticks) / orbitalPeriod);
         out = out.rotateY(orbitalTheta);
