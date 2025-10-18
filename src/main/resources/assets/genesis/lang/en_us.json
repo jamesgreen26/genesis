@@ -1,5 +1,8 @@
 {
   "block.genesis.nav_projector": "Navigation Projector",
+  "block.genesis.warpstone_catalyzer_block": "Warpstone Catalyzer",
+  "genesis.screen.warpstone_catalyzer": "Warpstone Catalyzer",
+  "block.genesis.warpstone_chunk": "Warpstone Chunk",
   "block.genesis.void_engine_interface": "Void Engine Interface",
   "block.genesis.void_engine_frame": "Void Engine Frame",
   "block.genesis.void_core": "Void Core",

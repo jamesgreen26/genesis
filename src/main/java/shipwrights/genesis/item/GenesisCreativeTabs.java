@@ -20,6 +20,7 @@ public class GenesisCreativeTabs {
             .displayItems((parameters, output) -> {
                 output.accept(GenesisItems.NAV_PROJECTOR.get());
                 output.accept(GenesisItems.WARPSTONE_CATALYZER_BLOCK_ITEM.get());
+                output.accept(GenesisItems.WARPSTONE_CHUNK.get());
                 output.accept(GenesisItems.VOID_ENGINE_INTERFACE.get());
                 output.accept(GenesisItems.VOID_ENGINE_FRAME.get());
                 output.accept(GenesisItems.VOID_ENGINE_VIEWPORT.get());

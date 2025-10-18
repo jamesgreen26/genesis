@@ -11,9 +11,9 @@ import shipwrights.genesis.blockentity.WarpstoneCatalyzerBlockEntity;
 
 public class WarpstoneCatalyzerScreen extends AbstractContainerScreen<WarpstoneCatalyzerContainer> {
 
-    private static final int ENERGY_LEFT = 96;
+    private static final int ENERGY_LEFT = 36;
     private static final int ENERGY_WIDTH = 72;
-    private static final int ENERGY_TOP = 8;
+    private static final int ENERGY_TOP = 44;
     private static final int ENERGY_HEIGHT = 8;
 
     private final ResourceLocation GUI = ResourceLocation.tryBuild(GenesisMod.MOD_ID, "textures/gui/warpstone_catalyzer.png");
@@ -28,8 +28,8 @@ public class WarpstoneCatalyzerScreen extends AbstractContainerScreen<WarpstoneC
         graphics.blit(GUI, leftPos, topPos, 0, 0, this.imageWidth, this.imageHeight);
         int power = menu.getPower();
         int p = (int) ((power / (float) WarpstoneCatalyzerBlockEntity.CAPACITY) * ENERGY_WIDTH);
-        graphics.fillGradient(leftPos + ENERGY_LEFT, topPos + ENERGY_TOP, leftPos + ENERGY_LEFT + p, topPos + ENERGY_TOP + ENERGY_HEIGHT, 0xffff0000, 0xff000000);
-        graphics.fill(leftPos + ENERGY_LEFT + p, topPos + ENERGY_TOP, leftPos + ENERGY_LEFT + ENERGY_WIDTH, topPos + ENERGY_TOP + ENERGY_HEIGHT, 0xff330000);
+        graphics.fillGradient(leftPos + ENERGY_LEFT, topPos + ENERGY_TOP, leftPos + ENERGY_LEFT + p, topPos + ENERGY_TOP + ENERGY_HEIGHT, 0xff00ff00, 0xff003300);
+        graphics.fill(leftPos + ENERGY_LEFT + p, topPos + ENERGY_TOP, leftPos + ENERGY_LEFT + ENERGY_WIDTH, topPos + ENERGY_TOP + ENERGY_HEIGHT, 0xff000000);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class WarpstoneCatalyzerScreen extends AbstractContainerScreen<WarpstoneC
         // Render tooltip with power if in the energy box
         if (mousex >= leftPos + ENERGY_LEFT && mousex < leftPos + ENERGY_LEFT + ENERGY_WIDTH && mousey >= topPos + ENERGY_TOP && mousey < topPos + ENERGY_TOP + ENERGY_HEIGHT) {
             int power = menu.getPower();
-            graphics.renderTooltip(this.font, Component.literal(power + " RF"), mousex, mousey);
+            graphics.renderTooltip(this.font, Component.literal(power + " FE"), mousex, mousey);
         }
     }
 }

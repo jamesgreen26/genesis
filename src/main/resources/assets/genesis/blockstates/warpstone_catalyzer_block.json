@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "powered=false": {
+            "model": "genesis:block/warpstone_catalyzer_empty"
+        },
+        "powered=true": {
+            "model": "genesis:block/warpstone_catalyzer_active"
+        }
+    }
+} 

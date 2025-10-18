@@ -84,14 +84,12 @@ public class WarpstoneCatalyzerBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState()
-                .setValue(BlockStateProperties.FACING, context.getNearestLookingDirection().getOpposite())
-                .setValue(BlockStateProperties.POWERED, false);
+        return this.defaultBlockState().setValue(BlockStateProperties.POWERED, false);
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(BlockStateProperties.POWERED, BlockStateProperties.FACING);
+        builder.add(BlockStateProperties.POWERED);
     }
 }

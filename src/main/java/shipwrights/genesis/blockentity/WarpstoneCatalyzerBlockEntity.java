@@ -17,6 +17,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
+import shipwrights.genesis.item.GenesisItems;
 import shipwrights.genesis.util.AdaptedEnergyStorage;
 
 import javax.annotation.Nonnull;
@@ -66,15 +67,11 @@ public class WarpstoneCatalyzerBlockEntity extends BlockEntity {
         if (energy.getEnergyStored() < energy.getMaxEnergyStored()) {
             if (burnTime <= 0) {
                 ItemStack fuel = items.getStackInSlot(SLOT);
-                if (fuel.isEmpty()) {
+                if (fuel.isEmpty() || !fuel.is(GenesisItems.WARPSTONE_CHUNK.get())) {
                     // No fuel
                     return;
                 }
-                setBurnTime(ForgeHooks.getBurnTime(fuel, RecipeType.SMELTING));
-                if (burnTime <= 0) {
-                    // Not a fuel
-                    return;
-                }
+                setBurnTime(600);
                 items.extractItem(SLOT, 1, false);
             } else {
                 setBurnTime(burnTime-1);
