@@ -1,5 +1,6 @@
 package shipwrights.dataplanets.space;
 
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import shipwrights.dataplanets.compat.Compat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -18,10 +19,10 @@ import java.util.UUID;
 
 public class StarSystemCreator {
 
-    public static void makeSystem(int minPlanetCount, int maxPlanetCount)
+    public static void makeSystem(int minPlanetCount, int maxPlanetCount, DimensionDataStorage storage)
     {
         String uuid = UUID.randomUUID().toString();
-        inventSystem(uuid, minPlanetCount, maxPlanetCount);
+        inventSystem(uuid, minPlanetCount, maxPlanetCount, storage);
     }
 
     private static String truth(boolean truth)
@@ -32,7 +33,7 @@ public class StarSystemCreator {
 
     private static final String[] CODE = new String[]{"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
 
-    private static void inventSystem(String uuid, int minPlanetCount, int maxPlanetCount)
+    private static void inventSystem(String uuid, int minPlanetCount, int maxPlanetCount, DimensionDataStorage storage)
     {
         RandomSource random = RandomSource.create();
         String systemName = CODE[random.nextInt(CODE.length)]+CODE[random.nextInt(CODE.length)]+random.nextInt(1000);
@@ -231,39 +232,21 @@ public class StarSystemCreator {
 
             systemData.put(planetName,planetData);
         }
-        CompoundTag tag = getDynamicDataOrNew();
+        
+        CompoundTag tag = getDynamicDataOrNew(storage);
         tag.put(systemName,systemData);
-        writeToDynamic(tag);
-
-
+        writeToDynamic(storage,tag);
     }
 
-    public static CompoundTag getDynamicDataOrNew()
+    public static CompoundTag getDynamicDataOrNew(DimensionDataStorage storage)
     {
-        CompoundTag tag;
-        File storage = new File("./dataplanets_dynamic_data.dat");
-        if(storage.exists())
-        {
-            try {
-                tag = NbtIo.readCompressed(new File("./dataplanets_dynamic_data.dat"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        else
-        {
-            tag = new CompoundTag();
-        }
-        return tag;
+        DynamicSavedData data = storage.computeIfAbsent(DynamicSavedData::new, DynamicSavedData::new, "dataplanets_dynamic_data");
+        return data.getData();
     }
-    private static void writeToDynamic(CompoundTag tag)
+    private static void writeToDynamic(DimensionDataStorage storage,CompoundTag tag)
     {
-        File storage = new File("./dataplanets_dynamic_data.dat");
-        try {
-            NbtIo.writeCompressed(tag,storage);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        DynamicSavedData data = storage.computeIfAbsent(DynamicSavedData::new, DynamicSavedData::new, "dataplanets_dynamic_data");
+        data.setData(tag);
     }
 
     private static void genOre(CompoundTag biomeData,RandomSource random)

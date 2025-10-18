@@ -5,6 +5,7 @@ import net.minecraft.world.effect.MobEffect;
 import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.MutableTags;
 import shipwrights.dataplanets.items.SpaceArmourItem;
+import shipwrights.dataplanets.space.DynamicSystems;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -89,7 +90,7 @@ public abstract class ServerPlayerMixin extends Entity {
         if(this.level().dimension().location().getNamespace().equals("dataplanets"))
         {
             String name = this.level().dimension().location().getPath();
-            CompoundTag data = StarSystemCreator.getDynamicDataOrNew();
+            CompoundTag data = StarSystemCreator.getDynamicDataOrNew(DynamicSystems.DATA_PROVIDER);
             CompoundTag planetData = data.getCompound(name.substring(0,name.length()-1)).getCompound(name);
             if(gravity!=null)
             {

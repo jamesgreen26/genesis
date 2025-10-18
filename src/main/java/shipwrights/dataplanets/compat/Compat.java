@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.Tags;
 import shipwrights.dataplanets.DPPackets;
 import shipwrights.dataplanets.MutableTags;
+import shipwrights.dataplanets.space.DynamicSystems;
 import shipwrights.dataplanets.space.S2PSyncPacket;
 import shipwrights.dataplanets.space.StarSystemCreator;
 import net.minecraft.core.Holder;
@@ -163,7 +164,7 @@ public class Compat {
      */
     public static void postLoadWorld()
     {
-        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PSyncPacket(StarSystemCreator.getDynamicDataOrNew()));
+        DPPackets.INSTANCE.send(PacketDistributor.ALL.noArg(),new S2PSyncPacket(StarSystemCreator.getDynamicDataOrNew(DynamicSystems.DATA_PROVIDER)));
 
     }
 }

@@ -1,5 +1,8 @@
 package shipwrights.dataplanets.space;
 
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import shipwrights.dataplanets.Dataplanets;
 import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.interfaces.IUnfreezableRegistry;
@@ -64,6 +67,7 @@ import net.minecraftforge.event.level.LevelEvent;
 import shipwrights.genesis.mixin.dataplanets.MinecraftServerAccessor;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -81,6 +85,8 @@ public class DynamicSystems {
     public static Map<String,String> TRANSLATIONS = new HashMap<>();
     public static Map<String,float[]> RAIN_COLOUR = new HashMap<>();
 
+    public static DimensionDataStorage DATA_PROVIDER;
+
     /**
      * called to load "datapack" resources into a world
      * used every time apart from the first when you should use onGenSetup instead.
@@ -88,30 +94,43 @@ public class DynamicSystems {
     public static void loadDynamicResources()
     {
         if(DynamicSystems.allRegistriesFrozen()) {
-            File storage = new File("./dataplanets_dynamic_data.dat");
-            if(!storage.exists())
+
+            if (DynamicSystems.DATA_PROVIDER == null && ServerLifecycleHooks.getCurrentServer() == null){
+                System.out.println("NEW WORLD");
+                TaskUtil.queueTickStart(() -> {
+                    System.out.println("TICK REGISTRATION GOES MEOW MEOW MEOW");
+                    DynamicSystems.DATA_PROVIDER = ServerLifecycleHooks.getCurrentServer().overworld().getDataStorage();
+                    DynamicSystems.loadDynamicResources();
+                });
+                return;
+            }
+
+            CompoundTag tag = StarSystemCreator.getDynamicDataOrNew(DynamicSystems.DATA_PROVIDER);
+//            System.out.println(tag);
+            if(tag.isEmpty())
             {
                 System.out.println("Last Level Name: "+ Dataplanets.LAST_WORLD_ID);
 
-                StarSystemCreator.makeSystem(8,12);
+                StarSystemCreator.makeSystem(8,12, DynamicSystems.DATA_PROVIDER);
             }
 
 
-            CompoundTag tag = StarSystemCreator.getDynamicDataOrNew();
+            tag = StarSystemCreator.getDynamicDataOrNew(DynamicSystems.DATA_PROVIDER);
             for(String system: tag.getAllKeys())
             {
                 if(tag.getTagType(system)== Tag.TAG_COMPOUND)
                 {
                     CompoundTag specificSystem = tag.getCompound(system);
-                    DynamicSystems.makeStar(specificSystem);
+                    DynamicSystems.makeDynamicWorld(null,system,makeStar(specificSystem));
 
                     for(String planet: specificSystem.getAllKeys())
                     {
-                        if(specificSystem.getTagType(planet)== Tag.TAG_COMPOUND)
+                        if(specificSystem.getTagType(planet) == Tag.TAG_COMPOUND)
                         {
                             CompoundTag specificPlanet = specificSystem.getCompound(planet);
+                            System.out.println(planet);
                             //DynamicSystems.makeOrbit(specificPlanet);
-                            DynamicSystems.makePlanet(specificPlanet);
+                            DynamicSystems.makeDynamicWorld(null,planet,makePlanet(specificPlanet));
 
                         }
                     }
@@ -136,7 +155,7 @@ public class DynamicSystems {
     public static ResourceKey<Biome> makeBiome(CompoundTag biomeData)
     {
         ResourceKey<Biome> biomeKey = ResourceKey.create(BIOMES.key(), ResourceLocation.tryBuild("dataplanets",biomeData.getString("name")+"_terrain"));
-
+        System.out.println(biomeData.getString("name"));
         if(!BIOMES.containsKey(biomeKey))
         {
             Biome biome = new Biome.BiomeBuilder()
@@ -575,46 +594,40 @@ public class DynamicSystems {
     public static LevelStem makeStar(CompoundTag systemData)
     {
         ResourceKey<LevelStem> starKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets", systemData.getString("systemName")));
-        if(!LEVEL_STEMS.containsKey(starKey))
-        {
-            Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
-            FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
-                    .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(50, DPBlocks.DENSE_GAS.get())),Optional.empty(),biomeHolder);
-            Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
+        Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
+        FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
+                .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(50, DPBlocks.DENSE_GAS.get())),Optional.empty(),biomeHolder);
+        Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
 
-            FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
-            LevelStem stem = new LevelStem(holder,flatLevelSource);
+        FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
+        LevelStem stem = new LevelStem(holder,flatLevelSource);
 
-            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
-            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
-                    starKey,
-                    stem,
-                    Lifecycle.stable() // use built-in registration info for now
-            );
-        }
+        ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+        ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                starKey,
+                stem,
+                Lifecycle.stable() // use built-in registration info for now
+        );
         return LEVEL_STEMS.get(starKey);
     }
 
     public static LevelStem makeGasPlanet(CompoundTag planetData)
     {
         ResourceKey<LevelStem> starKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets", planetData.getString("name")));
-        if(!LEVEL_STEMS.containsKey(starKey))
-        {
-            Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
-            FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
-                    .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(50, DPBlocks.DENSE_GAS.get())),Optional.empty(),biomeHolder);
-            Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
+        Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
+        FlatLevelGeneratorSettings settings = new FlatLevelGeneratorSettings(Optional.empty(),biomeHolder,List.of())
+                .withBiomeAndLayers(List.of(new FlatLayerInfo(1,Blocks.BEDROCK),new FlatLayerInfo(50,Blocks.LAVA),new FlatLayerInfo(50, DPBlocks.DENSE_GAS.get())),Optional.empty(),biomeHolder);
+        Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
 
-            FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
-            LevelStem stem = new LevelStem(holder,flatLevelSource);
+        FlatLevelSource flatLevelSource = new FlatLevelSource(settings);
+        LevelStem stem = new LevelStem(holder,flatLevelSource);
 
-            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
-            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
-                    starKey,
-                    stem,
-                    Lifecycle.stable() // use built-in registration info for now
-            );
-        }
+        ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+        ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                starKey,
+                stem,
+                Lifecycle.stable() // use built-in registration info for now
+        );
         Compat.postLoadPlanet(planetData);
         return LEVEL_STEMS.get(starKey);
     }
@@ -623,56 +636,51 @@ public class DynamicSystems {
     {
         ResourceKey<LevelStem> resourcekey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")));
         Holder.Reference<DimensionType> holder = DIMENSION_TYPE.getHolderOrThrow(makeDimType(planetData));
-        if(!LEVEL_STEMS.containsKey(resourcekey))
-        {
+        Holder<NormalNoise.NoiseParameters> offset = NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "offset")));
 
-            Holder<NormalNoise.NoiseParameters> offset = NOISE.getHolderOrThrow(ResourceKey.create(Registries.NOISE,ResourceLocation.fromNamespaceAndPath("minecraft","offset")));
+        NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
+                NoiseSettings.create(-64, 384, 2, 2),
+                BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("generalBlock"))).defaultBlockState(),
+                BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("seaBlock"))).defaultBlockState(),
+                getNoiseRouter(offset, planetData),
+                planetarySurfaceRuleSource(planetData.getBoolean("hasOxygen")&&planetData.getBoolean("hasAtmosphere")),
+                new OverworldBiomeBuilder().spawnTarget(),
+                planetData.getInt("seaLevel"),
+                false,
+                true,
+                true,
+                false
+        );
+        //Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(makeBiome(planetData));
 
-            NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
-                    NoiseSettings.create(-64, 384, 2, 2),
-                    BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("generalBlock"))).defaultBlockState(),
-                    BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(planetData.getString("seaBlock"))).defaultBlockState(),
-                    getNoiseRouter(offset, planetData),
-                    planetarySurfaceRuleSource(planetData.getBoolean("hasOxygen")&&planetData.getBoolean("hasAtmosphere")),
-                    new OverworldBiomeBuilder().spawnTarget(),
-                    planetData.getInt("seaLevel"),
-                    false,
-                    true,
-                    true,
-                    false
-            );
-            //Holder.Reference<Biome> biomeHolder = BIOMES.getHolderOrThrow(makeBiome(planetData));
-
-            List<Pair<Climate.ParameterPoint,Holder<Biome>>> biomes = new ArrayList<>();
-            ListTag biomesTag = planetData.getList("biomes",ListTag.TAG_COMPOUND);
-            for (int i = 0; i < biomesTag.size(); i++) {
-                CompoundTag b = biomesTag.getCompound(i);
-                biomes.add(new Pair<>(
-                        new Climate.ParameterPoint(
-                                Climate.Parameter.point(b.getFloat("temp")),
-                                Climate.Parameter.point(b.getFloat("humid")),
-                                Climate.Parameter.point(1),
-                                Climate.Parameter.point(b.getFloat("erode")),
-                                Climate.Parameter.point(1),
-                                Climate.Parameter.point(b.getFloat("wierd")),
-                                0
-                        ),BIOMES.getHolderOrThrow(makeBiome(b))));
-            }
-
-            MultiNoiseBiomeSource n = MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(biomes));
-            NoiseBasedChunkGenerator noiseBasedChunkGenerator = new NoiseBasedChunkGenerator(n, Holder.direct(settings));
-            LevelStem stem = new LevelStem(holder,noiseBasedChunkGenerator);
-
-            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
-            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
-                    resourcekey,
-                    stem,
-                    Lifecycle.stable() // use built-in registration info for now
-            );
-
-            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
-
+        List<Pair<Climate.ParameterPoint,Holder<Biome>>> biomes = new ArrayList<>();
+        ListTag biomesTag = planetData.getList("biomes",ListTag.TAG_COMPOUND);
+        for (int i = 0; i < biomesTag.size(); i++) {
+            CompoundTag b = biomesTag.getCompound(i);
+            biomes.add(new Pair<>(
+                    new Climate.ParameterPoint(
+                            Climate.Parameter.point(b.getFloat("temp")),
+                            Climate.Parameter.point(b.getFloat("humid")),
+                            Climate.Parameter.point(1),
+                            Climate.Parameter.point(b.getFloat("erode")),
+                            Climate.Parameter.point(1),
+                            Climate.Parameter.point(b.getFloat("wierd")),
+                            0
+                    ),BIOMES.getHolderOrThrow(makeBiome(b))));
         }
+
+        MultiNoiseBiomeSource n = MultiNoiseBiomeSource.createFromList(new Climate.ParameterList<>(biomes));
+        NoiseBasedChunkGenerator noiseBasedChunkGenerator = new NoiseBasedChunkGenerator(n, Holder.direct(settings));
+        LevelStem stem = new LevelStem(holder,noiseBasedChunkGenerator);
+
+        ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+        ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                resourcekey,
+                stem,
+                Lifecycle.stable() // use built-in registration info for now
+        );
+
+        ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
 
         Compat.postLoadPlanet(planetData);
         return LEVEL_STEMS.get(resourcekey);
@@ -728,23 +736,19 @@ public class DynamicSystems {
     {
         ResourceKey<LevelStem> orbitKey = ResourceKey.create(Registries.LEVEL_STEM, ResourceLocation.tryBuild("dataplanets",planetData.getString("name")+"_orbit"));
 
-        if(!LEVEL_STEMS.containsKey(orbitKey))
-        {
-            Holder.Reference<DimensionType> orbitHolder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
-            Holder.Reference<Biome> orbitBiomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
+        Holder.Reference<DimensionType> orbitHolder = DIMENSION_TYPE.getHolderOrThrow(Compat.SPACE_DIMENSION_TYPE);
+        Holder.Reference<Biome> orbitBiomeHolder = BIOMES.getHolderOrThrow(Compat.SPACE_BIOME);
 
-            LevelStem orbit = new LevelStem(orbitHolder,Compat.spaceGenerator(orbitBiomeHolder));
+        LevelStem orbit = new LevelStem(orbitHolder,Compat.spaceGenerator(orbitBiomeHolder));
 
-            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
-            ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
-                    orbitKey,
-                    orbit,
-                    Lifecycle.stable() // use built-in registration info for now
-            );
-            ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
-            return orbit;
-        }
-        return LEVEL_STEMS.get(orbitKey);
+        ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(false);
+        ((MappedRegistry<LevelStem>) LEVEL_STEMS).register(
+                orbitKey,
+                orbit,
+                Lifecycle.stable() // use built-in registration info for now
+        );
+        ((IUnfreezableRegistry) LEVEL_STEMS).setRegFrozen(true);
+        return orbit;
 
 
     }
@@ -753,8 +757,8 @@ public class DynamicSystems {
     {
         ResourceKey<Level> dimensionKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryBuild("dataplanets",name));
 
-        if(!((MinecraftServerAccessor) server).getLevels().containsKey(dimensionKey))
-        {
+//        if(!((MinecraftServerAccessor) server).getLevels().containsKey(dimensionKey))
+//        {
             DimensionManager.INSTANCE.queueLevelForRegistration(dimensionKey,stem);
 
 //            ChunkProgressListener listener = server.progressListenerFactory.create(server.getWorldData().getGameRules().getInt(GameRules.RULE_SPAWN_RADIUS));
@@ -767,10 +771,9 @@ public class DynamicSystems {
 //
 //            server.levels.put(dimensionKey, serverlevel1);
 //            MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(server.levels.get(dimensionKey)));
-            Compat.postLoadWorld();
+        TaskUtil.queueTickStart(Compat::postLoadWorld);
 
-
-        }
+//        }
     }
 
     /**
@@ -780,7 +783,7 @@ public class DynamicSystems {
      */
     public static void onGenSetup(MinecraftServer server)
     {
-        CompoundTag systems = StarSystemCreator.getDynamicDataOrNew();
+        CompoundTag systems = StarSystemCreator.getDynamicDataOrNew(DynamicSystems.DATA_PROVIDER);
         for(String systemId: systems.getAllKeys())
         {
             if(systems.getTagType(systemId)== Tag.TAG_COMPOUND)
