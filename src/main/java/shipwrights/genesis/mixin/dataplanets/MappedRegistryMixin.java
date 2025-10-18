@@ -97,8 +97,6 @@ public abstract class MappedRegistryMixin implements IUnfreezableRegistry {
         }
         if(shouldMake)
         {
-            DynamicSystems.frozeTimes++;
-
             DynamicSystems.loadDynamicResources();
         }
 

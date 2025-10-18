@@ -80,7 +80,6 @@ public class DynamicSystems {
     public static Registry<NormalNoise.NoiseParameters> NOISE = null;
     public static Map<String,String> TRANSLATIONS = new HashMap<>();
     public static Map<String,float[]> RAIN_COLOUR = new HashMap<>();
-    public static int frozeTimes = 0;
 
     /**
      * called to load "datapack" resources into a world
@@ -88,15 +87,10 @@ public class DynamicSystems {
      */
     public static void loadDynamicResources()
     {
-        //TODO: 20 is a somewhat arbitrary number, check this works on a big modpack
-        //I would have thought this would have more problems on a smaller modpack actually...
-        //Could you replace 20 with the number of mods that are currently loaded?
-        if(DynamicSystems.allRegistriesFrozen() && frozeTimes>30)
-        {
+        if(DynamicSystems.allRegistriesFrozen()) {
             File storage = new File("./dataplanets_dynamic_data.dat");
             if(!storage.exists())
             {
-
                 System.out.println("Last Level Name: "+ Dataplanets.LAST_WORLD_ID);
 
                 StarSystemCreator.makeSystem(8,12);
