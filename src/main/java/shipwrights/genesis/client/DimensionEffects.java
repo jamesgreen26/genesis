@@ -75,6 +75,8 @@ public class DimensionEffects extends DimensionSpecialEffects {
             VertexBuffer.unbind();
         }
 
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+
         return true;
     }
 
