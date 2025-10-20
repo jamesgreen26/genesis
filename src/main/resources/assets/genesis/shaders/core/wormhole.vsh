@@ -16,7 +16,7 @@ void main() {
     vec3 axis = normalize(Color.rgb * 2.0 - 1.0);
 
     // Rotation angle based on GameTime
-    float angle = GameTime * 3.14159265359 * 15;
+    float angle = GameTime * 3.14159265359 * 24;
 
     // Compute rotation matrix using Rodrigues' rotation formula
     float c = cos(angle);
