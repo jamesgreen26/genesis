@@ -16,6 +16,7 @@ public final class TaskUtil {
 
 	@SubscribeEvent
 	public static void onServerTick(final TickEvent.ServerTickEvent event) {
+		DynamicSystems.DATA_PROVIDER = ServerLifecycleHooks.getCurrentServer().overworld().getDataStorage();
 		final Queue<Runnable> queue = switch (event.phase) {
 			case START -> TICK_START_QUEUE;
 			case END -> TICK_END_QUEUE;
