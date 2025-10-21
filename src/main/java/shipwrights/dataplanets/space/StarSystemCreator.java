@@ -103,7 +103,7 @@ public class StarSystemCreator {
             planetData.putString("effects",effects);
 
 
-            if(planetData.getInt("temperature")>600)
+            if(planetData.getInt("temperature")>800)
             {
                 planetData.putString("generalBlock", "minecraft:magma_block");
             }
