@@ -4,7 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -119,8 +122,23 @@ public class AsteroidBlock extends Block {
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide && !state.is(newState.getBlock())) {
             spawnFallingBlocks(level, pos, state);
+            dropItems(level, pos, state);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    private void dropItems(Level level, BlockPos pos, BlockState state) {
+        int palette = state.getValue(PALETTE);
+
+        if (PALETTE_BLOCKS == null) {
+            setupPalettes();
+        }
+
+        List<Item> items = PALETTE_BLOCKS.get(palette).stream().map(weightedBlockState -> weightedBlockState.state.getBlock().asItem()).toList();
+
+        for (var item : items) {
+            popResource(level, pos, new ItemStack(item, level.random.nextInt(32, 64)));
+        }
     }
 
     @Override
