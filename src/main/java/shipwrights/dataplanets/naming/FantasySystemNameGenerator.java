@@ -67,7 +67,7 @@ public class FantasySystemNameGenerator extends SimpleJsonResourceReloadListener
         if (names.isEmpty()) {
             return "Unknown";
         }
-        return names.get(random.nextInt(names.size()));
+        return names.get(random.nextInt(names.size())) + "-" + random.nextInt(10);
     }
 
     /**

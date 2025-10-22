@@ -6,6 +6,9 @@ import static shipwrights.dataplanets.DataplanetsMod.FANTASY_SYSTEM_NAME_GENERAT
 
 public interface SystemNameGenerator {
 
+    String ALL_LETTERS = "abcdefghijklmnopqrstuvwxyz";
+
+
     static SystemNameGenerator get(boolean scientific) {
         if (scientific) {
             return new ScientificSystemNameGenerator();
@@ -24,7 +27,6 @@ public interface SystemNameGenerator {
     class ScientificSystemNameGenerator implements SystemNameGenerator {
 
         private static final String CONSONANTS = "bcdfghjklmnpqrstvwxyz";
-        private static final String ALL_LETTERS = "abcdefghijklmnopqrstuvwxyz";
 
         @Override
         public String generate(RandomSource random) {
