@@ -1,12 +1,19 @@
 package shipwrights.dataplanets.systemCreation.dimension;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.dimension.DimensionType;
 import shipwrights.dataplanets.systemCreation.PlanetData;
+import shipwrights.dataplanets.systemCreation.SystemCreator;
+import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.OptionalLong;
+
+import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 
 /**
  * Builtin dimension types for different planet configurations
@@ -14,12 +21,29 @@ import java.util.OptionalLong;
  */
 public class DimensionTypeCreator {
 
+    public static Holder<DimensionType> createAndRegisterDimensionType(SystemCreator.SystemCreationContext context, PlanetData planetData) {
+        DimensionType dimensionType = DimensionTypeCreator.createFromPlanetData(planetData);
+        ResourceLocation dimensionTypeLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name() + "_dimension_type");
+        ResourceKey<DimensionType> dimensionTypeKey = ResourceKey.create(Registries.DIMENSION_TYPE, dimensionTypeLocation);
+
+        RegistryUtil.registerDimensionType(
+                context.server,
+                dimensionTypeLocation,
+                dimensionType
+        );
+
+        // Return holder from registry after registration
+        return context.server.registryAccess()
+                .registryOrThrow(Registries.DIMENSION_TYPE)
+                .getHolderOrThrow(dimensionTypeKey);
+    }
+
     /**
      * Create a dimension type based on planet data
      * @param planetData The planet data to create a dimension type from
      * @return The appropriate dimension type
      */
-    public static DimensionType createFromPlanetData(PlanetData planetData) {
+    private static DimensionType createFromPlanetData(PlanetData planetData) {
 
         // Closer to star = more skylight (inverse relationship)
         // Earth distance is ~1.0, so less than ~3.0 has good skylight

@@ -3,23 +3,23 @@ package shipwrights.dataplanets.systemCreation;
 import net.minecraft.util.RandomSource;
 
 public record PlanetSource(
+        String name,
         double size,
         double distanceFromStar,
         double atmosphericDensity,
         double orbitalPeriod,
         double weirdness,
         double seaLevel,
-        double temperature,
         double terrainRoughness,
         double flavour
 ) {
 
-    public static PlanetSource createRandom(RandomSource random) {
-        return builder()
-                .size(doubleBetween(random, 0.5, 3.0))
-                .distanceFromStar(doubleBetween(random, 0.25, 4.0))
-                .orbitalPeriod(doubleBetween(random, 0.5, 4.0))
-                .atmosphericDensity(doubleBetween(random, 0.0, 3.5))
+    public static PlanetSource createRandom(String name, RandomSource random) {
+        return builder(name)
+                .size(doubleBetween(random, 0.5, 2.0))
+                .distanceFromStar(doubleBetween(random, 0.25, 2.0))
+                .orbitalPeriod(doubleBetween(random, 0.5, 2.0))
+                .atmosphericDensity(doubleBetween(random, 0.0, 2.0))
                 .weirdness(doubleBetween(random, 0.0, 2.0))
                 .seaLevel(doubleBetween(random, 0.0, 2.0))
                 .terrainRoughness(doubleBetween(random, 0.0, 2.0))
@@ -31,11 +31,12 @@ public record PlanetSource(
         return random.nextInt((int)(lower * 100), (int)(upper * 100)) / 100.0;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(String name) {
+        return new Builder(name);
     }
 
     public static class Builder {
+        private final String name;
         private double size = 1.0;
         private double distanceFromStar = 1.0;
         private double atmosphericDensity = 1.0;
@@ -45,7 +46,9 @@ public record PlanetSource(
         private double terrainRoughness = 1.0;
         private double flavour = 1.0;
 
-        private Builder() {}
+        private Builder(String name) {
+            this.name = name;
+        }
 
         public Builder size(double size) {
             this.size = size;
@@ -88,13 +91,7 @@ public record PlanetSource(
         }
 
         public PlanetSource build() {
-            return new PlanetSource(size, distanceFromStar, atmosphericDensity, orbitalPeriod, weirdness, seaLevel, getTemperature(), terrainRoughness, flavour);
-        }
-
-        private double getTemperature() {
-            double baseTemp = 1.0 / (distanceFromStar * distanceFromStar);
-            double greenhouseEffect = 1.0 + (atmosphericDensity - 1.0) * 0.3;
-            return baseTemp * greenhouseEffect;
+            return new PlanetSource(name, size, distanceFromStar, atmosphericDensity, orbitalPeriod, weirdness, seaLevel, terrainRoughness, flavour);
         }
     }
 }

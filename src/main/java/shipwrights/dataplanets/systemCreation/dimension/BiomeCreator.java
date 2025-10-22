@@ -1,15 +1,82 @@
 package shipwrights.dataplanets.systemCreation.dimension;
 
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeGenerationSettings;
-import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.biome.*;
 import shipwrights.dataplanets.systemCreation.PlanetData;
+import shipwrights.dataplanets.systemCreation.SystemCreator;
+import shipwrights.dataplanets.util.RegistryUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 
 public class BiomeCreator {
 
-    public static Biome createBiome(RandomSource random, PlanetData planetData, double variationFactor) {
+    public List<Pair<Climate.ParameterPoint, Holder<Biome>>> createAndRegisterBiomes(SystemCreator.SystemCreationContext context, PlanetData planetData) {
+        int biomeCount = 3 + context.random.nextInt(4);
+        List<Pair<Climate.ParameterPoint, Holder<Biome>>> biomeList = new ArrayList<>();
+
+        for (int i = 0; i < biomeCount; i++) {
+            double variationFactor = (double) i / biomeCount;
+
+            Biome biome = BiomeCreator.createBiome(context.random, planetData, variationFactor);
+
+            ResourceLocation biomeLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name() + "_biome_" + i);
+            ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, biomeLocation);
+            RegistryUtil.registerBiome(context.server, biomeLocation, biome);
+
+            // Create climate parameters for this biome based on variation
+            Climate.ParameterPoint climateParams = createClimateParameters(planetData, variationFactor);
+
+            // Create holder for the biome
+            Holder<Biome> biomeHolder = context.server.registryAccess()
+                    .registryOrThrow(Registries.BIOME)
+                    .getHolderOrThrow(biomeKey);
+
+            biomeList.add(Pair.of(climateParams, biomeHolder));
+        }
+
+        return biomeList;
+    }
+
+    /**
+     * Create climate parameters for a biome based on planet data and variation factor
+     */
+    private Climate.ParameterPoint createClimateParameters(PlanetData planetData, double variationFactor) {
+        // Base values from planet data, varied by the biome's variation factor
+        float temperature = clampClimate(planetData.temperature() + (variationFactor - 0.5) * 0.4);
+        float humidity = clampClimate((planetData.atmosphericDensity() + planetData.seaLevel()) / 2.0);
+        float continentalness = clampClimate(planetData.size() - 1.0); // Size affects landmass
+        float erosion = clampClimate(1.0 - planetData.terrainRoughness()); // Rough terrain = less erosion
+        float depth = 0.0f; // Depth parameter
+        float weirdness = clampClimate(planetData.weirdness() - 1.0);
+
+        // Create climate parameter ranges (using single points for simplicity)
+        return Climate.parameters(
+                Climate.Parameter.point(temperature),
+                Climate.Parameter.point(humidity),
+                Climate.Parameter.point(continentalness),
+                Climate.Parameter.point(erosion),
+                Climate.Parameter.point(depth),
+                Climate.Parameter.point(weirdness),
+                0L // offset - could be based on biome index
+        );
+    }
+
+    /**
+     * Clamp climate parameter values to Minecraft's allowed range
+     */
+    private static float clampClimate(double value) {
+        return (float) Math.max(-2.0, Math.min(2.0, value));
+    }
+
+    private static Biome createBiome(RandomSource random, PlanetData planetData, double variationFactor) {
         // Vary temperature based on planet base temperature and variation
         float temperature = (float) (planetData.temperature() + (variationFactor - 0.5) * 0.4);
 

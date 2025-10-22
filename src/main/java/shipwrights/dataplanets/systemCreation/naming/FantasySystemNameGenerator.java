@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.naming;
+package shipwrights.dataplanets.systemCreation.naming;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,6 +12,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -67,7 +68,7 @@ public class FantasySystemNameGenerator extends SimpleJsonResourceReloadListener
         if (names.isEmpty()) {
             return "Unknown";
         }
-        return names.get(random.nextInt(names.size())) + "-" + random.nextInt(10);
+        return names.get(random.nextInt(names.size())).toLowerCase(Locale.ROOT) + "-" + random.nextInt(10);
     }
 
     /**

@@ -7,8 +7,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import shipwrights.dataplanets.naming.FantasySystemNameGenerator;
+import shipwrights.dataplanets.systemCreation.naming.FantasySystemNameGenerator;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
+import shipwrights.dataplanets.util.RegistryUtil;
 
 @Mod.EventBusSubscriber
 public class DataplanetsMod {
@@ -26,6 +27,10 @@ public class DataplanetsMod {
     public static void onServerAboutToStart(ServerAboutToStartEvent event) {
         MinecraftServer server = event.getServer();
 
-        new SystemCreator().createSystem(server, true);
+        boolean isNewSave = RegistryUtil.setupDatapackFolder(server);
+
+        if (isNewSave) {
+            new SystemCreator().createSystem(server, true);
+        }
     }
 }

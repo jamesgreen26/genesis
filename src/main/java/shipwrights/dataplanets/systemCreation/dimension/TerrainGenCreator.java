@@ -1,5 +1,6 @@
 package shipwrights.dataplanets.systemCreation.dimension;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -13,8 +14,11 @@ import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
+import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.List;
+
+import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 
 /**
  * Creates NoiseGeneratorSettings for procedural terrain generation based on planet data.
@@ -27,7 +31,7 @@ public class TerrainGenCreator {
      * @param planetData The planet data to create terrain generation settings from
      * @return NoiseGeneratorSettings configured for this planet
      */
-    public static NoiseGeneratorSettings createFromPlanetData(PlanetData planetData, SystemCreator.SystemCreationContext context) {
+    public static Holder.Reference<NoiseGeneratorSettings> createFromPlanetData(PlanetData planetData, SystemCreator.SystemCreationContext context) {
         // Convert planet's sea level (0.0-2.0 normalized) to Minecraft Y coordinate
         // Earth-like sea level (~1.0) should map to around Y=63
         int seaLevel = (int) (planetData.seaLevel() * 63);
@@ -55,7 +59,7 @@ public class TerrainGenCreator {
         boolean oreVeinsEnabled = true; // Enable ore veins
         boolean useLegacyRandomSource = false; // Use modern random
 
-        return new NoiseGeneratorSettings(
+        NoiseGeneratorSettings noiseGeneratorSettings =  new NoiseGeneratorSettings(
                 noiseSettings,
                 defaultBlock,
                 defaultFluid,
@@ -68,6 +72,15 @@ public class TerrainGenCreator {
                 oreVeinsEnabled,
                 useLegacyRandomSource
         );
+
+        ResourceLocation noiseSettingsLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name() + "_noise_settings");
+        ResourceKey<NoiseGeneratorSettings> noiseSettingsKey = ResourceKey.create(Registries.NOISE_SETTINGS, noiseSettingsLocation);
+
+        RegistryUtil.registerNoiseSettings(context.server, noiseSettingsLocation, noiseGeneratorSettings);
+
+        return context.server.registryAccess()
+                .registryOrThrow(Registries.NOISE_SETTINGS)
+                .getHolderOrThrow(noiseSettingsKey);
     }
 
     /**
@@ -96,6 +109,14 @@ public class TerrainGenCreator {
     }
 
     /**
+     * Clamp a value to the valid climate parameter range [-2.0, 2.0]
+     * Uses a slightly tighter bound to account for floating point precision
+     */
+    private static double clampClimateParameter(double value) {
+        return Math.max(-1.99, Math.min(1.99, value));
+    }
+
+    /**
      * Create a noise router for terrain generation based on planet properties
      */
     private static NoiseRouter createNoiseRouter(PlanetData planetData, SystemCreator.SystemCreationContext context) {
@@ -106,6 +127,12 @@ public class TerrainGenCreator {
         // terrainRoughness affects the scale of noise (higher = more detail)
         double noiseScale = planetData.terrainRoughness();
         double noiseAmplitude = planetData.size(); // Larger planets = more dramatic terrain
+
+        // Clamp climate parameters to valid range [-2.0, 2.0]
+        double temperature = clampClimateParameter(planetData.temperature());
+        double vegetation = clampClimateParameter(planetData.atmosphericDensity());
+        double erosion = clampClimateParameter(planetData.weirdness());
+        double ridges = clampClimateParameter(planetData.terrainRoughness());
 
         // Create final density function for terrain shape
         // This determines where blocks are placed vs air
@@ -143,7 +170,7 @@ public class TerrainGenCreator {
                 DensityFunctions.constant(0),
                 // temperature - biome climate parameter (scaled by planet temperature)
                 DensityFunctions.mul(
-                        DensityFunctions.constant(planetData.temperature()),
+                        DensityFunctions.constant(temperature),
                         DensityFunctions.shiftedNoise2d(
                                 DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
                                 DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
@@ -153,7 +180,7 @@ public class TerrainGenCreator {
                 ),
                 // vegetation - biome climate parameter (scaled by atmospheric density)
                 DensityFunctions.mul(
-                        DensityFunctions.constant(planetData.atmosphericDensity()),
+                        DensityFunctions.constant(vegetation),
                         DensityFunctions.shiftedNoise2d(
                                 DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
                                 DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
@@ -165,7 +192,7 @@ public class TerrainGenCreator {
                 DensityFunctions.constant(0),
                 // erosion - terrain weathering (scaled by weirdness for variety)
                 DensityFunctions.mul(
-                        DensityFunctions.constant(planetData.weirdness()),
+                        DensityFunctions.constant(erosion),
                         DensityFunctions.shiftedNoise2d(
                                 DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
                                 DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
@@ -177,7 +204,7 @@ public class TerrainGenCreator {
                 DensityFunctions.constant(0),
                 // ridges - mountain ridge generation (scaled by terrain roughness)
                 DensityFunctions.mul(
-                        DensityFunctions.constant(planetData.terrainRoughness()),
+                        DensityFunctions.constant(ridges),
                         DensityFunctions.shiftedNoise2d(
                                 DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
                                 DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),

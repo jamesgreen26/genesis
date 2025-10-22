@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.naming;
+package shipwrights.dataplanets.systemCreation.naming;
 
 import net.minecraft.util.RandomSource;
 

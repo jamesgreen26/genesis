@@ -1,7 +1,5 @@
 package shipwrights.dataplanets.systemCreation;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 public record PlanetData(
@@ -20,38 +18,21 @@ public record PlanetData(
         double gravity
 ) {
 
-    public static final Codec<PlanetData> CODEC = RecordCodecBuilder.create(instance ->
-        instance.group(
-            Codec.STRING.fieldOf("name").forGetter(PlanetData::name),
-            Codec.DOUBLE.fieldOf("size").forGetter(PlanetData::size),
-            Codec.DOUBLE.fieldOf("distanceFromStar").forGetter(PlanetData::distanceFromStar),
-            Codec.DOUBLE.fieldOf("atmosphericDensity").forGetter(PlanetData::atmosphericDensity),
-            Codec.DOUBLE.fieldOf("orbitalPeriod").forGetter(PlanetData::orbitalPeriod),
-            Codec.DOUBLE.fieldOf("weirdness").forGetter(PlanetData::weirdness),
-            Codec.DOUBLE.fieldOf("seaLevel").forGetter(PlanetData::seaLevel),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(PlanetData::temperature),
-            Codec.DOUBLE.fieldOf("terrainRoughness").forGetter(PlanetData::terrainRoughness),
-            Codec.DOUBLE.fieldOf("flavour").forGetter(PlanetData::flavour),
-            ResourceLocation.CODEC.fieldOf("primaryBlock").forGetter(PlanetData::primaryBlock),
-            ResourceLocation.CODEC.fieldOf("primaryFluid").forGetter(PlanetData::primaryFluid),
-            Codec.DOUBLE.fieldOf("gravity").forGetter(PlanetData::gravity)
-        ).apply(instance, PlanetData::new)
-    );
-
-    public static PlanetData fromPlanetSource(PlanetSource source, String name) {
-        ResourceLocation primaryBlock = derivePrimaryBlock(source.temperature(), source.weirdness());
-        ResourceLocation primaryFluid = derivePrimaryFluid(source.temperature(), source.seaLevel(), source.atmosphericDensity());
+    public static PlanetData fromPlanetSource(PlanetSource source) {
+        double temperature = deriveTemperature(source.distanceFromStar(), source.atmosphericDensity());
+        ResourceLocation primaryBlock = derivePrimaryBlock(temperature, source.weirdness());
+        ResourceLocation primaryFluid = derivePrimaryFluid(temperature, source.seaLevel(), source.atmosphericDensity());
         double gravity = deriveGravity(source.size());
 
         return new PlanetData(
-            name,
+            source.name(),
             source.size(),
             source.distanceFromStar(),
             source.atmosphericDensity(),
             source.orbitalPeriod(),
             source.weirdness(),
             source.seaLevel(),
-            source.temperature(),
+            temperature,
             source.terrainRoughness(),
             source.flavour(),
             primaryBlock,
@@ -95,5 +76,13 @@ public record PlanetData(
     private static double deriveGravity(double size) {
         // Gravity is primarily based on planet size (mass)
         return Math.sqrt(size);
+    }
+
+    private static double deriveTemperature(double distanceFromStar, double atmosphericDensity) {
+        double baseTemp = 1.0 / distanceFromStar;
+        double greenhouseEffect = 1.0 + (atmosphericDensity - 1.0) * 0.3;
+        double rawTemp = baseTemp * greenhouseEffect;
+
+        return Math.max(-2.0, Math.min(2.0, rawTemp));
     }
 }
