@@ -33,10 +33,4 @@ public class ModRegistries {
             helper.register(ASTEROID_RULE_ID, AsteroidBlockSurfaceRule.CODEC.codec());
         });
     }
-
-    @SubscribeEvent
-    public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
-        event.register(SPACE_DIM, new DimensionEffects());
-        event.register(WORMHOLE_DIM, new WormholeDimensionEffects());
-    }
 }

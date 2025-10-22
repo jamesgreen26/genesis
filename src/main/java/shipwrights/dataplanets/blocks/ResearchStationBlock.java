@@ -1,9 +1,8 @@
 package shipwrights.dataplanets.blocks;
 
+import shipwrights.dataplanets.ClientThings;
 import shipwrights.dataplanets.registry.DPBlocks;
 import shipwrights.dataplanets.registry.DPItems;
-import shipwrights.dataplanets.screens.ResearchScreen;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -38,7 +37,7 @@ public class ResearchStationBlock extends BaseEntityBlock {
         ResearchStationBE researchStationBE = (ResearchStationBE) level.getBlockEntity(p_60505_);
         if(level.isClientSide)
         {
-            Minecraft.getInstance().setScreen(new ResearchScreen(researchStationBE));
+            ClientThings.openResearchScreen(researchStationBE);
         }
         else
         {
