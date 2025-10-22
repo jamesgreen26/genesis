@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.planetCreation;
+package shipwrights.dataplanets.systemCreation;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

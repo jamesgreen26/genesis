@@ -1,9 +1,10 @@
-package shipwrights.dataplanets.planetCreation;
+package shipwrights.dataplanets.systemCreation.dimension;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.dimension.DimensionType;
+import shipwrights.dataplanets.systemCreation.PlanetData;
 
 import java.util.OptionalLong;
 
@@ -11,7 +12,7 @@ import java.util.OptionalLong;
  * Builtin dimension types for different planet configurations
  * Based on combinations of atmosphere and oxygen presence
  */
-public class BuiltinDimensionTypes {
+public class DimensionTypeCreator {
 
     /**
      * Create a dimension type based on planet data

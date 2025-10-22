@@ -1,12 +1,18 @@
-package shipwrights.dataplanets.planetCreation;
+package shipwrights.dataplanets.systemCreation;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.naming.SystemNameGenerator;
+import shipwrights.dataplanets.systemCreation.dimension.BiomeCreator;
+import shipwrights.dataplanets.systemCreation.dimension.DimensionTypeCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SystemCreator {
 
@@ -19,16 +25,36 @@ public class SystemCreator {
         PlanetData planetData = PlanetData.fromPlanetSource(planetSource, context.nextPlanetName());
 
         DimensionType dimensionType = createAndRegisterDimensionType(context, planetData);
+
+        List<Biome> biomes = createAndRegisterBiomes(context, planetData);
     }
 
     private DimensionType createAndRegisterDimensionType(SystemCreationContext context, PlanetData planetData) {
-        DimensionType dimensionType = BuiltinDimensionTypes.createFromPlanetData(planetData);
+        DimensionType dimensionType = DimensionTypeCreator.createFromPlanetData(planetData);
         RegistryUtil.registerDimensionType(
                 context.server,
                 ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, planetData.name() + "_dimension_type"),
                 dimensionType
         );
         return dimensionType;
+    }
+
+    private List<Biome> createAndRegisterBiomes(SystemCreationContext context, PlanetData planetData) {
+        int biomeCount = 3 + context.random.nextInt(4);
+        List<Biome> biomes = new ArrayList<>();
+
+        for (int i = 0; i < biomeCount; i++) {
+            double variationFactor = (double) i / biomeCount;
+
+            Biome biome = BiomeCreator.createBiome(context.random, planetData, variationFactor);
+
+            ResourceLocation biomeLocation = ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, planetData.name() + "_biome_" + i);
+            RegistryUtil.registerBiome(context.server, biomeLocation, biome);
+
+            biomes.add(biome);
+        }
+
+        return biomes;
     }
 
 
