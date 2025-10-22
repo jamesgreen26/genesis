@@ -16,6 +16,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import shipwrights.dataplanets.util.RegistryUtil;
 
 @Mod.EventBusSubscriber
 public class DataplanetsMod {

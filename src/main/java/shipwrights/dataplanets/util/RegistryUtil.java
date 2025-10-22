@@ -1,4 +1,4 @@
-package shipwrights.dataplanets;
+package shipwrights.dataplanets.util;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;

@@ -1,4 +1,4 @@
-package shipwrights.dataplanets;
+package shipwrights.dataplanets.planetCreation;
 
 import net.minecraft.util.RandomSource;
 
