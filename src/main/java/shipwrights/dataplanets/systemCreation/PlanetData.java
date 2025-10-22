@@ -3,7 +3,6 @@ package shipwrights.dataplanets.systemCreation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
-import shipwrights.dataplanets.util.Color;
 
 public record PlanetData(
         String name,
@@ -16,7 +15,6 @@ public record PlanetData(
         double temperature,
         double terrainRoughness,
         double flavour,
-        int fogColor,
         ResourceLocation primaryBlock,
         ResourceLocation primaryFluid,
         double gravity
@@ -34,7 +32,6 @@ public record PlanetData(
             Codec.DOUBLE.fieldOf("temperature").forGetter(PlanetData::temperature),
             Codec.DOUBLE.fieldOf("terrainRoughness").forGetter(PlanetData::terrainRoughness),
             Codec.DOUBLE.fieldOf("flavour").forGetter(PlanetData::flavour),
-            Codec.INT.fieldOf("fogColor").forGetter(PlanetData::fogColor),
             ResourceLocation.CODEC.fieldOf("primaryBlock").forGetter(PlanetData::primaryBlock),
             ResourceLocation.CODEC.fieldOf("primaryFluid").forGetter(PlanetData::primaryFluid),
             Codec.DOUBLE.fieldOf("gravity").forGetter(PlanetData::gravity)
@@ -42,7 +39,6 @@ public record PlanetData(
     );
 
     public static PlanetData fromPlanetSource(PlanetSource source, String name) {
-        int fogColor = deriveFogColor(source.temperature(), source.atmosphericDensity());
         ResourceLocation primaryBlock = derivePrimaryBlock(source.temperature(), source.weirdness());
         ResourceLocation primaryFluid = derivePrimaryFluid(source.temperature(), source.seaLevel(), source.atmosphericDensity());
         double gravity = deriveGravity(source.size());
@@ -58,36 +54,10 @@ public record PlanetData(
             source.temperature(),
             source.terrainRoughness(),
             source.flavour(),
-            fogColor,
             primaryBlock,
             primaryFluid,
             gravity
         );
-    }
-
-    private static int deriveFogColor(double temperature, double atmosphericDensity) {
-        // Derive fog color based on temperature and atmospheric density
-        int alpha = (int)(atmosphericDensity * 127.5);
-
-        Color color;
-        if (temperature > 1.5) {
-            // Hot planets - reddish/orange fog
-            int red = 255;
-            int green = 200 - (int)((temperature - 1.5) * 100);
-            int blue = 100 - (int)((temperature - 1.5) * 50);
-            color = new Color(red, green, blue, alpha);
-        } else if (temperature < 0.5) {
-            // Cold planets - blue/white fog
-            int red = 150 + (int)((0.5 - temperature) * 200);
-            int green = 180 + (int)((0.5 - temperature) * 150);
-            int blue = 255;
-            color = new Color(red, green, blue, alpha);
-        } else {
-            // Earth-like - light blue fog
-            color = new Color(0xC0, 0xD8, 0xFF, alpha);
-        }
-
-        return color.toInt();
     }
 
     private static ResourceLocation derivePrimaryBlock(double temperature, double weirdness) {

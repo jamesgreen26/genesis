@@ -21,7 +21,7 @@ public class BiomeCreator {
 
         // Create special effects based on planet properties
         BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder()
-                .fogColor(planetData.fogColor())
+                .fogColor(deriveFogColor(planetData, variationFactor))
                 .waterColor(deriveWaterColor(planetData, variationFactor))
                 .waterFogColor(deriveWaterFogColor(planetData, variationFactor))
                 .skyColor(deriveSkyColor(planetData, variationFactor))
@@ -43,6 +43,44 @@ public class BiomeCreator {
                 .mobSpawnSettings(mobSpawnSettings)
                 .generationSettings(generationSettings)
                 .build();
+    }
+
+    private static int deriveFogColor(PlanetData planetData, double variationFactor) {
+        // Derive fog color based on temperature, atmospheric density, and variation
+        double temp = planetData.temperature();
+        double atmosphere = planetData.atmosphericDensity();
+
+        // Vary the temperature slightly for this biome
+        double biomeTemp = temp + (variationFactor - 0.5) * 0.3;
+
+        // Calculate alpha based on atmospheric density (thicker atmosphere = more opaque fog)
+        int alpha = Math.min(255, (int)(atmosphere * 127.5) + 64);
+
+        int red, green, blue;
+
+        if (biomeTemp > 1.5) {
+            // Hot planets - reddish/orange fog with variation
+            red = 255;
+            green = 200 - (int)((biomeTemp - 1.5) * 100) + (int)(variationFactor * 30);
+            blue = 100 - (int)((biomeTemp - 1.5) * 50) + (int)(variationFactor * 20);
+        } else if (biomeTemp < 0.5) {
+            // Cold planets - blue/white fog with variation
+            red = 150 + (int)((0.5 - biomeTemp) * 200) - (int)(variationFactor * 40);
+            green = 180 + (int)((0.5 - biomeTemp) * 150) - (int)(variationFactor * 30);
+            blue = 255;
+        } else {
+            // Earth-like - light blue fog with subtle variation
+            red = 0xC0 + (int)(variationFactor * 20) - 10;
+            green = 0xD8 + (int)(variationFactor * 15) - 7;
+            blue = 0xFF;
+        }
+
+        // Clamp values to valid range
+        red = Math.max(0, Math.min(255, red));
+        green = Math.max(0, Math.min(255, green));
+        blue = Math.max(0, Math.min(255, blue));
+
+        return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
 
     private static int deriveWaterColor(PlanetData planetData, double variationFactor) {
