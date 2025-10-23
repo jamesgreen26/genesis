@@ -2,11 +2,16 @@ package shipwrights.dataplanets.systemCreation.dimension;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.*;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
@@ -25,7 +30,7 @@ public class BiomeCreator {
         for (int i = 0; i < biomeCount; i++) {
             double variationFactor = (double) i / biomeCount;
 
-            Biome biome = BiomeCreator.createBiome(context.random, planetData, variationFactor);
+            Biome biome = BiomeCreator.createBiome(context.random, planetData, variationFactor, context);
 
             ResourceLocation biomeLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name() + "_biome_" + i);
             ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, biomeLocation);
@@ -76,7 +81,7 @@ public class BiomeCreator {
         return (float) Math.max(-2.0, Math.min(2.0, value));
     }
 
-    private static Biome createBiome(RandomSource random, PlanetData planetData, double variationFactor) {
+    private static Biome createBiome(RandomSource random, PlanetData planetData, double variationFactor, SystemCreator.SystemCreationContext context) {
         // Vary temperature based on planet base temperature and variation
         float temperature = (float) (planetData.temperature() + (variationFactor - 0.5) * 0.4);
 
@@ -99,7 +104,7 @@ public class BiomeCreator {
         MobSpawnSettings mobSpawnSettings = new MobSpawnSettings.Builder().build();
 
         // Create generation settings (empty for now - will be filled in later)
-        BiomeGenerationSettings generationSettings = new BiomeGenerationSettings.PlainBuilder().build();
+        BiomeGenerationSettings generationSettings = getBiomeGenerationSettings(context);
 
         // Build and return the biome
         return new Biome.BiomeBuilder()
@@ -110,6 +115,22 @@ public class BiomeCreator {
                 .mobSpawnSettings(mobSpawnSettings)
                 .generationSettings(generationSettings)
                 .build();
+    }
+
+    private static @NotNull BiomeGenerationSettings getBiomeGenerationSettings(SystemCreator.SystemCreationContext context) {
+        BiomeGenerationSettings.PlainBuilder builder = new BiomeGenerationSettings.PlainBuilder();
+
+        Registry<ConfiguredWorldCarver<?>> carvers = context.server.registryAccess().registryOrThrow(Registries.CONFIGURED_CARVER);
+
+        Holder.Reference<ConfiguredWorldCarver<?>> canyon = carvers.getHolderOrThrow(Carvers.CANYON);
+        Holder.Reference<ConfiguredWorldCarver<?>> cave = carvers.getHolderOrThrow(Carvers.CAVE);
+        Holder.Reference<ConfiguredWorldCarver<?>> cave_extra = carvers.getHolderOrThrow(Carvers.CAVE_EXTRA_UNDERGROUND);
+
+        builder.addCarver(GenerationStep.Carving.AIR,canyon)
+                .addCarver(GenerationStep.Carving.AIR,cave)
+                .addCarver(GenerationStep.Carving.AIR,cave_extra);
+
+        return builder.build();
     }
 
     private static int deriveFogColor(PlanetData planetData, double variationFactor) {
