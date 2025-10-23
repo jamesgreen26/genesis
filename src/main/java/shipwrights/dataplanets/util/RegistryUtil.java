@@ -2,14 +2,13 @@ package shipwrights.dataplanets.util;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.*;
 
 public class RegistryUtil {
 
@@ -33,6 +33,10 @@ public class RegistryUtil {
     ) {
         registerThing(server, Registries.BIOME, ResourceKey.create(Registries.BIOME, resourceLocation), biome);
         writeToDatapack(server, resourceLocation, "worldgen/biome", Biome.DIRECT_CODEC, biome);
+    }
+
+    public static void addBiomeToTag(MinecraftServer server, ResourceLocation biomeLocation, TagKey<Biome> tag) {
+        addBiomeToTag(server, tag, biomeLocation);
     }
 
     public static void registerDimensionType(
@@ -194,6 +198,124 @@ public class RegistryUtil {
             Files.writeString(objectFile, jsonString);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write " + path + " file: " + resourceLocation, e);
+        }
+    }
+
+    /**
+     * Add a biome to a tag by writing/updating the tag file in the datapack.
+     * Tags in datapacks are JSON files that list resource locations.
+     */
+    private static void addBiomeToTag(
+            MinecraftServer server,
+            TagKey<Biome> tag,
+            ResourceLocation biomeLocation
+    ) {
+        bindBiomeToTagRuntime(server, tag, biomeLocation);
+
+        Path basePath = server.storageSource.getLevelPath(LevelResource.DATAPACK_DIR);
+        Path dataplanetsFolder = basePath.resolve("dataplanets-generated");
+        Path tagFolder = dataplanetsFolder.resolve("data")
+                .resolve(tag.location().getNamespace())
+                .resolve("tags")
+                .resolve("worldgen")
+                .resolve("biome");
+        Path tagFile = tagFolder.resolve(tag.location().getPath() + ".json");
+
+        try {
+            // Create all directories including parent directories of the tag file
+            // This handles nested tag paths like "has_structure/mineshaft"
+            Files.createDirectories(tagFile.getParent());
+
+            // Read existing tag file if it exists
+            List<String> values = new ArrayList<>();
+            if (Files.exists(tagFile)) {
+                String content = Files.readString(tagFile);
+                com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(content).getAsJsonObject();
+                if (json.has("values")) {
+                    json.getAsJsonArray("values").forEach(element -> values.add(element.getAsString()));
+                }
+            }
+
+            // Add new biome if not already present
+            String biomeId = biomeLocation.toString();
+            if (!values.contains(biomeId)) {
+                values.add(biomeId);
+            }
+
+            // Create tag JSON
+            com.google.gson.JsonObject tagJson = new com.google.gson.JsonObject();
+            tagJson.addProperty("replace", false);
+            com.google.gson.JsonArray valuesArray = new com.google.gson.JsonArray();
+            values.forEach(valuesArray::add);
+            tagJson.add("values", valuesArray);
+
+            // Write to file
+            String jsonString = new com.google.gson.GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+                    .toJson(tagJson);
+
+            Files.writeString(tagFile, jsonString);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to add biome to tag: " + tag.location(), e);
+        }
+    }
+
+    /**
+     * Bind a biome holder to a tag at runtime by modifying the registry's tag map.
+     * This makes the tag change take effect immediately without requiring a datapack reload.
+     * Uses the public bindTags method from MappedRegistry.
+     */
+    @SuppressWarnings("deprecation")
+    private static void bindBiomeToTagRuntime(
+            MinecraftServer server,
+            TagKey<Biome> tag,
+            ResourceLocation biomeLocation
+    ) {
+        try {
+            Registry<Biome> biomeRegistry = server.registryAccess().registryOrThrow(Registries.BIOME);
+            ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, biomeLocation);
+
+            // Get the holder for the biome
+            Holder.Reference<Biome> biomeHolder = biomeRegistry.getHolderOrThrow(biomeKey);
+
+            // Get existing tag holders
+            List<Holder<Biome>> holders = new ArrayList<>();
+            Optional<HolderSet.Named<Biome>> existingTag = biomeRegistry.getTag(tag);
+            existingTag.ifPresent(namedSet -> namedSet.forEach(holders::add));
+
+            // Add new biome if not already present
+            if (!holders.contains(biomeHolder)) {
+                holders.add(biomeHolder);
+            }
+
+            // If the registry is a MappedRegistry, we can modify its tags
+            if (biomeRegistry instanceof MappedRegistry<Biome> mapped) {
+                mapped.unfreeze();
+
+                // Create a map with all existing tags plus our updated tag
+                Map<TagKey<Biome>, List<Holder<Biome>>> tagMap = new HashMap<>();
+
+                // Copy all existing tags
+                mapped.getTags().forEach(pair -> {
+                    TagKey<Biome> existingTagKey = pair.getFirst();
+                    List<Holder<Biome>> existingHolders = new ArrayList<>();
+                    pair.getSecond().forEach(existingHolders::add);
+                    tagMap.put(existingTagKey, existingHolders);
+                });
+
+                // Add/update our tag
+                tagMap.put(tag, holders);
+
+                // Bind all tags using the public bindTags method
+                mapped.bindTags(tagMap);
+
+                mapped.freeze();
+            }
+        } catch (Exception e) {
+            // If runtime binding fails, the datapack file will still work after reload
+            System.err.println("Warning: Could not bind biome to tag at runtime: " + e.getMessage());
+            System.err.println("Tag will take effect after datapack reload.");
         }
     }
 }
