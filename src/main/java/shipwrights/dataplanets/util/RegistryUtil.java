@@ -59,6 +59,8 @@ public class RegistryUtil {
             ConfiguredWorldCarver<?> configuredCarver
     ) {
         registerThing(server, Registries.CONFIGURED_CARVER, ResourceKey.create(Registries.CONFIGURED_CARVER, resourceLocation), configuredCarver);
+        //TODO write to datapack
+
     }
 
     public static void registerPlacedFeature(
@@ -67,6 +69,8 @@ public class RegistryUtil {
             PlacedFeature placedFeature
     ) {
         registerThing(server, Registries.PLACED_FEATURE, ResourceKey.create(Registries.PLACED_FEATURE, resourceLocation), placedFeature);
+        //TODO write to datapack
+
     }
 
     public static void registerConfiguredFeature(
@@ -75,6 +79,8 @@ public class RegistryUtil {
             ConfiguredFeature<?, ?> configuredFeature
     ) {
         registerThing(server, Registries.CONFIGURED_FEATURE, ResourceKey.create(Registries.CONFIGURED_FEATURE, resourceLocation), configuredFeature);
+        //TODO write to datapack
+
     }
 
     public static void registerNoise(
@@ -83,6 +89,8 @@ public class RegistryUtil {
             NormalNoise.NoiseParameters noiseParameters
     ) {
         registerThing(server, Registries.NOISE, ResourceKey.create(Registries.NOISE, resourceLocation), noiseParameters);
+        //TODO write to datapack
+
     }
 
     public static void registerNoiseSettings(
