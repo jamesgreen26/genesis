@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.systemCreation.dimension;
+package shipwrights.dataplanets.systemCreation.dimension.biome;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;

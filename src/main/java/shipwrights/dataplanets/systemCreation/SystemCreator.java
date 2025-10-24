@@ -2,8 +2,6 @@ package shipwrights.dataplanets.systemCreation;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
@@ -15,9 +13,9 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import shipwrights.dataplanets.systemCreation.naming.SystemNameGenerator;
-import shipwrights.dataplanets.systemCreation.dimension.BiomeCreator;
+import shipwrights.dataplanets.systemCreation.dimension.biome.BiomeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.DimensionTypeCreator;
-import shipwrights.dataplanets.systemCreation.dimension.TerrainGenCreator;
+import shipwrights.dataplanets.systemCreation.dimension.noise.TerrainGenCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.ArrayList;

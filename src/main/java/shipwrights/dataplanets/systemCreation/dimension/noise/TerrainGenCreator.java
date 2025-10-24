@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.systemCreation.dimension;
+package shipwrights.dataplanets.systemCreation.dimension.noise;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -123,6 +123,9 @@ public class TerrainGenCreator {
         HolderLookup.RegistryLookup<NormalNoise.NoiseParameters> noiseRegistry =
                 context.server.registryAccess().lookupOrThrow(Registries.NOISE);
 
+        HolderLookup.RegistryLookup<DensityFunction> densityFunctionRegistry =
+                context.server.registryAccess().lookupOrThrow(Registries.DENSITY_FUNCTION);
+
         // Calculate noise parameters from planet data
         double noiseScale = Math.max(0.1, planetData.terrainRoughness());
         double noiseAmplitude = planetData.size() * 0.3; // Reduced from 0.8 for more traversable terrain
@@ -215,10 +218,17 @@ public class TerrainGenCreator {
                 )
         );
 
+        // Add craters for low-atmosphere planets (creates impact crater terrain)
+        //planetData.atmosphericDensity() < 0.6
+        DensityFunction craters = densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, Crater.resourceLocation)).get();
+
         // Combine terrain elements more efficiently with fewer nested operations
         DensityFunction combinedTerrain = DensityFunctions.add(
                 baseTerrainNoise,
-                DensityFunctions.add(detailNoise, continents)
+                DensityFunctions.add(
+                        DensityFunctions.add(detailNoise, continents),
+                        craters
+                )
         );
 
         DensityFunction finalDensity = DensityFunctions.add(

@@ -6,15 +6,15 @@ import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import shipwrights.dataplanets.systemCreation.naming.FantasySystemNameGenerator;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.genesis.GenesisMod;
 
 @Mod.EventBusSubscriber
 public class DataplanetsMod {
     public static final String MOD_ID = "dataplanets";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final Logger LOGGER = GenesisMod.LOGGER;
 
     public static final FantasySystemNameGenerator FANTASY_SYSTEM_NAME_GENERATOR = new FantasySystemNameGenerator();
 

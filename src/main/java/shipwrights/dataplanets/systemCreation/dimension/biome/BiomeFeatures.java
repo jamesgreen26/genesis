@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.systemCreation.dimension;
+package shipwrights.dataplanets.systemCreation.dimension.biome;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;

@@ -1,25 +1,18 @@
-package shipwrights.dataplanets.systemCreation.dimension;
+package shipwrights.dataplanets.systemCreation.dimension.biome;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.*;
-import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 

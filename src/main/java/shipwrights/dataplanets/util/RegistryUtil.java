@@ -18,6 +18,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelResource;
+import shipwrights.dataplanets.DataplanetsMod;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -182,8 +183,8 @@ public class RegistryUtil {
 
             // Check if encoding was successful
             if (result.error().isPresent()) {
-                System.err.println("Warning: Failed to encode " + path + " for " + resourceLocation + ": " + result.error().get().message());
-                System.err.println("Skipping datapack file generation for this object.");
+                DataplanetsMod.LOGGER.error("Warning: Failed to encode " + path + " for " + resourceLocation + ": " + result.error().get().message());
+                DataplanetsMod.LOGGER.error("Skipping datapack file generation for this object.");
                 return; // Skip writing this file
             }
 
@@ -314,8 +315,8 @@ public class RegistryUtil {
             }
         } catch (Exception e) {
             // If runtime binding fails, the datapack file will still work after reload
-            System.err.println("Warning: Could not bind biome to tag at runtime: " + e.getMessage());
-            System.err.println("Tag will take effect after datapack reload.");
+            DataplanetsMod.LOGGER.error("Warning: Could not bind biome to tag at runtime: " + e.getMessage());
+            DataplanetsMod.LOGGER.error("Tag will take effect after datapack reload.");
         }
     }
 }
