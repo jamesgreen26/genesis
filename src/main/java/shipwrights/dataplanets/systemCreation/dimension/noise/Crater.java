@@ -18,112 +18,71 @@ public class Crater implements DensityFunction {
 
     public static final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, "crater");
 
-    private final double cellSize;
-    private final double intensity;
+    public static final Crater INSTANCE = new Crater();
 
-    public static final MapCodec<Crater> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-            instance.group(
-                    com.mojang.serialization.Codec.DOUBLE.fieldOf("cell_size").forGetter(crater -> crater.cellSize),
-                    com.mojang.serialization.Codec.DOUBLE.fieldOf("intensity").forGetter(crater -> crater.intensity)
-            ).apply(instance, Crater::new)
-    );
+    public static final MapCodec<Crater> MAP_CODEC = MapCodec.unit(INSTANCE);
 
     public static final KeyDispatchDataCodec<Crater> CODEC = KeyDispatchDataCodec.of(MAP_CODEC);
 
-    /**
-     * Create a crater density function (2D in XZ plane)
-     * @param cellSize Size of each Worley cell (larger = fewer, bigger craters)
-     * @param intensity Multiplier for the crater depth effect
-     */
-    public Crater(double cellSize, double intensity) {
-        this.cellSize = cellSize;
-        this.intensity = intensity;
-    }
-
     @Override
     public double compute(FunctionContext context) {
-        double x = context.blockX();
-        double z = context.blockZ();
-        // Y is ignored - craters are 2D in the XZ plane
+        int x = context.blockX();
+        int z = context.blockZ();
 
-        // Find distance to nearest cell center using 2D Worley noise approach
-        double dist = findNearestCellDistance(x, z);
+        // Scale for crater distribution (smaller = more frequent, smaller craters)
+        double scale = 64.0;
+        double scaledX = x / scale;
+        double scaledZ = z / scale;
 
-        // Normalize distance by cell size
-        double normalizedDist = dist / cellSize;
+        // Find the grid cell containing this point
+        int cellX = (int) Math.floor(scaledX);
+        int cellZ = (int) Math.floor(scaledZ);
 
-        // Apply crater formula: -(0.5 - abs(pow(dist, 3))) / max(pow(dist, 6), 1)
-        double dist3 = normalizedDist * normalizedDist * normalizedDist;
-        double dist6 = dist3 * dist3;
+        double minDist = Double.MAX_VALUE;
 
-        double numerator = -(0.5 - Math.abs(dist3));
-        double denominator = Math.max(dist6, 1.0);
+        // Check neighboring cells (3x3 grid)
+        for (int offsetX = -1; offsetX <= 1; offsetX++) {
+            for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+                int neighborCellX = cellX + offsetX;
+                int neighborCellZ = cellZ + offsetZ;
 
-        return (numerator / denominator) * intensity;
-    }
+                // Generate random point within this cell
+                long seed = hashCell(neighborCellX, neighborCellZ);
+                double randomX = neighborCellX + lcgRandom(seed);
+                double randomZ = neighborCellZ + lcgRandom(seed + 1);
 
-    /**
-     * Find the distance to the nearest Worley cell center in 2D space (XZ plane)
-     */
-    private double findNearestCellDistance(double x, double z) {
-        // Determine which cell we're in
-        int cellX = (int) Math.floor(x / cellSize);
-        int cellZ = (int) Math.floor(z / cellSize);
+                // Vary cell size based on the cell's seed (smaller variation range)
+                double cellSizeVariation = 0.7 + lcgRandom(seed + 2) * 0.6; // 0.7 to 1.3x size
 
-        double minDistSq = Double.MAX_VALUE;
+                // Calculate distance to this cell's point
+                double dx = (scaledX - randomX) / cellSizeVariation;
+                double dz = (scaledZ - randomZ) / cellSizeVariation;
+                double dist = dx * dx + dz * dz;
 
-        // Check neighboring cells (3x3 grid in XZ plane)
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                int neighborX = cellX + dx;
-                int neighborZ = cellZ + dz;
-
-                // Generate deterministic random position within the cell
-                double[] cellCenter = getCellCenter(neighborX, neighborZ);
-
-                // Calculate 2D distance to this cell center
-                double deltaX = x - cellCenter[0];
-                double deltaZ = z - cellCenter[1];
-                double distSq = deltaX * deltaX + deltaZ * deltaZ;
-
-                minDistSq = Math.min(minDistSq, distSq);
+                minDist = Math.min(minDist, dist);
             }
         }
 
-        return Math.sqrt(minDistSq);
+        // Invert so center is lower (crater depression)
+        // Steeper falloff for bowl shape
+        double crater = Math.max(0.0, 1.0 - Math.sqrt(minDist) * 3.5);
+
+        crater = Math.pow(crater, 0.5);
+
+        return crater * -0.05;
     }
 
-    /**
-     * Get the center point of a 2D cell using a deterministic hash function
-     */
-    private double[] getCellCenter(int cellX, int cellZ) {
-        // Use simple hash function for deterministic randomness
-        long seed = hash(cellX, cellZ);
-
-        // Generate random offset within the cell using the seed
-        double offsetX = cellX * cellSize + (randomDouble(seed, 0) * cellSize);
-        double offsetZ = cellZ * cellSize + (randomDouble(seed, 1) * cellSize);
-
-        return new double[]{offsetX, offsetZ};
-    }
-
-    /**
-     * Simple 2D hash function for deterministic randomness
-     */
-    private long hash(int x, int z) {
-        long h = x * 374761393L + z * 1274126177L;
+    // Hash function for generating consistent random values per cell
+    private long hashCell(int x, int z) {
+        long h = x * 374761393L + z * 668265263L;
         h = (h ^ (h >> 13)) * 1274126177L;
         return h ^ (h >> 16);
     }
 
-    /**
-     * Generate a deterministic random double in [0, 1) from a seed and component
-     */
-    private double randomDouble(long seed, int component) {
-        long h = seed + component * 668265263L;
-        h = (h ^ (h >> 13)) * 1274126177L;
-        h = h ^ (h >> 16);
-        return (h & 0x7FFFFFFFL) / (double) 0x80000000L;
+    // Simple linear congruential generator for [0, 1) random values
+    private double lcgRandom(long seed) {
+        seed = (seed * 1103515245L + 12345L) & 0x7FFFFFFFL;
+        return (double) seed / (double) 0x7FFFFFFFL;
     }
 
     @Override
@@ -139,26 +98,7 @@ public class Crater implements DensityFunction {
         return this; // No children to map
     }
 
-    @Override
-    public double minValue() {
-        return -intensity;
-    }
-
-    @Override
-    public double maxValue() {
-        return intensity * 0.5;
-    }
-
-    @Override
-    public @NotNull KeyDispatchDataCodec<? extends DensityFunction> codec() {
-        return CODEC;
-    }
-
-    public double getCellSize() {
-        return cellSize;
-    }
-
-    public double getIntensity() {
-        return intensity;
-    }
+    @Override public double minValue() { return 0.0; }
+    @Override public double maxValue() { return -1.0; }
+    @Override public @NotNull KeyDispatchDataCodec<? extends DensityFunction> codec() { return CODEC; }
 }
