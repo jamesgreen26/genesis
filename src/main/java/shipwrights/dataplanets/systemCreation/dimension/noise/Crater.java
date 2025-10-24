@@ -63,13 +63,9 @@ public class Crater implements DensityFunction {
             }
         }
 
-        // Invert so center is lower (crater depression)
-        // Steeper falloff for bowl shape
-        double crater = Math.max(0.0, 1.0 - Math.sqrt(minDist) * 3.5);
+        double crater = 12 * minDist;
 
-        crater = Math.pow(crater, 0.5);
-
-        return crater * -0.05;
+        return 0.05 * (crater - 0.5) / Math.max(1.0, crater * crater * crater);
     }
 
     // Hash function for generating consistent random values per cell
