@@ -124,104 +124,179 @@ public class TerrainGenCreator {
                 context.server.registryAccess().lookupOrThrow(Registries.NOISE);
 
         // Calculate noise parameters from planet data
-        // terrainRoughness affects the scale of noise (higher = more detail)
-        double noiseScale = planetData.terrainRoughness();
-        double noiseAmplitude = planetData.size(); // Larger planets = more dramatic terrain
+        double noiseScale = Math.max(0.1, planetData.terrainRoughness());
+        double noiseAmplitude = planetData.size() * 0.3; // Reduced from 0.8 for more traversable terrain
+        double weirdnessFactor = Math.abs(planetData.weirdness());
+        double seaLevelOffset = (planetData.seaLevel() - 1.0) * 16.0; // Reduced from 32.0
 
         // Clamp climate parameters to valid range [-2.0, 2.0]
         double temperature = clampClimateParameter(planetData.temperature());
         double vegetation = clampClimateParameter(planetData.atmosphericDensity());
-        double erosion = clampClimateParameter(planetData.weirdness());
-        double ridges = clampClimateParameter(planetData.terrainRoughness());
+        double erosion = clampClimateParameter(planetData.weirdness() * 0.8);
+        double ridges = clampClimateParameter(planetData.terrainRoughness() * 0.8);
 
-        // Create final density function for terrain shape
-        // This determines where blocks are placed vs air
-        DensityFunction finalDensity = DensityFunctions.add(
-                DensityFunctions.yClampedGradient(-64, 320, 1.0, -1.0),
-                DensityFunctions.mul(
-                        DensityFunctions.constant(noiseAmplitude),
+        // Cache commonly used noise holders for performance
+        Holder<NormalNoise.NoiseParameters> shiftNoise = noiseRegistry.getOrThrow(Noises.SHIFT);
+        Holder<NormalNoise.NoiseParameters> continentalnessNoise = noiseRegistry.getOrThrow(Noises.CONTINENTALNESS);
+
+        // Pre-calculate shift functions for reuse
+        DensityFunction shiftA = DensityFunctions.shiftA(shiftNoise);
+        DensityFunction shiftB = DensityFunctions.shiftB(shiftNoise);
+
+        // Base terrain noise - varies by planet type with reduced amplitudes
+        DensityFunction baseTerrainNoise;
+        if (weirdnessFactor > 1.5) {
+            // Weird planets: moderate chaotic terrain (reduced from 1.5x to 0.9x)
+            baseTerrainNoise = DensityFunctions.mul(
+                    DensityFunctions.constant(noiseAmplitude * 0.9),
+                    DensityFunctions.noise(
+                            noiseRegistry.getOrThrow(Noises.CAVE_CHEESE),
+                            noiseScale * 1.2,
+                            noiseScale * 0.6
+                    )
+            );
+        } else if (planetData.terrainRoughness() > 1.3) {
+            // Rough planets: moderate mountains (reduced from 1.2x to 0.75x)
+            baseTerrainNoise = DensityFunctions.mul(
+                    DensityFunctions.constant(noiseAmplitude * 0.75),
+                    DensityFunctions.noise(
+                            noiseRegistry.getOrThrow(Noises.JAGGED),
+                            noiseScale,
+                            noiseScale * 0.5
+                    )
+            );
+        } else if (planetData.terrainRoughness() < 0.7) {
+            // Smooth planets: very gentle hills (reduced from 0.6x to 0.4x)
+            baseTerrainNoise = DensityFunctions.mul(
+                    DensityFunctions.constant(noiseAmplitude * 0.4),
+                    DensityFunctions.noise(
+                            continentalnessNoise,
+                            noiseScale * 0.4,
+                            noiseScale * 0.2
+                    )
+            );
+        } else {
+            // Normal planets: moderate terrain (reduced from 1.0x to 0.6x)
+            baseTerrainNoise = DensityFunctions.mul(
+                    DensityFunctions.constant(noiseAmplitude * 0.6),
+                    DensityFunctions.noise(
+                            noiseRegistry.getOrThrow(Noises.RIDGE),
+                            noiseScale * 0.8,
+                            noiseScale * 0.4
+                    )
+            );
+        }
+
+        // Simplified detail layer - only add if flavour is significant (performance optimization)
+        DensityFunction detailNoise = Math.abs(planetData.flavour()) > 0.5
+                ? DensityFunctions.mul(
+                        DensityFunctions.constant(noiseAmplitude * 0.15), // Reduced from 0.3
                         DensityFunctions.noise(
                                 noiseRegistry.getOrThrow(Noises.GRAVEL),
-                                noiseScale,
-                                noiseScale * 0.5
+                                noiseScale * 2.0,
+                                noiseScale
                         )
+                )
+                : DensityFunctions.zero(); // Use zero() instead of constant(0) for performance
+
+        // Simplified continents - reduced amplitude and using cached noise
+        DensityFunction continents = DensityFunctions.mul(
+                DensityFunctions.constant(planetData.size() * 0.2), // Reduced from 0.4
+                DensityFunctions.noise(continentalnessNoise, 0.08, 0.04)
+        );
+
+        // Simplified depth - much less vertical variation
+        DensityFunction depth = DensityFunctions.mul(
+                DensityFunctions.constant(erosion * 0.25), // Reduced from 0.5
+                DensityFunctions.noise(
+                        noiseRegistry.getOrThrow(Noises.EROSION),
+                        0.15,
+                        0.08
                 )
         );
 
-        // Get noise holders for climate parameters
-        ResourceKey<NormalNoise.NoiseParameters> temperatureNoiseKey =
-                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "temperature"));
-        ResourceKey<NormalNoise.NoiseParameters> vegetationNoiseKey =
-                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "vegetation"));
-        ResourceKey<NormalNoise.NoiseParameters> erosionNoiseKey =
-                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "erosion"));
-        ResourceKey<NormalNoise.NoiseParameters> ridgeNoiseKey =
-                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "ridge"));
+        // Combine terrain elements more efficiently with fewer nested operations
+        DensityFunction combinedTerrain = DensityFunctions.add(
+                baseTerrainNoise,
+                DensityFunctions.add(detailNoise, continents)
+        );
 
-        // Build noise router with climate-based noise functions
+        DensityFunction finalDensity = DensityFunctions.add(
+                DensityFunctions.yClampedGradient(-64, 320, 1.0, -1.0),
+                DensityFunctions.add(
+                        combinedTerrain,
+                        DensityFunctions.add(depth, DensityFunctions.constant(seaLevelOffset * 0.008))
+                )
+        );
+
+        // Cache noise holders for climate parameters
+        Holder<NormalNoise.NoiseParameters> temperatureNoise = noiseRegistry.getOrThrow(
+                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "temperature")));
+        Holder<NormalNoise.NoiseParameters> vegetationNoise = noiseRegistry.getOrThrow(
+                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "vegetation")));
+        Holder<NormalNoise.NoiseParameters> erosionNoise = noiseRegistry.getOrThrow(
+                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "erosion")));
+        Holder<NormalNoise.NoiseParameters> ridgeNoise = noiseRegistry.getOrThrow(
+                ResourceKey.create(Registries.NOISE, ResourceLocation.fromNamespaceAndPath("minecraft", "ridge")));
+
+        // Aquifer configuration based on planet properties - optimize with constants when disabled
+        DensityFunction aquiferFloodedness = planetData.seaLevel() > 0.5
+                ? DensityFunctions.noise(noiseRegistry.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 1.0, 0.0)
+                : DensityFunctions.zero();
+
+        DensityFunction aquiferSpread = planetData.seaLevel() > 0.5
+                ? DensityFunctions.noise(noiseRegistry.getOrThrow(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 1.0, 0.0)
+                : DensityFunctions.zero();
+
+        // Lava presence based on temperature
+        DensityFunction lavaNoise = planetData.temperature() > 1.5
+                ? DensityFunctions.noise(noiseRegistry.getOrThrow(Noises.AQUIFER_LAVA), 1.0, 0.0)
+                : DensityFunctions.constant(-1.0);
+
+        // Build noise router with enhanced climate-based noise functions using cached values
         return new NoiseRouter(
                 // barrierNoise - used for world border effects
-                DensityFunctions.constant(0),
+                DensityFunctions.zero(),
                 // fluidLevelFloodednessNoise - affects aquifer flooding
-                DensityFunctions.constant(0),
+                aquiferFloodedness,
                 // fluidLevelSpreadNoise - affects aquifer spread
-                DensityFunctions.constant(0),
+                aquiferSpread,
                 // lavaNoise - determines lava placement in aquifers
-                DensityFunctions.constant(0),
-                // temperature - biome climate parameter (scaled by planet temperature)
+                lavaNoise,
+                // temperature - biome climate parameter (scaled by planet temperature, using cached shift)
                 DensityFunctions.mul(
                         DensityFunctions.constant(temperature),
-                        DensityFunctions.shiftedNoise2d(
-                                DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                0.25F,
-                                noiseRegistry.getOrThrow(temperatureNoiseKey)
-                        )
+                        DensityFunctions.shiftedNoise2d(shiftA, shiftB, 0.25F, temperatureNoise)
                 ),
-                // vegetation - biome climate parameter (scaled by atmospheric density)
+                // vegetation - biome climate parameter (scaled by atmospheric density, using cached shift)
                 DensityFunctions.mul(
                         DensityFunctions.constant(vegetation),
-                        DensityFunctions.shiftedNoise2d(
-                                DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                0.25F,
-                                noiseRegistry.getOrThrow(vegetationNoiseKey)
-                        )
+                        DensityFunctions.shiftedNoise2d(shiftA, shiftB, 0.25F, vegetationNoise)
                 ),
                 // continents - large scale terrain variation
-                DensityFunctions.constant(0),
-                // erosion - terrain weathering (scaled by weirdness for variety)
+                continents,
+                // erosion - terrain weathering (scaled by weirdness for variety, using cached shift)
                 DensityFunctions.mul(
                         DensityFunctions.constant(erosion),
-                        DensityFunctions.shiftedNoise2d(
-                                DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                0.25F,
-                                noiseRegistry.getOrThrow(erosionNoiseKey)
-                        )
+                        DensityFunctions.shiftedNoise2d(shiftA, shiftB, 0.25F, erosionNoise)
                 ),
                 // depth - vertical terrain variation
-                DensityFunctions.constant(0),
-                // ridges - mountain ridge generation (scaled by terrain roughness)
+                depth,
+                // ridges - mountain ridge generation (scaled by terrain roughness, using cached shift)
                 DensityFunctions.mul(
                         DensityFunctions.constant(ridges),
-                        DensityFunctions.shiftedNoise2d(
-                                DensityFunctions.shiftA(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                DensityFunctions.shiftB(noiseRegistry.getOrThrow(Noises.SHIFT)),
-                                0.25F,
-                                noiseRegistry.getOrThrow(ridgeNoiseKey)
-                        )
+                        DensityFunctions.shiftedNoise2d(shiftA, shiftB, 0.25F, ridgeNoise)
                 ),
                 // initialDensityWithoutJaggedness - base terrain density
-                DensityFunctions.constant(0),
+                baseTerrainNoise,
                 // finalDensity - determines block vs air placement
                 finalDensity,
                 // veinToggle - ore vein generation toggle
-                DensityFunctions.constant(0),
+                DensityFunctions.noise(noiseRegistry.getOrThrow(Noises.ORE_VEININESS), 1.0, 1.0),
                 // veinRidged - ore vein ridged noise
-                DensityFunctions.constant(0),
+                DensityFunctions.noise(noiseRegistry.getOrThrow(Noises.ORE_VEIN_A), 1.0, 1.0),
                 // veinGap - ore vein gap noise
-                DensityFunctions.constant(0)
+                DensityFunctions.noise(noiseRegistry.getOrThrow(Noises.ORE_GAP), 1.0, 1.0)
         );
     }
 
