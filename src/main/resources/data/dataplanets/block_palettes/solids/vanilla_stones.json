@@ -1,0 +1,45 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "mass": 2.5,
+      "temperature": 0.8,
+      "humidity": 0.5,
+      "minerality": 0.8,
+      "weirdness": 0.3,
+      "block": "minecraft:stone"
+    },
+    {
+      "mass": 2.6,
+      "temperature": 0.7,
+      "humidity": 0.4,
+      "minerality": 0.9,
+      "weirdness": 0.2,
+      "block": "minecraft:deepslate"
+    },
+    {
+      "mass": 2.4,
+      "temperature": 0.8,
+      "humidity": 0.3,
+      "minerality": 0.85,
+      "weirdness": 0.1,
+      "block": "minecraft:granite"
+    },
+    {
+      "mass": 2.3,
+      "temperature": 0.75,
+      "humidity": 0.35,
+      "minerality": 0.82,
+      "weirdness": 0.15,
+      "block": "minecraft:diorite"
+    },
+    {
+      "mass": 2.35,
+      "temperature": 0.78,
+      "humidity": 0.38,
+      "minerality": 0.83,
+      "weirdness": 0.12,
+      "block": "minecraft:andesite"
+    }
+  ]
+}

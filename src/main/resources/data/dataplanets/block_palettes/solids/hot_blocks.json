@@ -1,0 +1,45 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "mass": 1.8,
+      "temperature": 2.2,
+      "humidity": 0.1,
+      "minerality": 0.6,
+      "weirdness": 0.5,
+      "block": "minecraft:netherrack"
+    },
+    {
+      "mass": 2.0,
+      "temperature": 2.5,
+      "humidity": 0.05,
+      "minerality": 0.7,
+      "weirdness": 0.4,
+      "block": "minecraft:blackstone"
+    },
+    {
+      "mass": 2.2,
+      "temperature": 2.8,
+      "humidity": 0.02,
+      "minerality": 0.75,
+      "weirdness": 0.6,
+      "block": "minecraft:basalt"
+    },
+    {
+      "mass": 1.9,
+      "temperature": 1.6,
+      "humidity": 0.15,
+      "minerality": 0.65,
+      "weirdness": 0.25,
+      "block": "minecraft:red_sandstone"
+    },
+    {
+      "mass": 1.85,
+      "temperature": 1.55,
+      "humidity": 0.18,
+      "minerality": 0.62,
+      "weirdness": 0.22,
+      "block": "minecraft:red_sand"
+    }
+  ]
+}

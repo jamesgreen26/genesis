@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "mass": 1.0,
+      "temperature": 0.8,
+      "humidity": 1.0,
+      "minerality": 0.2,
+      "weirdness": 0.1,
+      "block": "minecraft:water"
+    },
+    {
+      "mass": 0.92,
+      "temperature": 0.35,
+      "humidity": 0.9,
+      "minerality": 0.1,
+      "weirdness": 0.15,
+      "block": "minecraft:ice"
+    },
+    {
+      "mass": 0.92,
+      "temperature": 0.25,
+      "humidity": 0.95,
+      "minerality": 0.05,
+      "weirdness": 0.2,
+      "block": "minecraft:packed_ice"
+    }
+  ]
+}

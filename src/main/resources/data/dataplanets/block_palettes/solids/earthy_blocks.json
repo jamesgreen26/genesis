@@ -1,0 +1,45 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "mass": 1.3,
+      "temperature": 0.7,
+      "humidity": 0.6,
+      "minerality": 0.3,
+      "weirdness": 0.1,
+      "block": "minecraft:dirt"
+    },
+    {
+      "mass": 1.4,
+      "temperature": 0.72,
+      "humidity": 0.65,
+      "minerality": 0.35,
+      "weirdness": 0.12,
+      "block": "minecraft:coarse_dirt"
+    },
+    {
+      "mass": 1.5,
+      "temperature": 0.75,
+      "humidity": 0.7,
+      "minerality": 0.4,
+      "weirdness": 0.15,
+      "block": "minecraft:rooted_dirt"
+    },
+    {
+      "mass": 1.2,
+      "temperature": 0.68,
+      "humidity": 0.8,
+      "minerality": 0.25,
+      "weirdness": 0.08,
+      "block": "minecraft:mud"
+    },
+    {
+      "mass": 1.25,
+      "temperature": 0.65,
+      "humidity": 0.55,
+      "minerality": 0.28,
+      "weirdness": 0.05,
+      "block": "minecraft:clay"
+    }
+  ]
+}

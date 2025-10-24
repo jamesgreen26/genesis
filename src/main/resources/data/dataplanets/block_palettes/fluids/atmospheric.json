@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "mass": 0.001,
+      "temperature": 0.5,
+      "humidity": 0.2,
+      "minerality": 0.0,
+      "weirdness": 0.1,
+      "block": "minecraft:air"
+    }
+  ]
+}
