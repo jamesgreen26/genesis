@@ -219,8 +219,9 @@ public class TerrainGenCreator {
         );
 
         // Add craters for low-atmosphere planets (creates impact crater terrain)
-        //planetData.atmosphericDensity() < 0.6
-        DensityFunction craters = densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, Crater.resourceLocation)).get();
+        DensityFunction craters = planetData.atmosphericDensity() < 0.5
+                ? densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, Crater.resourceLocation)).get()
+                : DensityFunctions.zero();
 
         // Combine terrain elements more efficiently with fewer nested operations
         DensityFunction combinedTerrain = DensityFunctions.add(
