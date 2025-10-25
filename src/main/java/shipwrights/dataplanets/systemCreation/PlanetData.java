@@ -33,6 +33,7 @@ public record PlanetData(
     public static PlanetData fromPlanetSource(PlanetSource source) {
         double temperature = deriveTemperature(source.distanceFromStar(), source.atmosphericDensity());
         double gravity = deriveGravity(source.size());
+        double orbitalPeriod = deriveOrbitalPeriod(source.distanceFromStar());
         double effectiveHumidity = Math.min(1.0, source.seaLevel() * source.atmosphericDensity());
 
         ResourceLocation primaryBlock = derivePrimaryBlock(
@@ -54,7 +55,7 @@ public record PlanetData(
             source.size(),
             source.distanceFromStar(),
             source.atmosphericDensity(),
-            source.orbitalPeriod(),
+            orbitalPeriod,
             source.weirdness(),
             source.seaLevel(),
             temperature,
@@ -137,5 +138,10 @@ public record PlanetData(
         double rawTemp = baseTemp * greenhouseEffect;
 
         return Math.max(-2.0, Math.min(2.0, rawTemp));
+    }
+
+    private static double deriveOrbitalPeriod(double distanceFromStar) {
+        // Kepler's third law: T² ∝ a³, so T ∝ a^1.5
+        return Math.pow(distanceFromStar, 1.5);
     }
 }

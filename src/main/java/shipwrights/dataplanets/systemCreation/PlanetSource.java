@@ -1,5 +1,7 @@
 package shipwrights.dataplanets.systemCreation;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 
 
@@ -14,18 +16,27 @@ public record PlanetSource(
         double size,
         double distanceFromStar,
         double atmosphericDensity,
-        double orbitalPeriod,
         double weirdness,
         double seaLevel,
         double terrainRoughness,
         double flavour
 ) {
 
+    public static final Codec<PlanetSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("name").forGetter(PlanetSource::name),
+            Codec.DOUBLE.fieldOf("size").forGetter(PlanetSource::size),
+            Codec.DOUBLE.fieldOf("distanceFromStar").forGetter(PlanetSource::distanceFromStar),
+            Codec.DOUBLE.fieldOf("atmosphericDensity").forGetter(PlanetSource::atmosphericDensity),
+            Codec.DOUBLE.fieldOf("weirdness").forGetter(PlanetSource::weirdness),
+            Codec.DOUBLE.fieldOf("seaLevel").forGetter(PlanetSource::seaLevel),
+            Codec.DOUBLE.fieldOf("terrainRoughness").forGetter(PlanetSource::terrainRoughness),
+            Codec.DOUBLE.fieldOf("flavour").forGetter(PlanetSource::flavour)
+    ).apply(instance, PlanetSource::new));
+
     public static PlanetSource createRandom(String name, RandomSource random) {
         return builder(name)
                 .size(doubleBetween(random, 0.5, 2.0))
                 .distanceFromStar(doubleBetween(random, 0.25, 2.0))
-                .orbitalPeriod(doubleBetween(random, 0.5, 2.0))
                 .atmosphericDensity(doubleBetween(random, 0.0, 2.0))
                 .weirdness(doubleBetween(random, 0.0, 2.0))
                 .seaLevel(doubleBetween(random, 0.0, 2.0))
@@ -47,7 +58,6 @@ public record PlanetSource(
         private double size = 1.0;
         private double distanceFromStar = 1.0;
         private double atmosphericDensity = 1.0;
-        private double orbitalPeriod = 1.0;
         private double weirdness = 1.0;
         private double seaLevel = 1.0;
         private double terrainRoughness = 1.0;
@@ -64,11 +74,6 @@ public record PlanetSource(
 
         public Builder distanceFromStar(double distanceFromStar) {
             this.distanceFromStar = distanceFromStar;
-            return this;
-        }
-
-        public Builder orbitalPeriod(double orbitalPeriod) {
-            this.orbitalPeriod = orbitalPeriod;
             return this;
         }
 
@@ -98,7 +103,7 @@ public record PlanetSource(
         }
 
         public PlanetSource build() {
-            return new PlanetSource(name, size, distanceFromStar, atmosphericDensity, orbitalPeriod, weirdness, seaLevel, terrainRoughness, flavour);
+            return new PlanetSource(name, size, distanceFromStar, atmosphericDensity, weirdness, seaLevel, terrainRoughness, flavour);
         }
     }
 }
