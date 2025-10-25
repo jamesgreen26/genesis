@@ -14,6 +14,11 @@ public class Registration {
                     Crater.resourceLocation,
                     Crater.CODEC.codec()
             );
+
+            helper.register(
+                    AlienDensityFunction.getResourceLocation(),
+                    AlienDensityFunction.CODEC.codec()
+            );
         });
     }
 }
