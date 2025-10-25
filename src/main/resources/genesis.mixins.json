@@ -12,10 +12,7 @@
     "ParticleEngineMixin",
     "ParticleMixin",
     "SoundMixin",
-    "VSClientLevelBiomeMixin",
-    "dataplanets.ClientLanguageMixin",
-    "dataplanets.LevelRendererMixin",
-    "dataplanets.WorldSelectionMixin"
+    "VSClientLevelBiomeMixin"
   ],
   "mixins": [
     "EntityDraggerMixin",
@@ -26,11 +23,7 @@
     "ServerLevelMixin",
     "ServerShipObjectWorldAccessor",
     "VSExplosionForceMixin",
-    "VSMountedCameraMixin",
-    "dataplanets.MappedRegistryMixin",
-    "dataplanets.MinecraftServerAccessor",
-    "dataplanets.MinecraftServerMixin",
-    "dataplanets.ServerPlayerMixin"
+    "VSMountedCameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1
