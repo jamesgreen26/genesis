@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraftforge.fml.ModList;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
@@ -107,9 +108,19 @@ public class DimensionTypeCreator {
             384,                                     // height
             384,                                     // logical_height
             BlockTags.INFINIBURN_OVERWORLD,          // infiniburn
-            ResourceLocation.withDefaultNamespace("the_end"), // effects
+            getSpaceEffects(), // effects
             0.0f,                                    // ambient_light
             new DimensionType.MonsterSettings(monsterSpawn, false, UniformInt.of(0, 7), 0)
         );
+    }
+
+    private static ResourceLocation getSpaceEffects() {
+        boolean isGenesLoaded = ModList.get().isLoaded("genesis");
+
+        if (isGenesLoaded) {
+            return ResourceLocation.parse("genesis:great_unknown");
+        } else {
+            return ResourceLocation.parse("minecraft:the_end");
+        }
     }
 }
