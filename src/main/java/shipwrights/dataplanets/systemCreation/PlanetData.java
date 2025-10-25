@@ -7,6 +7,13 @@ import shipwrights.dataplanets.systemCreation.dimension.blocks.BlockPalettes;
 import java.util.Comparator;
 import java.util.Optional;
 
+/**
+ * The full properties of a planet, including both core properties and derived properties
+ * <br> <br>
+ * All properties use Earth = 1.0 as a reference point
+ * <br><br>
+ * Derived properties should be fully deterministic, using hash functions if randomness is desired
+ **/
 public record PlanetData(
         String name,
         double size,

@@ -2,6 +2,13 @@ package shipwrights.dataplanets.systemCreation;
 
 import net.minecraft.util.RandomSource;
 
+
+
+/**
+ * The core properties of a planet, which cannot be determined through the knowledge of other planet properties
+ * <br> <br>
+ * All properties use Earth = 1.0 as a reference point
+ **/
 public record PlanetSource(
         String name,
         double size,
