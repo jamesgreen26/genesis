@@ -1,5 +1,7 @@
 package shipwrights.genesis;
 
+import g_mungus.vlib.data.DimensionSettings;
+import g_mungus.vlib.dimension.DimensionSettingsManager;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -19,6 +21,7 @@ import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mod.EventBusSubscriber
@@ -71,24 +74,33 @@ public final class GenesisMod {
         shipwrights.genesis.item.GenesisCreativeTabs.register(eventBus);
     }
 
-    /// @param size relative to earth
-    /// @param sunDist relative to earth
-    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, int yearLengthTicks, float r, float g, float b) {
+    /// @param size       relative to earth
+    /// @param sunDist    relative to earth
+    /// @param yearLength relative to earth
+    /// @param gravity    relative to earth
+    public static Optional<PlanetData> registerPlanet(ResourceLocation dimensionID, double size, double gravity, double sunDist, double yearLength, float r, float g, float b) {
         for (PlanetData planet : planets) {
             if (planet.dimensionID.equals(dimensionID)) {
-                return;
+                return Optional.empty();
             }
         }
 
         if (sunDist * earthDist > 2048) {
-            planets.add(new PlanetData(dimensionID, null, size, sunDist, yearLengthTicks, r, g, b));
+            PlanetData data = new PlanetData(dimensionID, null, size, sunDist, yearLength, r, g, b, gravity);
+            planets.add(data);
+            DimensionSettingsManager.INSTANCE.addSettings(data.dimensionID, new DimensionSettings(1.0, gravity, true));
+
+            return Optional.of(data);
         } else {
             LOGGER.warn("Failed to register planet {}, it is too close to the sun!", dimensionID);
+            return Optional.empty();
         }
     }
 
-    public static void registerMoon(ResourceLocation dimensionID, ResourceLocation orbitingDimensionID, double size, double orbitRadius, double yearLength, float r, float g, float b) {
-        moonQueue.add(new QueuedMoon(dimensionID, orbitingDimensionID, size, orbitRadius, yearLength, r, g, b));
+    public static void registerMoon(ResourceLocation dimensionID, ResourceLocation orbitingDimensionID, double size, double gravity, double orbitRadius, double yearLength, float r, float g, float b) {
+        DimensionSettingsManager.INSTANCE.addSettings(dimensionID, new DimensionSettings(1.0, gravity, true));
+
+        moonQueue.add(new QueuedMoon(dimensionID, orbitingDimensionID, size, gravity, orbitRadius, yearLength, r, g, b));
     }
 
     @ApiStatus.Internal
@@ -105,20 +117,13 @@ public final class GenesisMod {
             }
 
             if (parent != null) {
-                planets.add(new PlanetData(moon.dimensionID, parent, moon.size, moon.orbitRadius, (int)(moon.yearLength * earthYear), moon.r, moon.g, moon.b));
+                planets.add(new PlanetData(moon.dimensionID, parent, moon.size, moon.orbitRadius, moon.yearLength, moon.r, moon.g, moon.b, moon.gravity));
             } else {
                 LOGGER.warn("Failed to register moon {}, its parent planet is missing!", moon.dimensionID);
             }
         }
 
         moonQueue.clear();
-    }
-
-    /// @param size relative to earth
-    /// @param sunDist relative to earth
-    /// @param yearLength relative to earth
-    public static void registerPlanet(ResourceLocation dimensionID, double size, double sunDist, double yearLength, float r, float g, float b) {
-        registerPlanet(dimensionID, size, sunDist, (int)(yearLength * earthYear), r, g, b);
     }
 
     public static void refreshEntityScaling(Entity entity, Level level) {
@@ -179,6 +184,7 @@ public final class GenesisMod {
             ResourceLocation dimensionID,
             ResourceLocation orbitingDimensionID,
             double size,
+            double gravity,
             double orbitRadius,
             double yearLength,
             float r,

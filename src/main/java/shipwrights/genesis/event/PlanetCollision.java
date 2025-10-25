@@ -69,7 +69,7 @@ public class PlanetCollision {
 
 			final PlanetData planet = nearestPlanetData.planet();
 			final double distance = nearestPlanetData.distance();
-			double closeRange = planet.size / 8;
+			double closeRange = planet.getActualSize() / 8;
 
 			final ResourceKey<Level> targetDimension = ResourceKey.create(
 				net.minecraft.core.registries.Registries.DIMENSION,
@@ -91,7 +91,7 @@ public class PlanetCollision {
 			final ShipLandingAttachment landingAttachment = ShipLandingAttachment.get(ship);
 
 			// Too far away
-			if (distance > planet.size) {
+			if (distance > planet.getActualSize()) {
 				landingAttachment.launching = false;
 				continue;
 			}

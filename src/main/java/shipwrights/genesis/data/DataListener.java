@@ -64,6 +64,7 @@ public class DataListener {
                             GenesisMod.registerPlanet(
                                 planet.getDimensionID(),
                                     planet.size(),
+                                    planet.gravity(),
                                     planet.orbitRadius(),
                                     planet.yearLength(),
                                     planet.r(),
@@ -71,7 +72,6 @@ public class DataListener {
                                     planet.b()
                             );
 
-                            DimensionSettingsManager.INSTANCE.addSettings(planet.getDimensionID(), new DimensionSettings(1.0, planet.gravity(), true));
                             GenesisMod.LOGGER.info("Registered planet from data: {}", planet.dimensionID());
                         }
 
@@ -85,6 +85,7 @@ public class DataListener {
                                     moon.getDimensionID(),
                                     moon.getParentDimensionID(),
                                     moon.size(),
+                                    moon.gravity(),
                                     moon.orbitRadius(),
                                     moon.yearLength(),
                                     moon.r(),
@@ -92,7 +93,6 @@ public class DataListener {
                                     moon.b()
                             );
 
-                            DimensionSettingsManager.INSTANCE.addSettings(moon.getDimensionID(), new DimensionSettings(1.0, moon.gravity(), true));
                             GenesisMod.LOGGER.info("Registered moon from data: {}", moon.dimensionID());
                         }
                     }

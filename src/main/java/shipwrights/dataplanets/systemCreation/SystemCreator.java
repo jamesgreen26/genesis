@@ -12,6 +12,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.systemCreation.naming.SystemNameGenerator;
 import shipwrights.dataplanets.systemCreation.dimension.biome.BiomeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.DimensionTypeCreator;
@@ -30,9 +31,13 @@ public class SystemCreator {
 
         List<PlanetSource> sources = createPlanetSources(context);
 
+        List<PlanetData> planets = new ArrayList<>();
+
         for (var source : sources) {
-            createPlanet(source, context);
+            planets.add(createPlanet(source, context));
         }
+
+        context.compat.addPlanetsToSpace(server, planets);
     }
 
     private static List<PlanetSource> createPlanetSources(SystemCreator.SystemCreationContext context) {
@@ -45,7 +50,7 @@ public class SystemCreator {
         return output;
     }
 
-    public void createPlanet(PlanetSource source, SystemCreationContext context) {
+    public PlanetData createPlanet(PlanetSource source, SystemCreationContext context) {
         PlanetData planetData = PlanetData.fromPlanetSource(source);
 
         Holder<DimensionType> dimensionTypeHolder = DimensionTypeCreator.createAndRegisterDimensionType(context, planetData);
@@ -60,6 +65,8 @@ public class SystemCreator {
         LevelStem stem = new LevelStem(dimensionTypeHolder, noiseBasedChunkGenerator);
 
         RegistryUtil.registerLevelStem(context.server, ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name()), stem);
+
+        return planetData;
     }
 
 
@@ -68,6 +75,7 @@ public class SystemCreator {
         public final RandomSource random = RandomSource.create();
         public final String systemName;
         public int currentPlanetIndex = 0;
+        public Compat compat = Compat.get();
 
         public SystemCreationContext(MinecraftServer server, boolean scientificNameStyle) {
             this.server = server;

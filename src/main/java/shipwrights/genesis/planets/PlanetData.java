@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.data.SystemConfigModel;
 
 import java.util.Random;
 
@@ -13,14 +14,15 @@ public class PlanetData {
     public final double orbitRadius;
     private final double orbitalTheta;
     private final double orbitalPhi;
-    public final int orbitalPeriod;
+    private final double orbitalPeriod;
     public Vector3d rotation;
-    public final double size;
+    private final double size;
     public final float color;
+    public final double gravity;
 
     public final int hash;
 
-    public PlanetData(ResourceLocation dimensionID, @Nullable PlanetData parent, double size, double orbitRadius, int yearLength, float r, float g, float b) {
+    public PlanetData(ResourceLocation dimensionID, @Nullable PlanetData parent, double size, double orbitRadius, double yearLength, float r, float g, float b, double gravity) {
 
         int hash = dimensionID.toString().hashCode();
         Random rand = new Random(hash);
@@ -29,9 +31,10 @@ public class PlanetData {
         this.dimensionID = dimensionID;
         this.orbitRadius = orbitRadius;
         this.rotation = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
-        this.size = size * GenesisMod.earthSize;
+        this.size = size;
         this.orbitalPeriod = yearLength;
         this.color = rgbToFloat(r, g, b);
+        this.gravity = gravity;
         this.hash = dimensionID.hashCode();
 
         for (int i = 0; i < rand.nextInt(2, 20); i++) {
@@ -43,7 +46,7 @@ public class PlanetData {
     }
 
     public Vector3d getCurrentPos(long ticks, float subticks) {
-        if (orbitalPeriod == 0 || orbitRadius == 0) {
+        if (getYearLengthTicks() == 0 || orbitRadius == 0) {
             if (parent != null) {
                 return parent.getCurrentPos(ticks, subticks);
             }
@@ -51,7 +54,7 @@ public class PlanetData {
         }
 
         Vector3d out = new Vector3d(1, 0, 0);
-        out = out.rotateY(Math.PI * 2 * (ticks + subticks) / orbitalPeriod);
+        out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
         out = out.rotateY(orbitalTheta);
         out = out.rotateX(orbitalPhi + Math.PI / 2);
         out.normalize(orbitRadius * GenesisMod.earthDist);
@@ -90,5 +93,19 @@ public class PlanetData {
         return "PlanetData{" +
                 "dimensionID=" + dimensionID +
                 '}';
+    }
+
+    public int getYearLengthTicks() {
+        return (int)(this.orbitalPeriod * GenesisMod.earthYear);
+    }
+
+    public double getActualSize() {
+         return this.size * GenesisMod.earthSize;
+    }
+
+    public SystemConfigModel.PlanetJsonModel toJsonModel() {
+        int[] color = floatToRgb(this.color);
+
+        return new SystemConfigModel.PlanetJsonModel(dimensionID.toString(), size, orbitRadius, orbitalPeriod, gravity, color[0], color[1], color[2]);
     }
 }

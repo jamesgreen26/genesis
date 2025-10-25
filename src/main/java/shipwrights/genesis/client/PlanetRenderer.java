@@ -84,7 +84,7 @@ public class PlanetRenderer {
 
         matrix.rotate(new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z));
 
-        float halfSize = (float) (data.size / 2);
+        float halfSize = (float) (data.getActualSize() / 2);
 
         int textureScale = data.hash % 256;
 

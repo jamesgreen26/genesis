@@ -8,6 +8,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.fml.ModList;
+import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
@@ -23,7 +24,7 @@ import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 public class DimensionTypeCreator {
 
     public static Holder<DimensionType> createAndRegisterDimensionType(SystemCreator.SystemCreationContext context, PlanetData planetData) {
-        DimensionType dimensionType = DimensionTypeCreator.createFromPlanetData(planetData);
+        DimensionType dimensionType = DimensionTypeCreator.createFromPlanetData(planetData, context.compat);
         ResourceLocation dimensionTypeLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name() + "_dimension_type");
         ResourceKey<DimensionType> dimensionTypeKey = ResourceKey.create(Registries.DIMENSION_TYPE, dimensionTypeLocation);
 
@@ -41,10 +42,12 @@ public class DimensionTypeCreator {
 
     /**
      * Create a dimension type based on planet data
+     *
      * @param planetData The planet data to create a dimension type from
+     * @param compat current loaded compatibility
      * @return The appropriate dimension type
      */
-    private static DimensionType createFromPlanetData(PlanetData planetData) {
+    private static DimensionType createFromPlanetData(PlanetData planetData, Compat compat) {
 
         // Closer to star = more skylight (inverse relationship)
         // Earth distance is ~1.0, so less than ~3.0 has good skylight
@@ -62,7 +65,7 @@ public class DimensionTypeCreator {
             return createWithAtmosphere(hasSkylight, ultrawarm, false, monsterSpawn);
         } else {
             // Airless planet - end effects
-            return createAirless(hasSkylight, ultrawarm, monsterSpawn);
+            return createAirless(hasSkylight, ultrawarm, monsterSpawn, compat);
         }
     }
 
@@ -94,7 +97,7 @@ public class DimensionTypeCreator {
      * Airless/vacuum planets (no atmosphere)
      * Uses end effects (no sky, void particles, different ambient)
      */
-    public static DimensionType createAirless(boolean hasSkylight, boolean ultrawarm, boolean monsterSpawn) {
+    public static DimensionType createAirless(boolean hasSkylight, boolean ultrawarm, boolean monsterSpawn, Compat compat) {
         return new DimensionType(
             OptionalLong.empty(),                    // fixed_time
             hasSkylight,                             // has_skylight
@@ -108,19 +111,9 @@ public class DimensionTypeCreator {
             384,                                     // height
             384,                                     // logical_height
             BlockTags.INFINIBURN_OVERWORLD,          // infiniburn
-            getSpaceEffects(), // effects
+            compat.getSpaceDimensionEffects(),       // effects
             0.0f,                                    // ambient_light
             new DimensionType.MonsterSettings(monsterSpawn, false, UniformInt.of(0, 7), 0)
         );
-    }
-
-    private static ResourceLocation getSpaceEffects() {
-        boolean isGenesLoaded = ModList.get().isLoaded("genesis");
-
-        if (isGenesLoaded) {
-            return ResourceLocation.parse("genesis:great_unknown");
-        } else {
-            return ResourceLocation.parse("minecraft:the_end");
-        }
     }
 }

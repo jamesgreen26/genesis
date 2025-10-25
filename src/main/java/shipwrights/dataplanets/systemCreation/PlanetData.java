@@ -3,6 +3,7 @@ package shipwrights.dataplanets.systemCreation;
 import net.minecraft.resources.ResourceLocation;
 import shipwrights.dataplanets.systemCreation.dimension.blocks.BlockInfo;
 import shipwrights.dataplanets.systemCreation.dimension.blocks.BlockPalettes;
+import shipwrights.dataplanets.util.Color;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -68,19 +69,8 @@ public record PlanetData(
     }
 
     private static ResourceLocation derivePrimaryBlock(double mass, double temperature, double humidity, double weirdness) {
-        // If BlockPalettes are empty, use default values
         if (BlockPalettes.SOLIDS.isEmpty()) {
-            if (temperature > 2.0) {
-                return ResourceLocation.parse("minecraft:netherrack");
-            } else if (temperature > 1.5) {
-                return ResourceLocation.parse("minecraft:red_sandstone");
-            } else if (temperature < 0.3) {
-                return ResourceLocation.parse("minecraft:packed_ice");
-            } else if (weirdness > 1.5) {
-                return ResourceLocation.parse("minecraft:end_stone");
-            } else {
-                return ResourceLocation.parse("minecraft:stone");
-            }
+            throw new IllegalStateException("No block palettes to choose from");
         }
 
         // Find the best matching block from BlockPalettes using all available parameters
@@ -97,21 +87,8 @@ public record PlanetData(
     }
 
     private static ResourceLocation derivePrimaryFluid(double mass, double temperature, double humidity, double weirdness) {
-        // If BlockPalettes are empty, use default values
         if (BlockPalettes.FLUIDS.isEmpty()) {
-            if (humidity < 0.3) {
-                return ResourceLocation.parse("minecraft:air");
-            }
-
-            if (temperature < 0.4) {
-                return ResourceLocation.parse("minecraft:ice");
-            }
-
-            if (temperature > 1.8) {
-                return ResourceLocation.parse("minecraft:lava");
-            }
-
-            return ResourceLocation.parse("minecraft:water");
+            throw new IllegalStateException("No fluid palettes to choose from");
         }
 
         // Find the best matching fluid from BlockPalettes using all available parameters
@@ -143,5 +120,9 @@ public record PlanetData(
     private static double deriveOrbitalPeriod(double distanceFromStar) {
         // Kepler's third law: T² ∝ a³, so T ∝ a^1.5
         return Math.pow(distanceFromStar, 1.5);
+    }
+
+    public Color getPrimaryColour() {
+        return new Color(128, 128, 128); // TODO implement this properly
     }
 }

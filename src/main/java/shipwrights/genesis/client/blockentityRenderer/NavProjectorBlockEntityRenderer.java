@@ -23,7 +23,7 @@ import java.util.Objects;
 public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavProjectorBlockEntity> {
     public NavProjectorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
-    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , null, 15, 0, 0, 1, 1, 1);
+    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , null, 15, 10,0, 0, 1, 1, 1);
 
     static {
         sunData.rotation = new Vector3d(0, 0, 0);
@@ -103,7 +103,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
                 return;
         }
 
-        float scale = (float) (2 * Math.sqrt(planet.size) / Math.sqrt(scale_factor));
+        float scale = (float) (2 * Math.sqrt(planet.getActualSize()) / Math.sqrt(scale_factor));
         if (scale > 0) {
             poseStack.translate(planetPos.x / scale_factor, planetPos.y / scale_factor, planetPos.z / scale_factor);
             poseStack.scale(scale, scale, scale);

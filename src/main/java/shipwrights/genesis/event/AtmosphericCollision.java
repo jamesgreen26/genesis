@@ -5,22 +5,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.planets.PlanetData;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.teleportation.TeleportationHandler;
 import shipwrights.genesis.util.PlanetUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static shipwrights.genesis.util.VSUtils.getLoadedShipsInLevel;
 
@@ -72,7 +67,7 @@ public class AtmosphericCollision {
 			}
 
 			// Calculate target position in space
-			final Vector3d targetPos = new Vector3d(0, planet.size * 0.7 + 20, 0);
+			final Vector3d targetPos = new Vector3d(0, planet.getActualSize() * 0.7 + 20, 0);
 			final Quaterniond rotation = PlanetUtil.getPlanetRotation(planet);
 			rotation.transform(targetPos);
 			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
