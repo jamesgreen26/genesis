@@ -1,16 +1,17 @@
 package shipwrights.dataplanets.systemCreation.dimension.biome;
 
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -26,6 +27,7 @@ import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class BiomeFeatures {
@@ -39,7 +41,7 @@ public class BiomeFeatures {
             addDripstone(context, builder);
         }
 
-        addDeltas(context, builder, biomeName);
+        addDeltas(context, builder, biomeName, planetData);
 
         return builder.build();
     }
@@ -68,18 +70,17 @@ public class BiomeFeatures {
                 .addCarver(GenerationStep.Carving.AIR,cave_extra);
     }
 
-    private static void addDeltas(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder, String biomeName) {
+    private static void addDeltas(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder, String biomeName, PlanetData planetData) {
         Registry<ConfiguredFeature<?,?>> configuredFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
         Registry<PlacedFeature> placedFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
 
-        ResourceLocation configuredResourceLocation = ResourceLocation.tryBuild("dataplanets",biomeName+"_delta");
-        ResourceLocation placedResourceLocation = ResourceLocation.tryBuild("dataplanets",biomeName+"_delta");
+        ResourceLocation configuredResourceLocation = ResourceLocation.fromNamespaceAndPath("dataplanets",biomeName+"_delta");
+        ResourceLocation placedResourceLocation = ResourceLocation.fromNamespaceAndPath("dataplanets",biomeName+"_delta");
 
         ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(configuredFeatureRegistry.key(), configuredResourceLocation);
         ResourceKey<PlacedFeature> placedKey = ResourceKey.create(placedFeatureRegistry.key(), placedResourceLocation);
 
-        DeltaFeatureConfiguration configuration = new DeltaFeatureConfiguration(Blocks.LAVA.defaultBlockState(),Blocks.MAGMA_BLOCK.defaultBlockState(), UniformInt.of(3,7),UniformInt.of(0,2));
-        ConfiguredFeature<?,?> feature = new ConfiguredFeature<>(Feature.DELTA_FEATURE,configuration);
+        ConfiguredFeature<?, ?> feature = getConfiguredDelta(context.server, planetData);
 
         RegistryUtil.registerConfiguredFeature(context.server, configuredResourceLocation, feature);
 
@@ -92,6 +93,23 @@ public class BiomeFeatures {
         Optional<Holder.Reference<PlacedFeature>> placedHolder = placedFeatureRegistry.getHolder(placedKey);
 
         placedHolder.ifPresent(ref -> builder.addFeature(0, ref));
+    }
+
+    private static @NotNull ConfiguredFeature<?, ?> getConfiguredDelta(MinecraftServer server, PlanetData planetData) {
+        Block primaryFluid = server.registryAccess().registryOrThrow(Registries.BLOCK).get(planetData.primaryFluid());
+
+        BlockState primaryFluidState = Objects.requireNonNullElse(primaryFluid, Blocks.LAVA).defaultBlockState();
+
+        BlockState solidState;
+
+        if (primaryFluidState == Blocks.LAVA.defaultBlockState()) {
+            solidState = Blocks.MAGMA_BLOCK.defaultBlockState();
+        } else {
+            solidState = Blocks.MUD.defaultBlockState();
+        }
+
+        DeltaFeatureConfiguration configuration = new DeltaFeatureConfiguration(primaryFluidState, solidState, UniformInt.of(3,7),UniformInt.of(0,2));
+        return new ConfiguredFeature<>(Feature.DELTA_FEATURE,configuration);
     }
 
 
