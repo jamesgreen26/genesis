@@ -11,12 +11,6 @@ import shipwrights.dataplanets.DataplanetsMod;
 
 import static java.lang.Math.max;
 
-/**
- * Crater density function that creates crater-like depressions using 2D Worley noise cells.
- * Uses the formula: -(0.5 - abs(pow(dist, 3))) / max(pow(dist, 6), 1)
- * where dist is the normalized distance to the nearest cell center in the XZ plane.
- * Y coordinate is ignored - craters are consistent at all heights.
- */
 public class Crater implements DensityFunction {
 
     public static final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, "crater");
@@ -42,33 +36,27 @@ public class Crater implements DensityFunction {
 
         double frequency = 0.5;
 
-        // Scale for crater distribution (smaller = more frequent, smaller craters)
         double scaledX = frequency * x / this.scale;
         double scaledZ = frequency * z / this.scale;
 
         double scaleY = this.scale / 1280.0;
 
-        // Find the grid cell containing this point
         int cellX = (int) Math.floor(scaledX);
         int cellZ = (int) Math.floor(scaledZ);
 
         double minDist = Double.MAX_VALUE;
 
-        // Check neighboring cells (3x3 grid)
         for (int offsetX = -1; offsetX <= 1; offsetX++) {
             for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
                 int neighborCellX = cellX + offsetX;
                 int neighborCellZ = cellZ + offsetZ;
 
-                // Generate random point within this cell
                 long seed = hashCell(neighborCellX, neighborCellZ);
                 double randomX = neighborCellX + lcgRandom(seed);
                 double randomZ = neighborCellZ + lcgRandom(seed + 1);
 
-                // Vary cell size based on the cell's seed (smaller variation range)
                 double cellSizeVariation = 0.7 + lcgRandom(seed + 2) * 0.6; // 0.7 to 1.3x size
 
-                // Calculate distance to this cell's point
                 double dx = (scaledX - randomX) / cellSizeVariation;
                 double dz = (scaledZ - randomZ) / cellSizeVariation;
                 double dist = dx * dx + dz * dz;
@@ -82,14 +70,12 @@ public class Crater implements DensityFunction {
         return scaleY * (crater - 0.5) / max(1.0, crater * crater * crater);
     }
 
-    // Hash function for generating consistent random values per cell
     private long hashCell(int x, int z) {
         long h = x * 374761393L + z * 668265263L;
         h = (h ^ (h >> 13)) * 1274126177L;
         return h ^ (h >> 16);
     }
 
-    // Simple linear congruential generator for [0, 1) random values
     private double lcgRandom(long seed) {
         seed = (seed * 1103515245L + 12345L) & 0x7FFFFFFFL;
         return (double) seed / (double) 0x7FFFFFFFL;
