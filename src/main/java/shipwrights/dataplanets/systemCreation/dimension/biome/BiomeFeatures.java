@@ -2,6 +2,7 @@ package shipwrights.dataplanets.systemCreation.dimension.biome;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.resources.ResourceKey;
@@ -16,7 +17,10 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.CountOnEveryLayerPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
@@ -109,7 +113,49 @@ public class BiomeFeatures {
         }
 
         DeltaFeatureConfiguration configuration = new DeltaFeatureConfiguration(primaryFluidState, solidState, UniformInt.of(3,7),UniformInt.of(0,2));
-        return new ConfiguredFeature<>(Feature.DELTA_FEATURE,configuration);
+        return new ConfiguredFeature<>(Feature.DELTA_FEATURE, configuration);
+    }
+
+    private static void addLakes(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder, String biomeName, PlanetData planetData) {
+        Registry<ConfiguredFeature<?,?>> configuredFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
+        Registry<PlacedFeature> placedFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
+
+        ResourceLocation configuredResourceLocation = ResourceLocation.fromNamespaceAndPath("dataplanets",biomeName+"_lake");
+        ResourceLocation placedResourceLocation = ResourceLocation.fromNamespaceAndPath("dataplanets",biomeName+"_lake");
+
+        ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(configuredFeatureRegistry.key(), configuredResourceLocation);
+        ResourceKey<PlacedFeature> placedKey = ResourceKey.create(placedFeatureRegistry.key(), placedResourceLocation);
+
+        ConfiguredFeature<?, ?> feature = getConfiguredLake(context.server, planetData);
+
+        RegistryUtil.registerConfiguredFeature(context.server, configuredResourceLocation, feature);
+
+        List<PlacementModifier> modifiers = new ArrayList<>();
+        modifiers.add(CountOnEveryLayerPlacement.of(1));
+        PlacedFeature placedFeature = new PlacedFeature(configuredFeatureRegistry.getHolderOrThrow(configuredKey),modifiers);
+
+        RegistryUtil.registerPlacedFeature(context.server, placedResourceLocation, placedFeature);
+
+        Optional<Holder.Reference<PlacedFeature>> placedHolder = placedFeatureRegistry.getHolder(placedKey);
+
+        placedHolder.ifPresent(ref -> builder.addFeature(0, ref));
+    }
+
+    private static @NotNull ConfiguredFeature<?, ?> getConfiguredLake(MinecraftServer server, PlanetData planetData) {
+        Block primaryFluid = server.registryAccess().registryOrThrow(Registries.BLOCK).get(planetData.primaryFluid());
+
+        BlockState primaryFluidState = Objects.requireNonNullElse(primaryFluid, Blocks.LAVA).defaultBlockState();
+
+        BlockState solidState;
+
+        if (primaryFluidState == Blocks.LAVA.defaultBlockState()) {
+            solidState = Blocks.MAGMA_BLOCK.defaultBlockState();
+        } else {
+            solidState = BuiltInRegistries.BLOCK.get(planetData.primaryBlock()).defaultBlockState();
+        }
+
+        LakeFeature.Configuration configuration = new LakeFeature.Configuration(BlockStateProvider.simple(primaryFluidState), BlockStateProvider.simple(solidState));
+        return new ConfiguredFeature<>(Feature.LAKE, configuration);
     }
 
 
