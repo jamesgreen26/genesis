@@ -45,7 +45,12 @@ public class BiomeFeatures {
             addDripstone(context, builder);
         }
 
-        addDeltas(context, builder, biomeName, planetData);
+        if (planetData.atmosphericDensity() > 0.3 && variationFactor > 0.7) {
+            addDeltas(context, builder, biomeName, planetData);
+        }
+
+        addLakes(context, builder, biomeName, planetData);
+
 
         return builder.build();
     }
