@@ -1,6 +1,8 @@
 package shipwrights.dataplanets;
 
 import com.tterrag.registrate.Registrate;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -17,6 +19,8 @@ import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
 import shipwrights.genesis.GenesisMod;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber
 @Mod(DataplanetsMod.MOD_ID)
 public class DataplanetsMod {
@@ -26,6 +30,8 @@ public class DataplanetsMod {
     public static final FantasySystemNameGenerator FANTASY_SYSTEM_NAME_GENERATOR = new FantasySystemNameGenerator();
 
     public static final Registrate REGISTRATE = Registrate.create(MOD_ID);
+
+    public static final ResourceLocation MUTABLE_DATA = ResourceLocation.fromNamespaceAndPath("dataplanets","mutable_data");
 
     public DataplanetsMod(FMLJavaModLoadingContext context) {
         DPItems.init();
@@ -46,7 +52,17 @@ public class DataplanetsMod {
         boolean isNewSave = RegistryUtil.setupDatapackFolder(server);
 
         if (isNewSave) {
-            new SystemCreator().createSystem(server, true);
+            List<String> rawNames = new SystemCreator().createSystem(server, true);
+
+            CompoundTag tag = server.getCommandStorage().get(MUTABLE_DATA);
+            CompoundTag system = new CompoundTag();
+            for (int i = 1; i < rawNames.size(); i++) {
+                CompoundTag planet = new CompoundTag();
+                //TODO: faction data should exist here
+                system.put(rawNames.get(i),planet);
+            }
+            tag.put(rawNames.get(0),system);
+            server.getCommandStorage().set(MUTABLE_DATA,tag);
         }
     }
 }

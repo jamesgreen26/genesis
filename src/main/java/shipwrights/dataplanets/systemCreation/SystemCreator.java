@@ -26,7 +26,7 @@ import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 
 public class SystemCreator {
 
-    public void createSystem(MinecraftServer server, boolean scientificNamingStyle) {
+    public List<String> createSystem(MinecraftServer server, boolean scientificNamingStyle) {
         SystemCreationContext context = new SystemCreationContext(server, scientificNamingStyle);
 
         List<PlanetSource> sources = createPlanetSources(context);
@@ -36,8 +36,12 @@ public class SystemCreator {
         for (var source : sources) {
             planets.add(createPlanet(source, context));
         }
-
         context.compat.addPlanetsToSpace(server, planets);
+
+        List<String> rawNames = new ArrayList<>();
+        rawNames.add(context.systemName);
+        planets.forEach(a->rawNames.add(a.name()));
+        return rawNames;
     }
 
     private static List<PlanetSource> createPlanetSources(SystemCreator.SystemCreationContext context) {
