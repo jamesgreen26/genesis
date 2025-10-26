@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
@@ -220,7 +221,10 @@ public class TerrainGenCreator {
 
         // Add craters for low-atmosphere planets (creates impact crater terrain)
         DensityFunction craters = planetData.atmosphericDensity() < 0.5
-                ? densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, Crater.resourceLocation)).get()
+                ? DensityFunctions.add(DensityFunctions.add(
+                        densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "crater0"))).get(),
+                        densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "crater1"))).get()),
+                        densityFunctionRegistry.getOrThrow(ResourceKey.create(Registries.DENSITY_FUNCTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "crater2"))).get())
                 : DensityFunctions.zero();
 
         // Combine terrain elements more efficiently with fewer nested operations

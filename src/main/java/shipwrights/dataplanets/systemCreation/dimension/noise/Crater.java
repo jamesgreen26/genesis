@@ -1,5 +1,6 @@
 package shipwrights.dataplanets.systemCreation.dimension.noise;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -7,6 +8,8 @@ import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.DataplanetsMod;
+
+import static java.lang.Math.max;
 
 /**
  * Crater density function that creates crater-like depressions using 2D Worley noise cells.
@@ -18,9 +21,17 @@ public class Crater implements DensityFunction {
 
     public static final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, "crater");
 
-    public static final Crater INSTANCE = new Crater();
+    private final double scale;
 
-    public static final MapCodec<Crater> MAP_CODEC = MapCodec.unit(INSTANCE);
+    public Crater(double scale) {
+        this.scale = scale;
+    }
+
+    public static final MapCodec<Crater> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
+            instance.group(
+                    Codec.DOUBLE.fieldOf("scale").forGetter(crater -> crater.scale)
+            ).apply(instance, Crater::new)
+    );
 
     public static final KeyDispatchDataCodec<Crater> CODEC = KeyDispatchDataCodec.of(MAP_CODEC);
 
@@ -30,9 +41,10 @@ public class Crater implements DensityFunction {
         int z = context.blockZ();
 
         // Scale for crater distribution (smaller = more frequent, smaller craters)
-        double scale = 64.0;
-        double scaledX = x / scale;
-        double scaledZ = z / scale;
+        double scaledX = x / this.scale;
+        double scaledZ = z / this.scale;
+
+        double scaleY = this.scale / 1280.0;
 
         // Find the grid cell containing this point
         int cellX = (int) Math.floor(scaledX);
@@ -65,7 +77,7 @@ public class Crater implements DensityFunction {
 
         double crater = 12 * minDist;
 
-        return 0.05 * (crater - 0.5) / Math.max(1.0, crater * crater * crater);
+        return scaleY * (crater - 0.5) / max(1.0, crater * crater * crater);
     }
 
     // Hash function for generating consistent random values per cell
