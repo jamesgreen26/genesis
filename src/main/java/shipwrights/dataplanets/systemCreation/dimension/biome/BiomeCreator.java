@@ -24,6 +24,7 @@ public class BiomeCreator {
 
         for (int i = 0; i < biomeCount; i++) {
             double variationFactor = (double) i / biomeCount;
+            float biomeHeight = 0.0f;
 
             String biomeName = planetData.name() + "_biome_" + i;
 
@@ -36,7 +37,7 @@ public class BiomeCreator {
             BiomeTags.addTagsToBiome(context, biomeLocation, planetData, variationFactor);
 
             // Create climate parameters for this biome based on variation
-            Climate.ParameterPoint climateParams = createClimateParameters(planetData, variationFactor);
+            Climate.ParameterPoint climateParams = createClimateParameters(planetData, variationFactor, biomeHeight);
 
             // Create holder for the biome
             Holder<Biome> biomeHolder = context.server.registryAccess()
@@ -52,13 +53,13 @@ public class BiomeCreator {
     /**
      * Create climate parameters for a biome based on planet data and variation factor
      */
-    private Climate.ParameterPoint createClimateParameters(PlanetData planetData, double variationFactor) {
+    private Climate.ParameterPoint createClimateParameters(PlanetData planetData, double variationFactor, float biomeHeight) {
         // Base values from planet data, varied by the biome's variation factor
         float temperature = clampClimate(planetData.temperature() + (variationFactor - 0.5) * 0.4);
         float humidity = clampClimate((planetData.atmosphericDensity() + planetData.seaLevel()) / 2.0);
         float continentalness = clampClimate(planetData.size() - 1.0); // Size affects landmass
         float erosion = clampClimate(1.0 - planetData.terrainRoughness()); // Rough terrain = less erosion
-        float depth = 0.0f; // Depth parameter
+        float depth = biomeHeight; // Depth parameter
         float weirdness = clampClimate(planetData.weirdness() - 1.0);
 
         // Create climate parameter ranges (using single points for simplicity)
