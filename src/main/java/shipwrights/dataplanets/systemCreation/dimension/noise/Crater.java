@@ -40,9 +40,11 @@ public class Crater implements DensityFunction {
         int x = context.blockX();
         int z = context.blockZ();
 
+        double frequency = 0.5;
+
         // Scale for crater distribution (smaller = more frequent, smaller craters)
-        double scaledX = x / this.scale;
-        double scaledZ = z / this.scale;
+        double scaledX = frequency * x / this.scale;
+        double scaledZ = frequency * z / this.scale;
 
         double scaleY = this.scale / 1280.0;
 
@@ -75,7 +77,7 @@ public class Crater implements DensityFunction {
             }
         }
 
-        double crater = 12 * minDist;
+        double crater = 12 * minDist / (frequency * frequency);
 
         return scaleY * (crater - 0.5) / max(1.0, crater * crater * crater);
     }
