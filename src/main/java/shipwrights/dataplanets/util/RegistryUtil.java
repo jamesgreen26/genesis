@@ -75,6 +75,7 @@ public class RegistryUtil {
     ) {
         registerThing(server, Registries.PLACED_FEATURE, ResourceKey.create(Registries.PLACED_FEATURE, resourceLocation), placedFeature);
         //TODO write to datapack
+        writeToDatapack(server, resourceLocation, "worldgen/placed_feature", PlacedFeature.DIRECT_CODEC, placedFeature);
 
     }
 
@@ -85,6 +86,7 @@ public class RegistryUtil {
     ) {
         registerThing(server, Registries.CONFIGURED_FEATURE, ResourceKey.create(Registries.CONFIGURED_FEATURE, resourceLocation), configuredFeature);
         //TODO write to datapack
+        writeToDatapack(server, resourceLocation, "worldgen/configured_feature", ConfiguredFeature.DIRECT_CODEC, configuredFeature);
 
     }
 

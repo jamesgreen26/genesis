@@ -25,9 +25,11 @@ public class BiomeCreator {
         for (int i = 0; i < biomeCount; i++) {
             double variationFactor = (double) i / biomeCount;
 
-            Biome biome = BiomeCreator.createBiome(context.random, planetData, variationFactor, context);
+            String biomeName = planetData.name() + "_biome_" + i;
 
-            ResourceLocation biomeLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name() + "_biome_" + i);
+            Biome biome = BiomeCreator.createBiome(context.random, planetData, variationFactor, context, biomeName);
+
+            ResourceLocation biomeLocation = ResourceLocation.fromNamespaceAndPath(MOD_ID, biomeName);
             ResourceKey<Biome> biomeKey = ResourceKey.create(Registries.BIOME, biomeLocation);
             RegistryUtil.registerBiome(context.server, biomeLocation, biome);
 
@@ -78,7 +80,7 @@ public class BiomeCreator {
         return (float) Math.max(-2.0, Math.min(2.0, value));
     }
 
-    private static Biome createBiome(RandomSource random, PlanetData planetData, double variationFactor, SystemCreator.SystemCreationContext context) {
+    private static Biome createBiome(RandomSource random, PlanetData planetData, double variationFactor, SystemCreator.SystemCreationContext context, String biomeName) {
         // Vary temperature based on planet base temperature and variation
         float temperature = (float) (planetData.temperature() + (variationFactor - 0.5) * 0.4);
 
@@ -100,7 +102,7 @@ public class BiomeCreator {
         // Create mob spawn settings (empty for now - no mobs on generated planets)
         MobSpawnSettings mobSpawnSettings = new MobSpawnSettings.Builder().build();
 
-        BiomeGenerationSettings generationSettings = BiomeFeatures.getBiomeGenerationSettings(context, planetData, variationFactor);
+        BiomeGenerationSettings generationSettings = BiomeFeatures.getBiomeGenerationSettings(context, planetData, variationFactor, biomeName);
 
         // Build and return the biome
         return new Biome.BiomeBuilder()
