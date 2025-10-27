@@ -30,8 +30,8 @@ public class CrystalFeature extends Feature<NoneFeatureConfiguration> {
             return false;
         }
 
-        blockPos = blockPos.below(randomSource.nextInt(12));
-        int height = 15 + randomSource.nextInt(10);
+        blockPos = blockPos.below(5 + randomSource.nextInt(12));
+        int height = 20 + randomSource.nextInt(15);
         int maxRadius = 4 + randomSource.nextInt(3);
         int baseRadius = 2 + randomSource.nextInt(2);
         int expandHeight = (int) (height * 0.5F);
