@@ -70,30 +70,44 @@ public class BiomeFeatures {
     }
 
     private static void addCrystals(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder, String biomeName, PlanetData planetData) {
+        List<PlacementModifier> modifiers = new ArrayList<>();
+        modifiers.add(CountOnEveryLayerPlacement.of(40));
+
+        addSimpleFeature(context, builder, biomeName + "_crystal", "crystal", modifiers, 0);
+    }
+
+    private static void addSimpleFeature(
+            SystemCreator.SystemCreationContext context,
+            BiomeGenerationSettings.PlainBuilder builder,
+            String placedFeatureName,
+            String featureName,
+            List<PlacementModifier> modifiers,
+            int decorationStep
+    ) {
         Registry<ConfiguredFeature<?,?>> configuredFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
         Registry<PlacedFeature> placedFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
         Registry<Feature<?>> featureRegistry = context.server.registryAccess().registryOrThrow(Registries.FEATURE);
 
-        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath("dataplanets",biomeName+"_crystal");
+        ResourceLocation placedResourceLocation = ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, placedFeatureName);
+        ResourceLocation featureResourceLocation = ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, featureName);
 
-        ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(configuredFeatureRegistry.key(), resourceLocation);
-        ResourceKey<PlacedFeature> placedKey = ResourceKey.create(placedFeatureRegistry.key(), resourceLocation);
+        ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(configuredFeatureRegistry.key(), placedResourceLocation);
+        ResourceKey<PlacedFeature> placedKey = ResourceKey.create(placedFeatureRegistry.key(), placedResourceLocation);
 
-        Holder<Feature<?>> feature = featureRegistry.getHolderOrThrow(ResourceKey.create(featureRegistry.key(), ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, "crystal")));
+        Holder<Feature<?>> feature = featureRegistry.getHolderOrThrow(ResourceKey.create(featureRegistry.key(), featureResourceLocation));
 
-        ConfiguredFeature<?, ?> configuredFeature = new ConfiguredFeature<>((CrystalFeature) feature.get(), FeatureConfiguration.NONE);
+        @SuppressWarnings("unchecked")
+        ConfiguredFeature<?, ?> configuredFeature = new ConfiguredFeature<>((Feature<NoneFeatureConfiguration>) feature.value(), FeatureConfiguration.NONE);
 
-        RegistryUtil.registerConfiguredFeature(context.server, resourceLocation, configuredFeature);
+        RegistryUtil.registerConfiguredFeature(context.server, placedResourceLocation, configuredFeature);
 
-        List<PlacementModifier> modifiers = new ArrayList<>();
-        modifiers.add(CountOnEveryLayerPlacement.of(40));
-        PlacedFeature placedFeature = new PlacedFeature(configuredFeatureRegistry.getHolderOrThrow(configuredKey),modifiers);
+        PlacedFeature placedFeature = new PlacedFeature(configuredFeatureRegistry.getHolderOrThrow(configuredKey), modifiers);
 
-        RegistryUtil.registerPlacedFeature(context.server, resourceLocation, placedFeature);
+        RegistryUtil.registerPlacedFeature(context.server, placedResourceLocation, placedFeature);
 
         Optional<Holder.Reference<PlacedFeature>> placedHolder = placedFeatureRegistry.getHolder(placedKey);
 
-        placedHolder.ifPresent(ref -> builder.addFeature(0, ref));
+        placedHolder.ifPresent(ref -> builder.addFeature(decorationStep, ref));
     }
 
     private static void addIceSpikes(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder) {
