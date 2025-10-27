@@ -52,17 +52,7 @@ public class DataplanetsMod {
         boolean isNewSave = RegistryUtil.setupDatapackFolder(server);
 
         if (isNewSave) {
-            List<String> rawNames = new SystemCreator().createSystem(server, true);
-
-            CompoundTag tag = server.getCommandStorage().get(MUTABLE_DATA);
-            CompoundTag system = new CompoundTag();
-            for (int i = 1; i < rawNames.size(); i++) {
-                CompoundTag planet = new CompoundTag();
-                //TODO: faction data should exist here
-                system.put(rawNames.get(i),planet);
-            }
-            tag.put(rawNames.get(0),system);
-            server.getCommandStorage().set(MUTABLE_DATA,tag);
+            new SystemCreator().createSystem(server, true);
         }
     }
 }

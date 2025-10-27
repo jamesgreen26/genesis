@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "genesis:echostone",
+    "genesis:lunar_dust",
+    "genesis:nullstone",
+    "genesis:phaserock",
+    "genesis:riftrock",
+    "genesis:stellar_sand",
+    "genesis:voidstone",
+    "genesis:warpstone"
+  ]
+}
