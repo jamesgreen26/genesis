@@ -2,18 +2,27 @@ package shipwrights.dataplanets.systemCreation.dimension.biome.features;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraftforge.common.Tags;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class CrystalFeature extends Feature<NoneFeatureConfiguration> {
     public CrystalFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
+
+    private static final Set<Block> stainedGlass = new HashSet<>();
+    private static List<Block> stainedGlassList;
 
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> arg) {
         BlockPos blockPos = arg.origin();
@@ -26,7 +35,16 @@ public class CrystalFeature extends Feature<NoneFeatureConfiguration> {
 
         BlockState startState = worldGenLevel.getBlockState(blockPos);
 
-        if (!startState.isSolid() || startState.is(Blocks.AMETHYST_BLOCK) || randomSource.nextInt(120) != 0) {
+        if (stainedGlass.isEmpty()) {
+            BuiltInRegistries.BLOCK.getTagOrEmpty(Tags.Blocks.STAINED_GLASS).iterator().forEachRemaining(blockHolder -> {
+                stainedGlass.add(blockHolder.get());
+            });
+            stainedGlassList = stainedGlass.stream().toList();
+        }
+
+        Block block = stainedGlassList.get(randomSource.nextInt(stainedGlassList.size()));
+
+        if (!startState.isSolid() || stainedGlass.contains(startState.getBlock()) || randomSource.nextInt(120) != 0) {
             return false;
         }
 
@@ -52,7 +70,7 @@ public class CrystalFeature extends Feature<NoneFeatureConfiguration> {
             for (int m = -radius; m <= radius; ++m) {
                 for (int n = -radius; n <= radius; ++n) {
                     if (Math.abs(m) + Math.abs(n) <= radius) {
-                        this.setBlock(worldGenLevel, blockPos.offset(m, k, n), Blocks.AMETHYST_BLOCK.defaultBlockState());
+                        this.setBlock(worldGenLevel, blockPos.offset(m, k, n), block.defaultBlockState());
                     }
                 }
             }
@@ -65,7 +83,7 @@ public class CrystalFeature extends Feature<NoneFeatureConfiguration> {
                     int depth = 3 + randomSource.nextInt(3);
 
                     for (int d = 0; d < depth; ++d) {
-                        this.setBlock(worldGenLevel, blockPos2, Blocks.AMETHYST_BLOCK.defaultBlockState());
+                        this.setBlock(worldGenLevel, blockPos2, block.defaultBlockState());
                         blockPos2 = blockPos2.below();
                     }
                 }
