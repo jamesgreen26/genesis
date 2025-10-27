@@ -32,14 +32,6 @@
       "minerality": 0.65,
       "weirdness": 0.25,
       "block": "minecraft:red_sandstone"
-    },
-    {
-      "mass": 1.85,
-      "temperature": 1.55,
-      "humidity": 0.18,
-      "minerality": 0.62,
-      "weirdness": 0.22,
-      "block": "minecraft:red_sand"
     }
   ]
 }

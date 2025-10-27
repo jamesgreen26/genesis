@@ -2,14 +2,6 @@
   "replace": false,
   "values": [
     {
-      "mass": 1.6,
-      "temperature": 1.1,
-      "humidity": 0.2,
-      "minerality": 0.4,
-      "weirdness": 0.1,
-      "block": "minecraft:sand"
-    },
-    {
       "mass": 1.8,
       "temperature": 1.15,
       "humidity": 0.15,
@@ -24,14 +16,6 @@
       "minerality": 0.42,
       "weirdness": 0.08,
       "block": "minecraft:smooth_sandstone"
-    },
-    {
-      "mass": 1.7,
-      "temperature": 0.9,
-      "humidity": 0.4,
-      "minerality": 0.5,
-      "weirdness": 0.15,
-      "block": "minecraft:gravel"
     },
     {
       "mass": 1.2,
