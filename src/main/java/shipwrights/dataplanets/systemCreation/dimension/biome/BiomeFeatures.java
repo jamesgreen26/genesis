@@ -21,13 +21,17 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.CountOnEveryLayerPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import org.jetbrains.annotations.NotNull;
+import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
+import shipwrights.dataplanets.systemCreation.dimension.biome.features.CrystalFeature;
 import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.ArrayList;
@@ -58,10 +62,38 @@ public class BiomeFeatures {
 
         if (planetData.temperature() < 0.5 && random.nextDouble() > 0.7) {
             addIceSpikes(context, builder);
+        } else if (planetData.gravity() < 1 && random.nextDouble() > 0.8) {
+            addCrystals(context, builder, biomeName, planetData);
         }
 
-
         return builder.build();
+    }
+
+    private static void addCrystals(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder, String biomeName, PlanetData planetData) {
+        Registry<ConfiguredFeature<?,?>> configuredFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE);
+        Registry<PlacedFeature> placedFeatureRegistry = context.server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
+        Registry<Feature<?>> featureRegistry = context.server.registryAccess().registryOrThrow(Registries.FEATURE);
+
+        ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath("dataplanets",biomeName+"_crystal");
+
+        ResourceKey<ConfiguredFeature<?,?>> configuredKey = ResourceKey.create(configuredFeatureRegistry.key(), resourceLocation);
+        ResourceKey<PlacedFeature> placedKey = ResourceKey.create(placedFeatureRegistry.key(), resourceLocation);
+
+        Holder<Feature<?>> feature = featureRegistry.getHolderOrThrow(ResourceKey.create(featureRegistry.key(), ResourceLocation.fromNamespaceAndPath(DataplanetsMod.MOD_ID, "crystal")));
+
+        ConfiguredFeature<?, ?> configuredFeature = new ConfiguredFeature<>((CrystalFeature) feature.get(), FeatureConfiguration.NONE);
+
+        RegistryUtil.registerConfiguredFeature(context.server, resourceLocation, configuredFeature);
+
+        List<PlacementModifier> modifiers = new ArrayList<>();
+        modifiers.add(CountOnEveryLayerPlacement.of(40));
+        PlacedFeature placedFeature = new PlacedFeature(configuredFeatureRegistry.getHolderOrThrow(configuredKey),modifiers);
+
+        RegistryUtil.registerPlacedFeature(context.server, resourceLocation, placedFeature);
+
+        Optional<Holder.Reference<PlacedFeature>> placedHolder = placedFeatureRegistry.getHolder(placedKey);
+
+        placedHolder.ifPresent(ref -> builder.addFeature(0, ref));
     }
 
     private static void addIceSpikes(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder) {
