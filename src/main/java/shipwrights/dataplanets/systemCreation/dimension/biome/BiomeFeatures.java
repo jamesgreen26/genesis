@@ -8,6 +8,7 @@ import net.minecraft.data.worldgen.Carvers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.block.Block;
@@ -39,20 +40,36 @@ public class BiomeFeatures {
     public static @NotNull BiomeGenerationSettings getBiomeGenerationSettings(SystemCreator.SystemCreationContext context, PlanetData planetData, double variationFactor, String biomeName) {
         BiomeGenerationSettings.PlainBuilder builder = new BiomeGenerationSettings.PlainBuilder();
 
+        RandomSource random = RandomSource.create(biomeName.hashCode());
+
         addCarvers(context, builder);
 
         if ((planetData.atmosphericDensity() > 0.8 || planetData.weirdness() > 0.8) && planetData.flavour() > 0.3) {
             addDripstone(context, builder);
         }
 
-        if (planetData.atmosphericDensity() > 0.3 && variationFactor > 0.7) {
+        if (planetData.atmosphericDensity() > 0.3 && random.nextDouble() > 0.7) {
             addDeltas(context, builder, biomeName, planetData);
         }
 
-        addLakes(context, builder, biomeName, planetData);
+        if (planetData.atmosphericDensity() > 0.7) {
+            addLakes(context, builder, biomeName, planetData);
+        }
+
+        if (planetData.temperature() < 0.5 && random.nextDouble() > 0.7) {
+            addIceSpikes(context, builder);
+        }
 
 
         return builder.build();
+    }
+
+    private static void addIceSpikes(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder) {
+        Registry<PlacedFeature> placedFeatures = context.server.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
+
+        Optional<Holder.Reference<PlacedFeature>> iceSpikes = placedFeatures.getHolder(ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.parse("ice_spike")));
+
+        iceSpikes.ifPresent(ref -> builder.addFeature(0, ref));
     }
 
     private static void addDripstone(SystemCreator.SystemCreationContext context, BiomeGenerationSettings.PlainBuilder builder) {
