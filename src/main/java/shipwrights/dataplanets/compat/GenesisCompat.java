@@ -1,21 +1,14 @@
 package shipwrights.dataplanets.compat;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.storage.LevelResource;
 import shipwrights.dataplanets.DataplanetsMod;
+import shipwrights.dataplanets.util.DataPackUtil;
 import shipwrights.genesis.data.SystemConfigModel;
 import shipwrights.genesis.planets.PlanetData;
 import shipwrights.dataplanets.util.Color;
 import shipwrights.genesis.GenesisMod;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,35 +35,13 @@ public class GenesisCompat implements Compat{
             genesisPlanetData.ifPresent(genesisPlanets::add);
         }
 
-        try {
-            writeToDataPack(genesisPlanets, server);
-        } catch (IOException e) {
-            DataplanetsMod.LOGGER.error("Failed to write Genesis planets to datapack", e);
-        }
+        SystemConfigModel systemConfig = new SystemConfigModel(
+                genesisPlanets.stream().map(PlanetData::toJsonModel).toList(),
+                List.of()
+        );
+
+        DataPackUtil.write(server, "genesis/system_config", "dataplanets.json", systemConfig, SystemConfigModel.CODEC);
     }
-
-    private void writeToDataPack(List<PlanetData> planets, MinecraftServer server) throws IOException {
-        Path basePath = server.storageSource.getLevelPath(LevelResource.DATAPACK_DIR);
-        Path planetsPath = basePath.resolve("genesis/system_config");
-        String fileName = "dataplanets.json";
-
-        SystemConfigModel systemConfig = new SystemConfigModel(planets.stream().map(PlanetData::toJsonModel).toList(), List.of());
-
-        Files.createDirectories(planetsPath);
-
-        JsonElement json = SystemConfigModel.CODEC.encodeStart(JsonOps.INSTANCE, systemConfig)
-                .resultOrPartial(error -> DataplanetsMod.LOGGER.error("Failed to encode system config: {}", error))
-                .orElseThrow(() -> new IOException("Failed to encode system config"));
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonString = gson.toJson(json);
-
-        Path filePath = planetsPath.resolve(fileName);
-        Files.writeString(filePath, jsonString);
-
-        DataplanetsMod.LOGGER.info("Wrote {} planets to {}", planets.size(), filePath);
-    }
-
 
     @Override
     public ResourceLocation getSpaceDimensionEffects() {
