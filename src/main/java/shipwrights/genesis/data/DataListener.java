@@ -9,6 +9,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -23,6 +24,11 @@ import java.util.Set;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DataListener {
+
+    @SubscribeEvent
+    public static void onServerStop(ServerStoppedEvent event) {
+        GenesisMod.planets.clear();
+    }
 
     @SubscribeEvent
     public static void onRegisterReloadListener(AddReloadListenerEvent event) {

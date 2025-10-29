@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
@@ -64,5 +65,10 @@ public class PlanetLookup {
                 }
             }
         });
+    }
+
+    @SubscribeEvent
+    public static void onServerStop(ServerStoppedEvent event) {
+        planets.clear();
     }
 }
