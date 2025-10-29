@@ -12,9 +12,10 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.PlanetSource;
-import shipwrights.dataplanets.util.DataPackUtil;
+import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,10 +25,11 @@ public class PlanetLookup {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Map<ResourceLocation, PlanetData> planets = new ConcurrentHashMap<>();
+    private static final String PATH = "planet_source";
 
     public static void store(MinecraftServer server, PlanetSource planet) {
         load(planet);
-        DataPackUtil.write(server, "dataplanets/planet_source", planet.name() + ".json", planet, PlanetSource.CODEC);
+        RegistryUtil.writeToDatapack(server, id(planet.name()), PATH, PlanetSource.CODEC, planet);
     }
 
     private static void load(PlanetSource planet) {
@@ -48,9 +50,9 @@ public class PlanetLookup {
 
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(new SimpleJsonResourceReloadListener(GSON, "dataplanets/planet_source") {
+        event.addListener(new SimpleJsonResourceReloadListener(GSON, PATH) {
             @Override
-            protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+            protected void apply(@NotNull Map<ResourceLocation, JsonElement> map, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profilerFiller) {
                 for (Map.Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
                     try {
                         PlanetSource.CODEC.parse(JsonOps.INSTANCE, entry.getValue())

@@ -23,7 +23,8 @@
     "ServerLevelMixin",
     "ServerShipObjectWorldAccessor",
     "VSExplosionForceMixin",
-    "VSMountedCameraMixin"
+    "VSMountedCameraMixin",
+    "dataplanets.LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

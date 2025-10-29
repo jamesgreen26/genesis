@@ -3,7 +3,7 @@ package shipwrights.dataplanets.compat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import shipwrights.dataplanets.DataplanetsMod;
-import shipwrights.dataplanets.util.DataPackUtil;
+import shipwrights.dataplanets.util.RegistryUtil;
 import shipwrights.genesis.data.SystemConfigModel;
 import shipwrights.genesis.planets.PlanetData;
 import shipwrights.dataplanets.util.Color;
@@ -40,7 +40,7 @@ public class GenesisCompat implements Compat{
                 List.of()
         );
 
-        DataPackUtil.write(server, "genesis/system_config", "dataplanets.json", systemConfig, SystemConfigModel.CODEC);
+        RegistryUtil.writeToDatapack(server, ResourceLocation.parse("genesis:dataplanets"), "system_config", SystemConfigModel.CODEC, systemConfig);
     }
 
     @Override

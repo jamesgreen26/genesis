@@ -157,7 +157,7 @@ public class RegistryUtil {
         return newFolderCreated;
     }
 
-    private static <T> void writeToDatapack(
+    public static <T> void writeToDatapack(
             MinecraftServer server,
             ResourceLocation resourceLocation,
             String path,
