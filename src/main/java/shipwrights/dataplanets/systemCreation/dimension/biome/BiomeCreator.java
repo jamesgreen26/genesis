@@ -54,24 +54,63 @@ public class BiomeCreator {
      * Create climate parameters for a biome based on planet data and variation factor
      */
     private Climate.ParameterPoint createClimateParameters(PlanetData planetData, double variationFactor, float biomeHeight) {
-        // Base values from planet data, varied by the biome's variation factor
-        float temperature = clampClimate(planetData.temperature() + (variationFactor - 0.5) * 0.4);
-        float humidity = clampClimate((planetData.atmosphericDensity() + planetData.seaLevel()) / 2.0);
-        float continentalness = clampClimate(planetData.size() - 1.0); // Size affects landmass
-        float erosion = clampClimate(1.0 - planetData.terrainRoughness()); // Rough terrain = less erosion
-        float depth = biomeHeight; // Depth parameter
-        float weirdness = clampClimate(planetData.weirdness() - 1.0);
+        // IMPORTANT: The noise router in TerrainGenCreator multiplies noise (-1 to +1) by planet parameters
+        // So if planet.temperature() = 1.0, actual temperature noise ranges from -1.0 to +1.0
+        // We need to distribute biomes across the ACTUAL noise range, not around the planet parameter
 
-        // Create climate parameter ranges (using single points for simplicity)
+        // Calculate the actual noise ranges produced by TerrainGenCreator
+        double tempMultiplier = clampClimateParameter(planetData.temperature());
+        double humidityMultiplier = clampClimateParameter(planetData.atmosphericDensity());
+        double erosionMultiplier = clampClimateParameter(planetData.weirdness() * 0.8);
+        double ridgeMultiplier = clampClimateParameter(planetData.terrainRoughness() * 0.8);
+
+        // Continentalness is calculated differently - it's based on planet.size() * 0.2 * noise
+        double continentalnessMultiplier = planetData.size() * 0.2;
+
+        // Each biome should occupy a slice of the expected noise range
+        // Distribute biomes evenly across [-multiplier, +multiplier]
+        float sliceSize = 0.6f; // Smaller slices = less overlap = better distribution
+
+        // Temperature: distribute across the range the noise actually produces
+        float tempMin = (float)(tempMultiplier * -1.0 + (variationFactor * 2.0 * tempMultiplier));
+        float tempMax = tempMin + sliceSize;
+
+        // Humidity: distribute across atmospheric density range
+        float humidityMin = (float)(humidityMultiplier * -1.0 + (variationFactor * 2.0 * humidityMultiplier));
+        float humidityMax = humidityMin + sliceSize;
+
+        // Continentalness: distribute across size-based range
+        float continentalnessMin = (float)(continentalnessMultiplier * -1.0 + (variationFactor * 2.0 * continentalnessMultiplier));
+        float continentalnessMax = continentalnessMin + sliceSize;
+
+        // Erosion: distribute across weirdness-based range
+        float erosionMin = (float)(erosionMultiplier * -1.0 + (variationFactor * 2.0 * erosionMultiplier));
+        float erosionMax = erosionMin + sliceSize;
+
+        // Depth stays simple
+        float depth = biomeHeight;
+
+        // Ridges/weirdness: distribute across terrain roughness range
+        float weirdnessMin = (float)(ridgeMultiplier * -1.0 + (variationFactor * 2.0 * ridgeMultiplier));
+        float weirdnessMax = weirdnessMin + sliceSize;
+
+        // Create non-overlapping or minimally overlapping ranges for better distribution
         return Climate.parameters(
-                Climate.Parameter.point(temperature),
-                Climate.Parameter.point(humidity),
-                Climate.Parameter.point(continentalness),
-                Climate.Parameter.point(erosion),
+                Climate.Parameter.span(clampClimate(tempMin), clampClimate(tempMax)),
+                Climate.Parameter.span(clampClimate(humidityMin), clampClimate(humidityMax)),
+                Climate.Parameter.span(clampClimate(continentalnessMin), clampClimate(continentalnessMax)),
+                Climate.Parameter.span(clampClimate(erosionMin), clampClimate(erosionMax)),
                 Climate.Parameter.point(depth),
-                Climate.Parameter.point(weirdness),
-                0L // offset - could be based on biome index
+                Climate.Parameter.span(clampClimate(weirdnessMin), clampClimate(weirdnessMax)),
+                0L // offset
         );
+    }
+
+    /**
+     * Clamp a value to the valid climate parameter range [-2.0, 2.0]
+     */
+    private static double clampClimateParameter(double value) {
+        return Math.max(-1.99, Math.min(1.99, value));
     }
 
     /**
