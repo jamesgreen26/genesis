@@ -26,7 +26,7 @@
       "minerality": 0.3,
       "weirdness": 0.4,
       "block": "genesis:lunar_dust",
-      "color": "#CECECE"
+      "color": "#debaab"
     },
     {
       "mass": 1.5,
@@ -35,7 +35,7 @@
       "minerality": 0.35,
       "weirdness": 0.5,
       "block": "genesis:stellar_sand",
-      "color": "#FFE4B5"
+      "color": "#0a0e3d"
     },
     {
       "mass": 1.7,
