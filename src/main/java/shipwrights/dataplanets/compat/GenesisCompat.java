@@ -28,8 +28,8 @@ public class GenesisCompat implements Compat{
                     planetData.distanceFromStar(),
                     planetData.orbitalPeriod(),
                     color.red(),
-                    color.blue(),
-                    color.green()
+                    color.green(),
+                    color.blue()
                 );
 
             genesisPlanetData.ifPresent(genesisPlanets::add);
