@@ -7,7 +7,8 @@
       "humidity": 1.0,
       "minerality": 0.2,
       "weirdness": 0.1,
-      "block": "minecraft:water"
+      "block": "minecraft:water",
+      "color": "#3F76E4"
     },
     {
       "mass": 0.92,
@@ -15,7 +16,8 @@
       "humidity": 0.9,
       "minerality": 0.1,
       "weirdness": 0.15,
-      "block": "minecraft:ice"
+      "block": "minecraft:ice",
+      "color": "#9FCEFC"
     },
     {
       "mass": 0.92,
@@ -23,7 +25,8 @@
       "humidity": 0.95,
       "minerality": 0.05,
       "weirdness": 0.2,
-      "block": "minecraft:packed_ice"
+      "block": "minecraft:packed_ice",
+      "color": "#8EC8F9"
     }
   ]
 }

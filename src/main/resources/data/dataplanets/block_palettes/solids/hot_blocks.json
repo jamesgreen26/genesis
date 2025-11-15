@@ -7,7 +7,8 @@
       "humidity": 0.1,
       "minerality": 0.6,
       "weirdness": 0.5,
-      "block": "minecraft:netherrack"
+      "block": "minecraft:netherrack",
+      "color": "#8B3A3A"
     },
     {
       "mass": 2.0,
@@ -15,7 +16,8 @@
       "humidity": 0.05,
       "minerality": 0.7,
       "weirdness": 0.4,
-      "block": "minecraft:blackstone"
+      "block": "minecraft:blackstone",
+      "color": "#2A2238"
     },
     {
       "mass": 2.2,
@@ -23,7 +25,8 @@
       "humidity": 0.02,
       "minerality": 0.75,
       "weirdness": 0.6,
-      "block": "minecraft:basalt"
+      "block": "minecraft:basalt",
+      "color": "#5A5A68"
     },
     {
       "mass": 1.9,
@@ -31,7 +34,44 @@
       "humidity": 0.15,
       "minerality": 0.65,
       "weirdness": 0.25,
-      "block": "minecraft:red_sandstone"
+      "block": "minecraft:red_sandstone",
+      "color": "#B85F3F"
+    },
+    {
+      "mass": 1.7,
+      "temperature": 3.0,
+      "humidity": 0.0,
+      "minerality": 0.8,
+      "weirdness": 0.3,
+      "block": "minecraft:magma_block",
+      "color": "#9E4E00"
+    },
+    {
+      "mass": 2.15,
+      "temperature": 2.6,
+      "humidity": 0.03,
+      "minerality": 0.73,
+      "weirdness": 0.35,
+      "block": "minecraft:smooth_basalt",
+      "color": "#474849"
+    },
+    {
+      "mass": 1.85,
+      "temperature": 1.8,
+      "humidity": 0.08,
+      "minerality": 0.55,
+      "weirdness": 0.15,
+      "block": "minecraft:black_terracotta",
+      "color": "#4A3528"
+    },
+    {
+      "mass": 2.1,
+      "temperature": 1.5,
+      "humidity": 0.2,
+      "minerality": 0.68,
+      "weirdness": 0.28,
+      "block": "minecraft:tuff",
+      "color": "#6D6D65"
     }
   ]
 }

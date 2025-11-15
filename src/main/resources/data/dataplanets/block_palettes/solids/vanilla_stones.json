@@ -7,7 +7,8 @@
       "humidity": 0.5,
       "minerality": 0.8,
       "weirdness": 0.3,
-      "block": "minecraft:stone"
+      "block": "minecraft:stone",
+      "color": "#7F7F7F"
     },
     {
       "mass": 2.6,
@@ -15,7 +16,8 @@
       "humidity": 0.4,
       "minerality": 0.9,
       "weirdness": 0.2,
-      "block": "minecraft:deepslate"
+      "block": "minecraft:deepslate",
+      "color": "#4D4D4D"
     },
     {
       "mass": 2.4,
@@ -23,7 +25,8 @@
       "humidity": 0.3,
       "minerality": 0.85,
       "weirdness": 0.1,
-      "block": "minecraft:granite"
+      "block": "minecraft:granite",
+      "color": "#936D5E"
     },
     {
       "mass": 2.3,
@@ -31,7 +34,8 @@
       "humidity": 0.35,
       "minerality": 0.82,
       "weirdness": 0.15,
-      "block": "minecraft:diorite"
+      "block": "minecraft:diorite",
+      "color": "#C7C7C7"
     },
     {
       "mass": 2.35,
@@ -39,7 +43,26 @@
       "humidity": 0.38,
       "minerality": 0.83,
       "weirdness": 0.12,
-      "block": "minecraft:andesite"
+      "block": "minecraft:andesite",
+      "color": "#8B8B8B"
+    },
+    {
+      "mass": 2.2,
+      "temperature": 0.6,
+      "humidity": 0.45,
+      "minerality": 0.95,
+      "weirdness": 0.08,
+      "block": "minecraft:calcite",
+      "color": "#E3E4DF"
+    },
+    {
+      "mass": 2.25,
+      "temperature": 0.65,
+      "humidity": 0.5,
+      "minerality": 0.75,
+      "weirdness": 0.18,
+      "block": "minecraft:dripstone_block",
+      "color": "#8D6C5A"
     }
   ]
 }

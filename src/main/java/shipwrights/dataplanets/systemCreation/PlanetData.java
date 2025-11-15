@@ -28,7 +28,8 @@ public record PlanetData(
         double flavour,
         ResourceLocation primaryBlock,
         ResourceLocation primaryFluid,
-        double gravity
+        double gravity,
+        Color color
 ) {
 
     public static PlanetData fromPlanetSource(PlanetSource source) {
@@ -37,7 +38,7 @@ public record PlanetData(
         double orbitalPeriod = deriveOrbitalPeriod(source.distanceFromStar());
         double effectiveHumidity = Math.min(1.0, source.seaLevel() * source.atmosphericDensity());
 
-        ResourceLocation primaryBlock = derivePrimaryBlock(
+        Optional<BlockInfo> primaryBlockInfo = derivePrimaryBlockInfo(
             source.size(),
             temperature,
             effectiveHumidity,
@@ -51,6 +52,10 @@ public record PlanetData(
             source.weirdness()
         );
 
+        Color color = primaryBlockInfo
+                .map(BlockInfo::getColor)
+                .orElse(new Color(128, 128, 128, 255));
+
         return new PlanetData(
             source.name(),
             source.size(),
@@ -62,28 +67,27 @@ public record PlanetData(
             temperature,
             source.terrainRoughness(),
             source.flavour(),
-            primaryBlock,
+            primaryBlockInfo.map(BlockInfo::block).orElse(ResourceLocation.parse("minecraft:stone")),
             primaryFluid,
-            gravity
+            gravity,
+            color
         );
     }
 
-    private static ResourceLocation derivePrimaryBlock(double mass, double temperature, double humidity, double weirdness) {
+    private static Optional<BlockInfo> derivePrimaryBlockInfo(double mass, double temperature, double humidity, double weirdness) {
         if (BlockPalettes.SOLIDS.isEmpty()) {
             throw new IllegalStateException("No block palettes to choose from");
         }
 
         // Find the best matching block from BlockPalettes using all available parameters
         // Weight each parameter by its importance in block selection
-        Optional<BlockInfo> bestMatch = BlockPalettes.SOLIDS.stream()
+        return BlockPalettes.SOLIDS.stream()
                 .min(Comparator.comparingDouble(block ->
                     Math.abs(block.mass() - mass) * 0.5 +
                     Math.abs(block.temperature() - temperature) * 1.5 +
                     Math.abs(block.humidity() - humidity) * 0.8 +
                     Math.abs(block.weirdness() - weirdness) * 1.2
                 ));
-
-        return bestMatch.map(BlockInfo::block).orElse(ResourceLocation.parse("minecraft:stone"));
     }
 
     private static ResourceLocation derivePrimaryFluid(double mass, double temperature, double humidity, double weirdness) {
@@ -123,6 +127,6 @@ public record PlanetData(
     }
 
     public Color getPrimaryColour() {
-        return new Color(128, 128, 128); // TODO implement this properly
+        return color;
     }
 }

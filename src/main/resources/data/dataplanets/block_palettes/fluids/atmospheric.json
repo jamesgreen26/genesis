@@ -7,7 +7,8 @@
       "humidity": 0.2,
       "minerality": 0.0,
       "weirdness": 0.1,
-      "block": "minecraft:air"
+      "block": "minecraft:air",
+      "color": "#E6F7FF"
     }
   ]
 }

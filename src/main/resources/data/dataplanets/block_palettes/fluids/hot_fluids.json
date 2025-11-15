@@ -7,7 +7,8 @@
       "humidity": 0.05,
       "minerality": 0.9,
       "weirdness": 0.4,
-      "block": "minecraft:lava"
+      "block": "minecraft:lava",
+      "color": "#FF4500"
     }
   ]
 }

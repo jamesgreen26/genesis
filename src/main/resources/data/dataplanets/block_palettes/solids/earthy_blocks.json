@@ -7,7 +7,8 @@
       "humidity": 0.6,
       "minerality": 0.3,
       "weirdness": 0.1,
-      "block": "minecraft:dirt"
+      "block": "minecraft:dirt",
+      "color": "#96674A"
     },
     {
       "mass": 1.4,
@@ -15,7 +16,8 @@
       "humidity": 0.65,
       "minerality": 0.35,
       "weirdness": 0.12,
-      "block": "minecraft:coarse_dirt"
+      "block": "minecraft:coarse_dirt",
+      "color": "#876241"
     },
     {
       "mass": 1.5,
@@ -23,7 +25,8 @@
       "humidity": 0.7,
       "minerality": 0.4,
       "weirdness": 0.15,
-      "block": "minecraft:rooted_dirt"
+      "block": "minecraft:rooted_dirt",
+      "color": "#8A6646"
     },
     {
       "mass": 1.2,
@@ -31,7 +34,8 @@
       "humidity": 0.8,
       "minerality": 0.25,
       "weirdness": 0.08,
-      "block": "minecraft:mud"
+      "block": "minecraft:mud",
+      "color": "#3E3934"
     },
     {
       "mass": 1.25,
@@ -39,7 +43,26 @@
       "humidity": 0.55,
       "minerality": 0.28,
       "weirdness": 0.05,
-      "block": "minecraft:clay"
+      "block": "minecraft:clay",
+      "color": "#A1A5A7"
+    },
+    {
+      "mass": 1.6,
+      "temperature": 0.8,
+      "humidity": 0.4,
+      "minerality": 0.38,
+      "weirdness": 0.09,
+      "block": "minecraft:light_gray_terracotta",
+      "color": "#8A6B62"
+    },
+    {
+      "mass": 1.58,
+      "temperature": 0.78,
+      "humidity": 0.42,
+      "minerality": 0.36,
+      "weirdness": 0.11,
+      "block": "minecraft:gray_terracotta",
+      "color": "#5C4C45"
     }
   ]
 }

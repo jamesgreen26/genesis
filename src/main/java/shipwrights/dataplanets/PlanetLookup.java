@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.PlanetSource;
+import shipwrights.dataplanets.util.Color;
 import shipwrights.dataplanets.util.RegistryUtil;
 
 import java.util.Map;
@@ -46,7 +47,7 @@ public class PlanetLookup {
     }
 
     private static PlanetData getDefault(String name) {
-        return new PlanetData(name, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ResourceLocation.withDefaultNamespace("stone"), ResourceLocation.withDefaultNamespace("water"), 1.0);
+        return new PlanetData(name, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ResourceLocation.withDefaultNamespace("stone"), ResourceLocation.withDefaultNamespace("water"), 1.0, new Color(128, 128, 128, 255));
     }
 
     @SubscribeEvent
