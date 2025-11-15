@@ -27,9 +27,9 @@ public class GenesisCompat implements Compat{
                     planetData.gravity(),
                     planetData.distanceFromStar(),
                     planetData.orbitalPeriod(),
-                    color.red(),
-                    color.green(),
-                    color.blue()
+                    color.red() / 255.0f,
+                    color.green() / 255.0f,
+                    color.blue() / 255.0f
                 );
 
             genesisPlanetData.ifPresent(genesisPlanets::add);
