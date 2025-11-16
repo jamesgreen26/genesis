@@ -11,7 +11,8 @@
     "HugeExplosionSeedParticleMixin",
     "ParticleEngineMixin",
     "ParticleMixin",
-    "SoundMixin"
+    "SoundMixin",
+    "VSClientLevelMixin"
   ],
   "mixins": [
     "EntityDraggerMixin",
