@@ -166,8 +166,9 @@ public class VSClientLevelMixin {
                 if (particleOptions != null && genesis$vsRandom.nextInt(10) == 0) {
                     final boolean bl2 = blockState.isFaceSturdy(thisAsClientLevel, mutableBlockPos, Direction.DOWN);
                     final BlockPos blockPos = mutableBlockPos.below();
-                    this.trySpawnDripParticles(blockPos, thisAsClientLevel.getBlockState(blockPos), particleOptions,
-                            bl2);
+                    if (!thisAsClientLevel.isOutsideBuildHeight(blockPos)) {
+                        this.trySpawnDripParticles(blockPos, levelChunk.getBlockState(blockPos), particleOptions, bl2);
+                    }
                 }
             }
 
