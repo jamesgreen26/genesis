@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import org.joml.primitives.AABBd;
@@ -130,15 +132,34 @@ public class VSClientLevelMixin {
         }
         final ClientLevel thisAsClientLevel = ClientLevel.class.cast(this);
         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+        int minCX = SectionPos.blockToSectionCoord(region.minX());
+        int maxCX = SectionPos.blockToSectionCoord(region.maxX());
+        int minCZ = SectionPos.blockToSectionCoord(region.minZ());
+        int maxCZ = SectionPos.blockToSectionCoord(region.maxZ());
+
+        LevelChunk[][] chunkCache = new LevelChunk[maxCX - minCX + 1][maxCZ - minCZ + 1];
+
         for (int i = 0; i < blocksToTick; i++) {
             final int posX = region.minX() + genesis$vsRandom.nextInt(region.maxX() - region.minX() + 1);
             final int posY = region.minY() + genesis$vsRandom.nextInt(region.maxY() - region.minY() + 1);
             final int posZ = region.minZ() + genesis$vsRandom.nextInt(region.maxZ() - region.minZ() + 1);
 
             mutableBlockPos.set(posX, posY, posZ);
-            final BlockState blockState = thisAsClientLevel.getBlockState(mutableBlockPos);
+            if (thisAsClientLevel.isOutsideBuildHeight(mutableBlockPos)) continue;
+
+            int cx = SectionPos.blockToSectionCoord(posX) - minCX;
+            int cz = SectionPos.blockToSectionCoord(posZ) - minCZ;
+
+            LevelChunk levelChunk = chunkCache[cx][cz];
+            if (levelChunk == null) {
+                levelChunk = thisAsClientLevel.getChunk(cx + minCX, cz + minCZ);
+                chunkCache[cx][cz] = levelChunk;
+            }
+
+            final BlockState blockState = levelChunk.getBlockState(mutableBlockPos);
             blockState.getBlock().animateTick(blockState, thisAsClientLevel, mutableBlockPos, genesis$vsRandom);
-            final FluidState fluidState = thisAsClientLevel.getFluidState(mutableBlockPos);
+            final FluidState fluidState = levelChunk.getFluidState(mutableBlockPos);
             if (!fluidState.isEmpty()) {
                 fluidState.animateTick(thisAsClientLevel, mutableBlockPos, genesis$vsRandom);
                 final ParticleOptions particleOptions = fluidState.getDripParticle();
