@@ -12,6 +12,9 @@
   "samplers": [
     {
       "name": "DiffuseSampler"
+    },
+    {
+      "name": "MainDepthSampler"
     }
   ],
   "uniforms": [
@@ -24,6 +27,44 @@
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
+      ]
+    },
+    {
+      "name": "invProjMat",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+      ]
+    },
+    {
+      "name": "invViewMat",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+      ]
+    },
+    {
+      "name": "cameraPos",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0, 0, 0
+      ]
+    },
+    {
+      "name": "lookVector",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0, 0, 0
       ]
     },
     {

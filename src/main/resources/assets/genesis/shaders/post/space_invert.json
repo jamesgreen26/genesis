@@ -1,12 +1,21 @@
 {
   "targets": [
-    "final"
+    "final",
+    "depthMain"
   ],
   "passes": [
     {
       "name": "genesis:space_invert",
       "intarget": "minecraft:main",
-      "outtarget": "final"
+      "outtarget": "final",
+      "auxtargets": [
+        {
+          "name": "MainDepthSampler",
+          "id": "depthMain:depth"
+        }
+      ],
+      "uniforms": [
+      ]
     },
     {
       "name": "blit",
