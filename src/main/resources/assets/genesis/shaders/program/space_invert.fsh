@@ -26,9 +26,9 @@ void main() {
 
         vec3 light_vec = normalize(P_world + cameraPos);
 
-        float brightness = clamp(0.5 - dot(light_vec, normalWorld), 0, 2);
+        float brightness = clamp(1.0 - (2 * dot(light_vec, normalWorld)), 1, 2);
 
-        fragColor = texture(DiffuseSampler, texCoord) * vec4(brightness, brightness, brightness, 1.0);
+        fragColor = pow(texture(DiffuseSampler, texCoord), 1 / vec4(brightness, brightness, brightness, 1.0));
     } else {
         fragColor = texture(DiffuseSampler, texCoord);
     }
