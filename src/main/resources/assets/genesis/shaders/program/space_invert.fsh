@@ -10,18 +10,57 @@ uniform vec3 cameraPos;
 in vec2 texCoord;
 out vec4 fragColor;
 
+vec3 reconstructViewPos(vec2 uv, float depth)
+{
+    vec4 pos_clip = vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec4 pos_view = invProjMat * pos_clip;
+    return pos_view.xyz / pos_view.w;
+}
+
+vec3 computeSmoothNormal(vec2 uv)
+{
+    float depthC = texture(MainDepthSampler, uv).r;
+    vec3 center = reconstructViewPos(uv, depthC);
+
+    vec2 texel = 1.0 / vec2(textureSize(MainDepthSampler, 0));
+
+    // sample in a cross pattern (center + 4 neighbors)
+    vec3 positions[5];
+    positions[0] = center;
+
+    float threshold = 0.01; // depth difference threshold
+
+    // right
+    float depthR = texture(MainDepthSampler, uv + vec2(texel.x, 0.0)).r;
+    positions[1] = (abs(depthR - depthC) < threshold) ? reconstructViewPos(uv + vec2(texel.x, 0.0), depthR) : center;
+
+    // left
+    float depthL = texture(MainDepthSampler, uv - vec2(texel.x, 0.0)).r;
+    positions[2] = (abs(depthL - depthC) < threshold) ? reconstructViewPos(uv - vec2(texel.x, 0.0), depthL) : center;
+
+    // up
+    float depthU = texture(MainDepthSampler, uv + vec2(0.0, texel.y)).r;
+    positions[3] = (abs(depthU - depthC) < threshold) ? reconstructViewPos(uv + vec2(0.0, texel.y), depthU) : center;
+
+    // down
+    float depthD = texture(MainDepthSampler, uv - vec2(0.0, texel.y)).r;
+    positions[4] = (abs(depthD - depthC) < threshold) ? reconstructViewPos(uv - vec2(0.0, texel.y), depthD) : center;
+
+    // compute normal using central differences
+    vec3 dx = vec3(positions[1] - positions[2]) * 0.5;
+    vec3 dy = vec3(positions[3] - positions[4]) * 0.5;
+
+    return normalize(cross(dx, dy));
+}
+
 void main() {
     float depth = texture(MainDepthSampler, texCoord).r;
     if (depth < 1.0) {
 
-        vec4 pos_clip = vec4(texCoord * 2 - 1, depth * 2 - 1, 1.0);
-        vec4 P_view = invProjMat * pos_clip;
-        vec3 P_view3 = P_view.xyz / P_view.w;
+        vec3 normalView = computeSmoothNormal(texCoord);
+        vec3 normalWorld = normalize(mat3(invViewMat) * normalView);
 
-        vec3 normalView = normalize(cross(dFdx(P_view3), dFdy(P_view3)));
-        mat3 rotViewToWorld = mat3(invViewMat);
-        vec3 normalWorld = normalize(rotViewToWorld * normalView);
-
+        vec3 P_view3 = reconstructViewPos(texCoord, depth);
         vec3 P_world = (invViewMat * vec4(P_view3, 1.0)).xyz;
 
         vec3 light_vec = normalize(P_world + cameraPos);
