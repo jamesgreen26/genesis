@@ -12,19 +12,9 @@ const vec3 LightPos = vec3(0.0);
 in vec2 texCoord;
 out vec4 fragColor;
 
-vec3 reconstructPosition(vec2 uv, float z, mat4 InvVP) {
-    float x = uv.x * 2.0 - 1.0;
-    float y = (1.0 - uv.y) * 2.0 - 1.0;
-
-    vec4 position_s = vec4(x, y, z, 1.0);
-    vec4 position_v = InvVP * position_s;
-
-    return position_v.xyz / position_v.w;
-}
-
-
 void main() {
     float depth = texture(MainDepthSampler, texCoord).r;
+    if (depth < 1.0) {
 
     vec4 pos_clip = vec4(texCoord*2-1, depth*2-1, 1.0);
     vec4 P_view = invProjMat * pos_clip;
@@ -34,8 +24,13 @@ void main() {
     mat3 rotViewToWorld = mat3(invViewMat);
     vec3 normalWorld = normalize(rotViewToWorld * normalView);
 
-    vec3 finalColor = abs(normalWorld);
-    finalColor = clamp(finalColor, 0.0, 1.0);
 
-    fragColor = vec4(finalColor, 1.0);
+
+        vec3 finalColor = abs(normalWorld);
+        finalColor = clamp(finalColor, 0.0, 1.0);
+
+        fragColor = vec4(finalColor, 1.0);
+    } else {
+        fragColor = texture(DiffuseSampler, texCoord);
+    }
 }
