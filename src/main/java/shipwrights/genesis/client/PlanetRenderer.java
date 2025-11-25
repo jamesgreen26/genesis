@@ -15,8 +15,6 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.block.RadarDisplayBlock;
-import shipwrights.genesis.client.blockentityRenderer.RadarDisplayBlockEntityRenderer;
 import shipwrights.genesis.planets.PlanetData;
 
 import static shipwrights.genesis.client.ShaderRegistry.getPlanetRenderType;
@@ -66,8 +64,6 @@ public class PlanetRenderer {
         RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
-
-        RadarDisplayBlockEntityRenderer.renderFrustumDebug(RadarDisplayBlockEntityRenderer.instance, 0, 0, 200d, event.getPoseStack(), bufferSource);
     }
 
     private static void renderPlanet(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {

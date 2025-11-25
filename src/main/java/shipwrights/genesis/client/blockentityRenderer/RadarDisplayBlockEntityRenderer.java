@@ -18,7 +18,6 @@ import shipwrights.genesis.radar.PixelFrustumFactory;
 
 public class RadarDisplayBlockEntityRenderer implements BlockEntityRenderer<RadarDisplayBlockEntity> {
 
-    public static RadarDisplayBlockEntity instance = null;
 
     private static final double depthNear = 0d;
     private static final double depthFar = 25_000d;
@@ -29,7 +28,6 @@ public class RadarDisplayBlockEntityRenderer implements BlockEntityRenderer<Rada
     @Override
     public void render(RadarDisplayBlockEntity blockEntity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        instance = blockEntity;
 
         double[][] data = blockEntity.getDisplayableData();
         int resolution = data.length;
