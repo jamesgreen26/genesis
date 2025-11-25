@@ -1,0 +1,27 @@
+{
+    "variants": {
+        "facing=north": {
+            "model": "genesis:block/radar_display"
+        },
+        "facing=east": {
+            "model": "genesis:block/radar_display",
+            "y": 90
+        },
+        "facing=south": {
+            "model": "genesis:block/radar_display",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "genesis:block/radar_display",
+            "y": 270
+        },
+        "facing=up": {
+            "model": "genesis:block/radar_display",
+            "x": 270
+        },
+        "facing=down": {
+            "model": "genesis:block/radar_display",
+            "x": 90
+        }
+    }
+}

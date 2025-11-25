@@ -15,6 +15,9 @@ public class GenesisItems {
     public static final RegistryObject<Item> NAV_PROJECTOR = ITEMS.register("nav_projector",
         () -> new BlockItem(GenesisBlocks.NAV_PROJECTOR.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> RADAR_DISPLAY = ITEMS.register("radar_display",
+        () -> new BlockItem(GenesisBlocks.RADAR_DISPLAY.get(), new Item.Properties()));
+
     public static final RegistryObject<Item> VOID_ENGINE_INTERFACE = ITEMS.register("void_engine_interface",
         () -> new BlockItem(GenesisBlocks.VOID_ENGINE_INTERFACE.get(), new Item.Properties()));
 

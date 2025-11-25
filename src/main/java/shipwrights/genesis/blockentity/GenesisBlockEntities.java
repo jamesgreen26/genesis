@@ -28,4 +28,9 @@ public class GenesisBlockEntities {
 
     public static final RegistryObject<BlockEntityType<WarpstoneCatalyzerBlockEntity>> WARPSTONE_CATALYZER_BLOCK_ENTITY = BLOCK_ENTITIES.register("warpstone_catalyzer_block",
             () -> BlockEntityType.Builder.of(WarpstoneCatalyzerBlockEntity::new, GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get()).build(null));
+
+    public static final RegistryObject<BlockEntityType<RadarDisplayBlockEntity>> RADAR_DISPLAY =
+        BLOCK_ENTITIES.register("radar_display",
+            () -> BlockEntityType.Builder.of(RadarDisplayBlockEntity::new,
+                GenesisBlocks.RADAR_DISPLAY.get()).build(null));
 }

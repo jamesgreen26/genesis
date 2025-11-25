@@ -1,6 +1,7 @@
 {
   "block.genesis.asteroid_0": "Asteroid",
   "block.genesis.nav_projector": "Navigation Projector",
+  "block.genesis.radar_display": "Radar Display",
   "block.genesis.warpstone_catalyzer_block": "Warpstone Catalyzer",
   "genesis.screen.warpstone_catalyzer": "Warpstone Catalyzer",
   "block.genesis.warpstone_chunk": "Warpstone Chunk",
@@ -19,6 +20,7 @@
   "block.genesis.stellar_sand": "Stellar Sand",
   "item.genesis.asteroid_0": "Asteroid",
   "item.genesis.nav_projector": "Navigation Projector",
+  "item.genesis.radar_display": "Radar Display",
   "item.genesis.void_engine_interface": "Void Engine Interface",
   "item.genesis.void_engine_frame": "Void Engine Frame",
   "item.genesis.void_core": "Void Core",

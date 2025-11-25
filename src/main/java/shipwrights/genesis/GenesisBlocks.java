@@ -30,6 +30,12 @@ public class GenesisBlocks {
             .noOcclusion()
             .lightLevel(state -> 15)));
 
+    public static final RegistryObject<Block> RADAR_DISPLAY = BLOCKS.register("radar_display",
+        () -> new RadarDisplayBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+            .strength(3.0f)
+            .requiresCorrectToolForDrops()
+            .noOcclusion()));
+
     public static final RegistryObject<Block> VOID_ENGINE_INTERFACE = BLOCKS.register("void_engine_interface",
         () -> new VoidEngineInterfaceBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
             .strength(3.0f)
