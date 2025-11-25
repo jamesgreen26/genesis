@@ -54,7 +54,7 @@ public class RadarDisplay {
         // Update all frustums with new view parameters
         frustumFactory.update(camera, directionNormalized, right, upNormalized, fov);
 
-//        scanShips(level, camera, excludedShips);
+        scanShips(level, camera, excludedShips);
 
         if (GenesisMod.isSpaceDimension(level)) {
             scanPlanets(level, camera);
