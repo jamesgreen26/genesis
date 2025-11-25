@@ -64,7 +64,7 @@ public class RadarDisplayBlockEntityRenderer implements BlockEntityRenderer<Rada
 
                 // Convert to -0.5..0.5 screen space
                 float x0 = -0.5f + x * pixelSize;
-                float y0 = -0.5f + y * pixelSize;
+                float y0 = 0.5f - y * pixelSize;
                 float x1 = x0 + pixelSize;
                 float y1 = y0 + pixelSize;
 
