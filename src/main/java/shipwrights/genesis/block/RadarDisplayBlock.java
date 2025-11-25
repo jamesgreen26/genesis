@@ -4,10 +4,13 @@ import shipwrights.genesis.blockentity.RadarDisplayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -47,5 +50,19 @@ public class RadarDisplayBlock extends BaseEntityBlock {
             facing = facing.getOpposite();
         }
         return this.defaultBlockState().setValue(FACING, facing);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide) {
+            return (lvl, pos, st, be) -> {
+                if (be instanceof RadarDisplayBlockEntity radar) {
+                    radar.clientTick();
+                }
+            };
+        } else {
+            return null;
+        }
     }
 }
