@@ -35,17 +35,32 @@ public class RadarDisplayBlockEntity extends BlockEntity {
 
             Vector3d pos;
             Vector3d dir;
+            Vector3d up;
             List<Long> excludedShips = new ArrayList<>(1);
             pos = VectorConversionsMCKt.toJOML(getBlockPos().getCenter());
             dir = new Vector3d(normalShip.getX(), normalShip.getY(), normalShip.getZ());
 
+            // Calculate up vector based on facing direction
+            up = getUpVectorForFacing(state.getValue(RadarDisplayBlock.FACING));
+
             if (ship != null) {
                 pos = ship.getShipToWorld().transformPosition(pos);
                 dir = ship.getShipToWorld().transformDirection(dir);
+                up = ship.getShipToWorld().transformDirection(up);
                 excludedShips.add(ship.getId());
             }
 
-            display.scan(level, pos, dir, excludedShips);
+            display.scan(level, pos, dir, up, excludedShips);
         }
+    }
+
+    private Vector3d getUpVectorForFacing(net.minecraft.core.Direction facing) {
+        // Return the up vector for the radar display based on facing direction
+        // This matches the rotation logic in the renderer
+        return switch (facing) {
+            case NORTH, SOUTH, EAST, WEST -> new Vector3d(0, 1, 0);  // Horizontal facings use world up
+            case UP -> new Vector3d(0, 0, -1);    // When facing up, north is "up" on screen
+            case DOWN -> new Vector3d(0, 0, 1);   // When facing down, south is "up" on screen
+        };
     }
 }

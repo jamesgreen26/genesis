@@ -17,22 +17,42 @@ public class RadarDisplay {
     private final PixelFrustumFactory frustumFactory;
     private static final double fov = 90;
 
+    // Debug data (stored after scan for visualization)
+    public Vector3dc debugCamera;
+    public Vector3dc debugDirection;
+    public Vector3dc debugUp;
+
     public RadarDisplay(int resolution) {
         this.resolution = resolution;
         this.data = new double[resolution][resolution];
         this.frustumFactory = new PixelFrustumFactory(resolution);
     }
 
+    public PixelFrustumFactory getFrustumFactory() {
+        return frustumFactory;
+    }
 
-    public void scan(Level level, Vector3dc camera, Vector3dc direction, List<Long> excludedShips) {
+
+    public void scan(Level level, Vector3dc camera, Vector3dc direction, Vector3dc up, List<Long> excludedShips) {
         clear();
-        // Compute camera basis vectors
-        Vector3d worldUp = new Vector3d(0, 1, 0);
-        Vector3d right = new Vector3d(direction).cross(worldUp).normalize();
-        Vector3d up = new Vector3d(right).cross(direction).normalize();
+
+        // Store debug data
+        debugCamera = camera;
+        debugDirection = direction;
+        debugUp = up;
+
+        // Normalize direction and up vectors
+        Vector3d directionNormalized = new Vector3d(direction).normalize();
+        Vector3d upInput = new Vector3d(up).normalize();
+
+        // Compute camera basis vectors from direction and up (using right-hand rule)
+        // right = direction × up (perpendicular to both, pointing right)
+        Vector3d right = new Vector3d(directionNormalized).cross(upInput).normalize();
+        // Recompute up to ensure orthogonality: up = right × direction
+        Vector3d upNormalized = new Vector3d(right).cross(directionNormalized).normalize();
 
         // Update all frustums with new view parameters
-        frustumFactory.update(camera, direction, right, up, fov);
+        frustumFactory.update(camera, directionNormalized, right, upNormalized, fov);
 
 //        scanShips(level, camera, excludedShips);
 

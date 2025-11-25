@@ -51,18 +51,36 @@ public class PixelFrustumFactory {
         return frustums[px][py];
     }
 
-    private void updateFrustum(int px, int py) {
-        // pixel region in NDC
-        double x0 = (double) px / res * 2.0 - 1.0;
-        double x1 = (double)(px+1) / res * 2.0 - 1.0;
-        double y0 = (double) py / res * 2.0 - 1.0;
-        double y1 = (double)(py+1) / res * 2.0 - 1.0;
+    // Debug getters for rendering frustums
+    public Vector3dc getCamera() { return C; }
+    public Vector3dc getForward() { return F; }
+    public Vector3dc getRight() { return R; }
+    public Vector3dc getUp() { return U; }
+    public double getTanHalfFov() { return tanHalfFov; }
 
-        // corner rays
-        Vector3d d00 = cornerRay(x0, y0);
-        Vector3d d10 = cornerRay(x1, y0);
-        Vector3d d01 = cornerRay(x0, y1);
-        Vector3d d11 = cornerRay(x1, y1);
+    private void updateFrustum(int px, int py) {
+        // Calculate equal angular spacing for each pixel
+        // Convert tanHalfFov back to angle, then divide FOV equally among all pixels
+        double halfFov = Math.atan(tanHalfFov);
+        double anglePerPixelRad = (halfFov * 2.0) / res;
+
+        // Angular boundaries for this pixel (centered at 0)
+        double angleX0 = (px - res / 2.0) * anglePerPixelRad;
+        double angleX1 = (px + 1 - res / 2.0) * anglePerPixelRad;
+        double angleY0 = (py - res / 2.0) * anglePerPixelRad;
+        double angleY1 = (py + 1 - res / 2.0) * anglePerPixelRad;
+
+        // Convert angles to tangent values for ray construction
+        double tanX0 = Math.tan(angleX0);
+        double tanX1 = Math.tan(angleX1);
+        double tanY0 = Math.tan(angleY0);
+        double tanY1 = Math.tan(angleY1);
+
+        // corner rays using tangent values
+        Vector3d d00 = cornerRay(tanX0, tanY0);
+        Vector3d d10 = cornerRay(tanX1, tanY0);
+        Vector3d d01 = cornerRay(tanX0, tanY1);
+        Vector3d d11 = cornerRay(tanX1, tanY1);
 
         // planes: inward-pointing normals for frustum culling
         PixelFrustum.Plane left   = planeFromRays(d01, d00);
@@ -73,10 +91,11 @@ public class PixelFrustumFactory {
         frustums[px][py].update(left, right, top, bottom);
     }
 
-    private Vector3d cornerRay(double nx, double ny) {
+    private Vector3d cornerRay(double tanX, double tanY) {
+        // Construct ray directly from tangent values
         return new Vector3d(F)
-                .add(new Vector3d(R).mul(nx * tanHalfFov))
-                .add(new Vector3d(U).mul(ny * tanHalfFov))
+                .add(new Vector3d(R).mul(tanX))
+                .add(new Vector3d(U).mul(tanY))
                 .normalize();
     }
 
