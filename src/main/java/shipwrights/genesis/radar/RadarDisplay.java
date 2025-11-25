@@ -34,18 +34,18 @@ public class RadarDisplay {
         // Update all frustums with new view parameters
         frustumFactory.update(camera, direction, right, up, fov);
 
-        scanShips(level, camera, excludedShips);
+//        scanShips(level, camera, excludedShips);
 
         if (GenesisMod.isSpaceDimension(level)) {
             scanPlanets(level, camera);
-            scanAsteroidBelt(level, camera);
+//            scanAsteroidBelt(level, camera);
         }
     }
 
     private void scanShips(Level level, Vector3dc camera, List<Long> excludedShips) {
         VSGameUtilsKt.getShipObjectWorld(level).getAllShips().forEach(ship -> {
             if (!excludedShips.contains(ship.getId())) {
-                // scanBox(ship.getWorldAABB(), camera);
+                scanBox(ship.getWorldAABB(), camera);
             }
         });
     }

@@ -64,7 +64,7 @@ public class PixelFrustumFactory {
         Vector3d d01 = cornerRay(x0, y1);
         Vector3d d11 = cornerRay(x1, y1);
 
-        // planes: outward normals
+        // planes: inward-pointing normals for frustum culling
         PixelFrustum.Plane left   = planeFromRays(d01, d00);
         PixelFrustum.Plane right  = planeFromRays(d10, d11);
         PixelFrustum.Plane top    = planeFromRays(d00, d10);
@@ -81,8 +81,8 @@ public class PixelFrustumFactory {
     }
 
     private PixelFrustum.Plane planeFromRays(Vector3d a, Vector3d b) {
-        // plane normal = b × a (use correct winding)
-        Vector3d n = new Vector3d(b).cross(a).normalize();
+        // plane normal = a × b (inward-pointing for frustum culling)
+        Vector3d n = new Vector3d(a).cross(b).normalize();
         return new PixelFrustum.Plane(n, C);
     }
 }
