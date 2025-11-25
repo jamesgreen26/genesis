@@ -16,7 +16,7 @@ import java.util.List;
 
 public class RadarDisplayBlockEntity extends BlockEntity {
 
-    public RadarDisplay display = new RadarDisplay(20);
+    public RadarDisplay display = new RadarDisplay(64);
 
     public RadarDisplayBlockEntity(BlockPos pos, BlockState state) {
         super(GenesisBlockEntities.RADAR_DISPLAY.get(), pos, state);
