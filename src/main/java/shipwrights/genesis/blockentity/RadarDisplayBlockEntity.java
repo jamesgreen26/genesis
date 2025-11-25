@@ -31,7 +31,7 @@ public class RadarDisplayBlockEntity extends BlockEntity {
         BlockState state = level.getBlockState(getBlockPos());
         if (state.getBlock() instanceof RadarDisplayBlock) {
             Ship ship = VSGameUtilsKt.getShipObjectManagingPos(level, getBlockPos());
-            Vec3i normalShip = state.getValue(RadarDisplayBlock.FACING).getNormal();
+            Vec3i normalShip = state.getValue(RadarDisplayBlock.FACING).getOpposite().getNormal();
 
             Vector3d pos;
             Vector3d dir;

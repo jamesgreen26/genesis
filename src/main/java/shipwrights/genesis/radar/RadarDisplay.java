@@ -8,38 +8,24 @@ import org.joml.primitives.AABBdc;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import shipwrights.genesis.GenesisMod;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RadarDisplay {
 
     public final int resolution;
     public final double[][] data;
-    private final PixelFrustumFactory frustumFactory;
     private static final double fov = 90;
+    private final RadarScanner scanner = new RadarScanner(64, Math.PI / 4);
 
-    // Debug data (stored after scan for visualization)
-    public Vector3dc debugCamera;
-    public Vector3dc debugDirection;
-    public Vector3dc debugUp;
 
     public RadarDisplay(int resolution) {
         this.resolution = resolution;
         this.data = new double[resolution][resolution];
-        this.frustumFactory = new PixelFrustumFactory(resolution);
     }
-
-    public PixelFrustumFactory getFrustumFactory() {
-        return frustumFactory;
-    }
-
 
     public void scan(Level level, Vector3dc camera, Vector3dc direction, Vector3dc up, List<Long> excludedShips) {
         clear();
-
-        // Store debug data
-        debugCamera = camera;
-        debugDirection = direction;
-        debugUp = up;
 
         // Normalize direction and up vectors
         Vector3d directionNormalized = new Vector3d(direction).normalize();
@@ -51,21 +37,20 @@ public class RadarDisplay {
         // Recompute up to ensure orthogonality: up = right × direction
         Vector3d upNormalized = new Vector3d(right).cross(directionNormalized).normalize();
 
-        // Update all frustums with new view parameters
-        frustumFactory.update(camera, directionNormalized, right, upNormalized, fov);
+        scanner.update(camera, directionNormalized, upNormalized, right);
 
         scanShips(level, camera, excludedShips);
 
         if (GenesisMod.isSpaceDimension(level)) {
             scanPlanets(level, camera);
-//            scanAsteroidBelt(level, camera);
+            //scanAsteroidBelt(level, camera);
         }
     }
 
     private void scanShips(Level level, Vector3dc camera, List<Long> excludedShips) {
         VSGameUtilsKt.getShipObjectWorld(level).getAllShips().forEach(ship -> {
             if (!excludedShips.contains(ship.getId())) {
-                scanBox(ship.getWorldAABB(), camera);
+                scanBox(ship.getWorldAABB());
             }
         });
     }
@@ -75,7 +60,7 @@ public class RadarDisplay {
             double extent = planetData.getActualSize() / 2;
             Vector3dc pos = planetData.getCurrentPos(level.getGameTime());
             AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
-            scanBox(box, camera);
+            scanBox(box);
         });
     }
 
@@ -83,10 +68,18 @@ public class RadarDisplay {
         // Torus parameters matching worldgen
         double majorRadius = GenesisMod.earthDist * 1.6667; // distance from center to tube center
         double minorRadius = 470.0;    // radius of tube
-        double centerY = -100.0;       // Y offset
 
         // Approximate torus as boxes arranged in a circle
-        int segments = 16; // number of boxes around the ring
+        // Use more segments for smoother, continuous approximation
+        int segments = 64;
+
+        // Calculate arc length between segment centers
+        double arcLength = (2.0 * Math.PI * majorRadius) / segments;
+
+        // Box size needs to cover the arc length plus the tube radius for continuous coverage
+        // Use Pythagorean theorem: box must reach from center to adjacent center's edge
+        double boxRadialExtent = minorRadius + arcLength * 0.6; // 60% overlap ensures no gaps
+
         for (int i = 0; i < segments; i++) {
             double angle = (2.0 * Math.PI * i) / segments;
 
@@ -94,43 +87,54 @@ public class RadarDisplay {
             double cx = Math.cos(angle) * majorRadius;
             double cz = Math.sin(angle) * majorRadius;
 
-            // Create a box at this position with minor radius extent
-            double boxSize = minorRadius * 1.5; // slightly larger for overlap
+            // Create a box at this position with proper extent for continuous coverage
             AABBdc box = new org.joml.primitives.AABBd(
-                cx - boxSize, centerY - minorRadius, cz - boxSize,
-                cx + boxSize, centerY + minorRadius, cz + boxSize
+                cx - boxRadialExtent, -64, cz - boxRadialExtent,
+                cx + boxRadialExtent, 256, cz + boxRadialExtent
             );
 
-            scanBox(box, camera);
+            scanBox(box);
         }
     }
 
-    private void scanBox(AABBdc box, Vector3dc camera) {
-        for (int x = 0; x < resolution; x++) {
-            for (int y = 0; y < resolution; y++) {
+    private void scanBox(AABBdc box) {
+        Vector3dc[] corners = {
+                new Vector3d(box.minX(), box.minY(), box.minZ()),
+                new Vector3d(box.minX(), box.minY(), box.maxZ()),
+                new Vector3d(box.minX(), box.maxY(), box.minZ()),
+                new Vector3d(box.minX(), box.maxY(), box.maxZ()),
+                new Vector3d(box.maxX(), box.minY(), box.minZ()),
+                new Vector3d(box.maxX(), box.minY(), box.maxZ()),
+                new Vector3d(box.maxX(), box.maxY(), box.minZ()),
+                new Vector3d(box.maxX(), box.maxY(), box.maxZ())
+        };
 
-                PixelFrustum fr = frustumFactory.getFrustum(x, y);
+        List<RadarScanner.RadarScanResult> results = new ArrayList<>();
 
-                if (!fr.intersectsAabb(box))
-                    continue;
+        for (int i = 0; i < 8; i++) {
+            scanner.scanPoint(corners[i]).ifPresent(results::add);
+        }
+        if (results.isEmpty()) return;
 
-                // depth approximation = distance to closest point of AABB
-                double depth = computeDepth(box, camera);
+        int maxX = -1;
+        int minX = 9999;
+        int maxY = -1;
+        int minY = 9999;
+        double depthSqr = 0;
 
-                writeDepth(x, y, depth);
+        for (var result : results) {
+            maxX = Math.max(maxX, result.x());
+            minX = Math.min(minX, result.x());
+            maxY = Math.max(maxY, result.y());
+            minY = Math.min(minY, result.y());
+            depthSqr = Math.max(depthSqr, result.distSquared());
+        }
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                writeDepth(x, y, Math.sqrt(depthSqr));
             }
         }
-    }
-
-    private double computeDepth(AABBdc box, Vector3dc camera) {
-        double cx = clamp(camera.x(), box.minX(), box.maxX());
-        double cy = clamp(camera.y(), box.minY(), box.maxY());
-        double cz = clamp(camera.z(), box.minZ(), box.maxZ());
-        return camera.distance(cx, cy, cz);
-    }
-
-    private double clamp(double v, double lo, double hi) {
-        return Math.max(lo, Math.min(hi, v));
     }
 
     public void writeDepth(int x, int y, double depth) {
