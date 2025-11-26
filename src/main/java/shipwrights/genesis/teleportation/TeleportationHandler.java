@@ -53,7 +53,7 @@ public class TeleportationHandler {
 	private static final double ENTITY_COLLECT_RANGE = 8;
 	private static final double SHIP_COLLECT_RANGE = 10;
 
-	private static Map<Long, Set<Integer>> SHIP2CONSTRAINTS;
+	private static Map<Long, Set<Integer>> SHIP2CONSTRAINTS = Map.of();
 	private static Map<Integer, VSJoint> ID2CONSTRAINT;
 
 	private final Long2ObjectOpenHashMap<TeleportData> ships = new Long2ObjectOpenHashMap<>();
