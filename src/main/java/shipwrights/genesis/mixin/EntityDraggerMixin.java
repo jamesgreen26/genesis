@@ -19,7 +19,7 @@ import shipwrights.genesis.GenesisMod;
 public class EntityDraggerMixin {
 
     @Inject(method = "dragEntitiesWithShips", at = @At("HEAD"), remap = false)
-    private void onDragEntitiesWithShips(Iterable<Entity> entities, CallbackInfo ci) {
+    private void onDragEntitiesWithShips(Iterable<? extends Entity> entities, boolean preTick, CallbackInfo ci) {
         entities.forEach(entity -> {
             EntityDraggingInformation info = ((IEntityDraggingInformationProvider) entity).getDraggingInformation();
 

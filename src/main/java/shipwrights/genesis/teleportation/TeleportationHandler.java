@@ -3,6 +3,13 @@ package shipwrights.genesis.teleportation;
 import g_mungus.vlib.dimension.DimensionSettingsManager;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
+import org.valkyrienskies.core.api.events.PhysTickEvent;
+import org.valkyrienskies.core.api.world.PhysLevel;
+import org.valkyrienskies.core.internal.ShipTeleportData;
+import org.valkyrienskies.core.internal.joints.VSJoint;
+import org.valkyrienskies.core.internal.physics.PhysicsEntityServer;
+import org.valkyrienskies.core.internal.world.VsiPhysLevel;
+import org.valkyrienskies.core.internal.world.VsiServerShipWorld;
 import shipwrights.genesis.event.PreShipTravelEvent;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import net.minecraft.resources.ResourceKey;
@@ -31,16 +38,9 @@ import org.valkyrienskies.core.api.ships.QueryableShipData;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ServerShipTransformProvider;
 import org.valkyrienskies.core.api.ships.properties.ShipTransform;
-import org.valkyrienskies.core.apigame.ShipTeleportData;
-import org.valkyrienskies.core.apigame.constraints.VSConstraint;
-import org.valkyrienskies.core.apigame.physics.PhysicsEntityServer;
-import org.valkyrienskies.core.apigame.world.ServerShipWorldCore;
 import org.valkyrienskies.core.impl.game.ShipTeleportDataImpl;
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.mixin.ServerShipObjectWorldAccessor;
-import shipwrights.genesis.util.PlanetUtil;
 
 
 import java.util.*;
@@ -54,11 +54,11 @@ public class TeleportationHandler {
 	private static final double SHIP_COLLECT_RANGE = 10;
 
 	private static Map<Long, Set<Integer>> SHIP2CONSTRAINTS;
-	private static Map<Integer, VSConstraint> ID2CONSTRAINT;
+	private static Map<Integer, VSJoint> ID2CONSTRAINT;
 
 	private final Long2ObjectOpenHashMap<TeleportData> ships = new Long2ObjectOpenHashMap<>();
 	private final Map<Entity, Vec3> entityToPos = new HashMap<>();
-	private ServerShipWorldCore shipWorld;
+	private VsiServerShipWorld shipWorld;
 	private double greatestOffset;
 	private ServerLevel oldLevel;
 	private ServerLevel newLevel;
@@ -75,9 +75,15 @@ public class TeleportationHandler {
 
 	@SubscribeEvent
 	public static void onServerStart(final ServerStartedEvent event) {
-		final ServerShipObjectWorldAccessor server = (ServerShipObjectWorldAccessor) VSGameUtilsKt.getShipObjectWorld(event.getServer());
-		SHIP2CONSTRAINTS = server.getShipIdToConstraints();
-		ID2CONSTRAINT = server.getConstraints();
+	}
+
+	public static void onPhysTick(PhysTickEvent event) {
+		VsiPhysLevel level = (VsiPhysLevel) event.getWorld();
+		if (SHIP2CONSTRAINTS.isEmpty()) {
+			SHIP2CONSTRAINTS = level.getJointsByShipIds();
+			ID2CONSTRAINT = level.getAllJoints();
+		}
+
 	}
 
 	public void reset(final ServerLevel oldLevel, final ServerLevel newLevel) {
@@ -138,26 +144,27 @@ public class TeleportationHandler {
 			return;
 		}
 		final ServerShip ship = this.getShip(shipId);
-		if (ship == null) {
+		if (!(ship instanceof LoadedServerShip)) {
 			return;
 		}
-		final Vector3dc pos = ship.getTransform().getPositionInWorld();
-		final ShipLandingAttachment landingAttachment = ship.getAttachment(ShipLandingAttachment.class);
-		if (ship.isStatic() && landingAttachment != null && landingAttachment.frozen) {
+		final LoadedServerShip loadedShip = (LoadedServerShip) ship;
+		final Vector3dc pos = loadedShip.getTransform().getPositionInWorld();
+		final ShipLandingAttachment landingAttachment = loadedShip.getAttachment(ShipLandingAttachment.class);
+		if (loadedShip.isStatic() && landingAttachment != null && landingAttachment.frozen) {
 			velocity = landingAttachment.velocity;
 			omega = landingAttachment.omega;
 		} else {
 			if (velocity == null) {
-				velocity = new Vector3d(ship.getVelocity());
+				velocity = new Vector3d(loadedShip.getVelocity());
 			}
 			if (omega == null) {
-				omega = new Vector3d(ship.getOmega());
+				omega = new Vector3d(loadedShip.getAngularVelocity());
 			}
 		}
-		collected.add(ship);
+		collected.add(loadedShip);
 
 		final Vector3d relPos = pos.sub(origin, new Vector3d());
-		final Quaterniond newRotataion = new Quaterniond(ship.getTransform().getShipToWorldRotation());
+		final Quaterniond newRotataion = new Quaterniond(loadedShip.getTransform().getShipToWorldRotation());
 
 		if (!this.isReturning) {
 			final double offset = relPos.y;
@@ -187,7 +194,7 @@ public class TeleportationHandler {
 		}
 
 		MinecraftForge.EVENT_BUS.post(this.createPreShipTravelEvent(
-			ship, oldLevel.dimension(), newLevel.dimension(), relPos, newRotataion, velocity0, omega0
+				loadedShip, oldLevel.dimension(), newLevel.dimension(), relPos, newRotataion, velocity0, omega0
 		));
 
 		this.ships.put(
@@ -200,12 +207,16 @@ public class TeleportationHandler {
 			)
 		);
 
-		final Set<Integer> constraints = SHIP2CONSTRAINTS.get(shipId);
-		if (constraints != null) {
-			constraints.stream().map(ID2CONSTRAINT::get).forEach((constraint) -> {
-				this.collectShipAndConnected(constraint.getShipId0(), origin, newPos, rotation, collected);
-				this.collectShipAndConnected(constraint.getShipId1(), origin, newPos, rotation, collected);
-			});
+		try {
+			final Set<Integer> constraints = SHIP2CONSTRAINTS.get(shipId);
+			if (constraints != null) {
+				constraints.stream().map(ID2CONSTRAINT::get).forEach((constraint) -> {
+					this.collectShipAndConnected(constraint.getShipId0(), origin, newPos, rotation, collected);
+					this.collectShipAndConnected(constraint.getShipId1(), origin, newPos, rotation, collected);
+				});
+			}
+		} catch (ConcurrentModificationException e) {
+			//fuck.
 		}
 	}
 
@@ -333,20 +344,20 @@ public class TeleportationHandler {
 
 		final LoadedServerShip ship = this.shipWorld.getLoadedShips().getById(id);
 		if (ship == null) {
-			final PhysicsEntityServer physEntity = ((ShipObjectServerWorld) this.shipWorld).getLoadedPhysicsEntities().get(id);
-			if (physEntity == null) {
-				LOGGER.warn("[genesis]: Failed to teleport physics object with id " + id + "! It's neither a Ship nor a Physics Entity!");
-				return;
-			}
-			LOGGER.info("[genesis]: Teleporting physics entity {} to {} {} (scale: {})", id, vsDimName, newPos, shipScale);
-			final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, physEntity.getShipTransform().getShipToWorldRotation(), physEntity.getLinearVelocity(), physEntity.getAngularVelocity(), vsDimName, shipScale);
-			this.shipWorld.teleportPhysicsEntity(physEntity, teleportData);
+//			final PhysicsEntityServer physEntity = (this.shipWorld).getLoadedShips().getById(id);
+//			if (physEntity == null) {
+//				LOGGER.warn("[genesis]: Failed to teleport physics object with id " + id + "! It's neither a Ship nor a Physics Entity!");
+//				return;
+//			}
+//			LOGGER.info("[genesis]: Teleporting physics entity {} to {} {} (scale: {})", id, vsDimName, newPos, shipScale);
+//			final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, physEntity.getShipTransform().getShipToWorldRotation(), physEntity.getLinearVelocity(), physEntity.getAngularVelocity(), vsDimName, shipScale);
+//			this.shipWorld.teleportPhysicsEntity(physEntity, teleportData);
 			return;
 		}
 
 		LOGGER.info("[genesis]: Teleporting ship {} ({}) to {} {} (scale: {})", ship.getSlug(), id, vsDimName, newPos, shipScale);
 		ship.setStatic(false);
-		final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, rotation, velocity, omega, vsDimName, shipScale);
+		final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, rotation, velocity, omega, vsDimName, shipScale, null);
 		this.shipWorld.teleportShip(ship, teleportData);
 		if (velocity.lengthSquared() != 0 || omega.lengthSquared() != 0) {
 			ship.setTransformProvider(new ServerShipTransformProvider() {

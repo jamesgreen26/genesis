@@ -12,11 +12,14 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.valkyrienskies.mod.api.ValkyrienSkies;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
 import shipwrights.genesis.networking.WormholeTravelSoundPacket;
 import shipwrights.genesis.planets.PlanetData;
+import shipwrights.genesis.ship.ShipLandingAttachment;
+import shipwrights.genesis.teleportation.TeleportationHandler;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -72,6 +75,10 @@ public final class GenesisMod {
         shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
         shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
         shipwrights.genesis.item.GenesisCreativeTabs.register(eventBus);
+
+        ValkyrienSkies.api().registerAttachment(ShipLandingAttachment.class);
+
+        ValkyrienSkies.api().getPhysTickEvent().on(TeleportationHandler::onPhysTick);
     }
 
     /// @param size       relative to earth

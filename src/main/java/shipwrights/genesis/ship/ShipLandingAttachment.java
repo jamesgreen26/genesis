@@ -41,11 +41,11 @@ public final class ShipLandingAttachment {
 
 	public ShipLandingAttachment() {}
 
-	public static ShipLandingAttachment get(final ServerShip ship) {
+	public static ShipLandingAttachment get(final LoadedServerShip ship) {
 		ShipLandingAttachment attachment = ship.getAttachment(ShipLandingAttachment.class);
 		if (attachment == null) {
 			attachment = new ShipLandingAttachment();
-			ship.saveAttachment(ShipLandingAttachment.class, attachment);
+			ship.setAttachment(attachment);
 		}
 		return attachment;
 	}
