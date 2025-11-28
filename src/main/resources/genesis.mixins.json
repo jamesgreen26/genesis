@@ -20,6 +20,7 @@
     "FallingBlockEntityMixin",
     "LivingEntityMixin",
     "ServerLevelMixin",
+    "VSBlockItemMixin",
     "VSExplosionForceMixin",
     "VSMountedCameraMixin",
     "dataplanets.LivingEntityMixin"
