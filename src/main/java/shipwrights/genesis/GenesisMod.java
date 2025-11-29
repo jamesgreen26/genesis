@@ -79,6 +79,7 @@ public final class GenesisMod {
         shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
         shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
         shipwrights.genesis.item.GenesisCreativeTabs.register(eventBus);
+        shipwrights.genesis.painting.GenesisPaintings.PAINTING_VARIANTS.register(eventBus);
 
         ValkyrienSkies.api().registerAttachment(ShipLandingAttachment.class);
 

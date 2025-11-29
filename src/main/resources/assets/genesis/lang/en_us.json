@@ -36,5 +36,7 @@
   "item.genesis.stellar_sand": "Stellar Sand",
   "item.genesis.warpstone_chunk": "Warpstone Chunk",
   "creativetab.genesis_tab": "Genesis",
-  "subtitles.genesis.void_engine_start": "Void Engine starts"
+  "subtitles.genesis.void_engine_start": "Void Engine starts",
+  "painting.genesis.space_0.title": "Orbit Vista",
+  "painting.genesis.space_0.author": "rainyatrium"
 }
