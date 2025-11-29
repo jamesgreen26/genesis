@@ -7,9 +7,9 @@ license = "Apache 2.0"
 modId = "genesis"
 version = "${version}"
 displayName = "Genesis"
-authors = "G_Mungus, Acrogenous, Quoissant"
+authors = "G_Mungus, Acrogenous, Quoissant, Jcm"
 description = '''
-
+A space mod for Valkyrien Skies.
 '''
 logoFile = "assets/genesis/icon.png"
 
