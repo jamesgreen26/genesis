@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.valkyrienskies.core.api.util.AerodynamicUtils;
 import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
+import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
+import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
@@ -157,8 +159,10 @@ public final class GenesisMod {
             scaleData.setPersistence(true);
             explosionScaleData.setPersistence(true);
             if (isMiniScale(level)) {
-                scaleData.setScale(1 / 16f);
-                explosionScaleData.setScale(16f);
+                if (VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE) {
+                    scaleData.setScale(1 / 16f);
+                    explosionScaleData.setScale(16f);
+                }
                 entity.setNoGravity(true);
             } else {
                 scaleData.setScale(1f);
