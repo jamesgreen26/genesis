@@ -54,21 +54,32 @@ vec3 computeSmoothNormal(vec2 uv)
 }
 
 void main() {
+    vec4 color = texture(DiffuseSampler, texCoord);
     float depth = texture(MainDepthSampler, texCoord).r;
+
     if (depth < 1.0) {
-
-        vec3 normalView = computeSmoothNormal(texCoord);
-        vec3 normalWorld = normalize(mat3(invViewMat) * normalView);
-
         vec3 P_view3 = reconstructViewPos(texCoord, depth);
-        vec3 P_world = (invViewMat * vec4(P_view3, 1.0)).xyz;
+        float dist = length(P_view3);
 
-        vec3 light_vec = normalize(P_world + cameraPos);
+        // Fade out effect: full at <512, fading 512-1024, none at >1024
+        float fade = 1.0 - smoothstep(512.0, 1024.0, dist);
 
-        float brightness = clamp(1.0 - (2 * dot(light_vec, normalWorld)), 1, 2);
+        if (fade > 0.0) {
+            vec3 normalView = computeSmoothNormal(texCoord);
+            vec3 normalWorld = normalize(mat3(invViewMat) * normalView);
 
-        fragColor = pow(texture(DiffuseSampler, texCoord), 1 / vec4(brightness, brightness, brightness, 1.0));
+            vec3 P_world = (invViewMat * vec4(P_view3, 1.0)).xyz;
+            vec3 light_vec = normalize(P_world + cameraPos);
+
+            float brightness = clamp(1.0 - (2 * dot(light_vec, normalWorld)), 1, 2);
+            // Lerp brightness toward 1.0 (no effect) as fade decreases
+            brightness = mix(1.0, brightness, fade);
+
+            fragColor = pow(color, 1.0 / vec4(brightness, brightness, brightness, 1.0));
+        } else {
+            fragColor = color;
+        }
     } else {
-        fragColor = texture(DiffuseSampler, texCoord);
+        fragColor = color;
     }
 }
