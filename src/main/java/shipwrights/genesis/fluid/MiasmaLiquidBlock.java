@@ -4,6 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -49,6 +53,16 @@ public class MiasmaLiquidBlock extends LiquidBlock {
         if (level.getBlockState(abovePos).isAir() && level.getFluidState(abovePos).isEmpty()) {
             // Dissipate - replace this fluid block with air
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        }
+    }
+
+    @Override
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        super.entityInside(state, level, pos, entity);
+
+        if (!level.isClientSide && entity instanceof LivingEntity livingEntity) {
+            // Apply poison effect - 10 seconds (200 ticks), amplifier 1 (Poison II)
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 1, false, true));
         }
     }
 
