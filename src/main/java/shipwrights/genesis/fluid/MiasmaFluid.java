@@ -1,13 +1,21 @@
 package shipwrights.genesis.fluid;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+
+import java.util.Map;
 
 public abstract class MiasmaFluid extends ForgeFlowingFluid {
     protected MiasmaFluid(Properties properties) {
@@ -18,6 +26,38 @@ public abstract class MiasmaFluid extends ForgeFlowingFluid {
     public Vec3 getFlow(BlockGetter blockGetter, BlockPos pos, FluidState fluidState) {
         // Return zero flow - no pushing entities
         return Vec3.ZERO;
+    }
+
+    @Override
+    protected void spreadTo(LevelAccessor level, BlockPos pos, BlockState blockState, Direction direction, FluidState fluidState) {
+        // Prevent spreading downward - gas doesn't fall
+        if (direction == Direction.DOWN) {
+            return;
+        }
+        super.spreadTo(level, pos, blockState, direction, fluidState);
+    }
+
+    @Override
+    protected Map<Direction, FluidState> getSpread(Level level, BlockPos pos, BlockState state) {
+        Map<Direction, FluidState> spreadMap = super.getSpread(level, pos, state);
+        // Remove downward spread
+        spreadMap.remove(Direction.DOWN);
+        return spreadMap;
+    }
+
+    @Override
+    protected boolean canSpreadTo(BlockGetter level, BlockPos fromPos, BlockState fromBlockState, Direction direction, BlockPos toPos, BlockState toBlockState, FluidState toFluidState, Fluid fluid) {
+        // Prevent flowing downward - gas rises, doesn't fall
+        if (direction == Direction.DOWN) {
+            return false;
+        }
+        return super.canSpreadTo(level, fromPos, fromBlockState, direction, toPos, toBlockState, toFluidState, fluid);
+    }
+
+    @Override
+    protected int getSlopeFindDistance(LevelReader level) {
+        // How far to search for a path sideways
+        return 4;
     }
 
     @Override
@@ -72,6 +112,13 @@ public abstract class MiasmaFluid extends ForgeFlowingFluid {
     public static class Flowing extends MiasmaFluid {
         public Flowing(Properties properties) {
             super(properties);
+            registerDefaultState(getStateDefinition().any().setValue(LEVEL, 7));
+        }
+
+        @Override
+        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder) {
+            super.createFluidStateDefinition(builder);
+            builder.add(LEVEL);
         }
 
         @Override

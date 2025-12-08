@@ -26,8 +26,8 @@ public class GenesisFluids {
     private static final ResourceLocation OVERLAY_RL = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "block/miasma_overlay");
     private static final int TINT_COLOR = 0xCC8B9A32;
 
-    public static final FluidEntry<ForgeFlowingFluid.Flowing> MIASMA = REGISTRATE
-            .fluid("miasma", STILL_RL, FLOWING_RL, GenesisFluids::createMiasmaFluidType)
+    public static final FluidEntry<MiasmaFluid.Flowing> MIASMA = REGISTRATE
+            .fluid("miasma", STILL_RL, FLOWING_RL, GenesisFluids::createMiasmaFluidType, MiasmaFluid.Flowing::new)
             .lang("Miasma")
             .properties(p -> p
                     .density(0)
@@ -43,7 +43,7 @@ public class GenesisFluids {
                     .slopeFindDistance(3)
                     .tickRate(10))
             .source(MiasmaFluid.Source::new)
-            .block((fluid, props) -> new MiasmaLiquidBlock(fluid, props))
+            .block(MiasmaLiquidBlock::new)
                 .initialProperties(() -> net.minecraft.world.level.block.Blocks.WATER)
                 .properties(p -> p
                         .mapColor(MapColor.COLOR_YELLOW)
@@ -92,7 +92,7 @@ public class GenesisFluids {
         return (ForgeFlowingFluid.Source) MIASMA.getSource();
     }
 
-    public static ForgeFlowingFluid.Flowing getFlowing() {
+    public static MiasmaFluid.Flowing getFlowing() {
         return MIASMA.get();
     }
 
