@@ -37,6 +37,7 @@ public class GenesisCreativeTabs {
                 output.accept(GenesisItems.VOID_ENGINE_FRAME.get());
                 output.accept(GenesisItems.VOID_ENGINE_VIEWPORT.get());
                 output.accept(GenesisItems.VOID_CORE.get());
+                output.accept(shipwrights.genesis.fluid.GenesisFluids.MIASMA.getBucket().get());
                 addPaintings(parameters, output);
             })
             .build());

@@ -38,5 +38,8 @@
   "creativetab.genesis_tab": "Genesis",
   "subtitles.genesis.void_engine_start": "Void Engine starts",
   "painting.genesis.space_0.title": "Orbit Vista",
-  "painting.genesis.space_0.author": "rainyatrium"
+  "painting.genesis.space_0.author": "rainyatrium",
+  "fluid.genesis.miasma": "Miasma",
+  "block.genesis.miasma_block": "Miasma",
+  "item.genesis.miasma_bucket": "Miasma Bucket"
 }

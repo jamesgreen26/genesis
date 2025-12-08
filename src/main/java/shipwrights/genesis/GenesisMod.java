@@ -17,6 +17,7 @@ import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
+import shipwrights.genesis.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
@@ -74,6 +75,9 @@ public final class GenesisMod {
                 .decoder(StopVoidEngineStartSoundPacket::decode)
                 .consumerMainThread(StopVoidEngineStartSoundPacket::handle)
                 .add();
+
+        // Register fluids using Registrate (must be called before other registrations)
+        GenesisFluids.init();
 
         GenesisBlocks.BLOCKS.register(eventBus);
         GenesisBlocks.MENU_TYPES.register(eventBus);
