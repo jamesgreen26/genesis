@@ -31,7 +31,10 @@ public class GenesisFluids {
             .lang("Miasma")
             .properties(p -> p
                     .density(0)
-                    .viscosity(800)
+                    .viscosity(0)
+                    .canConvertToSource(false)
+                    .canPushEntity(false)
+                    .fallDistanceModifier(1f)
                     .canSwim(false)
                     .canDrown(false)
                     .supportsBoating(false))

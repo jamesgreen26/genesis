@@ -2,12 +2,14 @@ package shipwrights.genesis.fluid;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
 
 import java.util.function.Supplier;
 
@@ -15,6 +17,39 @@ public class MiasmaLiquidBlock extends LiquidBlock {
 
     public MiasmaLiquidBlock(Supplier<? extends FlowingFluid> fluidSupplier, Properties properties) {
         super(fluidSupplier, properties);
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
+
+        if (!level.isClientSide) {
+            level.scheduleTick(pos, this, 30);
+        }
+    }
+
+    @Override
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+
+        if (!level.isClientSide) {
+            // Schedule a tick to check dissipation shortly after placement
+            level.scheduleTick(pos, this, 30);
+        }
+    }
+
+    @Override
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        super.tick(state, level, pos, random);
+        tryDissipate(level, pos);
+    }
+
+    private void tryDissipate(Level level, BlockPos pos) {
+        BlockPos abovePos = pos.above();
+        if (level.getBlockState(abovePos).isAir() && level.getFluidState(abovePos).isEmpty()) {
+            // Dissipate - replace this fluid block with air
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+        }
     }
 
     @Override
