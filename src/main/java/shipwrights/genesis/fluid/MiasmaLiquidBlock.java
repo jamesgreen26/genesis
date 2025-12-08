@@ -4,10 +4,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -43,6 +46,12 @@ public class MiasmaLiquidBlock extends LiquidBlock {
     }
 
     @Override
+    public void randomTick(BlockState arg, ServerLevel arg2, BlockPos arg3, RandomSource arg4) {
+        super.randomTick(arg, arg2, arg3, arg4);
+        arg2.scheduleTick(arg3, this, 30);
+    }
+
+    @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         super.tick(state, level, pos, random);
         tryDissipate(level, pos);
@@ -62,7 +71,10 @@ public class MiasmaLiquidBlock extends LiquidBlock {
 
         if (!level.isClientSide && entity instanceof LivingEntity livingEntity) {
             // Apply poison effect - 10 seconds (200 ticks), amplifier 1 (Poison II)
+            if (entity instanceof Player player && player.isCreative()) {return;}
             livingEntity.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 1, false, true));
+            livingEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 1, false, true));
+            livingEntity.hurt(level.damageSources().genericKill(), 2);
         }
     }
 
