@@ -108,6 +108,7 @@ public final class GenesisMod {
     /// @param gravity    relative to earth
     ///
     /// @apiNote Registered planets get reset each time the server stops
+    /// potato
     public static Optional<PlanetData> registerPlanet(ResourceLocation dimensionID, double size, double gravity, double sunDist, double yearLength, float r, float g, float b) {
         for (PlanetData planet : planets) {
             if (planet.dimensionID.equals(dimensionID)) {
