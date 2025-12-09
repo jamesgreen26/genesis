@@ -7,7 +7,7 @@ license = "Apache 2.0"
 modId = "genesis"
 version = "${version}"
 displayName = "Genesis"
-authors = "G_Mungus, Acrogenous, Quoissant, Jcm"
+authors = "G_Mungus, Acrogenous, Quoissant, Jcm, Cosmos"
 description = '''
 A space mod for Valkyrien Skies.
 '''
