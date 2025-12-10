@@ -136,6 +136,136 @@ public class GenesisBlocks {
         )
     );
 
+    public static final RegistryObject<Block> RED_SALT = BLOCKS.register("red_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_RED)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> PALE_RED_SALT = BLOCKS.register("pale_red_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CRACKED_RED_SALT = BLOCKS.register("cracked_red_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_RED)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CRACKED_PALE_RED_SALT = BLOCKS.register("cracked_pale_red_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CYAN_SALT = BLOCKS.register("cyan_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> TURQUOISE_SALT = BLOCKS.register("turquoise_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WARPED_NYLIUM)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CRACKED_CYAN_SALT = BLOCKS.register("cracked_cyan_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CRACKED_TURQUOISE_SALT = BLOCKS.register("cracked_turquoise_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WARPED_NYLIUM)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> SALT = BLOCKS.register("salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SNOW)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CRACKED_SALT = BLOCKS.register("cracked_salt", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_WHITE)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> MOON_SAND = BLOCKS.register("moon_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> WAVY_MOON_SAND = BLOCKS.register("wavy_moon_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> DARK_MOON_SAND = BLOCKS.register("dark_moon_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> DARK_WAVY_MOON_SAND = BLOCKS.register("dark_wavy_moon_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> MOON_STONE = BLOCKS.register("moon_stone", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.STONE)
+            )
+    );
+
+    public static final RegistryObject<Block> HALLOW_MOON_STONE = BLOCKS.register("hallow_moon_stone", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.STONE)
+            )
+    );
+
+
+
     public static final RegistryObject<WarpstoneCatalyzerBlock> WARPSTONE_CATALYZER_BLOCK = BLOCKS.register("warpstone_catalyzer_block", WarpstoneCatalyzerBlock::new);
 
     public static final RegistryObject<MenuType<WarpstoneCatalyzerContainer>> WARPSTONE_CATALYZER_CONTAINER = MENU_TYPES.register("warpstone_catalyzer_block",

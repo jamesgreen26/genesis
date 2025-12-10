@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "genesis:block/dark_wavy_moon_sand"
+  }
+}

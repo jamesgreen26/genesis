@@ -59,6 +59,56 @@ public class GenesisItems {
     public static final RegistryObject<Item> STELLAR_SAND = ITEMS.register("stellar_sand",
         () -> new BlockItem(GenesisBlocks.STELLAR_SAND.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> PALE_RED_SALT = ITEMS.register("pale_red_salt",
+            () -> new BlockItem(GenesisBlocks.PALE_RED_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> RED_SALT = ITEMS.register("red_salt",
+            () -> new BlockItem(GenesisBlocks.RED_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CRACKED_PALE_RED_SALT = ITEMS.register("cracked_pale_red_salt",
+            () -> new BlockItem(GenesisBlocks.CRACKED_PALE_RED_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CRACKED_RED_SALT = ITEMS.register("cracked_red_salt",
+            () -> new BlockItem(GenesisBlocks.CRACKED_RED_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CYAN_SALT = ITEMS.register("cyan_salt",
+            () -> new BlockItem(GenesisBlocks.CYAN_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> TURQUOISE_SALT = ITEMS.register("turquoise_salt",
+            () -> new BlockItem(GenesisBlocks.TURQUOISE_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CRACKED_CYAN_SALT = ITEMS.register("cracked_cyan_salt",
+            () -> new BlockItem(GenesisBlocks.CRACKED_CYAN_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CRACKED_TURQUOISE_SALT = ITEMS.register("cracked_turquoise_salt",
+            () -> new BlockItem(GenesisBlocks.CRACKED_TURQUOISE_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> SALT = ITEMS.register("salt",
+            () -> new BlockItem(GenesisBlocks.SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CRACKED_SALT = ITEMS.register("cracked_salt",
+            () -> new BlockItem(GenesisBlocks.CRACKED_SALT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MOON_STONE = ITEMS.register("moon_stone",
+            () -> new BlockItem(GenesisBlocks.MOON_STONE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> HALLOW_MOON_STONE = ITEMS.register("hallow_moon_stone",
+            () -> new BlockItem(GenesisBlocks.HALLOW_MOON_STONE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MOON_SAND = ITEMS.register("moon_sand",
+            () -> new BlockItem(GenesisBlocks.MOON_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WAVY_MOON_SAND = ITEMS.register("wavy_moon_sand",
+            () -> new BlockItem(GenesisBlocks.WAVY_MOON_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> DARK_MOON_SAND = ITEMS.register("dark_moon_sand",
+            () -> new BlockItem(GenesisBlocks.DARK_MOON_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> DARK_WAVY_MOON_SAND = ITEMS.register("dark_wavy_moon_sand",
+            () -> new BlockItem(GenesisBlocks.DARK_WAVY_MOON_SAND.get(), new Item.Properties()));
+
+
+
     public static final RegistryObject<Item> WARPSTONE_CHUNK = ITEMS.register("warpstone_chunk",
             () -> new Item(new Item.Properties()));
 

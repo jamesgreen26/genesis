@@ -41,6 +41,29 @@ public class GenesisCreativeTabs {
                 addPaintings(parameters, output);
             })
             .build());
+    public static final RegistryObject<CreativeModeTab> GENESIS_NATURAL_TAB = CREATIVE_MODE_TABS.register("genesis_natural_tab",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("creativetab.genesis_natural_tab"))
+                    .icon(() -> new ItemStack(GenesisItems.NULLSTONE.get()))
+                    .displayItems((parameters, output) -> {
+                        output.accept(GenesisItems.WARPSTONE.get());
+                        output.accept(GenesisItems.NULLSTONE.get());
+                        output.accept(GenesisItems.VOIDSTONE.get());
+                        output.accept(GenesisItems.ECHOSTONE.get());
+                        output.accept(GenesisItems.STELLAR_SAND.get());
+                        output.accept(GenesisItems.LUNAR_DUST.get());
+                        output.accept(GenesisItems.CRACKED_CYAN_SALT.get());
+                        output.accept(GenesisItems.CYAN_SALT.get());
+                        output.accept(GenesisItems.CRACKED_TURQUOISE_SALT.get());
+                        output.accept(GenesisItems.TURQUOISE_SALT.get());
+                        output.accept(GenesisItems.CRACKED_RED_SALT.get());
+                        output.accept(GenesisItems.RED_SALT.get());
+                        output.accept(GenesisItems.CRACKED_PALE_RED_SALT.get());
+                        output.accept(GenesisItems.PALE_RED_SALT.get());
+                        output.accept(GenesisItems.SALT.get());
+                        output.accept(GenesisItems.CRACKED_SALT.get());
+                    })
+                    .build());
 
     private static void addPaintings(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output) {
         parameters.holders().lookup(Registries.PAINTING_VARIANT).ifPresent((arg2x) -> generatePresetPaintings(output, arg2x, (arg) -> arg.is(PaintingVariantTags.PLACEABLE), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
