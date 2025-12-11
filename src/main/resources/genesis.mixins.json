@@ -19,6 +19,7 @@
     "FallingBlockEntityAccessor",
     "FallingBlockEntityMixin",
     "LivingEntityMixin",
+    "MinecraftServerMixin",
     "ServerLevelMixin",
     "VSBlockItemMixin",
     "VSExplosionForceMixin",

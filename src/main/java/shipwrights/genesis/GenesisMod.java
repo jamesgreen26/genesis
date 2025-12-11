@@ -12,9 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.valkyrienskies.core.api.util.AerodynamicUtils;
 import org.valkyrienskies.mod.api.ValkyrienSkies;
-import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.fluid.GenesisFluids;
@@ -29,10 +27,8 @@ import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber
 @Mod(GenesisMod.MOD_ID)
@@ -90,16 +86,6 @@ public final class GenesisMod {
         ValkyrienSkies.api().registerAttachment(ShipLandingAttachment.class);
 
         ValkyrienSkies.api().getPhysTickEvent().on(TeleportationHandler::onPhysTick);
-
-        AtomicBoolean shouldUpdateAero = new AtomicBoolean(true);
-        ValkyrienSkies.api().getShipLoadEvent().on(unused -> {
-            if (shouldUpdateAero.getAndSet(false)) {
-                AerodynamicUtils utils = Objects.requireNonNull(ValkyrienSkies.api().getServerShipWorld(ValkyrienSkiesMod.getCurrentServer())).getAerodynamicUtils();
-                utils.updateAerodynamicInfoForDimension("minecraft:dimension:genesis:great_unknown", -1d, 63.0);
-                utils.updateAerodynamicInfoForDimension("minecraft:dimension:genesis:wormhole", -1d, 63.0);
-
-            }
-        });
     }
 
     /// @param size       relative to earth
