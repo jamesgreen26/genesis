@@ -2,9 +2,7 @@ package shipwrights.genesis;
 
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.common.extensions.IForgeMenuType;
@@ -264,6 +262,86 @@ public class GenesisBlocks {
             )
     );
 
+    public static final RegistryObject<Block> DEAD_MOON_CORAL_BLOCK = BLOCKS.register("dead_moon_coral_block", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.STONE)
+            )
+    );
+
+    public static final RegistryObject<Block> DEAD_MOON_CORAL_WALL_FAN = BLOCKS.register("dead_moon_coral_wall_fan", () ->
+            new BaseCoralWallFanBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+                    .noCollission()
+            )
+    );
+
+    public static final RegistryObject<Block> DEAD_MOON_CORAL_FAN = BLOCKS.register("dead_moon_coral_fan", () ->
+            new BaseCoralFanBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+                    .noCollission()
+            )
+    );
+
+    public static final RegistryObject<Block> DEAD_MOON_CORAL = BLOCKS.register("dead_moon_coral", () ->
+            new BaseCoralPlantTypeBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.SAND)
+                    .noCollission()
+            )
+    );
+
+    public static final RegistryObject<Block> BRINE_TRUNK = BLOCKS.register("brine_trunk", () ->
+            new BrineTrunkPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_WHITE)
+                    .strength(0.5F)
+                    .sound(SoundType.TUFF)
+            )
+    );
+
+    public static final RegistryObject<Block> BRINE_FLOWER = BLOCKS.register("brine_flower", () ->
+            new BrineFlowerBlock((BrineTrunkPlantBlock) BRINE_TRUNK.get(), BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_RED)
+                    .strength(0.5F)
+                    .sound(SoundType.TUFF)
+                    .emissiveRendering((state, level, pos) -> true)
+                    .lightLevel(state -> 12)
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> PETRIFIED_BUSH = BLOCKS.register("petrified_bush", () ->
+            new ColoredSaltPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_WHITE)
+                    .strength(0.5F)
+                    .sound(SoundType.TUFF)
+                    .noCollission()
+            )
+    );
+
+    public static final RegistryObject<Block> MIMIC_FEATHER = BLOCKS.register("mimic_feather", () ->
+            new BushBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.GRASS)
+                    .noCollission()
+            )
+    );
+
+    public static final RegistryObject<Block> TALL_MIMIC_FEATHER = BLOCKS.register("tall_mimic_feather", () ->
+            new TallFlowerBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5F)
+                    .sound(SoundType.GRASS)
+                    .noCollission()
+            )
+    );
 
 
     public static final RegistryObject<WarpstoneCatalyzerBlock> WARPSTONE_CATALYZER_BLOCK = BLOCKS.register("warpstone_catalyzer_block", WarpstoneCatalyzerBlock::new);

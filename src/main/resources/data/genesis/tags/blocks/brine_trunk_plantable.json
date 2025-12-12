@@ -1,0 +1,15 @@
+{
+  "values": [
+    "genesis:salt",
+    "genesis:cracked_salt",
+    "genesis:red_salt",
+    "genesis:cracked_red_salt",
+    "genesis:pale_red_salt",
+    "genesis:cracked_pale_red_salt",
+    "genesis:cyan_salt",
+    "genesis:cracked_cyan_salt",
+    "genesis:turquoise_salt",
+    "genesis:cracked_turquoise_salt",
+    "genesis:brine_trunk"
+  ]
+}

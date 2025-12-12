@@ -14,6 +14,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import team.lodestar.lodestone.systems.postprocess.PostProcessHandler;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class GenesisClientSetup {
@@ -28,6 +30,15 @@ public class GenesisClientSetup {
 
             // Register post-processing shader for space dimension
             PostProcessHandler.addInstance(SpaceInvertPostProcessor.INSTANCE);
+
+            // IDK why it's whining, it says that it's depreciated for 1.21.4+, but were not on that version sooo
+            // also this is how im changing render types for plants
+            ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.DEAD_MOON_CORAL.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.DEAD_MOON_CORAL_FAN.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.DEAD_MOON_CORAL_WALL_FAN.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.BRINE_FLOWER.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.BRINE_TRUNK.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.PETRIFIED_BUSH.get(), RenderType.cutout());
         });
     }
 }

@@ -62,6 +62,18 @@ public class GenesisCreativeTabs {
                         output.accept(GenesisItems.PALE_RED_SALT.get());
                         output.accept(GenesisItems.SALT.get());
                         output.accept(GenesisItems.CRACKED_SALT.get());
+                        output.accept(GenesisItems.BRINE_TRUNK.get());
+                        output.accept(GenesisItems.BRINE_FLOWER.get());
+                        output.accept(GenesisItems.PETRIFIED_BUSH.get());
+                        output.accept(GenesisItems.HALLOW_MOON_STONE.get());
+                        output.accept(GenesisItems.MOON_STONE.get());
+                        output.accept(GenesisItems.DARK_WAVY_MOON_SAND.get());
+                        output.accept(GenesisItems.DARK_MOON_SAND.get());
+                        output.accept(GenesisItems.MOON_SAND.get());
+                        output.accept(GenesisItems.DARK_MOON_SAND.get());
+                        output.accept(GenesisItems.DEAD_MOON_CORAL_BLOCK.get());
+                        output.accept(GenesisItems.DEAD_MOON_CORAL_FAN.get());
+                        output.accept(GenesisItems.DEAD_MOON_CORAL.get());
                     })
                     .build());
 

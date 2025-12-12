@@ -1,0 +1,44 @@
+{
+	"format_version": "1.21.6",
+	"credit": "Designed by Paulevs with Cubik Studio - https://cubik.studio",
+	"parent": "block/block",
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "genesis:block/brine_trunk",
+		"2": "genesis:block/brine_flower",
+		"particle": "genesis:block/brine_flower"
+	},
+	"elements": [
+		{
+			"name": "Box1",
+			"from": [3.9, 3.9, 3.9],
+			"to": [12.1, 12.1, 12.1],
+			"faces": {
+				"north": {"uv": [4, 2, 8, 6], "texture": "#1"},
+				"east": {"uv": [4, 2, 8, 6], "texture": "#1"},
+				"south": {"uv": [4, 2, 8, 6], "texture": "#1"},
+				"west": {"uv": [4, 2, 8, 6], "texture": "#1"},
+				"up": {"uv": [8, 0, 12, 4], "texture": "#1"},
+				"down": {"uv": [4, 2, 8, 6], "texture": "#1"}
+			}
+		},
+		{
+			"from": [8, 12, 4],
+			"to": [8, 23, 12],
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 12.5, 8]},
+			"faces": {
+				"east": {"uv": [2.5, 10, 6.5, 15.5], "texture": "#2"},
+				"west": {"uv": [2.5, 10, 6.5, 15.5], "texture": "#2"}
+			}
+		},
+		{
+			"from": [4, 12, 8],
+			"to": [12, 23, 8],
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 12.5, 8]},
+			"faces": {
+				"north": {"uv": [2.5, 10, 6.5, 15.5], "texture": "#2"},
+				"south": {"uv": [2.5, 10, 6.5, 15.5], "texture": "#2"}
+			}
+		}
+	]
+}

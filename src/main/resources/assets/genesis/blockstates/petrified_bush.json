@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "color=0": {
+      "model": "genesis:block/petrified_bush_0"
+    },
+    "color=1": {
+      "model": "genesis:block/petrified_bush_1"
+    },
+    "color=2": {
+      "model": "genesis:block/petrified_bush_2"
+    },
+    "color=3": {
+      "model": "genesis:block/petrified_bush_3"
+    },
+    "color=4": {
+      "model": "genesis:block/petrified_bush_4"
+    }
+  }
+}

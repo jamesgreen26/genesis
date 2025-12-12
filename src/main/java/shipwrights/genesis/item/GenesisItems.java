@@ -1,5 +1,9 @@
 package shipwrights.genesis.item;
 
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ComplexItem;
+import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.block.WallTorchBlock;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.GenesisBlocks;
 import net.minecraft.world.item.BlockItem;
@@ -106,6 +110,24 @@ public class GenesisItems {
 
     public static final RegistryObject<Item> DARK_WAVY_MOON_SAND = ITEMS.register("dark_wavy_moon_sand",
             () -> new BlockItem(GenesisBlocks.DARK_WAVY_MOON_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> DEAD_MOON_CORAL_BLOCK = ITEMS.register("dead_moon_coral_block",
+            () -> new BlockItem(GenesisBlocks.DEAD_MOON_CORAL_BLOCK.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> DEAD_MOON_CORAL = ITEMS.register("dead_moon_coral",
+            () -> new BlockItem(GenesisBlocks.DEAD_MOON_CORAL.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> DEAD_MOON_CORAL_FAN = ITEMS.register("dead_moon_coral_fan",
+            () -> new StandingAndWallBlockItem(GenesisBlocks.DEAD_MOON_CORAL_FAN.get(), GenesisBlocks.DEAD_MOON_CORAL_WALL_FAN.get(), new Item.Properties(), Direction.DOWN));
+
+    public static final RegistryObject<Item> BRINE_TRUNK = ITEMS.register("brine_trunk",
+            () -> new BlockItem(GenesisBlocks.BRINE_TRUNK.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BRINE_FLOWER = ITEMS.register("brine_flower",
+            () -> new BlockItem(GenesisBlocks.BRINE_FLOWER.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> PETRIFIED_BUSH = ITEMS.register("petrified_bush",
+            () -> new BlockItem(GenesisBlocks.PETRIFIED_BUSH.get(), new Item.Properties()));
 
 
 

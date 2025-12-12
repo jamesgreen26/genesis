@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "genesis:block/dead_moon_coral_wall_fan",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "genesis:block/dead_moon_coral_wall_fan"
+    },
+    "facing=south": {
+      "model": "genesis:block/dead_moon_coral_wall_fan",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "genesis:block/dead_moon_coral_wall_fan",
+      "y": 270
+    }
+  }
+}
