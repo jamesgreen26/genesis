@@ -47,9 +47,12 @@ public class GenesisCreativeTabs {
                     .icon(() -> new ItemStack(GenesisItems.NULLSTONE.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(GenesisItems.WARPSTONE.get());
+                        output.accept(GenesisItems.WARPSTONE_ORE.get());
                         output.accept(GenesisItems.NULLSTONE.get());
                         output.accept(GenesisItems.VOIDSTONE.get());
+                        output.accept(GenesisItems.RIFTROCK.get());
                         output.accept(GenesisItems.ECHOSTONE.get());
+                        output.accept(GenesisItems.PHASEROCK.get());
                         output.accept(GenesisItems.STELLAR_SAND.get());
                         output.accept(GenesisItems.LUNAR_DUST.get());
                         output.accept(GenesisItems.CRACKED_CYAN_SALT.get());
@@ -70,6 +73,7 @@ public class GenesisCreativeTabs {
                         output.accept(GenesisItems.DARK_WAVY_MOON_SAND.get());
                         output.accept(GenesisItems.DARK_MOON_SAND.get());
                         output.accept(GenesisItems.MOON_SAND.get());
+                        output.accept(GenesisItems.WAVY_MOON_SAND.get());
                         output.accept(GenesisItems.DARK_MOON_SAND.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL_BLOCK.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL_FAN.get());
