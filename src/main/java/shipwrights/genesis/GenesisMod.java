@@ -5,6 +5,7 @@ import g_mungus.vlib.dimension.DimensionSettingsManager;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -150,7 +151,7 @@ public final class GenesisMod {
             scaleData.setPersistence(true);
             explosionScaleData.setPersistence(true);
             if (isMiniScale(level)) {
-                if (VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE) {
+                if (entity instanceof Projectile || VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE) {
                     scaleData.setScale(1 / 16f);
                     explosionScaleData.setScale(16f);
                 }
