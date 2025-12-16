@@ -14,5 +14,6 @@ void main() {
     // Apply lighting from vertex color
     vec3 finalColor = texColor.rgb * vertexColor;
 
-    frag_color = vec4(finalColor, texColor.a);
+    // Planets are always fully opaque
+    frag_color = vec4(finalColor, 1.0);
 }

@@ -3,7 +3,9 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,6 +16,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.planets.PlanetData;
@@ -64,23 +67,56 @@ public class PlanetRenderer {
 
         // Render non-textured planets with procedural shader
         if (!proceduralPlanets.isEmpty()) {
+            // Force depth state with raw GL calls
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GL11.glDepthFunc(GL11.GL_LEQUAL);
+            GL11.glDepthMask(true);
+
             VertexConsumer planetBuffer = bufferSource.getBuffer(getPlanetRenderType());
             for (var planet : proceduralPlanets) {
                 renderProceduralPlanet(event, planet, planetBuffer, ticks);
             }
             bufferSource.endBatch(getPlanetRenderType());
+
+            // Re-render with solid render type to write depth
+            GL11.glColorMask(false, false, false, false); // Don't write color, only depth
+            GL11.glDepthMask(true);
+            VertexConsumer depthBuffer = bufferSource.getBuffer(RenderType.solid());
+            for (var planet : proceduralPlanets) {
+                renderDepthOnly(event, planet, depthBuffer, ticks);
+            }
+            bufferSource.endBatch(RenderType.solid());
+            GL11.glColorMask(true, true, true, true); // Restore color write
         }
 
         // Render textured planets - each needs its own render type for the texture binding
         for (var planet : texturedPlanets) {
             ResourceLocation textureLocation = PlanetTextures.getTexture(planet.dimensionID);
             if (textureLocation != null) {
+                // Force depth state with raw GL calls
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
+                GL11.glDepthFunc(GL11.GL_LEQUAL);
+                GL11.glDepthMask(true);
+
                 var renderType = getTexturedPlanetRenderType(textureLocation);
                 VertexConsumer texturedBuffer = bufferSource.getBuffer(renderType);
                 renderTexturedPlanet(event, planet, texturedBuffer, ticks);
                 bufferSource.endBatch(renderType);
+
+                // Re-render with solid render type to write depth
+                GL11.glColorMask(false, false, false, false);
+                GL11.glDepthMask(true);
+                VertexConsumer depthBuffer = bufferSource.getBuffer(RenderType.solid());
+                renderDepthOnly(event, planet, depthBuffer, ticks);
+                bufferSource.endBatch(RenderType.solid());
+                GL11.glColorMask(true, true, true, true);
             }
         }
+
+        // Force depth state before rendering sun with raw GL calls
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+        GL11.glDepthMask(true);
 
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
         renderSun(event, sunBuffer);
@@ -256,5 +292,46 @@ public class PlanetRenderer {
         int litB = (int) (b * lighting);
 
         buffer.vertex(matrix, x, y, z).color(litR, litG, litB, textureScale).uv((x < 0 ? 0 : 0.25f) + (y < 0 ? 0 : 0.5f), z < 0 ? 0 : 1).endVertex();
+    }
+
+    private static void renderDepthOnly(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
+        PoseStack poseStack = event.getPoseStack();
+
+        Matrix4f matrix;
+        try {
+            matrix = (Matrix4f) poseStack.last().pose().clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Vector3d pos = data.getCurrentPos(ticks, event.getPartialTick());
+
+        matrix.translate((float) (pos.x - event.getCamera().getPosition().x),
+                (float) (pos.y - event.getCamera().getPosition().y),
+                (float) (pos.z - event.getCamera().getPosition().z));
+
+        matrix.rotate(new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z));
+
+        float halfSize = (float) (data.getActualSize() / 2);
+
+        // Render a simple cube for depth using BLOCK vertex format (position, color, uv, uv2, normal)
+        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
+        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize);
+        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize);
+        addDepthCubeFace(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize);
+        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize);
+        addDepthCubeFace(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize);
+    }
+
+    private static void addDepthCubeFace(Matrix4f matrix, VertexConsumer buffer,
+                                         float x1, float y1, float z1,
+                                         float x2, float y2, float z2,
+                                         float x3, float y3, float z3,
+                                         float x4, float y4, float z4) {
+        // RenderType.solid() uses BLOCK format: position, color, uv, uv2 (lightmap), normal
+        buffer.vertex(matrix, x1, y1, z1).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        buffer.vertex(matrix, x3, y3, z3).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        buffer.vertex(matrix, x4, y4, z4).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
     }
 }
