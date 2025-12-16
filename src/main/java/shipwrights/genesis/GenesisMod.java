@@ -2,6 +2,7 @@ package shipwrights.genesis;
 
 import g_mungus.vlib.data.DimensionSettings;
 import g_mungus.vlib.dimension.DimensionSettingsManager;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -30,6 +31,7 @@ import virtuoel.pehkui.api.ScaleTypes;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 
 @Mod.EventBusSubscriber
 @Mod(GenesisMod.MOD_ID)
@@ -41,6 +43,9 @@ public final class GenesisMod {
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final ResourceLocation WORMHOLE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "wormhole");
     public static final ResourceLocation ASTEROID_RULE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "asteroid_block_surface_rule");
+
+    private static final Pattern SEAT_REGISTRY_NAME =
+            Pattern.compile("(?<![a-z])(seat|chair)(?![a-z])", Pattern.CASE_INSENSITIVE);
 
     public static final int atmosphereExitHeight = 2048;
     public static final int atmosphereEntryHeight = 1440;
@@ -151,7 +156,12 @@ public final class GenesisMod {
             scaleData.setPersistence(true);
             explosionScaleData.setPersistence(true);
             if (isMiniScale(level)) {
-                if (entity instanceof Projectile || VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE) {
+                ResourceLocation entityType = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+                if (
+                        entity instanceof Projectile ||
+                        VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE ||
+                        SEAT_REGISTRY_NAME.matcher(entityType.getPath()).find()
+                ) {
                     scaleData.setScale(1 / 16f);
                     explosionScaleData.setScale(16f);
                 }
