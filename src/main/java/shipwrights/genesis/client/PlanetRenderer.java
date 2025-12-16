@@ -3,9 +3,7 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -111,6 +109,19 @@ public class PlanetRenderer {
                 bufferSource.endBatch(renderType);
             }
         }
+
+        // Third pass: Write depth only for all planets to ensure proper occlusion
+        GL11.glColorMask(false, false, false, false);
+        GL11.glDepthMask(true);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+        var depthRenderType = getPlanetMaskRenderType();
+        VertexConsumer depthBuffer = bufferSource.getBuffer(depthRenderType);
+        for (var planet : allPlanets) {
+            renderMask(event, planet, depthBuffer, ticks);
+        }
+        bufferSource.endBatch(depthRenderType);
+        GL11.glColorMask(true, true, true, true);
 
         // Render sun
         GL11.glEnable(GL11.GL_DEPTH_TEST);
