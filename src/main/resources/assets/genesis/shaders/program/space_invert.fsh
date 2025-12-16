@@ -2,6 +2,8 @@
 
 uniform sampler2D DiffuseSampler;
 uniform sampler2D MainDepthSampler;
+uniform sampler2D PlanetMaskSampler;
+uniform sampler2D PlanetDepthSampler;
 
 uniform mat4 invProjMat;
 uniform mat4 invViewMat;
@@ -56,6 +58,17 @@ vec3 computeSmoothNormal(vec2 uv)
 void main() {
     vec4 color = texture(DiffuseSampler, texCoord);
     float depth = texture(MainDepthSampler, texCoord).r;
+    vec4 planetMask = texture(PlanetMaskSampler, texCoord);
+    float planetDepth = texture(PlanetDepthSampler, texCoord).r;
+
+    // Check if this pixel is a planet pixel AND the planet is the frontmost object
+    // 1. planetMask.r > 0.5 means a planet was rendered at this pixel
+    // 2. depth comparison ensures the planet is actually visible (not behind something)
+    if (planetMask.r > 0.5 && abs(planetDepth - depth) < 0.0001) {
+        // Skip post-processing for planet pixels
+        fragColor = color;
+        return;
+    }
 
     if (depth < 1.0) {
         vec3 P_view3 = reconstructViewPos(texCoord, depth);

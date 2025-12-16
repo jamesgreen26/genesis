@@ -45,14 +45,6 @@ public class PlanetRenderer {
 
         long ticks = level.getGameTime();
 
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
-        RenderSystem.depthFunc(GL11C.GL_LEQUAL);
-        RenderSystem.enableCull();
-
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-
         // Separate planets into textured and non-textured
         List<PlanetData> proceduralPlanets = new ArrayList<>();
         List<PlanetData> texturedPlanets = new ArrayList<>();
@@ -65,9 +57,35 @@ public class PlanetRenderer {
             }
         }
 
+        List<PlanetData> allPlanets = new ArrayList<>();
+        allPlanets.addAll(proceduralPlanets);
+        allPlanets.addAll(texturedPlanets);
+
+        // First pass: Render planets to the mask target for post-processing exclusion
+        PlanetMaskTarget.clear();
+        PlanetMaskTarget.bindWrite();
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+        GL11.glDepthMask(true);
+
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        var maskRenderType = getPlanetMaskRenderType();
+        VertexConsumer maskBuffer = bufferSource.getBuffer(maskRenderType);
+        for (var planet : allPlanets) {
+            renderMask(event, planet, maskBuffer, ticks);
+        }
+        bufferSource.endBatch(maskRenderType);
+        PlanetMaskTarget.unbindWrite();
+
+        // Second pass: Render planets to the main target with their visual shaders
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthMask(true);
+        RenderSystem.depthFunc(GL11C.GL_LEQUAL);
+        RenderSystem.enableCull();
+
         // Render non-textured planets with procedural shader
         if (!proceduralPlanets.isEmpty()) {
-            // Force depth state with raw GL calls
             GL11.glEnable(GL11.GL_DEPTH_TEST);
             GL11.glDepthFunc(GL11.GL_LEQUAL);
             GL11.glDepthMask(true);
@@ -77,23 +95,12 @@ public class PlanetRenderer {
                 renderProceduralPlanet(event, planet, planetBuffer, ticks);
             }
             bufferSource.endBatch(getPlanetRenderType());
-
-            // Re-render with solid render type to write depth
-            GL11.glColorMask(false, false, false, false); // Don't write color, only depth
-            GL11.glDepthMask(true);
-            VertexConsumer depthBuffer = bufferSource.getBuffer(RenderType.solid());
-            for (var planet : proceduralPlanets) {
-                renderDepthOnly(event, planet, depthBuffer, ticks);
-            }
-            bufferSource.endBatch(RenderType.solid());
-            GL11.glColorMask(true, true, true, true); // Restore color write
         }
 
         // Render textured planets - each needs its own render type for the texture binding
         for (var planet : texturedPlanets) {
             ResourceLocation textureLocation = PlanetTextures.getTexture(planet.dimensionID);
             if (textureLocation != null) {
-                // Force depth state with raw GL calls
                 GL11.glEnable(GL11.GL_DEPTH_TEST);
                 GL11.glDepthFunc(GL11.GL_LEQUAL);
                 GL11.glDepthMask(true);
@@ -102,18 +109,10 @@ public class PlanetRenderer {
                 VertexConsumer texturedBuffer = bufferSource.getBuffer(renderType);
                 renderTexturedPlanet(event, planet, texturedBuffer, ticks);
                 bufferSource.endBatch(renderType);
-
-                // Re-render with solid render type to write depth
-                GL11.glColorMask(false, false, false, false);
-                GL11.glDepthMask(true);
-                VertexConsumer depthBuffer = bufferSource.getBuffer(RenderType.solid());
-                renderDepthOnly(event, planet, depthBuffer, ticks);
-                bufferSource.endBatch(RenderType.solid());
-                GL11.glColorMask(true, true, true, true);
             }
         }
 
-        // Force depth state before rendering sun with raw GL calls
+        // Render sun
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glDepthFunc(GL11.GL_LEQUAL);
         GL11.glDepthMask(true);
@@ -294,7 +293,7 @@ public class PlanetRenderer {
         buffer.vertex(matrix, x, y, z).color(litR, litG, litB, textureScale).uv((x < 0 ? 0 : 0.25f) + (y < 0 ? 0 : 0.5f), z < 0 ? 0 : 1).endVertex();
     }
 
-    private static void renderDepthOnly(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
+    private static void renderMask(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
         PoseStack poseStack = event.getPoseStack();
 
         Matrix4f matrix;
@@ -314,24 +313,24 @@ public class PlanetRenderer {
 
         float halfSize = (float) (data.getActualSize() / 2);
 
-        // Render a simple cube for depth using BLOCK vertex format (position, color, uv, uv2, normal)
-        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
-        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize);
-        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize);
-        addDepthCubeFace(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize);
-        addDepthCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize);
-        addDepthCubeFace(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize);
+        // Render a simple white cube using POSITION_COLOR format
+        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
+        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize);
+        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize);
+        addMaskCubeFace(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize);
+        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize);
+        addMaskCubeFace(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize);
     }
 
-    private static void addDepthCubeFace(Matrix4f matrix, VertexConsumer buffer,
+    private static void addMaskCubeFace(Matrix4f matrix, VertexConsumer buffer,
                                          float x1, float y1, float z1,
                                          float x2, float y2, float z2,
                                          float x3, float y3, float z3,
                                          float x4, float y4, float z4) {
-        // RenderType.solid() uses BLOCK format: position, color, uv, uv2 (lightmap), normal
-        buffer.vertex(matrix, x1, y1, z1).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-        buffer.vertex(matrix, x3, y3, z3).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-        buffer.vertex(matrix, x4, y4, z4).color(255, 255, 255, 255).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        // POSITION_COLOR format: just position and color (white for mask)
+        buffer.vertex(matrix, x1, y1, z1).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(matrix, x3, y3, z3).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(matrix, x4, y4, z4).color(255, 255, 255, 255).endVertex();
     }
 }

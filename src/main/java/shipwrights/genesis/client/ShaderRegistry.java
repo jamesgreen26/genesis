@@ -3,6 +3,7 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -37,6 +38,7 @@ public class ShaderRegistry {
 
     private static LodestoneRenderType SUN_RENDER_TYPE;
     private static LodestoneRenderType PLANET_RENDER_TYPE;
+    private static LodestoneRenderType PLANET_MASK_RENDER_TYPE;
     private static final ConcurrentHashMap<ResourceLocation, LodestoneRenderType> TEXTURED_PLANET_RENDER_TYPES = new ConcurrentHashMap<>();
 
     public static LodestoneRenderType getSunRenderType() {
@@ -63,6 +65,19 @@ public class ShaderRegistry {
             );
         }
         return PLANET_RENDER_TYPE;
+    }
+
+    public static LodestoneRenderType getPlanetMaskRenderType() {
+        if (PLANET_MASK_RENDER_TYPE == null) {
+            PLANET_MASK_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("planet_mask_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
+                    .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setCullState(LodestoneRenderTypeRegistry.CULL)
+            );
+        }
+        return PLANET_MASK_RENDER_TYPE;
     }
 
     /**
