@@ -64,8 +64,9 @@ void main() {
     // Skip post-processing for planet pixels that are visible (not occluded)
     // planetMask.r = 1.0 means planet was rendered here
     // planetMask.g = planet's depth (encoded as color by mask shader)
-    // If something rendered in front, main depth will be smaller than planet depth
-    if (planetMask.r > 0.5 && depth >= planetMask.g - 0.0001) {
+    // Since both use gl_FragCoord.z, they should match exactly for same geometry
+    // Use very tight threshold - only skip if depths are essentially equal
+    if (planetMask.r > 0.5 && abs(depth - planetMask.g) < 0.000001) {
         fragColor = color;
         return;
     }
