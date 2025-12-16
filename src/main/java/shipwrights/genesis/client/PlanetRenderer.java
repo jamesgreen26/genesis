@@ -146,53 +146,59 @@ public class PlanetRenderer {
         Vector3d lightDir = new Vector3d(-pos.x, -pos.y, -pos.z).normalize();
         Quaternionf rotation = new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z);
 
-        // Front face (+Z) - uses center portion of texture
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-            -halfSize, -halfSize, halfSize,  // bottom-left
-             halfSize, -halfSize, halfSize,  // bottom-right
-             halfSize,  halfSize, halfSize,  // top-right
-            -halfSize,  halfSize, halfSize,  // top-left
-            0.25f, 0.5f, 0.5f, 1.0f);        // UV: middle section
+        // UV layout (3x2 grid):
+        // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
+        // | east (0,0.5)    | down (1/3,0.5) | up (2/3,0.5)   |
+        float third = 1.0f / 3.0f;
+        float twoThirds = 2.0f / 3.0f;
 
-        // Back face (-Z)
+        // South face (+Z)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
+            -halfSize, -halfSize, halfSize,
+             halfSize, -halfSize, halfSize,
+             halfSize,  halfSize, halfSize,
+            -halfSize,  halfSize, halfSize,
+            twoThirds, 0.0f, 1.0f, 0.5f);
+
+        // North face (-Z)
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
              halfSize, -halfSize, -halfSize,
             -halfSize, -halfSize, -halfSize,
             -halfSize,  halfSize, -halfSize,
              halfSize,  halfSize, -halfSize,
-            0.75f, 0.5f, 1.0f, 1.0f);
+            0.0f, 0.0f, third, 0.5f);
 
-        // Left face (-X)
+        // West face (-X)
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
             -halfSize, -halfSize, -halfSize,
             -halfSize, -halfSize,  halfSize,
             -halfSize,  halfSize,  halfSize,
             -halfSize,  halfSize, -halfSize,
-            0.0f, 0.5f, 0.25f, 1.0f);
+            third, 0.0f, twoThirds, 0.5f);
 
-        // Right face (+X)
+        // East face (+X)
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
              halfSize, -halfSize,  halfSize,
              halfSize, -halfSize, -halfSize,
              halfSize,  halfSize, -halfSize,
              halfSize,  halfSize,  halfSize,
-            0.5f, 0.5f, 0.75f, 1.0f);
+            0.0f, 0.5f, third, 1.0f);
 
-        // Bottom face (-Y)
+        // Down face (-Y)
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
             -halfSize, -halfSize, -halfSize,
              halfSize, -halfSize, -halfSize,
              halfSize, -halfSize,  halfSize,
             -halfSize, -halfSize,  halfSize,
-            0.25f, 0.0f, 0.5f, 0.5f);
+            third, 0.5f, twoThirds, 1.0f);
 
-        // Top face (+Y)
+        // Up face (+Y)
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
             -halfSize,  halfSize,  halfSize,
              halfSize,  halfSize,  halfSize,
              halfSize,  halfSize, -halfSize,
             -halfSize,  halfSize, -halfSize,
-            0.25f, 0.5f, 0.5f, 0.0f);
+            twoThirds, 0.5f, 1.0f, 1.0f);
     }
 
     private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize,
