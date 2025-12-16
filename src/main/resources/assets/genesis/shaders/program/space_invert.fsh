@@ -61,11 +61,11 @@ void main() {
     vec4 planetMask = texture(PlanetMaskSampler, texCoord);
     float planetDepth = texture(PlanetDepthSampler, texCoord).r;
 
-    // Check if this pixel is a planet pixel AND the planet is the frontmost object
-    // 1. planetMask.r > 0.5 means a planet was rendered at this pixel
-    // 2. depth comparison ensures the planet is actually visible (not behind something)
-    if (planetMask.r > 0.5 && abs(planetDepth - depth) < 0.0001) {
-        // Skip post-processing for planet pixels
+    // Skip post-processing for planet pixels that are visible (not occluded)
+    // planetMask.r = 1.0 means planet was rendered here
+    // planetMask.g = planet's depth (encoded as color by mask shader)
+    // If something rendered in front, main depth will be smaller than planet depth
+    if (planetMask.r > 0.5 && depth >= planetMask.g - 0.0001) {
         fragColor = color;
         return;
     }

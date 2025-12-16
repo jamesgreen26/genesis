@@ -3,7 +3,6 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -26,6 +25,7 @@ public class ShaderRegistry {
     public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_TEX);
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
     public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_COLOR_TEX);
+    public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder WORMHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole"), DefaultVertexFormat.POSITION_COLOR_TEX);
 
     @SubscribeEvent
@@ -33,6 +33,7 @@ public class ShaderRegistry {
         registerShader(event, SUN_SHADER);
         registerShader(event, PLANET_SHADER);
         registerShader(event, PLANET_TEXTURED_SHADER);
+        registerShader(event, PLANET_MASK_SHADER);
         registerShader(event, WORMHOLE_SHADER);
     }
 
@@ -70,7 +71,7 @@ public class ShaderRegistry {
     public static LodestoneRenderType getPlanetMaskRenderType() {
         if (PLANET_MASK_RENDER_TYPE == null) {
             PLANET_MASK_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("planet_mask_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
-                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setShaderState(PLANET_MASK_SHADER)
                     .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
