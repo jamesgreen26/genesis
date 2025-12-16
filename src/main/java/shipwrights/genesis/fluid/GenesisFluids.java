@@ -2,7 +2,6 @@ package shipwrights.genesis.fluid;
 
 import com.tterrag.registrate.Registrate;
 import com.tterrag.registrate.util.entry.FluidEntry;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -55,7 +54,6 @@ public class GenesisFluids {
                 .build()
             .bucket()
                 .build()
-            .renderType(() -> RenderType.translucent())
             .register();
 
     private static FluidType createMiasmaFluidType(FluidType.Properties properties, ResourceLocation stillTexture, ResourceLocation flowingTexture) {

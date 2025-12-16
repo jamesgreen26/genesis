@@ -5,6 +5,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import shipwrights.genesis.GenesisBlocks;
+import shipwrights.genesis.fluid.GenesisFluids;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.blockentity.GenesisBlockEntities;
 import shipwrights.genesis.client.blockentityRenderer.NavProjectorBlockEntityRenderer;
@@ -44,6 +45,10 @@ public class GenesisClientSetup {
             ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.BRINE_FLOWER.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.BRINE_TRUNK.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.PETRIFIED_BUSH.get(), RenderType.cutout());
+
+            // Miasma fluid render type (must be registered client-side to avoid server crash)
+            ItemBlockRenderTypes.setRenderLayer(GenesisFluids.MIASMA.getSource(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(GenesisFluids.MIASMA.get(), RenderType.translucent());
         });
     }
 
