@@ -19,6 +19,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelResource;
 import shipwrights.dataplanets.DataplanetsMod;
+import shipwrights.genesis.mixin.MinecraftServerAccessor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -127,7 +128,7 @@ public class RegistryUtil {
     }
 
     public static boolean setupDatapackFolder(MinecraftServer server) {
-        Path basePath = server.storageSource.getLevelPath(LevelResource.DATAPACK_DIR);
+        Path basePath = ((MinecraftServerAccessor) server).getStorageSource().getLevelPath(LevelResource.DATAPACK_DIR);
         Path dataplanetsFolder = basePath.resolve("dataplanets-generated");
 
         String mcMeta = "{\n" +
@@ -164,7 +165,7 @@ public class RegistryUtil {
             com.mojang.serialization.Codec<T> codec,
             T object
     ) {
-        Path basePath = server.storageSource.getLevelPath(LevelResource.DATAPACK_DIR);
+        Path basePath = ((MinecraftServerAccessor) server).getStorageSource().getLevelPath(LevelResource.DATAPACK_DIR);
         Path dataplanetsFolder = basePath.resolve("dataplanets-generated");
         Path typeFolder = dataplanetsFolder.resolve("data")
                 .resolve(resourceLocation.getNamespace())
@@ -215,7 +216,7 @@ public class RegistryUtil {
     ) {
         bindBiomeToTagRuntime(server, tag, biomeLocation);
 
-        Path basePath = server.storageSource.getLevelPath(LevelResource.DATAPACK_DIR);
+        Path basePath = ((MinecraftServerAccessor) server).getStorageSource().getLevelPath(LevelResource.DATAPACK_DIR);
         Path dataplanetsFolder = basePath.resolve("dataplanets-generated");
         Path tagFolder = dataplanetsFolder.resolve("data")
                 .resolve(tag.location().getNamespace())
