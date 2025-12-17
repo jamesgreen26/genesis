@@ -10,5 +10,18 @@
       "g": 0.5,
       "b": 0.8
     }
+  ],
+  "moons": [
+    {
+      "dimensionID": "genesis:noctis",
+      "parentDimensionID": "minecraft:overworld",
+      "size": 0.3,
+      "gravity": 0.1622,
+      "orbitRadius": 0.05,
+      "yearLength": 0.005,
+      "r": 0.55,
+      "g": 0.55,
+      "b": 0.65
+    }
   ]
 }

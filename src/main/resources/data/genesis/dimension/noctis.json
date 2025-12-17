@@ -1,0 +1,60 @@
+{
+  "type": "genesis:noctis_dimension_type",
+  "generator": {
+    "biome_source": {
+      "biomes": [
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0.0,
+            "weirdness": 0.2,
+            "offset": 0.0,
+            "temperature": 0.4482,
+            "humidity": 0.94,
+            "continentalness": 0.1
+          },
+          "biome": "genesis:noctis_biome_0"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0.0,
+            "weirdness": 0.2,
+            "offset": 0.0,
+            "temperature": 0.5482,
+            "humidity": 0.94,
+            "continentalness": 0.1
+          },
+          "biome": "genesis:noctis_biome_1"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0.0,
+            "weirdness": 0.2,
+            "offset": 0.0,
+            "temperature": 0.6482,
+            "humidity": 0.94,
+            "continentalness": 0.1
+          },
+          "biome": "genesis:noctis_biome_2"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0.0,
+            "weirdness": 0.2,
+            "offset": 0.0,
+            "temperature": 0.7482,
+            "humidity": 0.94,
+            "continentalness": 0.1
+          },
+          "biome": "genesis:noctis_biome_3"
+        }
+      ],
+      "type": "minecraft:multi_noise"
+    },
+    "settings": "genesis:noctis_noise_settings",
+    "type": "minecraft:noise"
+  }
+}
