@@ -19,6 +19,7 @@
     "EntityMixin",
     "FallingBlockEntityAccessor",
     "FallingBlockEntityMixin",
+    "LevelChunkMixin",
     "LivingEntityMixin",
     "MinecraftServerAccessor",
     "MinecraftServerMixin",
