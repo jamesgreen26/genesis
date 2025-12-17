@@ -47,7 +47,7 @@ public class PlanetRenderer {
         List<PlanetData> proceduralPlanets = new ArrayList<>();
         List<PlanetData> texturedPlanets = new ArrayList<>();
 
-        for (var planet : GenesisMod.planets) {
+        for (var planet : GenesisMod.planets.values()) {
             if (PlanetTextures.hasTexture(planet.dimensionID)) {
                 texturedPlanets.add(planet);
             } else {

@@ -40,18 +40,14 @@ public class PlanetUtil {
      */
     @Nullable
     public static PlanetData getPlanetByDimension(ResourceKey<Level> dimension) {
-        ResourceLocation dimLocation = dimension.location();
-        return GenesisMod.planets.stream()
-            .filter(planet -> planet.dimensionID.equals(dimLocation))
-            .findFirst()
-            .orElse(null);
+        return GenesisMod.planets.get(dimension.location());
     }
 
     /**
      * Get the nearest planet to a position in space
      */
     public static Optional<PlanetWithDistance> getNearestPlanet(Vec3 position, long ticks) {
-        return GenesisMod.planets.stream()
+        return GenesisMod.planets.values().stream()
             .map(planet -> {
                 Vector3d planetPos = planet.getCurrentPos(ticks);
                 double distance = Math.sqrt(

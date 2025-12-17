@@ -83,7 +83,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
         }
 
         // Render planets from Genesis planet registry
-        for (PlanetData planet : GenesisMod.planets) {
+        for (PlanetData planet : GenesisMod.planets.values()) {
             renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, planet, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick);
         }
 

@@ -20,6 +20,7 @@ import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
+import shipwrights.genesis.networking.SyncPlanetsPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
 import shipwrights.genesis.networking.WormholeTravelSoundPacket;
 import shipwrights.genesis.planets.PlanetData;
@@ -29,7 +30,9 @@ import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
@@ -54,7 +57,7 @@ public final class GenesisMod {
     public static final double earthSize = 96;
     public static final int earthYear = 4608000;
 
-    public static final List<PlanetData> planets = new CopyOnWriteArrayList<>();
+    public static final Map<ResourceLocation, PlanetData> planets = new ConcurrentHashMap<>();
     private static final List<QueuedMoon> moonQueue = new CopyOnWriteArrayList<>();
 
     public GenesisMod(FMLJavaModLoadingContext context) {
@@ -76,6 +79,12 @@ public final class GenesisMod {
                 .encoder(StopVoidEngineStartSoundPacket::encode)
                 .decoder(StopVoidEngineStartSoundPacket::decode)
                 .consumerMainThread(StopVoidEngineStartSoundPacket::handle)
+                .add();
+
+        GenesisNetworking.INSTANCE.messageBuilder(SyncPlanetsPacket.class, 3)
+                .encoder(SyncPlanetsPacket::encode)
+                .decoder(SyncPlanetsPacket::decode)
+                .consumerMainThread(SyncPlanetsPacket::handle)
                 .add();
 
         // Register fluids using Registrate (must be called before other registrations)
@@ -102,15 +111,16 @@ public final class GenesisMod {
     /// @apiNote Registered planets get reset each time the server stops
     /// pineapple
     public static Optional<PlanetData> registerPlanet(ResourceLocation dimensionID, double size, double gravity, double sunDist, double yearLength, float r, float g, float b) {
-        for (PlanetData planet : planets) {
-            if (planet.dimensionID.equals(dimensionID)) {
-                return Optional.empty();
-            }
+        if (planets.containsKey(dimensionID)) {
+            return Optional.empty();
         }
 
         if (sunDist * earthDist > 2048) {
             PlanetData data = new PlanetData(dimensionID, null, size, sunDist, yearLength, r, g, b, gravity);
-            planets.add(data);
+            PlanetData existing = planets.putIfAbsent(dimensionID, data);
+            if (existing != null) {
+                return Optional.empty(); // Another thread beat us to it
+            }
             DimensionSettingsManager.INSTANCE.addSettings(data.dimensionID, new DimensionSettings(1.0, gravity, true));
 
             return Optional.of(data);
@@ -129,18 +139,14 @@ public final class GenesisMod {
     @ApiStatus.Internal
     public static void finalizeMoons() {
         for (var moon : moonQueue) {
-            PlanetData parent = null;
-
-            for (PlanetData planet : planets) {
-                if (planet.dimensionID.equals(moon.dimensionID)) {
-                    return;
-                } else if (planet.dimensionID.equals(moon.orbitingDimensionID)) {
-                    parent = planet;
-                }
+            if (planets.containsKey(moon.dimensionID)) {
+                continue; // Moon already registered
             }
 
+            PlanetData parent = planets.get(moon.orbitingDimensionID);
+
             if (parent != null) {
-                planets.add(new PlanetData(moon.dimensionID, parent, moon.size, moon.orbitRadius, moon.yearLength, moon.r, moon.g, moon.b, moon.gravity));
+                planets.putIfAbsent(moon.dimensionID, new PlanetData(moon.dimensionID, parent, moon.size, moon.orbitRadius, moon.yearLength, moon.r, moon.g, moon.b, moon.gravity));
             } else {
                 LOGGER.warn("Failed to register moon {}, its parent planet is missing!", moon.dimensionID);
             }

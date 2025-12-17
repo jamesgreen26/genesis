@@ -56,7 +56,7 @@ public class RadarDisplay {
     }
 
     private void scanPlanets(Level level, Vector3dc camera) {
-        GenesisMod.planets.forEach(planetData -> {
+        GenesisMod.planets.values().forEach(planetData -> {
             double extent = planetData.getActualSize() / 2;
             Vector3dc pos = planetData.getCurrentPos(level.getGameTime());
             AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
