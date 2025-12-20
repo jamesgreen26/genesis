@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:disk",
+  "config": {
+    "state_provider": {
+      "fallback": {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "genesis:wavy_moon_sand"
+        }
+      },
+      "rules": [
+        {
+          "if_true": {
+            "type": "minecraft:matching_blocks",
+            "offset": [
+              0,
+              -1,
+              0
+            ],
+            "blocks": [
+              "genesis:wavy_moon_sand",
+              "genesis:moon_sand"
+            ]
+          },
+          "then": {
+            "type": "minecraft:weighted_state_provider",
+            "entries": [
+              {
+                "weight": 1,
+                "data": {
+                  "Name": "genesis:dead_moon_coral_block"
+                }
+              },
+              {
+                "weight": 1,
+                "data": {
+                  "Name": "genesis:moon_sand"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "radius": 6,
+    "half_height": 3,
+    "target": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "genesis:wavy_moon_sand",
+        "genesis:moon_sand"
+      ]
+    }
+  }
+}

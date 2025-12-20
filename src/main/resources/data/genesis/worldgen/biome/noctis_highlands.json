@@ -1,14 +1,14 @@
 {
   "has_precipitation": true,
-  "temperature": 0.64824563,
+  "temperature": 0.5482456,
   "downfall": 0.94,
   "effects": {
-    "sky_color": 526344,
-    "foliage_color": 7252518,
-    "grass_color": 8370999,
-    "fog_color": 1354815743,
-    "water_color": 5215988,
-    "water_fog_color": 2575226
+    "sky_color": 0,
+    "foliage_color": 6988322,
+    "grass_color": 8106803,
+    "fog_color": 1354487039,
+    "water_color": 4687596,
+    "water_fog_color": 2311030
   },
   "carvers": {
     "air": [
@@ -18,11 +18,19 @@
     ]
   },
   "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
     [
-      "minecraft:large_dripstone",
-      "minecraft:dripstone_cluster",
-      "minecraft:pointed_dripstone"
-    ]
+      "genesis:constant_hallow_moon_stone_disk",
+      "genesis:hallow_moon_stone_pillar_cluster"
+    ],
+    []
   ],
   "spawners": {
     "monster": [],

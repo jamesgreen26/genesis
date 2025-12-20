@@ -6,50 +6,38 @@
         {
           "parameters": {
             "erosion": 0.3899,
-            "depth": 0.0,
-            "weirdness": 0.2,
-            "offset": 0.0,
+            "depth": 0,
+            "weirdness": 0.7,
+            "offset": 0,
             "temperature": 0.4482,
             "humidity": 0.94,
             "continentalness": 0.1
           },
-          "biome": "genesis:noctis_biome_0"
+          "biome": "genesis:noctis_barrens"
         },
         {
           "parameters": {
             "erosion": 0.3899,
-            "depth": 0.0,
-            "weirdness": 0.2,
-            "offset": 0.0,
+            "depth": 0,
+            "weirdness": 0.25,
+            "offset": 0,
             "temperature": 0.5482,
             "humidity": 0.94,
-            "continentalness": 0.1
+            "continentalness": 0.5
           },
-          "biome": "genesis:noctis_biome_1"
+          "biome": "genesis:noctis_lowlands"
         },
         {
           "parameters": {
             "erosion": 0.3899,
-            "depth": 0.0,
-            "weirdness": 0.2,
-            "offset": 0.0,
+            "depth": 0,
+            "weirdness": 0.5,
+            "offset": 0,
             "temperature": 0.6482,
             "humidity": 0.94,
-            "continentalness": 0.1
+            "continentalness": 0.3
           },
-          "biome": "genesis:noctis_biome_2"
-        },
-        {
-          "parameters": {
-            "erosion": 0.3899,
-            "depth": 0.0,
-            "weirdness": 0.2,
-            "offset": 0.0,
-            "temperature": 0.7482,
-            "humidity": 0.94,
-            "continentalness": 0.1
-          },
-          "biome": "genesis:noctis_biome_3"
+          "biome": "genesis:noctis_highlands"
         }
       ],
       "type": "minecraft:multi_noise"
