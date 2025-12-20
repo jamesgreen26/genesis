@@ -105,17 +105,24 @@
             "argument2": {
               "argument1": {
                 "argument1": {
-                  "scale": 24.0,
-                  "type": "genesis:crater"
+                  "argument1": {
+                    "scale": 24.0,
+                    "type": "genesis:crater"
+                  },
+                  "argument2": {
+                    "scale": 64.0,
+                    "type": "genesis:crater"
+                  },
+                  "type": "minecraft:add"
                 },
                 "argument2": {
-                  "scale": 64.0,
+                  "scale": 192.0,
                   "type": "genesis:crater"
                 },
                 "type": "minecraft:add"
               },
               "argument2": {
-                "scale": 192.0,
+                "scale": 456.0,
                 "type": "genesis:crater"
               },
               "type": "minecraft:add"
