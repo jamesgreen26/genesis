@@ -13,7 +13,7 @@
   ],
   "moons": [
     {
-      "dimensionID": "genesis:noctis",
+      "dimensionID": "genesis:moon",
       "parentDimensionID": "minecraft:overworld",
       "size": 0.3,
       "gravity": 0.1622,

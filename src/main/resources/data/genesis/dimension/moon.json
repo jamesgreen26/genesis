@@ -1,5 +1,5 @@
 {
-  "type": "genesis:noctis_dimension_type",
+  "type": "genesis:moon_dimension_type",
   "generator": {
     "biome_source": {
       "biomes": [
@@ -13,7 +13,7 @@
             "humidity": 0.94,
             "continentalness": 0.1
           },
-          "biome": "genesis:noctis_barrens"
+          "biome": "genesis:moon_barrens"
         },
         {
           "parameters": {
@@ -25,7 +25,7 @@
             "humidity": 0.94,
             "continentalness": 0.5
           },
-          "biome": "genesis:noctis_lowlands"
+          "biome": "genesis:moon_lowlands"
         },
         {
           "parameters": {
@@ -37,12 +37,12 @@
             "humidity": 0.94,
             "continentalness": 0.3
           },
-          "biome": "genesis:noctis_highlands"
+          "biome": "genesis:moon_highlands"
         }
       ],
       "type": "minecraft:multi_noise"
     },
-    "settings": "genesis:noctis_noise_settings",
+    "settings": "genesis:moon_noise_settings",
     "type": "minecraft:noise"
   }
 }
