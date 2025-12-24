@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3d;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
@@ -70,38 +71,83 @@ public class PlanetUtil {
         return new Quaterniond(); // TODO: Implement proper rotation conversion from planet.rot
     }
 
-    private static final double RAYCAST_PRECISION = 10D;
-    public static Optional<PlanetData> celestialRaycast(Vec3 from, Vec3 to, long ticks)
+
+    private static double raycastAABB(Vector3d origin, Vector3d direction, Vector3d min, Vector3d max)
     {
-        List<AABB> bodies = GenesisMod.planets.values().stream().map(a->
-        {
-            Vector3d pos = a.getCurrentPos(ticks);
-            double oR  = a.getActualSize()/2 + ((a.getActualSize()/2)/2);
-            return new AABB(pos.x-oR,pos.y-oR,pos.z-oR,pos.x+oR,pos.y+oR,pos.z+oR);
-        }).toList();
+        double tMin = 0.0;
+        double tMax = Double.POSITIVE_INFINITY;
 
-        double step = RAYCAST_PRECISION/from.distanceTo(to);
+        for (int i = 0; i < 3; i++) {
+            double originA = origin.get(i);
+            double DirectionA = direction.get(i);
+            double minA = min.get(i);
+            double maxA = max.get(i);
 
-        //System.out.println("starting raycast");
-        double d = 0D;
-        while (d<1D)
-        {
-            d+=step;
-            Vec3 where = from.lerp(to,d);
-            for(AABB aabb: bodies)
-            {
-                if(aabb.contains(where))
-                {
-                    return GenesisMod.planets.values().stream().filter(a->
-                    {
-                        Vector3d v3d = a.getCurrentPos(ticks);
-                        Vec3 v = new Vec3(v3d.x,v3d.y,v3d.z);
-                        return aabb.contains(v);
-                    }).findFirst();
+            if (Math.abs(DirectionA) < 1e-9) {
+                if (originA < minA || originA > maxA)
+                    return Double.POSITIVE_INFINITY;
+            } else {
+                double invD = 1.0 / DirectionA;
+                double t1 = (minA - originA) * invD;
+                double t2 = (maxA - originA) * invD;
+                if (t1 > t2) {
+                    double tmp = t1;
+                    t1 = t2;
+                    t2 = tmp;
                 }
+                tMin = Math.max(tMin, t1);
+                tMax = Math.min(tMax, t2);
+                if (tMin > tMax)
+                    return Double.POSITIVE_INFINITY;
             }
         }
-        //System.out.println("ending raycast");
+
+        return tMin;
+    }
+
+    private static double raycastOBB(Vector3d origin, Vector3d direction, Vector3d center, Matrix3d rotation, Vector3d localMin, Vector3d localMax)
+    {
+        // Inverse rotation = transpose (rotation is orthonormal)
+        Matrix3d invRot = new Matrix3d(rotation).transpose();
+
+        // Transform ray into box-local space
+        Vector3d localOrigin = new Vector3d(origin).sub(center).mul(invRot);
+
+        Vector3d localDir = new Vector3d(direction).mul(invRot);
+
+        return raycastAABB(localOrigin, localDir, localMin, localMax);
+    }
+
+    public static Optional<PlanetData> celestialRaycast(long ticks,Vector3d origin, Vector3d direction)
+    {
+        double closestT = Double.POSITIVE_INFINITY;
+        PlanetData planetData = null;
+
+        for (PlanetData data : GenesisMod.planets.values()) {
+            Vector3d pos = data.getCurrentPos(ticks);
+            double oR  = data.getActualSize()/2 + ((data.getActualSize()/2)/2);
+            AABB box = new AABB(pos.x-oR,pos.y-oR,pos.z-oR,pos.x+oR,pos.y+oR,pos.z+oR);
+            Matrix3d rotation = data.getRotationMatrix();
+            Vec3 center = box.getCenter();
+            double t = raycastOBB(
+                    origin,
+                    direction,
+                    new Vector3d(center.x,center.y,center.z),
+                    rotation,
+                    new Vector3d(box.minX,box.minY,box.minZ),
+                    new Vector3d(box.maxX,box.maxY,box.maxZ)
+            );
+
+            if (t < closestT) {
+                closestT = t;
+                planetData = data;
+            }
+        }
+
+        if(planetData!=null)
+        {
+            return Optional.of(planetData);
+        }
 
         return Optional.empty();
     }

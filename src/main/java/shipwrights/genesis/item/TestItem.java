@@ -7,6 +7,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import shipwrights.genesis.planets.PlanetData;
 import shipwrights.genesis.util.PlanetUtil;
 
@@ -21,7 +23,11 @@ public class TestItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level arg, Player arg2, InteractionHand arg3) {
         if(!arg.isClientSide && arg3==InteractionHand.MAIN_HAND)
         {
-            Optional<PlanetData> data = PlanetUtil.celestialRaycast(arg2.position(),arg2.position().add(arg2.getForward().scale(100000)),arg.getGameTime());
+            Vec3 v3d = arg2.getForward();
+
+            Vector3d origin = new Vector3d(arg2.position().x,arg2.position().y,arg2.position().z);
+            Vector3d direction = new Vector3d(v3d.x,v3d.y,v3d.z);
+            Optional<PlanetData> data = PlanetUtil.celestialRaycast(arg.getGameTime(),origin,direction);
             data.ifPresent(planetData -> arg2.sendSystemMessage(Component.literal("BODY FOUND: " + planetData.dimensionID)));
         }
         return super.use(arg, arg2, arg3);

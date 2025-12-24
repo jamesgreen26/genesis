@@ -2,6 +2,8 @@ package shipwrights.genesis.planets;
 
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3d;
+import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.data.SystemConfigModel;
@@ -101,6 +103,11 @@ public class PlanetData {
 
     public double getActualSize() {
          return this.size * GenesisMod.earthSize;
+    }
+
+    public Matrix3d getRotationMatrix()
+    {
+        return new Matrix3d().rotate(new Quaternionf().rotationXYZ((float) rotation.x, (float) rotation.y, (float) rotation.z));
     }
 
     public SystemConfigModel.PlanetJsonModel toJsonModel() {
