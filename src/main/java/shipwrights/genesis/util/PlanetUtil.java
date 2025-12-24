@@ -118,7 +118,7 @@ public class PlanetUtil {
         return raycastAABB(localOrigin, localDir, localMin, localMax);
     }
 
-    public static Optional<PlanetData> celestialRaycast(long ticks,Vector3d origin, Vector3d direction)
+    public static Optional<PlanetWithDistance> celestialRaycast(long ticks,Vector3d origin, Vector3d direction)
     {
         double closestT = Double.POSITIVE_INFINITY;
         PlanetData planetData = null;
@@ -129,11 +129,9 @@ public class PlanetUtil {
             AABB box = new AABB(pos.x-oR,pos.y-oR,pos.z-oR,pos.x+oR,pos.y+oR,pos.z+oR);
             Matrix3d rotation = data.getRotationMatrix();
             Vec3 center = box.getCenter();
-            double t = raycastOBB(
+            double t = raycastAABB(
                     origin,
                     direction,
-                    new Vector3d(center.x,center.y,center.z),
-                    rotation,
                     new Vector3d(box.minX,box.minY,box.minZ),
                     new Vector3d(box.maxX,box.maxY,box.maxZ)
             );
@@ -146,7 +144,7 @@ public class PlanetUtil {
 
         if(planetData!=null)
         {
-            return Optional.of(planetData);
+            return Optional.of(new PlanetWithDistance(planetData,closestT));
         }
 
         return Optional.empty();
