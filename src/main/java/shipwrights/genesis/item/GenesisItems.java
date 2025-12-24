@@ -137,4 +137,5 @@ public class GenesisItems {
     public static final RegistryObject<Item> WARPSTONE_CATALYZER_BLOCK_ITEM = ITEMS.register("warpstone_catalyzer_block",
         () -> new BlockItem(GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> TEST_ITEM = ITEMS.register("test_item",()->new TestItem(new Item.Properties()));
 }

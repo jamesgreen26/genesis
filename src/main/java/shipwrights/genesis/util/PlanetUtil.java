@@ -1,8 +1,8 @@
 package shipwrights.genesis.util;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
@@ -10,8 +10,7 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.planets.PlanetData;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Utility class for planet-related operations in Genesis
@@ -69,6 +68,42 @@ public class PlanetUtil {
         // Convert the planet's rotation vector to a quaternion
         // For now, using identity - you may want to implement proper rotation from the Vector3d
         return new Quaterniond(); // TODO: Implement proper rotation conversion from planet.rot
+    }
+
+    private static final double RAYCAST_PRECISION = 10D;
+    public static Optional<PlanetData> celestialRaycast(Vec3 from, Vec3 to, long ticks)
+    {
+        List<AABB> bodies = GenesisMod.planets.values().stream().map(a->
+        {
+            Vector3d pos = a.getCurrentPos(ticks);
+            double oR  = a.getActualSize()/2 + ((a.getActualSize()/2)/2);
+            return new AABB(pos.x-oR,pos.y-oR,pos.z-oR,pos.x+oR,pos.y+oR,pos.z+oR);
+        }).toList();
+
+        double step = RAYCAST_PRECISION/from.distanceTo(to);
+
+        //System.out.println("starting raycast");
+        double d = 0D;
+        while (d<1D)
+        {
+            d+=step;
+            Vec3 where = from.lerp(to,d);
+            for(AABB aabb: bodies)
+            {
+                if(aabb.contains(where))
+                {
+                    return GenesisMod.planets.values().stream().filter(a->
+                    {
+                        Vector3d v3d = a.getCurrentPos(ticks);
+                        Vec3 v = new Vec3(v3d.x,v3d.y,v3d.z);
+                        return aabb.contains(v);
+                    }).findFirst();
+                }
+            }
+        }
+        //System.out.println("ending raycast");
+
+        return Optional.empty();
     }
 
     /**
