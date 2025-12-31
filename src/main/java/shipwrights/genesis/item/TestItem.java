@@ -27,8 +27,8 @@ public class TestItem extends Item {
 
             Vector3d origin = new Vector3d(arg2.position().x,arg2.position().y,arg2.position().z);
             Vector3d direction = new Vector3d(v3d.x,v3d.y,v3d.z);
-            Optional<PlanetData> data = PlanetUtil.celestialRaycast(arg.getGameTime(),origin,direction);
-            data.ifPresent(planetData -> arg2.sendSystemMessage(Component.literal("BODY FOUND: " + planetData.dimensionID)));
+            Optional<PlanetUtil.PlanetWithDistance> data = PlanetUtil.celestialRaycast(arg.getGameTime(),origin,direction);
+            data.ifPresent(planetData -> arg2.sendSystemMessage(Component.literal("BODY FOUND: " + planetData.planet().dimensionID)));
         }
         return super.use(arg, arg2, arg3);
     }

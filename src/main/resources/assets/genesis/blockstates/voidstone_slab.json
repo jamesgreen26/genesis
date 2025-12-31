@@ -1,0 +1,13 @@
+  {
+    "variants": {
+      "type=bottom": {
+        "model": "genesis:block/voidstone_slab"
+      },
+      "type=top": {
+        "model": "genesis:block/voidstone_slab_top"
+      },
+      "type=double": {
+        "model": "genesis:block/voidstone"
+      }
+    }
+  }
