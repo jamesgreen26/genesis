@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "genesis:block/warpstone",
+    "top": "genesis:block/warpstone",
+    "side": "genesis:block/warpstone"
+  }
+}

@@ -16,7 +16,8 @@ public class BlockDataGenerator {
             "nullstone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
             "riftrock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
             "echostone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
-            "phaserock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs)
+            "phaserock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
+            "warpstone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs)
     );
 
     public static void main(String[] args) {
