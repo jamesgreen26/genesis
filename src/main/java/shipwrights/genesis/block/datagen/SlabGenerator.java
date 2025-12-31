@@ -32,7 +32,7 @@ public class SlabGenerator {
     private static void generateTopSlabModel(String name) {
         String json = """
               {
-                "parent": "minecraft:block/top_slab",
+                "parent": "minecraft:block/slab_top",
                 "textures": {
                   "bottom": "genesis:block/%1$s",
                   "top": "genesis:block/%1$s",
