@@ -1,0 +1,13 @@
+  {
+    "variants": {
+      "type=bottom": {
+        "model": "genesis:block/nullstone_slab"
+      },
+      "type=top": {
+        "model": "genesis:block/nullstone_slab_top"
+      },
+      "type=double": {
+        "model": "genesis:block/nullstone"
+      }
+    }
+  }

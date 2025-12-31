@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 public class BlockDataGenerator {
 
@@ -13,10 +14,13 @@ public class BlockDataGenerator {
     private static final Logger log = LoggerFactory.getLogger(BlockDataGenerator.class);
 
     public static void main(String[] args) {
-        String name = "voidstone";
-        List<BlockType> types = List.of(BlockType.slab, BlockType.stair);
+        Map<String, List<BlockType>> blocksToDatagen = Map.of(
+                "voidstone", List.of(BlockType.slab, BlockType.stair),
+                "nullstone", List.of(BlockType.slab, BlockType.stair),
+                "riftrock", List.of(BlockType.slab, BlockType.stair)
+        );
 
-        generate(name, types);
+        blocksToDatagen.forEach(BlockDataGenerator::generate);
     }
 
     private static void generate(String name, List<BlockType> types) {
@@ -32,9 +36,4 @@ public class BlockDataGenerator {
             log.error("Error: ", e);
         }
     }
-}
-
-
-enum BlockType {
-    simple, slab, stair, pillar, fence, wall
 }

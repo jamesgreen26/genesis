@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "genesis:block/riftrock",
+    "top": "genesis:block/riftrock",
+    "side": "genesis:block/riftrock"
+  }
+}

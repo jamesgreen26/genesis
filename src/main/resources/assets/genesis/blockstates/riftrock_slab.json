@@ -1,0 +1,13 @@
+  {
+    "variants": {
+      "type=bottom": {
+        "model": "genesis:block/riftrock_slab"
+      },
+      "type=top": {
+        "model": "genesis:block/riftrock_slab_top"
+      },
+      "type=double": {
+        "model": "genesis:block/riftrock"
+      }
+    }
+  }
