@@ -836,6 +836,17 @@ public class GenesisBlocks {
                         GenesisItems.DYNAMIC_ITEMS.put(id, GenesisItems.ITEMS.register(id,
                                 () -> new BlockItem(slab.get(), new Item.Properties())));
                     }
+                    case stairs -> {
+                        String id = entry.getKey() + "_stairs";
+                        RegistryObject<Block> stairs = BLOCKS.register(id,
+                                () -> {
+                                    Block block = blockLookup(entry.getKey()).get().get();
+                                    return new StairBlock(block::defaultBlockState, ((BlockBehaviourAccessor) block).getProperties());
+                                });
+
+                        GenesisItems.DYNAMIC_ITEMS.put(id, GenesisItems.ITEMS.register(id,
+                                () -> new BlockItem(stairs.get(), new Item.Properties())));
+                    }
                 }
             }
         }

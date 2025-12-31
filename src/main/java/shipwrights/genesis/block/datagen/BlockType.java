@@ -1,5 +1,5 @@
 package shipwrights.genesis.block.datagen;
 
 public enum BlockType {
-    simple, slab, stair, pillar, fence, wall
+    simple, slab, stairs, pillar, fence, wall
 }

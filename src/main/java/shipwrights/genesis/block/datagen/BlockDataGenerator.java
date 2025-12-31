@@ -12,9 +12,9 @@ public class BlockDataGenerator {
     private static final Logger log = LoggerFactory.getLogger(BlockDataGenerator.class);
 
     public static final Map<String, List<BlockType>> blocksToDatagen = Map.of(
-            "voidstone", List.of(BlockType.simple, BlockType.slab, BlockType.stair),
-            "nullstone", List.of(BlockType.simple, BlockType.slab, BlockType.stair),
-            "riftrock", List.of(BlockType.simple, BlockType.slab, BlockType.stair)
+            "voidstone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
+            "nullstone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
+            "riftrock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs)
     );
 
     public static void main(String[] args) {
@@ -26,7 +26,7 @@ public class BlockDataGenerator {
             for (var type : types) {
                 switch (type) {
                     case slab -> SlabGenerator.generateSlab(name);
-                    case stair -> StairGenerator.generateStair(name);
+                    case stairs -> StairGenerator.generateStair(name);
                     default -> {}
                 }
             }
