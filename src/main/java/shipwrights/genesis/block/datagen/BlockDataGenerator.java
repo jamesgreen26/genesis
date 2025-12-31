@@ -14,7 +14,9 @@ public class BlockDataGenerator {
     public static final Map<String, List<BlockType>> blocksToDatagen = Map.of(
             "voidstone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
             "nullstone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
-            "riftrock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs)
+            "riftrock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
+            "echostone", List.of(BlockType.simple, BlockType.slab, BlockType.stairs),
+            "phaserock", List.of(BlockType.simple, BlockType.slab, BlockType.stairs)
     );
 
     public static void main(String[] args) {

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "genesis:block/phaserock",
+    "top": "genesis:block/phaserock",
+    "side": "genesis:block/phaserock"
+  }
+}
