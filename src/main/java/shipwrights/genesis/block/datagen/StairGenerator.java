@@ -3,6 +3,8 @@ package shipwrights.genesis.block.datagen;
 public class StairGenerator {
     public static void generateStair(String name) {
         generateBlockState(name);
+        generateModels(name);
+        BlockItemGenerator.generate(name);
     }
 
     private static void generateBlockState(String name) {
@@ -218,6 +220,60 @@ public class StairGenerator {
                 }
               """.formatted(name);
         String path = BlockDataGenerator.FOLDER + "assets/genesis/blockstates/" + name + "_stairs.json";
+
+        FileWriter.writeFile(path, json);
+    }
+
+    private static void generateModels(String name) {
+        generateRegularModel(name);
+        generateInnerModel(name);
+        generateOuterModel(name);
+    }
+
+    private static void generateRegularModel(String name) {
+        String json = """
+              {
+                "parent": "minecraft:block/stairs",
+                "textures": {
+                  "bottom": "genesis:block/%1$s",
+                  "top": "genesis:block/%1$s",
+                  "side": "genesis:block/%1$s"
+                }
+              }
+              """.formatted(name);
+        String path = BlockDataGenerator.FOLDER + "assets/genesis/models/block/" + name + "_stairs.json";
+
+        FileWriter.writeFile(path, json);
+    }
+
+    private static void generateOuterModel(String name) {
+        String json = """
+              {
+                "parent": "minecraft:block/outer_stairs",
+                "textures": {
+                  "bottom": "genesis:block/%1$s",
+                  "top": "genesis:block/%1$s",
+                  "side": "genesis:block/%1$s"
+                }
+              }
+              """.formatted(name);
+        String path = BlockDataGenerator.FOLDER + "assets/genesis/models/block/" + name + "_stairs_outer.json";
+
+        FileWriter.writeFile(path, json);
+    }
+
+    private static void generateInnerModel(String name) {
+        String json = """
+              {
+                "parent": "minecraft:block/inner_stairs",
+                "textures": {
+                  "bottom": "genesis:block/%1$s",
+                  "top": "genesis:block/%1$s",
+                  "side": "genesis:block/%1$s"
+                }
+              }
+              """.formatted(name);
+        String path = BlockDataGenerator.FOLDER + "assets/genesis/models/block/" + name + "_stairs_inner.json";
 
         FileWriter.writeFile(path, json);
     }
