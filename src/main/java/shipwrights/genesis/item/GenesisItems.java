@@ -12,9 +12,14 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GenesisItems {
     public static final DeferredRegister<Item> ITEMS =
         DeferredRegister.create(ForgeRegistries.ITEMS, GenesisMod.MOD_ID);
+
+    public static Map<String, RegistryObject<Item>> DYNAMIC_ITEMS = new HashMap<>();
 
     public static final RegistryObject<Item> NAV_PROJECTOR = ITEMS.register("nav_projector",
         () -> new BlockItem(GenesisBlocks.NAV_PROJECTOR.get(), new Item.Properties()));

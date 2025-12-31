@@ -15,6 +15,7 @@
     "SoundMixin"
   ],
   "mixins": [
+    "BlockBehaviourAccessor",
     "EntityDraggerMixin",
     "EntityMixin",
     "FallingBlockEntityAccessor",

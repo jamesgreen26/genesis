@@ -1,7 +1,10 @@
 package shipwrights.genesis;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -10,6 +13,11 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import shipwrights.genesis.block.*;
+import shipwrights.genesis.block.datagen.BlockDataGenerator;
+import shipwrights.genesis.item.GenesisItems;
+import shipwrights.genesis.mixin.BlockBehaviourAccessor;
+
+import java.util.Optional;
 
 public class GenesisBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, GenesisMod.MOD_ID);
@@ -20,6 +28,16 @@ public class GenesisBlocks {
                 .mapColor(DyeColor.GRAY).sound(SoundType.STONE)
         )
     );
+
+    static Optional<RegistryObject<Block>> blockLookup(String name) {
+        for (var block: BLOCKS.getEntries()) {
+            ResourceLocation id = block.getId();
+            if (id != null && id.getPath().equals(name)) {
+                return Optional.of(block);
+            }
+        }
+        return Optional.empty();
+    }
 
     public static final RegistryObject<Block> NAV_PROJECTOR = BLOCKS.register("nav_projector",
         () -> new NavProjectorBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
@@ -348,4 +366,23 @@ public class GenesisBlocks {
 
     public static final RegistryObject<MenuType<WarpstoneCatalyzerContainer>> WARPSTONE_CATALYZER_CONTAINER = MENU_TYPES.register("warpstone_catalyzer_block",
             () -> IForgeMenuType.create((windowId, inv, data) -> new WarpstoneCatalyzerContainer(windowId, inv.player, data.readBlockPos())));
+
+
+    static {
+        for (var entry : BlockDataGenerator.blocksToDatagen.entrySet()) {
+            for (var type : entry.getValue()) {
+                switch (type) {
+                    case simple -> { /* registered manually */}
+                    case slab -> {
+                        String id = entry.getKey() + "_slab";
+                        RegistryObject<Block> slab = BLOCKS.register(id,
+                                () -> new SlabBlock(((BlockBehaviourAccessor) blockLookup(entry.getKey()).get().get()).getProperties()));
+
+                        GenesisItems.DYNAMIC_ITEMS.put(id, GenesisItems.ITEMS.register(id,
+                                () -> new BlockItem(slab.get(), new Item.Properties())));
+                    }
+                }
+            }
+        }
+    }
 }

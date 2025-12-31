@@ -9,17 +9,15 @@ import java.util.Map;
 public class BlockDataGenerator {
 
     public static String FOLDER = "src/main/resources/";
-
-
     private static final Logger log = LoggerFactory.getLogger(BlockDataGenerator.class);
 
-    public static void main(String[] args) {
-        Map<String, List<BlockType>> blocksToDatagen = Map.of(
-                "voidstone", List.of(BlockType.slab, BlockType.stair),
-                "nullstone", List.of(BlockType.slab, BlockType.stair),
-                "riftrock", List.of(BlockType.slab, BlockType.stair)
-        );
+    public static final Map<String, List<BlockType>> blocksToDatagen = Map.of(
+            "voidstone", List.of(BlockType.simple, BlockType.slab, BlockType.stair),
+            "nullstone", List.of(BlockType.simple, BlockType.slab, BlockType.stair),
+            "riftrock", List.of(BlockType.simple, BlockType.slab, BlockType.stair)
+    );
 
+    public static void main(String[] args) {
         blocksToDatagen.forEach(BlockDataGenerator::generate);
     }
 
@@ -29,7 +27,7 @@ public class BlockDataGenerator {
                 switch (type) {
                     case slab -> SlabGenerator.generateSlab(name);
                     case stair -> StairGenerator.generateStair(name);
-                    default -> throw new IllegalArgumentException("unimplemented block type" + type);
+                    default -> {}
                 }
             }
         } catch (Exception e) {
