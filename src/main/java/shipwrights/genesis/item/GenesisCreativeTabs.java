@@ -6,18 +6,19 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
+import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.GenesisMod;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
+import shipwrights.genesis.block.datagen.BlockType;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class GenesisCreativeTabs {
@@ -41,18 +42,21 @@ public class GenesisCreativeTabs {
                 addPaintings(parameters, output);
             })
             .build());
+
+    private static final Set<String> alreadyAdded = new HashSet<>();
+
     public static final RegistryObject<CreativeModeTab> GENESIS_NATURAL_TAB = CREATIVE_MODE_TABS.register("genesis_natural_tab",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("creativetab.genesis_natural_tab"))
                     .icon(() -> new ItemStack(GenesisItems.NULLSTONE.get()))
                     .displayItems((parameters, output) -> {
-                        output.accept(GenesisItems.WARPSTONE.get());
-                        output.accept(GenesisItems.WARPSTONE_ORE.get());
-                        output.accept(GenesisItems.NULLSTONE.get());
-                        output.accept(GenesisItems.VOIDSTONE.get());
-                        output.accept(GenesisItems.RIFTROCK.get());
-                        output.accept(GenesisItems.ECHOSTONE.get());
-                        output.accept(GenesisItems.PHASEROCK.get());
+                        addItemGroup(output, GenesisItems.WARPSTONE);
+                        addItemGroup(output, GenesisItems.WARPSTONE_ORE);
+                        addItemGroup(output, GenesisItems.NULLSTONE);
+                        addItemGroup(output, GenesisItems.VOIDSTONE);
+                        addItemGroup(output, GenesisItems.RIFTROCK);
+                        addItemGroup(output, GenesisItems.ECHOSTONE);
+                        addItemGroup(output, GenesisItems.PHASEROCK);
                         output.accept(GenesisItems.STELLAR_SAND.get());
                         output.accept(GenesisItems.LUNAR_DUST.get());
                         output.accept(GenesisItems.CRACKED_CYAN_SALT.get());
@@ -103,10 +107,28 @@ public class GenesisCreativeTabs {
                         output.accept(GenesisItems.WITHERING_WILLOW_BRANCH.get());
                         output.accept(GenesisItems.WITHERING_WILLOW_LEAVES.get());
                         for (var item : GenesisItems.DYNAMIC_ITEMS.values()) {
+                            if (alreadyAdded.contains(item.getId().getPath())) {
+                                continue;
+                            }
                             output.accept(item.get());
                         }
                     })
                     .build());
+
+    private static void addItemGroup(CreativeModeTab.Output output, RegistryObject<Item> item) {
+        output.accept(item.get());
+
+        String name = item.getId().getPath();
+
+        for (String suffix : BlockType.suffixes) {
+            RegistryObject<Item> it = GenesisItems.DYNAMIC_ITEMS.get(name + suffix);
+            if (it != null) {
+                alreadyAdded.add(it.getId().getPath());
+                output.accept(it.get());
+            }
+        }
+    }
+
 
     private static void addPaintings(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output) {
         parameters.holders().lookup(Registries.PAINTING_VARIANT).ifPresent((arg2x) -> generatePresetPaintings(output, arg2x, (arg) -> arg.is(PaintingVariantTags.PLACEABLE), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
