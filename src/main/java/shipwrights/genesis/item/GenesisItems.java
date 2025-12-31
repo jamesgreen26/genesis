@@ -134,6 +134,158 @@ public class GenesisItems {
     public static final RegistryObject<Item> PETRIFIED_BUSH = ITEMS.register("petrified_bush",
             () -> new BlockItem(GenesisBlocks.PETRIFIED_BUSH.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> ZAPLIGHT_SPINDLES = ITEMS.register("zap_light_spindles",
+            () -> new StandingAndWallBlockItem(GenesisBlocks.ZAPLIGHT_SPINDLES.get(), GenesisBlocks.WALL_ZAPLIGHT_SPINDLES.get(), new Item.Properties(), Direction.DOWN));
+
+    public static final RegistryObject<Item> ZAPLIGHT = ITEMS.register("zaplight",
+            () -> new BlockItem(GenesisBlocks.ZAPLIGHT.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BUBBLE_SHROOM_STALK = ITEMS.register("bubble_shroom_stalk",
+            () -> new BlockItem(GenesisBlocks.BUBBLE_SHROOM_STALK.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BUBBLE_SHROOM_CAP = ITEMS.register("bubble_shroom_cap",
+            () -> new BlockItem(GenesisBlocks.BUBBLE_SHROOM_CAP.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BEARD_SHROOM_CAP = ITEMS.register("beard_shroom_cap",
+            () -> new BlockItem(GenesisBlocks.BEARD_SHROOM_CAP.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BEARD_SHROOM_LOG = ITEMS.register("beard_shroom_log",
+            () -> new BlockItem(GenesisBlocks.BEARD_SHROOM_LOG.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BEARD_SHROOM_LEAVES = ITEMS.register("beard_shroom_leaves",
+            () -> new BlockItem(GenesisBlocks.BEARD_SHROOM_LEAVES.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> FLOWERING_BEARD_SHROOM_LEAVES = ITEMS.register("flowering_beard_shroom_leaves",
+            () -> new BlockItem(GenesisBlocks.FLOWERING_BEARD_SHROOM_LEAVES.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> HANGING_BEARD_SHROOM_LEAVES = ITEMS.register("hanging_beard_shroom_leaves",
+            () -> new BlockItem(GenesisBlocks.HANGING_BEARD_SHROOM_LEAVES.get(), new Item.Properties()));
+
+
+
+    public static final RegistryObject<Item> AZURE_MOSS = ITEMS.register("azure_moss",
+            () -> new BlockItem(GenesisBlocks.AZURE_MOSS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CYAN_MOSS = ITEMS.register("cyan_moss",
+            () -> new BlockItem(GenesisBlocks.CYAN_MOSS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> TURQUOISE_MOSS = ITEMS.register("turquoise_moss",
+            () -> new BlockItem(GenesisBlocks.TURQUOISE_MOSS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> AZURE_MOSS_CARPET = ITEMS.register("azure_moss_carpet",
+            () -> new BlockItem(GenesisBlocks.AZURE_MOSS_CARPET.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CYAN_MOSS_CARPET = ITEMS.register("cyan_moss_carpet",
+            () -> new BlockItem(GenesisBlocks.CYAN_MOSS_CARPET.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> TURQUOISE_MOSS_CARPET = ITEMS.register("turquoise_moss_carpet",
+            () -> new BlockItem(GenesisBlocks.TURQUOISE_MOSS_CARPET.get(), new Item.Properties()));
+
+
+    public static final RegistryObject<Item> SPINDLE_GRASS = ITEMS.register("spindle_grass",
+            () -> new BlockItem(GenesisBlocks.SPINDLE_GRASS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> TALL_SPINDLE_GRASS = ITEMS.register("tall_spindle_grass",
+            () -> new BlockItem(GenesisBlocks.TALL_SPINDLE_GRASS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> SPINDLE_BUSH = ITEMS.register("spindle_bush",
+            () -> new BlockItem(GenesisBlocks.SPINDLE_BUSH.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> BELL_FLOWER = ITEMS.register("bell_flower",
+            () -> new BlockItem(GenesisBlocks.BELL_FLOWER.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> SMALL_VERDITE_BUD = ITEMS.register("small_verdite_bud",
+            () -> new BlockItem(GenesisBlocks.SMALL_VERDITE_BUD.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MEDIUM_VERDITE_BUD = ITEMS.register("medium_verdite_bud",
+            () -> new BlockItem(GenesisBlocks.MEDIUM_VERDITE_BUD.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> LARGE_VERDITE_BUD = ITEMS.register("large_verdite_bud",
+            () -> new BlockItem(GenesisBlocks.LARGE_VERDITE_BUD.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> VERDITE_CLUSTER = ITEMS.register("verdite_cluster",
+            () -> new BlockItem(GenesisBlocks.VERDITE_CLUSTER.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> VERDITE_CRYSTAL_BLOCK = ITEMS.register("verdite_crystal_block",
+            () -> new BlockItem(GenesisBlocks.VERDITE_CRYSTAL_BLOCK.get(), new Item.Properties()));
+
+
+    public static final RegistryObject<Item> HEMATITE = ITEMS.register("hematite",
+            () -> new BlockItem(GenesisBlocks.HEMATITE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> HEMATITE_SAND = ITEMS.register("hematite_sand",
+            () -> new BlockItem(GenesisBlocks.HEMATITE_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> HEMATITE_GRAVEL = ITEMS.register("hematite_gravel",
+            () -> new BlockItem(GenesisBlocks.HEMATITE_GRAVEL.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> HEMATITE_SPROUTS = ITEMS.register("hematite_sprouts",
+            () -> new BlockItem(GenesisBlocks.HEMATITE_SPROUTS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> HEMATITE_BRAMBLE = ITEMS.register("hematite_bramble",
+            () -> new BlockItem(GenesisBlocks.HEMATITE_BRAMBLE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> ROOTED_SMOLDERING_HEMATITE = ITEMS.register("rooted_smoldering_hematite",
+            () -> new BlockItem(GenesisBlocks.ROOTED_SMOLDERING_HEMATITE.get(), new Item.Properties()));
+
+
+    public static final RegistryObject<Item> CHALCOPYRITE = ITEMS.register("chalcopyrite",
+            () -> new BlockItem(GenesisBlocks.CHALCOPYRITE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CHALCOPYRITE_SAND = ITEMS.register("chalcopyrite_sand",
+            () -> new BlockItem(GenesisBlocks.CHALCOPYRITE_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CHALCOPYRITE_GRAVEL = ITEMS.register("chalcopyrite_gravel",
+            () -> new BlockItem(GenesisBlocks.CHALCOPYRITE_GRAVEL.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CHALCOPYRITE_SPROUTS = ITEMS.register("chalcopyrite_sprouts",
+            () -> new BlockItem(GenesisBlocks.CHALCOPYRITE_SPROUTS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> CHALCOPYRITE_BRAMBLE = ITEMS.register("chalcopyrite_bramble",
+            () -> new BlockItem(GenesisBlocks.CHALCOPYRITE_BRAMBLE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> ROOTED_SMOLDERING_CHALCOPYRITE = ITEMS.register("rooted_smoldering_chalcopyrite",
+            () -> new BlockItem(GenesisBlocks.ROOTED_SMOLDERING_CHALCOPYRITE.get(), new Item.Properties()));
+
+
+    public static final RegistryObject<Item> MALACHITE = ITEMS.register("malachite",
+            () -> new BlockItem(GenesisBlocks.MALACHITE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MALACHITE_SAND = ITEMS.register("malachite_sand",
+            () -> new BlockItem(GenesisBlocks.MALACHITE_SAND.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MALACHITE_GRAVEL = ITEMS.register("malachite_gravel",
+            () -> new BlockItem(GenesisBlocks.MALACHITE_GRAVEL.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MALACHITE_SPROUTS = ITEMS.register("malachite_sprouts",
+            () -> new BlockItem(GenesisBlocks.MALACHITE_SPROUTS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> MALACHITE_BRAMBLE = ITEMS.register("malachite_bramble",
+            () -> new BlockItem(GenesisBlocks.MALACHITE_BRAMBLE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> ROOTED_SMOLDERING_MALACHITE = ITEMS.register("rooted_smoldering_malachite",
+            () -> new BlockItem(GenesisBlocks.ROOTED_SMOLDERING_MALACHITE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> RAINBOW_CHALCOPYRITE_BLOCK = ITEMS.register("rainbow_chalcopyrite_block",
+            () -> new BlockItem(GenesisBlocks.RAINBOW_CHALCOPYRITE_BLOCK.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> RAINBOW_CHALCOPYRITE_CLUSTER = ITEMS.register("rainbow_chalcopyrite_cluster",
+            () -> new BlockItem(GenesisBlocks.RAINBOW_CHALCOPYRITE_CLUSTER.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> RAINBOW_CHALCOPYRITE_BRICK = ITEMS.register("rainbow_chalcopyrite_brick",
+            () -> new BlockItem(GenesisBlocks.RAINBOW_CHALCOPYRITE_BRICK.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WITHERING_WILLOW_LOG = ITEMS.register("withering_willow_log",
+            () -> new BlockItem(GenesisBlocks.WITHERING_WILLOW_LOG.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WITHERING_WILLOW_BRANCH = ITEMS.register("withering_willow_branch",
+            () -> new BlockItem(GenesisBlocks.WITHERING_WILLOW_BRANCH.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> WITHERING_WILLOW_LEAVES = ITEMS.register("withering_willow_leaves",
+            () -> new BlockItem(GenesisBlocks.WITHERING_WILLOW_LEAVES.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> SMOLDERING_LILY = ITEMS.register("smoldering_lily",
+            () -> new BlockItem(GenesisBlocks.SMOLDERING_LILY.get(), new Item.Properties()));
 
 
     public static final RegistryObject<Item> WARPSTONE_CHUNK = ITEMS.register("warpstone_chunk",

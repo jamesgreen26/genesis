@@ -79,6 +79,29 @@ public class GenesisCreativeTabs {
                         output.accept(GenesisItems.DEAD_MOON_CORAL_FAN.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL.get());
 
+                        output.accept(GenesisItems.CHALCOPYRITE.get());
+                        output.accept(GenesisItems.CHALCOPYRITE_GRAVEL.get());
+                        output.accept(GenesisItems.CHALCOPYRITE_SAND.get());
+                        output.accept(GenesisItems.CHALCOPYRITE_SPROUTS.get());
+                        output.accept(GenesisItems.CHALCOPYRITE_BRAMBLE.get());
+                        output.accept(GenesisItems.ROOTED_SMOLDERING_CHALCOPYRITE.get());
+                        output.accept(GenesisItems.MALACHITE.get());
+                        output.accept(GenesisItems.MALACHITE_GRAVEL.get());
+                        output.accept(GenesisItems.MALACHITE_SAND.get());
+                        output.accept(GenesisItems.MALACHITE_SPROUTS.get());
+                        output.accept(GenesisItems.MALACHITE_BRAMBLE.get());
+                        output.accept(GenesisItems.ROOTED_SMOLDERING_MALACHITE.get());
+                        output.accept(GenesisItems.HEMATITE.get());
+                        output.accept(GenesisItems.HEMATITE_GRAVEL.get());
+                        output.accept(GenesisItems.HEMATITE_SAND.get());
+                        output.accept(GenesisItems.HEMATITE_SPROUTS.get());
+                        output.accept(GenesisItems.HEMATITE_BRAMBLE.get());
+                        output.accept(GenesisItems.ROOTED_SMOLDERING_HEMATITE.get());
+                        output.accept(GenesisItems.SMOLDERING_LILY.get());
+
+                        output.accept(GenesisItems.WITHERING_WILLOW_LOG.get());
+                        output.accept(GenesisItems.WITHERING_WILLOW_BRANCH.get());
+                        output.accept(GenesisItems.WITHERING_WILLOW_LEAVES.get());
                         for (var item : GenesisItems.DYNAMIC_ITEMS.values()) {
                             output.accept(item.get());
                         }

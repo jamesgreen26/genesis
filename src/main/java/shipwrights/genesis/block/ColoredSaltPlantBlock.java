@@ -22,7 +22,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import shipwrights.genesis.GenesisBlocks;
-import shipwrights.genesis.util.ModTags;
+import shipwrights.genesis.util.GenesisTags;
 
 
 public class ColoredSaltPlantBlock extends Block implements SimpleWaterloggedBlock {
@@ -73,7 +73,7 @@ public class ColoredSaltPlantBlock extends Block implements SimpleWaterloggedBlo
 
     public boolean canSurvive(BlockState arg, LevelReader arg2, BlockPos arg3) {
         BlockState below_block = arg2.getBlockState(arg3.below());
-        return below_block.is(ModTags.Blocks.SALT_PLANTABLE);
+        return below_block.is(GenesisTags.Blocks.SALT_PLANTABLE);
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> arg) {

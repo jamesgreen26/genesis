@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -284,7 +285,7 @@ public class GenesisBlocks {
             new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
-                    .sound(SoundType.STONE)
+                    .sound(SoundType.DECORATED_POT_CRACKED)
             )
     );
 
@@ -292,7 +293,7 @@ public class GenesisBlocks {
             new BaseCoralWallFanBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
-                    .sound(SoundType.SAND)
+                    .sound(SoundType.DECORATED_POT_CRACKED)
                     .noCollission()
             )
     );
@@ -301,16 +302,16 @@ public class GenesisBlocks {
             new BaseCoralFanBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
-                    .sound(SoundType.SAND)
+                    .sound(SoundType.DECORATED_POT_CRACKED)
                     .noCollission()
             )
     );
 
     public static final RegistryObject<Block> DEAD_MOON_CORAL = BLOCKS.register("dead_moon_coral", () ->
-            new BaseCoralPlantTypeBlock(BlockBehaviour.Properties.of()
+            new BaseCoralPlantBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
-                    .sound(SoundType.SAND)
+                    .sound(SoundType.DECORATED_POT_CRACKED)
                     .noCollission()
             )
     );
@@ -360,6 +361,460 @@ public class GenesisBlocks {
                     .noCollission()
             )
     );
+
+    public static final RegistryObject<Block> BUBBLE_SHROOM_STALK = BLOCKS.register("bubble_shroom_stalk", () ->
+            new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .strength(0.5F)
+                    .sound(SoundType.NETHER_WOOD)
+            )
+    );
+
+    public static final RegistryObject<Block> BUBBLE_SHROOM_CAP = BLOCKS.register("bubble_shroom_cap", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.5F)
+                    .sound(SoundType.NETHER_WOOD)
+            )
+    );
+
+    public static final RegistryObject<Block> BEARD_SHROOM_CAP = BLOCKS.register("beard_shroom_cap", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.5F)
+                    .sound(SoundType.NETHER_WOOD)
+            )
+    );
+
+    public static final RegistryObject<Block> BEARD_SHROOM_LOG = BLOCKS.register("beard_shroom_log", () ->
+            new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.SNOW)
+                    .strength(0.5F)
+                    .sound(SoundType.NETHER_WOOD)
+            )
+    );
+
+    public static final RegistryObject<Block> BEARD_SHROOM_LEAVES = BLOCKS.register("beard_shroom_leaves", () ->
+            new LeavesBlock(BlockBehaviour.Properties
+                    .copy(Blocks.CHERRY_LEAVES)
+                    .mapColor(MapColor.COLOR_MAGENTA)
+                    .sound(SoundType.CHERRY_LEAVES)
+            )
+    );
+
+    public static final RegistryObject<Block> FLOWERING_BEARD_SHROOM_LEAVES = BLOCKS.register("flowering_beard_shroom_leaves", () ->
+            new CherryLeavesBlock(BlockBehaviour.Properties
+                    .copy(Blocks.CHERRY_LEAVES)
+                    .mapColor(MapColor.COLOR_PINK)
+                    .sound(SoundType.CHERRY_LEAVES)
+            )
+    );
+
+    public static final RegistryObject<Block> HANGING_BEARD_SHROOM_LEAVES = BLOCKS.register("hanging_beard_shroom_leaves", () ->
+            new WeepingVinesBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PINK)
+                    .strength(0.0F)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .noCollission()
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> HANGING_BEARD_SHROOM_LEAVES_PLANT = BLOCKS.register("hanging_beard_shroom_leaves_plant", () ->
+            new WeepingVinesPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PINK)
+                    .strength(0.0F)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .noCollission()
+                    .noOcclusion()
+            )
+    );
+
+
+
+    public static final RegistryObject<Block> ZAPLIGHT = BLOCKS.register("zaplight", () ->
+            new Block(BlockBehaviour.Properties
+                    .copy(Blocks.SHROOMLIGHT)
+                    .mapColor(MapColor.COLOR_PINK)
+                    .sound(SoundType.SHROOMLIGHT)
+                    .emissiveRendering((state, level, pos) -> true)
+                    .lightLevel(state -> 15)
+            )
+    );
+
+    public static final RegistryObject<Block> ZAPLIGHT_SPINDLES = BLOCKS.register("zaplight_spindles", () ->
+            new ZaplightSpindlesBlock(BlockBehaviour.Properties
+                    .copy(Blocks.DEAD_BRAIN_CORAL)
+                    .mapColor(MapColor.COLOR_PINK)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .emissiveRendering((state, level, pos) -> true)
+                    .lightLevel(state -> 15)
+            )
+    );
+
+    public static final RegistryObject<Block> WALL_ZAPLIGHT_SPINDLES = BLOCKS.register("wall_zaplight_spindles", () ->
+            new WallZaplightSpindlesBlock(BlockBehaviour.Properties
+                    .copy(Blocks.DEAD_BRAIN_CORAL_WALL_FAN)
+                    .mapColor(MapColor.COLOR_PINK)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .emissiveRendering((state, level, pos) -> true)
+                    .lightLevel(state -> 15)
+            )
+    );
+
+    public static final RegistryObject<Block> AZURE_MOSS = BLOCKS.register("azure_moss", () ->
+            new Block(BlockBehaviour.Properties
+                    .copy(Blocks.MOSS_BLOCK)
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .sound(SoundType.MOSS)
+            )
+    );
+
+    public static final RegistryObject<Block> CYAN_MOSS = BLOCKS.register("cyan_moss", () ->
+            new Block(BlockBehaviour.Properties
+                    .copy(Blocks.MOSS_BLOCK)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> TURQUOISE_MOSS = BLOCKS.register("turquoise_moss", () ->
+            new Block(BlockBehaviour.Properties
+                    .copy(Blocks.MOSS_BLOCK)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> AZURE_MOSS_CARPET = BLOCKS.register("azure_moss_carpet", () ->
+            new CarpetBlock(BlockBehaviour.Properties
+                    .copy(Blocks.MOSS_CARPET)
+                    .mapColor(MapColor.COLOR_BLUE)
+                    .sound(SoundType.MOSS)
+            )
+    );
+
+    public static final RegistryObject<Block> CYAN_MOSS_CARPET = BLOCKS.register("cyan_moss_carpet", () ->
+            new CarpetBlock(BlockBehaviour.Properties
+                    .copy(Blocks.MOSS_CARPET)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> TURQUOISE_MOSS_CARPET = BLOCKS.register("turquoise_moss_carpet", () ->
+            new CarpetBlock(BlockBehaviour.Properties
+                    .copy(Blocks.MOSS_CARPET)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+
+
+    public static final RegistryObject<Block> SPINDLE_GRASS = BLOCKS.register("spindle_grass", () ->
+            new AzurePlantBlock(BlockBehaviour.Properties
+                    .copy(Blocks.GRASS)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> SPINDLE_BUSH = BLOCKS.register("spindle_bush", () ->
+            new AzurePlantBlock(BlockBehaviour.Properties
+                    .copy(Blocks.GRASS)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> GLOWING_SPINDLE_BUSH = BLOCKS.register("glowing_spindle_bush", () ->
+            new AzurePlantBlock(BlockBehaviour.Properties
+                    .copy(Blocks.GRASS)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> TALL_SPINDLE_GRASS = BLOCKS.register("tall_spindle_grass", () ->
+            new TallAzurePlantBlock(BlockBehaviour.Properties
+                    .copy(Blocks.GRASS)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> GIANT_SPINDLE_GRASS = BLOCKS.register("gaint_spindle_grass", () ->
+            new TallAzurePlantBlock(BlockBehaviour.Properties
+                    .copy(Blocks.GRASS)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> BELL_FLOWER = BLOCKS.register("bell_flower", () ->
+            new TallAzurePlantBlock(BlockBehaviour.Properties
+                    .copy(Blocks.GRASS)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> HOOK_GRASS = BLOCKS.register("hook_grass", () ->
+            new AzurePlantBlock(BlockBehaviour.Properties.of()
+                    .replaceable()
+                    .noCollission()
+                    .instabreak()
+                    .sound(SoundType.GRASS)
+                    .offsetType(BlockBehaviour.OffsetType.XYZ)
+                    .ignitedByLava()
+                    .pushReaction(PushReaction.DESTROY)
+                    .mapColor(MapColor.COLOR_BLUE)
+            )
+    );
+
+    public static final RegistryObject<Block> VERDITE_CRYSTAL_BLOCK = BLOCKS.register("verdite_crystal_block", () ->
+            new VerditeCrystalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.AMETHYST)
+                    .randomTicks()
+                    .lightLevel(state -> 15)
+            )
+    );
+
+    public static final RegistryObject<Block> SMALL_VERDITE_BUD = BLOCKS.register("small_verdite_bud", () ->
+            new AmethystClusterBlock(2,2,BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 4)
+            )
+    );
+
+    public static final RegistryObject<Block> MEDIUM_VERDITE_BUD = BLOCKS.register("medium_verdite_bud", () ->
+            new AmethystClusterBlock(2,2,BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 6)
+            )
+    );
+
+    public static final RegistryObject<Block> LARGE_VERDITE_BUD = BLOCKS.register("large_verdite_bud", () ->
+            new AmethystClusterBlock(2,2,BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 8)
+            )
+    );
+
+    public static final RegistryObject<Block> VERDITE_CLUSTER = BLOCKS.register("verdite_cluster", () ->
+            new AmethystClusterBlock(2,2,BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.AMETHYST)
+                    .lightLevel(state -> 12)
+            )
+    );
+
+    public static final RegistryObject<Block> CHALCOPYRITE_SAND = BLOCKS.register("chalcopyrite_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> MALACHITE_SAND = BLOCKS.register("malachite_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GREEN)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> HEMATITE_SAND = BLOCKS.register("hematite_sand", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .sound(SoundType.SAND)
+            )
+    );
+
+    public static final RegistryObject<Block> CHALCOPYRITE_GRAVEL = BLOCKS.register("chalcopyrite_gravel", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.GRAVEL)
+            )
+    );
+
+    public static final RegistryObject<Block> MALACHITE_GRAVEL = BLOCKS.register("malachite_gravel", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GREEN)
+                    .sound(SoundType.GRAVEL)
+            )
+    );
+
+    public static final RegistryObject<Block> HEMATITE_GRAVEL = BLOCKS.register("hematite_gravel", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .sound(SoundType.GRAVEL)
+            )
+    );
+
+    public static final RegistryObject<Block> CHALCOPYRITE = BLOCKS.register("chalcopyrite", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.NETHER_BRICKS)
+            )
+    );
+
+    public static final RegistryObject<Block> MALACHITE = BLOCKS.register("malachite", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GREEN)
+                    .sound(SoundType.NETHER_BRICKS)
+            )
+    );
+
+    public static final RegistryObject<Block> HEMATITE = BLOCKS.register("hematite", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .sound(SoundType.NETHER_BRICKS)
+            )
+    );
+
+    public static final RegistryObject<Block> ROOTED_SMOLDERING_CHALCOPYRITE = BLOCKS.register("rooted_smoldering_chalcopyrite", () ->
+            new SmolderingRootBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.GRAVEL)
+            )
+    );
+
+    public static final RegistryObject<Block> ROOTED_SMOLDERING_MALACHITE = BLOCKS.register("rooted_smoldering_malachite", () ->
+            new SmolderingRootBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GREEN)
+                    .sound(SoundType.GRAVEL)
+            )
+    );
+
+    public static final RegistryObject<Block> ROOTED_SMOLDERING_HEMATITE = BLOCKS.register("rooted_smoldering_hematite", () ->
+            new SmolderingRootBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .sound(SoundType.GRAVEL)
+            )
+    );
+
+    public static final RegistryObject<Block> CHALCOPYRITE_SPROUTS = BLOCKS.register("chalcopyrite_sprouts", () ->
+            new BaseCoralPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.NETHER_SPROUTS)
+                    .noCollission()
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> MALACHITE_SPROUTS = BLOCKS.register("malachite_sprouts", () ->
+            new BaseCoralPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GREEN)
+                    .sound(SoundType.NETHER_SPROUTS)
+                    .noCollission()
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> HEMATITE_SPROUTS = BLOCKS.register("hematite_sprouts", () ->
+            new BaseCoralPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .sound(SoundType.NETHER_SPROUTS)
+                    .noCollission()
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> CHALCOPYRITE_BRAMBLE = BLOCKS.register("chalcopyrite_bramble", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_GREEN)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .strength(0.5F)
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> MALACHITE_BRAMBLE = BLOCKS.register("malachite_bramble", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_GREEN)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .strength(0.5F)
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> HEMATITE_BRAMBLE = BLOCKS.register("hematite_bramble", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_RED)
+                    .sound(SoundType.CHERRY_LEAVES)
+                    .strength(0.5F)
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> RAINBOW_CHALCOPYRITE_BLOCK = BLOCKS.register("rainbow_chalcopyrite_block", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_YELLOW)
+                    .sound(SoundType.CALCITE)
+                    .strength(0.5F)
+            )
+    );
+
+    public static final RegistryObject<Block> RAINBOW_CHALCOPYRITE_CLUSTER = BLOCKS.register("rainbow_chalcopyrite_cluster", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_YELLOW)
+                    .sound(SoundType.CALCITE)
+                    .strength(0.5F)
+            )
+    );
+
+    public static final RegistryObject<Block> RAINBOW_CHALCOPYRITE_BRICK = BLOCKS.register("rainbow_chalcopyrite_brick", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_YELLOW)
+                    .sound(SoundType.CALCITE)
+                    .strength(0.5F)
+            )
+    );
+
+    public static final RegistryObject<Block> WITHERING_WILLOW_LOG = BLOCKS.register("withering_willow_log", () ->
+            new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BROWN)
+                    .sound(SoundType.WOOD)
+            )
+    );
+
+    public static final RegistryObject<Block> WITHERING_WILLOW_BRANCH = BLOCKS.register("withering_willow_branch", () ->
+            new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BROWN)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()
+                    .noCollission()
+            )
+    );
+
+    public static final RegistryObject<Block> WITHERING_WILLOW_LEAVES = BLOCKS.register("withering_willow_leaves", () ->
+            new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BROWN)
+                    .sound(SoundType.AZALEA_LEAVES)
+                    .noOcclusion()
+            )
+    );
+
+    public static final RegistryObject<Block> WITHERING_WILLOW_PLANKS = BLOCKS.register("withering_willow_planks", () ->
+            new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_BROWN)
+                    .sound(SoundType.WOOD)
+            )
+    );
+
+    public static final RegistryObject<Block> SMOLDERING_LILY = BLOCKS.register("smoldering_lily", () ->
+            new SmolderingLilyBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.TERRACOTTA_PURPLE)
+                    .sound(SoundType.AZALEA_LEAVES)
+                    .noOcclusion()
+                    .noCollission()
+                    .lightLevel(state -> 16)
+            )
+    );
+
+    public static final RegistryObject<Block> SMOLDERING_TURNIP = BLOCKS.register("smoldering_turnip", () ->
+            new BaseCoralPlantBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .sound(SoundType.NETHER_WOOD)
+            )
+    );
+
+
 
 
     public static final RegistryObject<WarpstoneCatalyzerBlock> WARPSTONE_CATALYZER_BLOCK = BLOCKS.register("warpstone_catalyzer_block", WarpstoneCatalyzerBlock::new);

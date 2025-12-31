@@ -16,7 +16,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -28,9 +27,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisBlocks;
-import shipwrights.genesis.util.ModTags;
+import shipwrights.genesis.util.GenesisTags;
 
 public class BrineTrunkPlantBlock extends PipeBlock implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED;
@@ -52,7 +50,7 @@ public class BrineTrunkPlantBlock extends PipeBlock implements SimpleWaterlogged
         BlockState blockstate3 = arg.getBlockState(arg2.east());
         BlockState blockstate4 = arg.getBlockState(arg2.south());
         BlockState blockstate5 = arg.getBlockState(arg2.west());
-        return this.defaultBlockState().setValue(DOWN, blockstate.is(this) || blockstate.is(GenesisBlocks.BRINE_FLOWER.get()) || blockstate.is(ModTags.Blocks.BRINE_TRUNK_PLANTABLE))
+        return this.defaultBlockState().setValue(DOWN, blockstate.is(this) || blockstate.is(GenesisBlocks.BRINE_FLOWER.get()) || blockstate.is(GenesisTags.Blocks.BRINE_TRUNK_PLANTABLE))
         .setValue(UP, blockstate1.is(this) || blockstate1.is(GenesisBlocks.BRINE_FLOWER.get()))
         .setValue(NORTH, blockstate2.is(this) || blockstate2.is(GenesisBlocks.BRINE_FLOWER.get()))
         .setValue(EAST, blockstate3.is(this) || blockstate3.is(GenesisBlocks.BRINE_FLOWER.get()))
@@ -66,7 +64,7 @@ public class BrineTrunkPlantBlock extends PipeBlock implements SimpleWaterlogged
             arg4.scheduleTick(arg5, this, 1);
             return super.updateShape(arg, arg2, arg3, arg4, arg5, arg6);
         } else {
-            boolean flag = arg3.is(this) || arg3.is(GenesisBlocks.BRINE_FLOWER.get()) || arg2 == Direction.DOWN && arg3.is(ModTags.Blocks.BRINE_TRUNK_PLANTABLE);
+            boolean flag = arg3.is(this) || arg3.is(GenesisBlocks.BRINE_FLOWER.get()) || arg2 == Direction.DOWN && arg3.is(GenesisTags.Blocks.BRINE_TRUNK_PLANTABLE);
             return arg.setValue((Property)PROPERTY_BY_DIRECTION.get(arg2), flag);
         }
     }
@@ -91,13 +89,13 @@ public class BrineTrunkPlantBlock extends PipeBlock implements SimpleWaterlogged
                 }
 
                 BlockState blockstate2 = arg2.getBlockState(blockpos.below());
-                if (blockstate2.is(this) || blockstate2.is(ModTags.Blocks.BRINE_TRUNK_PLANTABLE)) {
+                if (blockstate2.is(this) || blockstate2.is(GenesisTags.Blocks.BRINE_TRUNK_PLANTABLE)) {
                     return true;
                 }
             }
         }
 
-        return blockstate.is(this) || blockstate.is(ModTags.Blocks.BRINE_TRUNK_PLANTABLE);
+        return blockstate.is(this) || blockstate.is(GenesisTags.Blocks.BRINE_TRUNK_PLANTABLE);
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> arg) {

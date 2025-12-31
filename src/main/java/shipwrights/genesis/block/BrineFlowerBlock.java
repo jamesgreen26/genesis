@@ -10,8 +10,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ChorusPlantBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -21,7 +19,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.ForgeHooks;
 import shipwrights.genesis.GenesisBlocks;
-import shipwrights.genesis.util.ModTags;
+import shipwrights.genesis.util.GenesisTags;
 
 import javax.annotation.Nullable;
 
@@ -55,7 +53,7 @@ public class BrineFlowerBlock extends Block {
                 boolean flag = false;
                 boolean flag1 = false;
                 BlockState blockstate = arg2.getBlockState(arg3.below());
-                if (!blockstate.is(ModTags.Blocks.SALT_PLANTABLE)) {
+                if (!blockstate.is(GenesisTags.Blocks.SALT_PLANTABLE)) {
                     if (!blockstate.is(this.plant)) {
                         if (blockstate.isAir()) {
                             flag = true;
@@ -66,7 +64,7 @@ public class BrineFlowerBlock extends Block {
                         for(int k = 0; k < 4; ++k) {
                             BlockState blockstate1 = arg2.getBlockState(arg3.below(j + 1));
                             if (!blockstate1.is(this.plant)) {
-                                if (blockstate1.is(ModTags.Blocks.BRINE_TRUNK_PLANTABLE)) {
+                                if (blockstate1.is(GenesisTags.Blocks.BRINE_TRUNK_PLANTABLE)) {
                                     flag1 = true;
                                 }
                                 break;
@@ -148,7 +146,7 @@ public class BrineFlowerBlock extends Block {
 
     public boolean canSurvive(BlockState arg, LevelReader arg2, BlockPos arg3) {
         BlockState blockstate = arg2.getBlockState(arg3.below());
-        if (!blockstate.is(this.plant) && !blockstate.is(ModTags.Blocks.BRINE_TRUNK_PLANTABLE)) {
+        if (!blockstate.is(this.plant) && !blockstate.is(GenesisTags.Blocks.BRINE_TRUNK_PLANTABLE)) {
             if (!blockstate.isAir()) {
                 return false;
             } else {

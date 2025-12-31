@@ -23,6 +23,7 @@ import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
 import shipwrights.genesis.networking.SyncPlanetsPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
 import shipwrights.genesis.networking.WormholeTravelSoundPacket;
+import shipwrights.genesis.particle.GenesisParticles;
 import shipwrights.genesis.planets.PlanetData;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.teleportation.TeleportationHandler;
@@ -92,6 +93,8 @@ public final class GenesisMod {
 
         GenesisBlocks.BLOCKS.register(eventBus);
         GenesisBlocks.MENU_TYPES.register(eventBus);
+        GenesisParticles.PARTICLE_TYPES.register(eventBus);
+
         shipwrights.genesis.blockentity.GenesisBlockEntities.BLOCK_ENTITIES.register(eventBus);
         shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
         shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
