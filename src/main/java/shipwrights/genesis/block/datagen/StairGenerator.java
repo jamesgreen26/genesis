@@ -4,7 +4,7 @@ public class StairGenerator {
     public static void generateStair(String name) {
         generateBlockState(name);
         generateModels(name);
-        BlockItemGenerator.generate(name);
+        BlockItemGenerator.generate(name + "_stairs");
     }
 
     private static void generateBlockState(String name) {
