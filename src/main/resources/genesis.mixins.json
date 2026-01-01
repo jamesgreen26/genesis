@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
+    "ChannelAccessor",
     "ChunkBorderRendererMixin",
     "EntityRenderDispatcherMixin",
     "FallingBlockRendererMixin",
@@ -12,6 +13,7 @@
     "ParticleEngineMixin",
     "ParticleMixin",
     "PehkuiEntityRenderDispatcherMixin",
+    "SoundEngineMixin",
     "SoundMixin"
   ],
   "mixins": [
