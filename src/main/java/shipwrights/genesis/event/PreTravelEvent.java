@@ -88,9 +88,9 @@ public class PreTravelEvent extends Event {
 			final Vector3dc oldPos,
 			final ResourceKey<Level> newLevel,
 			final Vector3d newPos,
-			final Quaterniond rotation
+			final Quaterniondc rotation
 		) {
-			super(oldLevel, oldPos, newLevel, newPos, rotation);
+			super(oldLevel, oldPos, newLevel, newPos, new Quaterniond(rotation));
 		}
 
 		public final ResourceKey<Level> getPlanet() {

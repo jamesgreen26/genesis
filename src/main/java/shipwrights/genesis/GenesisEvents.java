@@ -8,15 +8,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
 import shipwrights.genesis.event.AtmosphericCollision;
 import shipwrights.genesis.event.PlanetCollision;
-import shipwrights.genesis.networking.GenesisNetworking;
-import shipwrights.genesis.networking.SyncPlanetsPacket;
 
 import java.util.List;
 
@@ -25,15 +21,6 @@ public class GenesisEvents {
 
 	public static Component message = Component.empty();
 	private static int wormholeLightningTimer = 0;
-
-	@SubscribeEvent
-	public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getEntity() instanceof ServerPlayer player) {
-			SyncPlanetsPacket packet = SyncPlanetsPacket.fromPlanets(GenesisMod.planets.values());
-			GenesisNetworking.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
-			GenesisMod.LOGGER.info("Sent {} planets to {}", GenesisMod.planets.size(), player.getName().getString());
-		}
-	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void onLevelTick(final TickEvent.LevelTickEvent event) {

@@ -17,7 +17,7 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.planets.PlanetData;
+import shipwrights.genesis.space.OrbitingBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,18 +44,18 @@ public class PlanetRenderer {
         long ticks = level.getGameTime();
 
         // Separate planets into textured and non-textured
-        List<PlanetData> proceduralPlanets = new ArrayList<>();
-        List<PlanetData> texturedPlanets = new ArrayList<>();
+        List<OrbitingBody> proceduralPlanets = new ArrayList<>();
+        List<OrbitingBody> texturedPlanets = new ArrayList<>();
 
-        for (var planet : GenesisMod.planets.values()) {
-            if (PlanetTextures.hasTexture(planet.dimensionID)) {
-                texturedPlanets.add(planet);
+        for (var body : GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies()) {
+            if (PlanetTextures.hasTexture(body.getID())) {
+                texturedPlanets.add(body);
             } else {
-                proceduralPlanets.add(planet);
+                proceduralPlanets.add(body);
             }
         }
 
-        List<PlanetData> allPlanets = new ArrayList<>();
+        List<OrbitingBody> allPlanets = new ArrayList<>();
         allPlanets.addAll(proceduralPlanets);
         allPlanets.addAll(texturedPlanets);
 
@@ -97,7 +97,7 @@ public class PlanetRenderer {
 
         // Render textured planets - each needs its own render type for the texture binding
         for (var planet : texturedPlanets) {
-            ResourceLocation textureLocation = PlanetTextures.getTexture(planet.dimensionID);
+            ResourceLocation textureLocation = PlanetTextures.getTexture(planet.getID());
             if (textureLocation != null) {
                 GL11.glEnable(GL11.GL_DEPTH_TEST);
                 GL11.glDepthFunc(GL11.GL_LEQUAL);
@@ -138,7 +138,7 @@ public class PlanetRenderer {
         RenderSystem.enableCull();
     }
 
-    private static void renderProceduralPlanet(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
+    private static void renderProceduralPlanet(RenderLevelStageEvent event, OrbitingBody data, VertexConsumer buffer, long ticks) {
         PoseStack poseStack = event.getPoseStack();
 
         Matrix4f matrix;
@@ -148,27 +148,29 @@ public class PlanetRenderer {
             throw new RuntimeException(e);
         }
 
-        Vector3d pos = data.getCurrentPos(ticks, event.getPartialTick());
+        Vector3d pos = new Vector3d(data.getCurrentPos(ticks, event.getPartialTick()));
 
         matrix.translate((float) (pos.x -event.getCamera().getPosition().x),
                 (float) (pos.y -event.getCamera().getPosition().y),
                 (float) (pos.z -event.getCamera().getPosition().z));
 
-        matrix.rotate(new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z));
+        Quaternionf rotation = new Quaternionf(data.getRotation());
+        matrix.rotate(rotation);
 
         float halfSize = (float) (data.getActualSize() / 2);
 
-        int textureScale = data.hash % 256;
+        int textureScale = data.getID().hashCode() % 256;
+        float color = packColor(data.r(), data.g(), data.b());
 
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, data.color, pos, data.rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, data.color, pos, data.rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, data.color, pos, data.rotation);
-        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, data.color, pos, data.rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, data.color, pos, data.rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, data.color, pos, data.rotation);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, color, pos, rotation);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, color, pos, rotation);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, color, pos, rotation);
+        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, color, pos, rotation);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, color, pos, rotation);
+        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, color, pos, rotation);
     }
 
-    private static void renderTexturedPlanet(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
+    private static void renderTexturedPlanet(RenderLevelStageEvent event, OrbitingBody data, VertexConsumer buffer, long ticks) {
         PoseStack poseStack = event.getPoseStack();
 
         Matrix4f matrix;
@@ -178,19 +180,19 @@ public class PlanetRenderer {
             throw new RuntimeException(e);
         }
 
-        Vector3d pos = data.getCurrentPos(ticks, event.getPartialTick());
+        Vector3d pos = new Vector3d(data.getCurrentPos(ticks, event.getPartialTick()));
 
         matrix.translate((float) (pos.x - event.getCamera().getPosition().x),
                 (float) (pos.y - event.getCamera().getPosition().y),
                 (float) (pos.z - event.getCamera().getPosition().z));
 
-        matrix.rotate(new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z));
+        Quaternionf rotation = new Quaternionf(data.getRotation());
+        matrix.rotate(rotation);
 
         float halfSize = (float) (data.getActualSize() / 2);
 
         // Calculate light direction (from planet toward sun at origin)
         Vector3d lightDir = new Vector3d(-pos.x, -pos.y, -pos.z).normalize();
-        Quaternionf rotation = new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z);
 
         // UV layout (3x2 grid):
         // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
@@ -275,13 +277,11 @@ public class PlanetRenderer {
         buffer.vertex(matrix, x, y, z).color(litValue, litValue, litValue, 255).uv(u, v).endVertex();
     }
 
-    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color, Vector3d planetPos, Vector3d planetRot) {
-        int[] rgb = PlanetData.floatToRgb(color);
+    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color, Vector3d planetPos, Quaternionf rotation) {
+        int[] rgb = unpackColor(color);
         int r = rgb[0], g = rgb[1], b = rgb[2];
 
         Vector3d lightDir = new Vector3d(-planetPos.x, -planetPos.y, -planetPos.z).normalize();
-
-        Quaternionf rotation = new Quaternionf().rotationXYZ((float) planetRot.x, (float) planetRot.y, (float) planetRot.z);
 
         addVertexWithLighting(matrix, buffer, x1, y1, z1, r, g, b, textureScale, lightDir, rotation);
         addVertexWithLighting(matrix, buffer, x2, y2, z2, r, g, b, textureScale, lightDir, rotation);
@@ -304,7 +304,7 @@ public class PlanetRenderer {
         buffer.vertex(matrix, x, y, z).color(litR, litG, litB, textureScale).uv((x < 0 ? 0 : 0.25f) + (y < 0 ? 0 : 0.5f), z < 0 ? 0 : 1).endVertex();
     }
 
-    private static void renderMask(RenderLevelStageEvent event, PlanetData data, VertexConsumer buffer, long ticks) {
+    private static void renderMask(RenderLevelStageEvent event, OrbitingBody data, VertexConsumer buffer, long ticks) {
         PoseStack poseStack = event.getPoseStack();
 
         Matrix4f matrix;
@@ -314,13 +314,13 @@ public class PlanetRenderer {
             throw new RuntimeException(e);
         }
 
-        Vector3d pos = data.getCurrentPos(ticks, event.getPartialTick());
+        Vector3d pos = new Vector3d(data.getCurrentPos(ticks, event.getPartialTick()));
 
         matrix.translate((float) (pos.x - event.getCamera().getPosition().x),
                 (float) (pos.y - event.getCamera().getPosition().y),
                 (float) (pos.z - event.getCamera().getPosition().z));
 
-        matrix.rotate(new Quaternionf().rotationXYZ((float) data.rotation.x, (float) data.rotation.y, (float) data.rotation.z));
+        matrix.rotate(new Quaternionf(data.getRotation()));
 
         float halfSize = (float) (data.getActualSize() / 2);
 
@@ -343,5 +343,21 @@ public class PlanetRenderer {
         buffer.vertex(matrix, x2, y2, z2).color(255, 255, 255, 255).endVertex();
         buffer.vertex(matrix, x3, y3, z3).color(255, 255, 255, 255).endVertex();
         buffer.vertex(matrix, x4, y4, z4).color(255, 255, 255, 255).endVertex();
+    }
+
+    private static float packColor(float r, float g, float b) {
+        int ri = (int)(r * 255.0f) & 0xFF;
+        int gi = (int)(g * 255.0f) & 0xFF;
+        int bi = (int)(b * 255.0f) & 0xFF;
+        int packed = (ri << 16) | (gi << 8) | bi;
+        return Float.intBitsToFloat(packed);
+    }
+
+    private static int[] unpackColor(float packedFloat) {
+        int packed = Float.floatToIntBits(packedFloat);
+        int r = ((packed >> 16) & 0xFF);
+        int g = ((packed >> 8) & 0xFF);
+        int b = (packed & 0xFF);
+        return new int[] { r, g, b };
     }
 }

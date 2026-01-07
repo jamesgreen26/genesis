@@ -1,21 +1,21 @@
 package shipwrights.genesis.event;
 
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.planets.PlanetData;
 import shipwrights.genesis.ship.ShipLandingAttachment;
+import shipwrights.genesis.space.OrbitingBody;
 import shipwrights.genesis.teleportation.TeleportationHandler;
-import shipwrights.genesis.util.PlanetUtil;
 
 import static shipwrights.genesis.util.VSUtils.getLoadedShipsInLevel;
 
@@ -31,21 +31,20 @@ public class AtmosphericCollision {
 	 * @param level
 	 */
 	public static void atmosphericCollisionTick(final ServerLevel level) {
-		// Check if this is a planet dimension
-		final PlanetData planet = PlanetUtil.getPlanetByDimension(level.dimension());
-		if (planet == null) {
+		// Check if this is a body dimension
+		final OrbitingBody body = GenesisMod.getDataForLevel(level);
+		if (body == null) {
 			return;
 		}
 
-		// Get the space dimension
-		final ResourceKey<Level> targetDimension = PlanetUtil.getSpaceDimension();
+		final ResourceKey<Level> targetDimension = ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE_DIM);
 		final ServerLevel targetLevel = level.getServer().getLevel(targetDimension);
 		if (targetLevel == null) {
 			return;
 		}
 
 		final ResourceKey<Level> dimension = level.dimension();
-		final Vector3dc planetPos = planet.getCurrentPos(level.getGameTime());
+		final Vector3dc planetPos = body.getCurrentPos(level.getGameTime());
 		final double atmoHeight = GenesisMod.atmosphereExitHeight;
 
 		final TeleportationHandler teleportHandler = TELEPORT_HANDLER;
@@ -67,8 +66,8 @@ public class AtmosphericCollision {
 			}
 
 			// Calculate target position in space
-			final Vector3d targetPos = new Vector3d(0, planet.getActualSize() * 0.7 + 20, 0);
-			final Quaterniond rotation = PlanetUtil.getPlanetRotation(planet);
+			final Vector3d targetPos = new Vector3d(0, body.getActualSize() * 0.7 + 20, 0);
+			final Quaterniondc rotation = body.getRotation();
 			rotation.transform(targetPos);
 			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
 

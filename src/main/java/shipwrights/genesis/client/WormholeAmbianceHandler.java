@@ -10,7 +10,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.sound.GenesisSounds;
+import shipwrights.genesis.content.sound.GenesisSounds;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class WormholeAmbianceHandler {

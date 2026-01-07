@@ -10,8 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.extension.FallingBlockEntityExtension;
+import shipwrights.genesis.mixin.extension.FallingBlockEntityExtension;
 
 @Mixin(FallingBlockRenderer.class)
 public class FallingBlockRendererMixin {

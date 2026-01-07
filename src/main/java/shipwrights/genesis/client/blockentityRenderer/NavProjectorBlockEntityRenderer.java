@@ -4,8 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.blockentity.NavProjectorBlockEntity;
-import shipwrights.genesis.planets.PlanetData;
+import shipwrights.genesis.content.blockentity.NavProjectorBlockEntity;
+import shipwrights.genesis.space.Orbitable;
+import shipwrights.genesis.space.OrbitingBody;
+import shipwrights.genesis.space.Star;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -22,12 +24,6 @@ import java.util.Objects;
 
 public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavProjectorBlockEntity> {
     public NavProjectorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
-
-    static final PlanetData sunData = new PlanetData(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun") , null, 15, 10,0, 0, 1, 1, 1);
-
-    static {
-        sunData.rotation = new Vector3d(0, 0, 0);
-    }
 
     @Override
     public void render(NavProjectorBlockEntity blockEntity, float partialTick, PoseStack poseStack,
@@ -82,38 +78,41 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate((float) -shipPos.x() / scale_factor, (float) -shipPos.y() / scale_factor, (float) -shipPos.z() / scale_factor);
         }
 
-        // Render planets from Genesis planet registry
-        for (PlanetData planet : GenesisMod.planets.values()) {
-            renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, planet, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick);
+        // Render planets from Genesis space registry
+        for (OrbitingBody body : GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies()) {
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick, false);
         }
 
-        renderPlanetProjection(poseStack, bufferSource, packedLight, packedOverlay, sunData, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick);
+        // Render stars
+        for (Star star : GenesisMod.SPACE_REGISTRY.getAllStars()) {
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, star, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick, true);
+        }
 
 
         poseStack.popPose();
     }
 
-    private static void renderPlanetProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, PlanetData planet, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick) {
-        Vector3d planetPos = planet.getCurrentPos(ticks, partialTick);
+    private static void renderCelestialProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Orbitable.Celestial celestial, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick, boolean isStar) {
+        Vector3d celestialPos = new Vector3d(celestial.getCurrentPos(ticks, partialTick));
 
         if (isOnShip) {
-            if (planetPos.sub(new Vector3d(shipPos), new Vector3d()).length() > 120000) return;
+            if (celestialPos.sub(new Vector3d(shipPos), new Vector3d()).length() > 120000) return;
         } else {
-            if (planetPos.sub(new Vector3d(pos.getX(), pos.getY(), pos.getZ()), new Vector3d()).length() > 120000)
+            if (celestialPos.sub(new Vector3d(pos.getX(), pos.getY(), pos.getZ()), new Vector3d()).length() > 120000)
                 return;
         }
 
-        float scale = (float) (2 * Math.sqrt(planet.getActualSize()) / Math.sqrt(scale_factor));
+        float scale = (float) (2 * Math.sqrt(celestial.getActualSize()) / Math.sqrt(scale_factor));
         if (scale > 0) {
-            poseStack.translate(planetPos.x / scale_factor, planetPos.y / scale_factor, planetPos.z / scale_factor);
+            poseStack.translate(celestialPos.x / scale_factor, celestialPos.y / scale_factor, celestialPos.z / scale_factor);
             poseStack.scale(scale, scale, scale);
 
-            Quaternionf rot = new Quaternionf().rotateXYZ((float) planet.rotation.x, (float) planet.rotation.y, (float) planet.rotation.z);
+            Quaternionf rot = new Quaternionf(celestial.getRotation());
             poseStack.mulPose(rot);
 
             poseStack.translate(-0.5D, -0.5D, -0.5D);
 
-            if (planetPos.lengthSquared() == 0) {
+            if (isStar) {
                 blockRenderer.renderSingleBlock(Blocks.WHITE_STAINED_GLASS.defaultBlockState(),
                         poseStack,
                         bufferSource,
@@ -133,7 +132,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
             poseStack.mulPose(rot.invert());
             poseStack.scale(1 / scale, 1 / scale, 1 / scale);
-            poseStack.translate(-planetPos.x / scale_factor, -planetPos.y / scale_factor, -planetPos.z / scale_factor);
+            poseStack.translate(-celestialPos.x / scale_factor, -celestialPos.y / scale_factor, -celestialPos.z / scale_factor);
         }
     }
 
