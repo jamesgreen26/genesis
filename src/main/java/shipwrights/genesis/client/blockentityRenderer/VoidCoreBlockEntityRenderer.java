@@ -2,8 +2,8 @@ package shipwrights.genesis.client.blockentityRenderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import shipwrights.genesis.block.VoidCoreBlock;
-import shipwrights.genesis.blockentity.VoidCoreBlockEntity;
+import shipwrights.genesis.content.block.VoidCoreBlock;
+import shipwrights.genesis.content.blockentity.VoidCoreBlockEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;

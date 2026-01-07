@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBdc;
@@ -15,10 +16,10 @@ import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.planets.PlanetData;
+import shipwrights.genesis.space.OrbitingBody;
+import shipwrights.genesis.space.SpaceLevel;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.teleportation.TeleportationHandler;
-import shipwrights.genesis.util.PlanetUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ public class PlanetCollision {
 
 	public static void planetCollisionTick(final ServerLevel level) {
 		// Only run in space dimension
-		if (!PlanetUtil.isSpaceDimension(level.dimension())) {
+		if (!GenesisMod.isSpaceDimension(level)) {
 			return;
 		}
 
@@ -62,18 +63,18 @@ public class PlanetCollision {
 			final Vec3 shipCenter = VectorConversionsMCKt.toMinecraft(ship.getWorldAABB().center(new Vector3d()));
 
 			// Find nearest planet
-			final PlanetUtil.PlanetWithDistance nearestPlanetData = PlanetUtil.getNearestPlanet(shipCenter, level.getGameTime()).orElse(null);
+			final OrbitingBody.WithDistanceSq nearestPlanetData = SpaceLevel.getNearestOrbitingBody(new Vector3d(shipCenter.x, shipCenter.y, shipCenter.z), level.getGameTime()).orElse(null);
 			if (nearestPlanetData == null) {
 				continue;
 			}
 
-			final PlanetData planet = nearestPlanetData.planet();
-			final double distance = nearestPlanetData.distance();
+			final OrbitingBody planet = nearestPlanetData.getCelestial();
+			final double distance = Math.sqrt(nearestPlanetData.getDistanceSquared());
 			double closeRange = planet.getActualSize() / 8;
 
 			final ResourceKey<Level> targetDimension = ResourceKey.create(
 				net.minecraft.core.registries.Registries.DIMENSION,
-				planet.dimensionID
+				planet.getID()
 			);
 			final ServerLevel targetLevel = level.getServer().getLevel(targetDimension);
 			if (targetLevel == null) {
@@ -132,7 +133,7 @@ public class PlanetCollision {
 				shipCenter.z - planetPos.z()
 			).normalize();
 			final Quaterniond rotation = new Quaterniond().rotateTo(new Vector3d(0, 1, 0), directionToPlanet);
-			final Quaterniond planetRotation = PlanetUtil.getPlanetRotation(planet);
+			final Quaterniondc planetRotation = planet.getRotation();
 			planetRotation.mul(rotation, rotation).conjugate();
 
 			MinecraftForge.EVENT_BUS.post(new PreTravelEvent.SpaceToPlanet(

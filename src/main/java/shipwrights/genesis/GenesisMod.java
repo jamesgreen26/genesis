@@ -1,9 +1,6 @@
 package shipwrights.genesis;
 
-import g_mungus.vlib.data.DimensionSettings;
-import g_mungus.vlib.dimension.DimensionSettingsManager;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -12,29 +9,30 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
-import shipwrights.genesis.fluid.GenesisFluids;
+import shipwrights.genesis.content.block.GenesisBlocks;
+import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
-import shipwrights.genesis.networking.SyncPlanetsPacket;
+import shipwrights.genesis.space.registry.SpaceRegistrySyncPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
 import shipwrights.genesis.networking.WormholeTravelSoundPacket;
-import shipwrights.genesis.particle.GenesisParticles;
-import shipwrights.genesis.planets.PlanetData;
+import shipwrights.genesis.content.particle.GenesisParticles;
 import shipwrights.genesis.ship.ShipLandingAttachment;
+import shipwrights.genesis.space.OrbitingBody;
+import shipwrights.genesis.space.registry.SpaceRegistry;
 import shipwrights.genesis.teleportation.TeleportationHandler;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @Mod.EventBusSubscriber
@@ -54,12 +52,8 @@ public final class GenesisMod {
     public static final int atmosphereExitHeight = 2048;
     public static final int atmosphereEntryHeight = 1440;
 
-    public static final double earthDist = 15_000;
-    public static final double earthSize = 96;
-    public static final int earthYear = 4608000;
-
-    public static final Map<ResourceLocation, PlanetData> planets = new ConcurrentHashMap<>();
-    private static final List<QueuedMoon> moonQueue = new CopyOnWriteArrayList<>();
+    private static final List<Consumer<SpaceRegistry.RegisterCelestialsEvent>> registrationCallbacks = new CopyOnWriteArrayList<>();
+    public static final SpaceRegistry SPACE_REGISTRY = new SpaceRegistry(registrationCallbacks);
 
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
@@ -82,10 +76,10 @@ public final class GenesisMod {
                 .consumerMainThread(StopVoidEngineStartSoundPacket::handle)
                 .add();
 
-        GenesisNetworking.INSTANCE.messageBuilder(SyncPlanetsPacket.class, 3)
-                .encoder(SyncPlanetsPacket::encode)
-                .decoder(SyncPlanetsPacket::decode)
-                .consumerMainThread(SyncPlanetsPacket::handle)
+        GenesisNetworking.INSTANCE.messageBuilder(SpaceRegistrySyncPacket.class, 3)
+                .encoder(SpaceRegistrySyncPacket::encode)
+                .decoder(SpaceRegistrySyncPacket::decode)
+                .consumerMainThread(SpaceRegistrySyncPacket::handle)
                 .add();
 
         // Register fluids using Registrate (must be called before other registrations)
@@ -95,69 +89,50 @@ public final class GenesisMod {
         GenesisBlocks.MENU_TYPES.register(eventBus);
         GenesisParticles.PARTICLE_TYPES.register(eventBus);
 
-        shipwrights.genesis.blockentity.GenesisBlockEntities.BLOCK_ENTITIES.register(eventBus);
-        shipwrights.genesis.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
-        shipwrights.genesis.item.GenesisItems.ITEMS.register(eventBus);
-        shipwrights.genesis.item.GenesisCreativeTabs.register(eventBus);
-        shipwrights.genesis.painting.GenesisPaintings.PAINTING_VARIANTS.register(eventBus);
+        shipwrights.genesis.content.blockentity.GenesisBlockEntities.BLOCK_ENTITIES.register(eventBus);
+        shipwrights.genesis.content.sound.GenesisSounds.SOUND_EVENTS.register(eventBus);
+        shipwrights.genesis.content.item.GenesisItems.ITEMS.register(eventBus);
+        shipwrights.genesis.content.item.GenesisCreativeTabs.register(eventBus);
+        shipwrights.genesis.content.painting.GenesisPaintings.PAINTING_VARIANTS.register(eventBus);
 
         ValkyrienSkies.api().registerAttachment(ShipLandingAttachment.class);
 
         ValkyrienSkies.api().getPhysTickEvent().on(TeleportationHandler::onPhysTick);
     }
 
-    /// @param size       relative to earth
-    /// @param sunDist    relative to earth
-    /// @param yearLength relative to earth
-    /// @param gravity    relative to earth
-    ///
-    /// @apiNote Registered planets get reset each time the server stops
-    /// pineapple
-    public static Optional<PlanetData> registerPlanet(ResourceLocation dimensionID, double size, double gravity, double sunDist, double yearLength, float r, float g, float b) {
-        if (planets.containsKey(dimensionID)) {
-            return Optional.empty();
-        }
-
-        if (sunDist * earthDist > 2048) {
-            PlanetData data = new PlanetData(dimensionID, null, size, sunDist, yearLength, r, g, b, gravity);
-            PlanetData existing = planets.putIfAbsent(dimensionID, data);
-            if (existing != null) {
-                return Optional.empty(); // Another thread beat us to it
-            }
-            DimensionSettingsManager.INSTANCE.addSettings(data.dimensionID, new DimensionSettings(1.0, gravity, true));
-
-            return Optional.of(data);
-        } else {
-            LOGGER.warn("Failed to register planet {}, it is too close to the sun!", dimensionID);
-            return Optional.empty();
-        }
+    public static void onRegisterCelestialsEvent(Consumer<SpaceRegistry.RegisterCelestialsEvent> callback) {
+        registrationCallbacks.add(callback);
     }
 
-    public static void registerMoon(ResourceLocation dimensionID, ResourceLocation orbitingDimensionID, double size, double gravity, double orbitRadius, double yearLength, float r, float g, float b) {
-        DimensionSettingsManager.INSTANCE.addSettings(dimensionID, new DimensionSettings(1.0, gravity, true));
+    @Nullable public static OrbitingBody getDataForLevel(Level level) {
+        return SPACE_REGISTRY.getOrbitingBody(level.dimension().location());
+    }
 
-        moonQueue.add(new QueuedMoon(dimensionID, orbitingDimensionID, size, gravity, orbitRadius, yearLength, r, g, b));
+    public static boolean isMiniScale(ResourceLocation dimensionLocation) {
+        return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
+    }
+
+    public static boolean isMiniScale(Level level) {
+        return isMiniScale(level.dimension().location());
+    }
+
+    public static boolean shouldCancelVoidDamage(ResourceLocation dimensionLocation) {
+        return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
+    }
+
+    public static boolean shouldCancelVoidDamage(Level level) {
+        return shouldCancelVoidDamage(level.dimension().location());
+    }
+
+    public static boolean isSpaceDimension(ResourceLocation dimensionLocation) {
+        return dimensionLocation.equals(SPACE_DIM);
+    }
+
+    public static boolean isSpaceDimension(Level level) {
+        return isSpaceDimension(level.dimension().location());
     }
 
     @ApiStatus.Internal
-    public static void finalizeMoons() {
-        for (var moon : moonQueue) {
-            if (planets.containsKey(moon.dimensionID)) {
-                continue; // Moon already registered
-            }
-
-            PlanetData parent = planets.get(moon.orbitingDimensionID);
-
-            if (parent != null) {
-                planets.putIfAbsent(moon.dimensionID, new PlanetData(moon.dimensionID, parent, moon.size, moon.orbitRadius, moon.yearLength, moon.r, moon.g, moon.b, moon.gravity));
-            } else {
-                LOGGER.warn("Failed to register moon {}, its parent planet is missing!", moon.dimensionID);
-            }
-        }
-
-        moonQueue.clear();
-    }
-
     public static void refreshEntityScaling(Entity entity, Level level) {
         try {
             ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
@@ -168,8 +143,8 @@ public final class GenesisMod {
                 ResourceLocation entityType = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
                 if (
                         entity instanceof Projectile ||
-                        VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE ||
-                        SEAT_REGISTRY_NAME.matcher(entityType.getPath()).find()
+                                VSEntityManager.INSTANCE.getHandler(entity) != DefaultShipyardEntityHandler.INSTANCE ||
+                                SEAT_REGISTRY_NAME.matcher(entityType.getPath()).find()
                 ) {
                     scaleData.setScale(1 / 16f);
                     explosionScaleData.setScale(16f);
@@ -182,52 +157,4 @@ public final class GenesisMod {
             }
         } catch (Exception ignored) { /* not really sure what causes this, but I don't think it's critical */ }
     }
-
-    public static boolean isMiniScale(ResourceLocation dimensionLocation) {
-        return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
-    }
-
-    public static boolean isMiniScale(ResourceKey<Level> dimension) {
-        return isMiniScale(dimension.location());
-    }
-
-    public static boolean isMiniScale(Level level) {
-        return isMiniScale(level.dimension().location());
-    }
-
-    public static boolean shouldCancelVoidDamage(ResourceLocation dimensionLocation) {
-        return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
-    }
-
-    public static boolean shouldCancelVoidDamage(ResourceKey<Level> dimension) {
-        return shouldCancelVoidDamage(dimension.location());
-    }
-
-    public static boolean shouldCancelVoidDamage(Level level) {
-        return shouldCancelVoidDamage(level.dimension().location());
-    }
-
-    public static boolean isSpaceDimension(ResourceLocation dimensionLocation) {
-        return dimensionLocation.equals(SPACE_DIM);
-    }
-
-    public static boolean isSpaceDimension(ResourceKey<Level> dimension) {
-        return isSpaceDimension(dimension.location());
-    }
-
-    public static boolean isSpaceDimension(Level level) {
-        return isSpaceDimension(level.dimension().location());
-    }
-
-    private record QueuedMoon(
-            ResourceLocation dimensionID,
-            ResourceLocation orbitingDimensionID,
-            double size,
-            double gravity,
-            double orbitRadius,
-            double yearLength,
-            float r,
-            float g,
-            float b
-    ) {}
 }

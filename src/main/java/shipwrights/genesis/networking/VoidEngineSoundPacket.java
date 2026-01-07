@@ -1,15 +1,11 @@
 package shipwrights.genesis.networking;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkEvent;
 import shipwrights.genesis.client.WormholeAmbianceHandler;
-import shipwrights.genesis.sound.GenesisSounds;
 
 import java.util.function.Supplier;
 

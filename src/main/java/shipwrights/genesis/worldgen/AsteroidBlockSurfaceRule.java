@@ -5,8 +5,8 @@ import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.jetbrains.annotations.NotNull;
-import shipwrights.genesis.GenesisBlocks;
-import shipwrights.genesis.block.AsteroidBlock;
+import shipwrights.genesis.content.block.GenesisBlocks;
+import shipwrights.genesis.content.block.AsteroidBlock;
 
 import java.util.ArrayList;
 import java.util.List;

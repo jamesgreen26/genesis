@@ -6,8 +6,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.block.WarpstoneCatalyzerContainer;
-import shipwrights.genesis.blockentity.WarpstoneCatalyzerBlockEntity;
+import shipwrights.genesis.content.block.WarpstoneCatalyzerContainer;
+import shipwrights.genesis.content.blockentity.WarpstoneCatalyzerBlockEntity;
 
 public class WarpstoneCatalyzerScreen extends AbstractContainerScreen<WarpstoneCatalyzerContainer> {
 

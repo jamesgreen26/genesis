@@ -22,7 +22,7 @@ public class MinecraftServerMixin {
 
     @Final
     @Shadow
-    public Map<ResourceKey<Level>, ServerLevel> levels;
+    private Map<ResourceKey<Level>, ServerLevel> levels;
 
     @Inject(method = "prepareLevels", at = @At("RETURN"))
     public void onLevelsCreated(ChunkProgressListener arg, CallbackInfo ci) {

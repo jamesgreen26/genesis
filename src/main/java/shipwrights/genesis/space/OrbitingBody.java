@@ -1,0 +1,121 @@
+package shipwrights.genesis.space;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
+import org.joml.Vector3d;
+import java.util.Random;
+
+public final class OrbitingBody extends Orbitable.Celestial {
+
+    private final String dimensionID;
+    private final String parentID;
+    private final double size;
+    private final double orbitDistance;
+    private final double orbitTime;
+    private final double orbitalTheta;
+    private final double orbitalPhi;
+    private final double gravity;
+    private final float r;
+    private final float g;
+    private final float b;
+
+    private @Nullable Orbitable parent = null;
+    private final Quaterniondc rotation;
+
+    public OrbitingBody(String ID, String parentID, double size, double orbitDistance, double orbitTime, double gravity, float r, float g, float b) {
+        this.dimensionID = ID;
+        this.parentID = parentID;
+        this.size = size;
+        this.orbitDistance = orbitDistance;
+        this.orbitTime = orbitTime;
+        this.gravity = gravity;
+        this.r = r;
+        this.g = g;
+        this.b = b;
+
+        Random rand = new Random(ID.hashCode());
+        this.rotation = new Quaterniond().rotationXYZ(rand.nextDouble(Math.PI), rand.nextDouble(Math.PI), rand.nextDouble(Math.PI));
+        this.orbitalTheta = rand.nextDouble() * 2 * Math.PI;   // longitude
+        this.orbitalPhi   = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
+    }
+
+    @Override
+    public boolean exists() {
+        return super.exists() && this.parent != null && this.parent.exists();
+    }
+
+    public Orbitable getParent() {
+        assert parent != null;
+        return parent;
+    }
+
+    public void defineParent(Orbitable parent) {
+        if (this.parent == null) {
+            this.parent = parent;
+        }
+    }
+
+    @Override
+    public Vector3d getCurrentPos(long ticks, float subticks) {
+        Vector3d out = new Vector3d(1, 0, 0);
+        out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
+        out = out.rotateY(orbitalTheta);
+        out = out.rotateX(orbitalPhi + Math.PI / 2);
+        out.normalize(orbitDistance * BASE_ORBIT_DISTANCE);
+        return out.add(getParent().getCurrentPos(ticks, subticks), new Vector3d());
+    }
+
+    @Override
+    public ResourceLocation getID() {
+        return ResourceLocation.parse(dimensionID);
+    }
+
+    public ResourceLocation getParentID() {
+        return ResourceLocation.parse(parentID);
+    }
+
+    public int getYearLengthTicks() {
+        return (int)(this.orbitTime * BASE_ORBIT_TIME);
+    }
+
+    private String dimensionID() { return dimensionID; }
+    private String parentID() { return parentID; }
+    public double size() { return size; }
+
+    @Override
+    public Quaterniondc getRotation() {
+        return rotation;
+    }
+
+    public double orbitRadius() { return orbitDistance; }
+    public double yearLength() { return orbitTime; }
+    public double gravity() { return gravity; }
+    public float r() { return r; }
+    public float g() { return g; }
+    public float b() { return b; }
+
+    public static final Codec<OrbitingBody> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("ID").forGetter(OrbitingBody::dimensionID),
+            Codec.STRING.fieldOf("parentID").forGetter(OrbitingBody::parentID),
+            Codec.DOUBLE.fieldOf("size").forGetter(OrbitingBody::size),
+            Codec.DOUBLE.fieldOf("orbitDistance").forGetter(OrbitingBody::orbitRadius),
+            Codec.DOUBLE.fieldOf("orbitTime").forGetter(OrbitingBody::yearLength),
+            Codec.DOUBLE.fieldOf("gravity").forGetter(OrbitingBody::gravity),
+            Codec.FLOAT.optionalFieldOf("r", 0.5f).forGetter(OrbitingBody::r),
+            Codec.FLOAT.optionalFieldOf("g", 0.5f).forGetter(OrbitingBody::g),
+            Codec.FLOAT.optionalFieldOf("b", 0.5f).forGetter(OrbitingBody::b)
+    ).apply(instance, OrbitingBody::new));
+
+    public WithDistanceSq withDistanceSq(double distanceSquared) {
+        return new WithDistanceSq(this, distanceSquared);
+    }
+    public static class WithDistanceSq extends Celestial.WithDistanceSq<OrbitingBody> {
+        public WithDistanceSq(OrbitingBody celestial, double distanceSquared) {
+            super(celestial, distanceSquared);
+        }
+    }
+}

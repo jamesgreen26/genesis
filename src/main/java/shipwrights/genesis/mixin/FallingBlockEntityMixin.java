@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.extension.FallingBlockEntityExtension;
+import shipwrights.genesis.mixin.extension.FallingBlockEntityExtension;
 
 @Mixin(FallingBlockEntity.class)
 public class FallingBlockEntityMixin implements FallingBlockEntityExtension {
