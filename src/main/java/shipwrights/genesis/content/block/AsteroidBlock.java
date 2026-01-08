@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3d;
-import shipwrights.genesis.mixin.extension.FallingBlockEntityExtension;
+import shipwrights.genesis.mixin_extension.FallingBlockEntityExtension;
 import shipwrights.genesis.mixin.FallingBlockEntityAccessor;
 
 import java.util.List;
