@@ -17,7 +17,7 @@ import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.space.OrbitingBody;
 import shipwrights.genesis.teleportation.TeleportationHandler;
 
-import static shipwrights.genesis.util.VSUtils.getLoadedShipsInLevel;
+import static shipwrights.genesis.ship.VSUtils.getLoadedShipsInLevel;
 
 public class AtmosphericCollision {
 	private static final Logger LOGGER = GenesisMod.LOGGER;

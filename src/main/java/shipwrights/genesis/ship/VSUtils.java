@@ -1,4 +1,4 @@
-package shipwrights.genesis.util;
+package shipwrights.genesis.ship;
 
 import net.minecraft.server.level.ServerLevel;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static shipwrights.genesis.util.VSUtils.getLoadedShipsInLevel;
+import static shipwrights.genesis.ship.VSUtils.getLoadedShipsInLevel;
 
 public class PlanetCollision {
 	private static final Logger LOGGER = GenesisMod.LOGGER;

@@ -1,4 +1,4 @@
-package shipwrights.genesis.util;
+package shipwrights.genesis.content;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;

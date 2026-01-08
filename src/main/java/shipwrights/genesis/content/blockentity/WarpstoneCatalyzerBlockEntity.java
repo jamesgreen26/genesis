@@ -16,7 +16,6 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.content.item.GenesisItems;
-import shipwrights.genesis.util.AdaptedEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
