@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -26,7 +27,14 @@ public final class OrbitingBody extends Orbitable.Celestial {
     private @Nullable Orbitable parent = null;
     private final Quaterniondc rotation;
 
+    private final @Nullable CustomTransformProvider customTransformProvider;
+
     public OrbitingBody(String ID, String parentID, double size, double orbitDistance, double orbitTime, double gravity, float r, float g, float b) {
+        this(ID, parentID, size, orbitDistance, orbitTime, gravity, r, g, b, null);
+    }
+
+    @TestOnly
+    public OrbitingBody(String ID, String parentID, double size, double orbitDistance, double orbitTime, double gravity, float r, float g, float b, @Nullable CustomTransformProvider customTransformProvider) {
         this.dimensionID = ID;
         this.parentID = parentID;
         this.size = size;
@@ -36,6 +44,7 @@ public final class OrbitingBody extends Orbitable.Celestial {
         this.r = r;
         this.g = g;
         this.b = b;
+        this.customTransformProvider = customTransformProvider;
 
         Random rand = new Random(ID.hashCode());
         this.rotation = new Quaterniond().rotationXYZ(rand.nextDouble(Math.PI), rand.nextDouble(Math.PI), rand.nextDouble(Math.PI));
@@ -61,6 +70,9 @@ public final class OrbitingBody extends Orbitable.Celestial {
 
     @Override
     public Vector3d getCurrentPos(long ticks, float subticks) {
+        if (this.customTransformProvider != null) {
+            return customTransformProvider.getCurrentPos(ticks, subticks);
+        }
         Vector3d out = new Vector3d(1, 0, 0);
         out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
         out = out.rotateY(orbitalTheta);
@@ -88,6 +100,9 @@ public final class OrbitingBody extends Orbitable.Celestial {
 
     @Override
     public Quaterniondc getRotation() {
+        if (this.customTransformProvider != null) {
+            return customTransformProvider.getRotation();
+        }
         return rotation;
     }
 
