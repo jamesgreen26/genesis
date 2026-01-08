@@ -8,6 +8,8 @@ import org.jetbrains.annotations.TestOnly;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
+
+import java.util.Optional;
 import java.util.Random;
 
 public final class OrbitingBody extends Orbitable.Celestial {
@@ -113,6 +115,11 @@ public final class OrbitingBody extends Orbitable.Celestial {
     public float g() { return g; }
     public float b() { return b; }
 
+    @Nullable
+    public CustomTransformProvider customTransformProvider() {
+        return customTransformProvider;
+    }
+
     public static final Codec<OrbitingBody> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("ID").forGetter(OrbitingBody::dimensionID),
             Codec.STRING.fieldOf("parentID").forGetter(OrbitingBody::parentID),
@@ -122,8 +129,13 @@ public final class OrbitingBody extends Orbitable.Celestial {
             Codec.DOUBLE.fieldOf("gravity").forGetter(OrbitingBody::gravity),
             Codec.FLOAT.optionalFieldOf("r", 0.5f).forGetter(OrbitingBody::r),
             Codec.FLOAT.optionalFieldOf("g", 0.5f).forGetter(OrbitingBody::g),
-            Codec.FLOAT.optionalFieldOf("b", 0.5f).forGetter(OrbitingBody::b)
-    ).apply(instance, OrbitingBody::new));
+            Codec.FLOAT.optionalFieldOf("b", 0.5f).forGetter(OrbitingBody::b),
+            CustomTransformProvider.DISPATCH_CODEC.optionalFieldOf("customTransform").forGetter(
+                body -> Optional.ofNullable(body.customTransformProvider())
+            )
+    ).apply(instance, (id, parentId, size, orbitDist, orbitTime, grav, r, g, b, customTransform) ->
+        new OrbitingBody(id, parentId, size, orbitDist, orbitTime, grav, r, g, b, customTransform.orElse(null))
+    ));
 
     public WithDistanceSq withDistanceSq(double distanceSquared) {
         return new WithDistanceSq(this, distanceSquared);

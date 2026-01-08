@@ -1,6 +1,5 @@
 package shipwrights.genesis.space;
 
-import com.mojang.serialization.Codec;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -119,8 +118,8 @@ class SpaceLevelTest {
         }
 
         @Override
-        public <T extends CustomTransformProvider> Codec<T> getCodec() {
-            return null;
+        public net.minecraft.resources.ResourceLocation getType() {
+            return net.minecraft.resources.ResourceLocation.parse("genesis:test_fixed");
         }
     }
 
@@ -362,8 +361,8 @@ class SpaceLevelTest {
             }
 
             @Override
-            public <T extends CustomTransformProvider> Codec<T> getCodec() {
-                return null;
+            public net.minecraft.resources.ResourceLocation getType() {
+                return net.minecraft.resources.ResourceLocation.parse("genesis:test_tick_dependent");
             }
         };
 
