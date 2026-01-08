@@ -1,12 +1,7 @@
 package shipwrights.genesis.space;
 
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -17,17 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber
 public class SpaceLevel {
-
-    @Nullable public static Level level = null;
-
-    @SubscribeEvent
-    public static void onLoadLevel(LevelEvent.Load event) {
-        if (event.getLevel() instanceof Level it && GenesisMod.isSpaceDimension(it) && level == null) {
-            level = it;
-        }
-    }
 
     public static Optional<OrbitingBody.WithDistanceSq> getNearestOrbitingBody(Vector3dc position, long ticks) {
         return GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies().stream()
@@ -119,7 +104,7 @@ public class SpaceLevel {
 
         if(result!=null)
         {
-            return Optional.of(new Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>(result, closestT * closestT));
+            return Optional.of(new Orbitable.Celestial.WithDistanceSq<>(result, closestT * closestT));
         }
 
         return Optional.empty();
