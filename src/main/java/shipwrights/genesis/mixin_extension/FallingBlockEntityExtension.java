@@ -1,4 +1,4 @@
-package shipwrights.genesis.mixin.extension;
+package shipwrights.genesis.mixin_extension;
 
 import org.joml.Vector3d;
 
