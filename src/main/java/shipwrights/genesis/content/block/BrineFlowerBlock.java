@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.ForgeHooks;
-import shipwrights.genesis.util.GenesisTags;
+import shipwrights.genesis.content.GenesisTags;
 
 import javax.annotation.Nullable;
 

@@ -1,4 +1,4 @@
-package shipwrights.genesis.util;
+package shipwrights.genesis.content.blockentity;
 
 import net.minecraftforge.energy.IEnergyStorage;
 
