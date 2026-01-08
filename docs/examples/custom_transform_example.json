@@ -1,0 +1,21 @@
+{
+  "_comment": "Example celestial body configuration using CustomTransformProvider",
+  "_comment2": "This shows how to create a planet with a fixed position instead of orbital mechanics",
+
+  "ID": "yourmod:stationary_moon",
+  "parentID": "genesis:earth",
+  "size": 0.5,
+  "orbitDistance": 100,
+  "orbitTime": 1000,
+  "gravity": 0.3,
+  "r": 0.8,
+  "g": 0.8,
+  "b": 0.9,
+
+  "customTransform": {
+    "type": "genesis:example_fixed_position",
+    "x": 500.0,
+    "y": 100.0,
+    "z": 200.0
+  }
+}

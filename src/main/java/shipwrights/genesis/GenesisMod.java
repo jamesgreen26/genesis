@@ -19,6 +19,7 @@ import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
+import shipwrights.genesis.space.ExampleCustomTransformProvider;
 import shipwrights.genesis.space.registry.SpaceRegistrySyncPacket;
 import shipwrights.genesis.networking.VoidEngineSoundPacket;
 import shipwrights.genesis.networking.WormholeTravelSoundPacket;
@@ -81,6 +82,9 @@ public final class GenesisMod {
                 .decoder(SpaceRegistrySyncPacket::decode)
                 .consumerMainThread(SpaceRegistrySyncPacket::handle)
                 .add();
+
+        // Register custom transform providers
+        ExampleCustomTransformProvider.register();
 
         // Register fluids using Registrate (must be called before other registrations)
         GenesisFluids.init();
