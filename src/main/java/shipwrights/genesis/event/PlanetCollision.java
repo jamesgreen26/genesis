@@ -124,7 +124,8 @@ public class PlanetCollision {
 				SectionPos.sectionToBlockCoord(landingChunkPos.z)
 			);
 
-			final Vector3dc planetPos = planet.getCurrentPos(level.getGameTime());
+			final long ticks = level.getGameTime();
+			final Vector3dc planetPos = planet.getCurrentPos(ticks);
 
 			// Calculate rotation based on planet position
 			final Vector3d directionToPlanet = new Vector3d(
@@ -133,7 +134,7 @@ public class PlanetCollision {
 				shipCenter.z - planetPos.z()
 			).normalize();
 			final Quaterniond rotation = new Quaterniond().rotateTo(new Vector3d(0, 1, 0), directionToPlanet);
-			final Quaterniondc planetRotation = planet.getRotation();
+			final Quaterniondc planetRotation = planet.getRotation(ticks, 0f);
 			planetRotation.mul(rotation, rotation).conjugate();
 
 			MinecraftForge.EVENT_BUS.post(new PreTravelEvent.SpaceToPlanet(

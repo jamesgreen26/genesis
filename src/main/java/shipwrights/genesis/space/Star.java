@@ -47,7 +47,7 @@ public final class Star extends Orbitable.Celestial {
     public double size() { return size; }
 
     @Override
-    public Quaterniondc getRotation() {
+    public Quaterniondc getRotation(long ticks, float subticks) {
         return rotation;
     }
 

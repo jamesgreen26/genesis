@@ -101,9 +101,9 @@ public final class OrbitingBody extends Orbitable.Celestial {
     public double size() { return size; }
 
     @Override
-    public Quaterniondc getRotation() {
+    public Quaterniondc getRotation(long ticks, float subticks) {
         if (this.customTransformProvider != null) {
-            return customTransformProvider.getRotation();
+            return customTransformProvider.getRotation(ticks, subticks);
         }
         return rotation;
     }

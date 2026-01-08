@@ -4,14 +4,17 @@ The `CustomTransformProvider` API allows you to create celestial bodies with cus
 
 ## Overview
 
-By default, celestial bodies in Genesis follow orbital mechanics based on their `orbitDistance`, `orbitTime`, and other orbital parameters. The `CustomTransformProvider` allows you to override this behavior with custom logic.
+By default, celestial bodies in Genesis follow orbital mechanics based on their `orbitDistance`, `orbitTime`, and other orbital parameters. The `CustomTransformProvider` allows you to override this behavior with custom logic for both position and rotation.
+
+Both `getCurrentPos()` and `getRotation()` receive the current game time, allowing you to create dynamic, time-dependent transformations.
 
 ## Use Cases
 
-- **Fixed position bodies**: Planets that don't orbit
+- **Fixed position/rotation**: Planets that don't orbit or rotate
 - **Non-standard orbits**: Figure-8 orbits, precessing orbits, etc.
-- **Dynamic positions**: Bodies that respond to game events
-- **Testing**: Controlled positions for unit tests
+- **Custom rotation**: Tidally locked bodies, tumbling asteroids, precessing axes
+- **Dynamic behavior**: Bodies that respond to game events or time
+- **Testing**: Controlled positions and rotations for unit tests
 
 ## How to Use
 
@@ -50,7 +53,7 @@ public class MyCustomProvider implements CustomTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation() {
+    public Quaterniondc getRotation(long ticks, float subticks) {
         return new Quaterniond(); // No rotation
     }
 
@@ -153,30 +156,62 @@ public Vector3d getCurrentPos(long ticks, float subticks) {
 }
 ```
 
-### Dynamic Rotation
+### Time-Dependent Rotation
 
 ```java
-private final Quaterniond rotation = new Quaterniond();
-
 @Override
-public Quaterniondc getRotation() {
-    // Update rotation each time it's called
-    rotation.rotateY(0.01);
+public Quaterniondc getRotation(long ticks, float subticks) {
+    // Rotate based on time - completes one rotation every 20000 ticks (1000 seconds)
+    double angle = (ticks + subticks) * Math.PI * 2.0 / 20000.0;
+    return new Quaterniond().rotateY(angle);
+}
+```
+
+### Tidally Locked Rotation (always facing parent)
+
+```java
+@Override
+public Quaterniondc getRotation(long ticks, float subticks) {
+    // Calculate rotation to always face the parent body
+    Vector3d pos = getCurrentPos(ticks, subticks);
+    Vector3d toParent = new Vector3d(0, 0, 0).sub(pos).normalize();
+
+    // Create rotation that points toward parent
+    Quaterniond rotation = new Quaterniond();
+    rotation.lookAlong(toParent, new Vector3d(0, 1, 0));
     return rotation;
+}
+```
+
+### Tumbling Rotation (multiple axes)
+
+```java
+@Override
+public Quaterniondc getRotation(long ticks, float subticks) {
+    // Tumble on multiple axes like an asteroid
+    double t = (ticks + subticks) * Math.PI * 2.0 / 20000.0;
+    return new Quaterniond()
+        .rotateX(t * 1.3)      // Rotate on X axis
+        .rotateY(t * 0.7)      // Rotate on Y axis at different speed
+        .rotateZ(t * 0.5);     // Rotate on Z axis
 }
 ```
 
 ## Important Notes
 
-1. **Thread Safety**: Your provider may be called from multiple threads. Make sure your implementation is thread-safe.
+1. **Stateless & Deterministic**: Both `getCurrentPos()` and `getRotation()` should be pure functions that only depend on the `ticks` and `subticks` parameters. Given the same time, they should always return the same result. **Do not mutate internal state** - create and return new objects each time.
 
-2. **Performance**: The `getCurrentPos()` and `getRotation()` methods are called frequently. Keep them efficient.
+2. **Thread Safety**: Your provider may be called from multiple threads. Because methods should be stateless (see above), thread safety is automatic if you follow that guideline.
 
-3. **Serialization**: All fields must be serializable via the Codec. Don't store references to game objects.
+3. **Performance**: The methods are called frequently (every frame for rendering). Keep them efficient - avoid expensive calculations when possible.
 
-4. **Backward Compatibility**: The `customTransform` field is optional. Bodies without it will use standard orbital mechanics.
+4. **Serialization**: All fields must be serializable via the Codec. Don't store references to game objects like `Level`, `Entity`, etc. Store only primitive data and configuration values.
 
-5. **Client/Server Sync**: Your custom provider will be automatically synchronized to clients via the space registry sync packet.
+5. **Backward Compatibility**: The `customTransform` field is optional. Bodies without it will use standard orbital mechanics.
+
+6. **Client/Server Sync**: Your custom provider will be automatically synchronized to clients via the space registry sync packet.
+
+7. **Return New Objects**: Always return new `Vector3d` and `Quaterniond` instances. Never return a mutable field that could be modified by the caller.
 
 ## Testing
 
@@ -205,29 +240,48 @@ public void testRaycast() {
 public interface CustomTransformProvider {
     /**
      * Returns the type identifier for this provider.
+     * This is used during serialization to determine which codec to use.
+     *
+     * @return A unique ResourceLocation identifying this provider type
      */
     ResourceLocation getType();
 
     /**
-     * Returns the rotation quaternion for the celestial body.
-     */
-    Quaterniondc getRotation();
-
-    /**
-     * Returns the current position of the celestial body.
+     * Returns the rotation quaternion for the celestial body at the given time.
+     * Should be a pure function - same inputs always produce same output.
      *
      * @param ticks The current game time in ticks
-     * @param subticks Partial tick for smooth interpolation
+     * @param subticks Partial tick for smooth interpolation (0.0 to 1.0)
+     * @return A quaternion representing the celestial body's rotation
+     */
+    Quaterniondc getRotation(long ticks, float subticks);
+
+    /**
+     * Returns the current position of the celestial body at the given time.
+     * Should be a pure function - same inputs always produce same output.
+     *
+     * @param ticks The current game time in ticks
+     * @param subticks Partial tick for smooth interpolation (0.0 to 1.0)
+     * @return A Vector3d representing the celestial body's position in space
      */
     Vector3d getCurrentPos(long ticks, float subticks);
 
     /**
      * Registers a custom transform provider type.
-     * Call this during mod initialization.
+     * Call this during mod initialization before any celestial bodies are loaded.
+     *
+     * @param type The unique identifier for this provider type
+     * @param codec The codec used to serialize/deserialize this provider
      */
     static void register(ResourceLocation type, Codec<? extends CustomTransformProvider> codec);
 }
 ```
+
+### Key Points
+
+- **`ticks`**: The game time in ticks (20 ticks = 1 second)
+- **`subticks`**: A value between 0.0 and 1.0 representing partial progress through the current tick, used for smooth interpolation between frames
+- **Return values**: Always create and return new objects. Don't return mutable fields that could be modified by callers.
 
 ## Questions?
 

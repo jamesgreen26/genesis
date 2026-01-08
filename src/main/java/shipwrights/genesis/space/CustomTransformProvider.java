@@ -14,7 +14,7 @@ import java.util.Map;
  * Implementations must be registered via {@link #register(ResourceLocation, Codec)} before use.
  */
 public interface CustomTransformProvider {
-    Quaterniondc getRotation();
+    Quaterniondc getRotation(long ticks, float subticks);
     Vector3d getCurrentPos(long ticks, float subticks);
 
     /**

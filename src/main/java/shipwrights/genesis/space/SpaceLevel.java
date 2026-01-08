@@ -87,7 +87,7 @@ public class SpaceLevel {
             Vector3dc pos = body.getCurrentPos(ticks);
             double oR  = body.getActualSize()/2 + ((body.getActualSize()/2)/2);
             AABB box = new AABB(pos.x()-oR,pos.y()-oR,pos.z()-oR,pos.x()+oR,pos.y()+oR,pos.z()+oR);
-            Quaterniondc rotation = body.getRotation();
+            Quaterniondc rotation = body.getRotation(ticks);
             Vec3 center = box.getCenter();
             double t = raycastAABB(
                     origin,

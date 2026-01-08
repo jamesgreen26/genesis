@@ -67,7 +67,7 @@ public class AtmosphericCollision {
 
 			// Calculate target position in space
 			final Vector3d targetPos = new Vector3d(0, body.getActualSize() * 0.7 + 20, 0);
-			final Quaterniondc rotation = body.getRotation();
+			final Quaterniondc rotation = body.getRotation(level.getGameTime());
 			rotation.transform(targetPos);
 			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
 
