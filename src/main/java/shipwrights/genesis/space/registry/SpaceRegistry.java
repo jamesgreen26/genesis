@@ -79,12 +79,17 @@ public class SpaceRegistry {
         RegisterCelestialsEvent event = new RegisterCelestialsEvent(this);
         config.stars().forEach(star -> event.accept(star.getID(), star));
         config.bodies().forEach(body -> event.accept(body.getID(), body));
-        bake();
+        // Don't run callbacks on client - just link the parents from server data
+        linkParents();
     }
 
     void bake() {
         registrationCallbacks.forEach(it -> it.accept(new RegisterCelestialsEvent(this)));
+        linkParents();
+        SpaceRegistrySyncPacket.sendToAllClients();
+    }
 
+    private void linkParents() {
         boolean progress;
         do {
             progress = false;
@@ -108,7 +113,6 @@ public class SpaceRegistry {
         }
 
         registryQueue.clear();
-        SpaceRegistrySyncPacket.sendToAllClients();
     }
 
     public static class RegisterCelestialsEvent {

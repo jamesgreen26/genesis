@@ -8,18 +8,33 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisMod;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DataLoader {
+    private static final List<SystemConfigModel> loadedConfigs = new CopyOnWriteArrayList<>();
+
+    static {
+        GenesisMod.onRegisterCelestialsEvent(registerEvent -> {
+            for (SystemConfigModel config : loadedConfigs) {
+                config.stars().forEach(it -> registerEvent.accept(it.getID(), it));
+                config.bodies().forEach(it -> registerEvent.accept(it.getID(), it));
+            }
+        });
+    }
+
     @SubscribeEvent
     public static void onRegisterReloadListener(AddReloadListenerEvent event) {
         event.addListener((ResourceManagerReloadListener) resourceManager -> {
-            GenesisMod.SPACE_REGISTRY.reset();
+            loadedConfigs.clear();
             Map<ResourceLocation, Resource> resources = resourceManager.listResources("system_config", location -> true);
 
             for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
@@ -30,15 +45,14 @@ public class DataLoader {
                     SystemConfigModel config = SystemConfigModel.CODEC.parse(JsonOps.INSTANCE, jsonElement)
                             .getOrThrow(false, SpaceRegistry.LOGGER::error);
 
-                    GenesisMod.onRegisterCelestialsEvent(registerCelestialsEvent -> {
-                        config.stars().forEach(it -> registerCelestialsEvent.accept(it.getID(), it));
-                        config.bodies().forEach(it -> registerCelestialsEvent.accept(it.getID(), it));
-                    });
+                    loadedConfigs.add(config);
 
                 } catch (Exception e) {
                     SpaceRegistry.LOGGER.error("Failed to load system_config data from: {}", entry.getKey(), e);
                 }
             }
+
+            GenesisMod.SPACE_REGISTRY.reset();
             GenesisMod.SPACE_REGISTRY.bake();
         });
     }
