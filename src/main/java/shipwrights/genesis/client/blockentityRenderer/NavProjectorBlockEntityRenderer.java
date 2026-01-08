@@ -107,7 +107,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate(celestialPos.x / scale_factor, celestialPos.y / scale_factor, celestialPos.z / scale_factor);
             poseStack.scale(scale, scale, scale);
 
-            Quaternionf rot = new Quaternionf(celestial.getRotation());
+            Quaternionf rot = new Quaternionf(celestial.getRotation(ticks, partialTick));
             poseStack.mulPose(rot);
 
             poseStack.translate(-0.5D, -0.5D, -0.5D);

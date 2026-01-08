@@ -31,7 +31,8 @@ public sealed interface Orbitable {
             return this.size() * BASE_SIZE;
         }
 
-        public abstract Quaterniondc getRotation();
+        public abstract Quaterniondc getRotation(long ticks, float subticks);
+        public Quaterniondc getRotation(long ticks) { return getRotation(ticks, 0f); }
 
         public static class WithDistanceSq<T extends Celestial> {
             public final T celestial;

@@ -108,7 +108,7 @@ class SpaceLevelTest {
         }
 
         @Override
-        public Quaterniondc getRotation() {
+        public Quaterniondc getRotation(long ticks, float subticks) {
             return rotation;
         }
 
@@ -349,7 +349,7 @@ class SpaceLevelTest {
         // Create orbiting body that returns different positions based on ticks
         CustomTransformProvider tickDependentProvider = new CustomTransformProvider() {
             @Override
-            public Quaterniondc getRotation() {
+            public Quaterniondc getRotation(long ticks, float subticks) {
                 return new Quaterniond();
             }
 

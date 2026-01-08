@@ -154,7 +154,7 @@ public class PlanetRenderer {
                 (float) (pos.y -event.getCamera().getPosition().y),
                 (float) (pos.z -event.getCamera().getPosition().z));
 
-        Quaternionf rotation = new Quaternionf(data.getRotation());
+        Quaternionf rotation = new Quaternionf(data.getRotation(ticks, event.getPartialTick()));
         matrix.rotate(rotation);
 
         float halfSize = (float) (data.getActualSize() / 2);
@@ -186,7 +186,7 @@ public class PlanetRenderer {
                 (float) (pos.y - event.getCamera().getPosition().y),
                 (float) (pos.z - event.getCamera().getPosition().z));
 
-        Quaternionf rotation = new Quaternionf(data.getRotation());
+        Quaternionf rotation = new Quaternionf(data.getRotation(ticks, event.getPartialTick()));
         matrix.rotate(rotation);
 
         float halfSize = (float) (data.getActualSize() / 2);
@@ -320,7 +320,7 @@ public class PlanetRenderer {
                 (float) (pos.y - event.getCamera().getPosition().y),
                 (float) (pos.z - event.getCamera().getPosition().z));
 
-        matrix.rotate(new Quaternionf(data.getRotation()));
+        matrix.rotate(new Quaternionf(data.getRotation(ticks, event.getPartialTick())));
 
         float halfSize = (float) (data.getActualSize() / 2);
 

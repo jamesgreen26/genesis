@@ -55,7 +55,7 @@ public class ExampleCustomTransformProvider implements CustomTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation() {
+    public Quaterniondc getRotation(long ticks, float subticks) {
         return rotation;
     }
 
