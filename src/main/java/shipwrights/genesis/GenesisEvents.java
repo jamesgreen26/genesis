@@ -16,6 +16,7 @@ import shipwrights.genesis.event.PlanetCollision;
 
 import java.util.List;
 
+// TODO: this class should disappear, it looks like api but isn't, and also violates Single Responsibility Principle
 @Mod.EventBusSubscriber
 public class GenesisEvents {
 
