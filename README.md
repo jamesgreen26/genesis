@@ -1,6 +1,8 @@
 # Genesis
 A suite of mods providing perhaps the most exciting modded space experience in Minecraft.
 
+![Genesis](images/2026-01-04_15.57.00.png)
+
 ## Priorities:
 - Designed specifically for Valkyrien Skies
 - Good performance on all systems
