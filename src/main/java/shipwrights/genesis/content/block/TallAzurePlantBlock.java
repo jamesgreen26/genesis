@@ -31,7 +31,6 @@ public class TallAzurePlantBlock extends AzurePlantBlock {
         super(arg);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(HALF, DoubleBlockHalf.LOWER));
     }
-
     public BlockState updateShape(BlockState arg, Direction arg2, BlockState arg3, LevelAccessor arg4, BlockPos arg5, BlockPos arg6) {
         DoubleBlockHalf doubleblockhalf = (DoubleBlockHalf)arg.getValue(HALF);
         if (arg2.getAxis() != Direction.Axis.Y || doubleblockhalf == DoubleBlockHalf.LOWER != (arg2 == Direction.UP) || arg3.is(this) && arg3.getValue(HALF) != doubleblockhalf) {

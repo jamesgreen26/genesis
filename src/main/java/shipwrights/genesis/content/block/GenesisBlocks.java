@@ -6,6 +6,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -814,6 +815,30 @@ public class GenesisBlocks {
             )
     );
 
+    public static final RegistryObject<Block> VOID_CORE_REFLECTOR_PANEL = BLOCKS.register("void_core_reflector_panel", () ->
+            new VoidCorePanelBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+            )
+    );
+
+
+    public static final RegistryObject<Block> VERDITE_VOID_COIL = BLOCKS.register("verdite_void_coil", () ->
+            new VerditeVoidCoilBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+            )
+    );
+
+    public static final RegistryObject<Block> VOID_FOCUS = BLOCKS.register("void_focus", () ->
+            new VoidFocusBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .requiresCorrectToolForDrops()
+            )
+    );
 
 
 

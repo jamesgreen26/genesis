@@ -17,7 +17,12 @@ public class VoidCoreBlockEntity extends BlockEntity {
 
     public List<Block> frameBlocks = List.of(
             GenesisBlocks.VOID_ENGINE_FRAME.get(),
+            GenesisBlocks.VOID_CORE_REFLECTOR_PANEL.get(),
             GenesisBlocks.VOID_ENGINE_VIEWPORT.get()
+    );
+
+    public List<Block> focusBlocks = List.of(
+            GenesisBlocks.VOID_FOCUS.get()
     );
 
     public static void updateVoidCore(BlockPos framePos, LevelReader level) {
@@ -38,6 +43,7 @@ public class VoidCoreBlockEntity extends BlockEntity {
         if (level == null) return;
         int frames = 0;
         int interfaces = 0;
+        int focuses = 0;
 
         for (int x = -1; x < 2; x++) {
             for (int y = -1; y < 2; y++) {
@@ -47,12 +53,22 @@ public class VoidCoreBlockEntity extends BlockEntity {
                         frames++;
                     } else if (level.getBlockState(framePos).is(GenesisBlocks.VOID_ENGINE_INTERFACE.get())) {
                         interfaces++;
+                    } else if (focusBlocks.stream().anyMatch(level.getBlockState(framePos)::is)) {
+                        focuses++;
                     }
                 }
             }
         }
+        int needed_frames = 25;
+        if (focuses == 1){
+            needed_frames = 24;
+        } else if (focuses == 2) {
+            needed_frames = 16;
+        } else if (focuses > 2) {
+            needed_frames = 0;
+        }
 
-        if (frames == 25 && interfaces == 1) {
+        if (frames >= needed_frames && interfaces == 1) {
             level.setBlock(this.getBlockPos(), GenesisBlocks.VOID_CORE.get().defaultBlockState().setValue(VoidCoreBlock.DORMANT, false), Block.UPDATE_CLIENTS);
         } else {
             level.setBlock(this.getBlockPos(), GenesisBlocks.VOID_CORE.get().defaultBlockState().setValue(VoidCoreBlock.DORMANT, true), Block.UPDATE_CLIENTS);

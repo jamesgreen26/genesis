@@ -286,6 +286,15 @@ public class GenesisItems {
     public static final RegistryObject<Item> SMOLDERING_LILY = ITEMS.register("smoldering_lily",
             () -> new BlockItem(GenesisBlocks.SMOLDERING_LILY.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> VOID_CORE_REFLECTOR_PANEL = ITEMS.register("void_core_reflector_panel",
+            () -> new BlockItem(GenesisBlocks.VOID_CORE_REFLECTOR_PANEL.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> VOID_FOCUS = ITEMS.register("void_focus",
+            () -> new BlockItem(GenesisBlocks.VOID_FOCUS.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> VERDITE_VOID_COIL = ITEMS.register("verdite_void_coil",
+            () -> new BlockItem(GenesisBlocks.VERDITE_VOID_COIL.get(), new Item.Properties()));
+
 
     public static final RegistryObject<Item> WARPSTONE_CHUNK = ITEMS.register("warpstone_chunk",
             () -> new Item(new Item.Properties()));
