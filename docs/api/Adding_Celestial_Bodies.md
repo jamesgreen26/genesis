@@ -91,7 +91,6 @@ All orbital mechanics values use Earth as the baseline (1.0):
 
 - The `ID` field for orbiting bodies **must match** the dimension ID of the Minecraft dimension it represents
 - The RGB color values are **optional** and only used as a fallback when no texture is provided
-- Parent bodies must be defined before their children in the configuration
 
 ## Textures
 
@@ -111,6 +110,29 @@ assets/genesis/textures/planets/mymod/custom_planet.png
 ```
 
 If no texture is found, the body will be rendered using the RGB color values specified in the configuration.
+
+## Texture Layout
+
+Planet and moon textures use a cube map layout arranged in a 3x2 grid. The texture should be divided into 6 equal sections representing the faces of a cube:
+
+**Top Row (upper half of texture):**
+- **Left third**: North face
+- **Middle third**: West face
+- **Right third**: South face
+
+**Bottom Row (lower half of texture):**
+- **Left third**: East face
+- **Middle third**: Down face (bottom of the planet)
+- **Right third**: Up face (top of the planet)
+
+When creating your texture, ensure that:
+
+1. The texture dimensions are divisible by 3 horizontally and by 2 vertically for clean mapping
+2. Adjacent faces should have matching edges where they meet on the cube
+3. The Up and Down faces represent the top and bottom of the planet
+4. The four cardinal faces (North, East, South, West) wrap around the sides
+
+For best results, use textures with dimensions that are powers of 2 (e.g., 192x128, 384x256, 768x512) to ensure each face section divides evenly.
 
 ## Programmatic Registration
 
@@ -152,29 +174,6 @@ public class MyMod {
     }
 }
 ```
-
-## Texture Layout
-
-Planet and moon textures use a cube map layout arranged in a 3x2 grid. The texture should be divided into 6 equal sections representing the faces of a cube:
-
-**Top Row (upper half of texture):**
-- **Left third**: North face
-- **Middle third**: West face
-- **Right third**: South face
-
-**Bottom Row (lower half of texture):**
-- **Left third**: East face
-- **Middle third**: Down face (bottom of the planet)
-- **Right third**: Up face (top of the planet)
-
-When creating your texture, ensure that:
-
-1. The texture dimensions are divisible by 3 horizontally and by 2 vertically for clean mapping
-2. Adjacent faces should have matching edges where they meet on the cube
-3. The Up and Down faces represent the top and bottom of the planet
-4. The four cardinal faces (North, East, South, West) wrap around the sides
-
-For best results, use textures with dimensions that are powers of 2 (e.g., 192x128, 384x256, 768x512) to ensure each face section divides evenly.
 
 ## Examples
 
