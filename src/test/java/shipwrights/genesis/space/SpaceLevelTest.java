@@ -108,12 +108,12 @@ class SpaceLevelTest {
         }
 
         @Override
-        public Quaterniondc getRotation(long ticks, float subticks) {
+        public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
             return rotation;
         }
 
         @Override
-        public Vector3d getCurrentPos(long ticks, float subticks) {
+        public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
             return new Vector3d(position);
         }
 
@@ -349,12 +349,12 @@ class SpaceLevelTest {
         // Create orbiting body that returns different positions based on ticks
         CustomTransformProvider tickDependentProvider = new CustomTransformProvider() {
             @Override
-            public Quaterniondc getRotation(long ticks, float subticks) {
+            public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
                 return new Quaterniond();
             }
 
             @Override
-            public Vector3d getCurrentPos(long ticks, float subticks) {
+            public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
                 // Position changes with ticks - at tick 0 it's at (100,0,0), at tick 1000 it's at (200,0,0)
                 double x = 100 + (ticks / 10.0);
                 return new Vector3d(x, 0, 0);

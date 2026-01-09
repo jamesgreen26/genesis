@@ -73,7 +73,7 @@ public final class OrbitingBody extends Orbitable.Celestial {
     @Override
     public Vector3d getCurrentPos(long ticks, float subticks) {
         if (this.customTransformProvider != null) {
-            return customTransformProvider.getCurrentPos(ticks, subticks);
+            return customTransformProvider.getCurrentPos(ticks, subticks, getParent());
         }
         Vector3d out = new Vector3d(1, 0, 0);
         out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
@@ -103,7 +103,7 @@ public final class OrbitingBody extends Orbitable.Celestial {
     @Override
     public Quaterniondc getRotation(long ticks, float subticks) {
         if (this.customTransformProvider != null) {
-            return customTransformProvider.getRotation(ticks, subticks);
+            return customTransformProvider.getRotation(ticks, subticks, getParent());
         }
         return rotation;
     }

@@ -14,8 +14,27 @@ import java.util.Map;
  * Implementations must be registered via {@link #register(ResourceLocation, Codec)} before use.
  */
 public interface CustomTransformProvider {
-    Quaterniondc getRotation(long ticks, float subticks);
-    Vector3d getCurrentPos(long ticks, float subticks);
+    /**
+     * Returns the rotation quaternion for the celestial body at the given time.
+     * Should be a pure function - same inputs always produce same output.
+     *
+     * @param ticks The current game time in ticks
+     * @param subticks Partial tick for smooth interpolation (0.0 to 1.0)
+     * @param parent The parent celestial body that this body orbits
+     * @return A quaternion representing the celestial body's rotation
+     */
+    Quaterniondc getRotation(long ticks, float subticks, Orbitable parent);
+
+    /**
+     * Returns the current position of the celestial body at the given time.
+     * Should be a pure function - same inputs always produce same output.
+     *
+     * @param ticks The current game time in ticks
+     * @param subticks Partial tick for smooth interpolation (0.0 to 1.0)
+     * @param parent The parent celestial body that this body orbits
+     * @return A Vector3d representing the celestial body's position in space
+     */
+    Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent);
 
     /**
      * Returns the type identifier for this provider.

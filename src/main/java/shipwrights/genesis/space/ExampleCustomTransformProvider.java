@@ -55,12 +55,12 @@ public class ExampleCustomTransformProvider implements CustomTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation(long ticks, float subticks) {
+    public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
         return rotation;
     }
 
     @Override
-    public Vector3d getCurrentPos(long ticks, float subticks) {
+    public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
         return new Vector3d(x, y, z);
     }
 
