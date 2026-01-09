@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.util;
+package shipwrights.dataplanets.runtimeRegistration;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Lifecycle;
@@ -19,7 +19,6 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelResource;
 import shipwrights.dataplanets.DataplanetsMod;
-import shipwrights.dataplanets.systemCreation.DimensionManager;
 import shipwrights.genesis.mixin.MinecraftServerAccessor;
 
 import java.io.IOException;

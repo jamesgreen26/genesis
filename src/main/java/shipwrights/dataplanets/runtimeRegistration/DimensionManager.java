@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.systemCreation;
+package shipwrights.dataplanets.runtimeRegistration;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;
@@ -23,10 +23,12 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
 import net.minecraft.world.level.Level;
+import shipwrights.dataplanets.DPPackets;
 import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.genesis.mixin.MinecraftServerAccessor;
 
@@ -95,7 +97,7 @@ public class DimensionManager {
         server.markWorldsDirty();
 
         MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(newLevel));
-//        DPPackets.sendToAll(DPPackets.INSTANCE,new UpdateDimensionsPacket(Set.of(levelKey), true));
+        DPPackets.sendToAll(DPPackets.INSTANCE,new UpdateDimensionsPacket(Set.of(levelKey), true));
     }
 
     public void queueLevelForRegistration(ResourceKey<Level> levelKey, LevelStem stem){

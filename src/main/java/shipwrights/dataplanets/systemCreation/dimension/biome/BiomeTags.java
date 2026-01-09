@@ -7,7 +7,7 @@ import net.minecraft.world.level.biome.Biome;
 import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 
 public class BiomeTags {
     public static final TagKey<Biome> HAS_WEATHER_STATION = create("has_weather_station");

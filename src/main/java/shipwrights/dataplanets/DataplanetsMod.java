@@ -1,12 +1,10 @@
 package shipwrights.dataplanets;
 
 import com.tterrag.registrate.Registrate;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -15,12 +13,8 @@ import shipwrights.dataplanets.registry.DPBlocks;
 import shipwrights.dataplanets.registry.DPEntities;
 import shipwrights.dataplanets.registry.DPItems;
 import shipwrights.dataplanets.systemCreation.naming.FantasySystemNameGenerator;
-import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.util.RegistryUtil;
-import shipwrights.dataplanets.util.ServerPhase;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 import shipwrights.genesis.GenesisMod;
-
-import java.util.List;
 
 @Mod.EventBusSubscriber
 @Mod(DataplanetsMod.MOD_ID)
@@ -38,6 +32,7 @@ public class DataplanetsMod {
         DPItems.init();
         DPBlocks.init();
         DPEntities.init();
+        DPPackets.init();
     }
 
 

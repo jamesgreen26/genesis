@@ -6,6 +6,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import shipwrights.dataplanets.runtimeRegistration.UpdateDimensionsPacket;
 
 public class DPPackets {
     private static final String PROTOCOL_VERSION = "1";
@@ -28,4 +29,7 @@ public class DPPackets {
         channel.send(ALL.with(()->channel), packet);
     }
 
+    public static void init() {
+        INSTANCE.registerMessage(0, UpdateDimensionsPacket.class, UpdateDimensionsPacket::write, UpdateDimensionsPacket::read, UpdateDimensionsPacket::handle);
+    }
 }

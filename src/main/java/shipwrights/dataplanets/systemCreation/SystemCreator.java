@@ -18,8 +18,8 @@ import shipwrights.dataplanets.systemCreation.naming.SystemNameGenerator;
 import shipwrights.dataplanets.systemCreation.dimension.biome.BiomeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.DimensionTypeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.noise.TerrainGenCreator;
-import shipwrights.dataplanets.util.RegistryUtil;
-import shipwrights.dataplanets.util.ServerPhase;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.ServerPhase;
 
 import java.util.ArrayList;
 import java.util.List;

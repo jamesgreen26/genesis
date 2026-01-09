@@ -20,7 +20,6 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.DripstoneClusterConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
@@ -31,8 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.systemCreation.dimension.biome.features.CrystalFeature;
-import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 
 import java.util.ArrayList;
 import java.util.List;

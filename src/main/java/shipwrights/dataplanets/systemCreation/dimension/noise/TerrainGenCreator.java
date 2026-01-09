@@ -12,10 +12,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import shipwrights.dataplanets.DataplanetsMod;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 
 import java.util.List;
 

@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import shipwrights.dataplanets.systemCreation.PlanetSource;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.util.ServerPhase;
+import shipwrights.dataplanets.runtimeRegistration.ServerPhase;
 
 public class TestPlanetCreationItem extends Item {
     public TestPlanetCreationItem(Properties arg) {

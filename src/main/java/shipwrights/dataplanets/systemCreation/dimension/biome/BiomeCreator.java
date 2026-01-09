@@ -9,7 +9,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.*;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 
 import java.util.ArrayList;
 import java.util.List;

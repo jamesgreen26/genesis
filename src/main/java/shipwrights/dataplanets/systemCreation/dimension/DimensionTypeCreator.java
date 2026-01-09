@@ -7,11 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraftforge.fml.ModList;
 import shipwrights.dataplanets.compat.Compat;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
-import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 
 import java.util.OptionalLong;
 

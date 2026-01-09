@@ -2,14 +2,8 @@ package shipwrights.dataplanets.compat;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import shipwrights.dataplanets.DataplanetsMod;
-import shipwrights.dataplanets.util.RegistryUtil;
-import shipwrights.dataplanets.util.Color;
-import shipwrights.genesis.GenesisMod;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class GenesisCompat implements Compat{
     @Override

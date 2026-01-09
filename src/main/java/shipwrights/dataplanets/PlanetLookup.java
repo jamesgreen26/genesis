@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import shipwrights.dataplanets.systemCreation.PlanetData;
 import shipwrights.dataplanets.systemCreation.PlanetSource;
 import shipwrights.dataplanets.util.Color;
-import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.runtimeRegistration.RegistryUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
