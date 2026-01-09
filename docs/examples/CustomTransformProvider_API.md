@@ -53,12 +53,12 @@ public class MyCustomProvider implements CustomTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation(long ticks, float subticks) {
+    public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
         return new Quaterniond(); // No rotation
     }
 
     @Override
-    public Vector3d getCurrentPos(long ticks, float subticks) {
+    public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
         // Return your custom position
         return new Vector3d(x, y, z);
     }
@@ -130,14 +130,19 @@ Genesis includes an example implementation at:
 
 ```java
 @Override
-public Vector3d getCurrentPos(long ticks, float subticks) {
-    // Circular orbit with custom radius
+public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
+    // Circular orbit with custom radius, offset by parent position
     double angle = (ticks + subticks) * Math.PI * 2.0 / 20000.0;
     double radius = 500.0;
+
+    // Get parent's position
+    Vector3d parentPos = parent.getCurrentPos(ticks, subticks);
+
+    // Calculate orbit position relative to parent
     return new Vector3d(
-        Math.cos(angle) * radius,
-        0,
-        Math.sin(angle) * radius
+        parentPos.x + Math.cos(angle) * radius,
+        parentPos.y,
+        parentPos.z + Math.sin(angle) * radius
     );
 }
 ```
@@ -146,12 +151,17 @@ public Vector3d getCurrentPos(long ticks, float subticks) {
 
 ```java
 @Override
-public Vector3d getCurrentPos(long ticks, float subticks) {
+public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
     double t = (ticks + subticks) * Math.PI * 2.0 / 20000.0;
+
+    // Get parent's position
+    Vector3d parentPos = parent.getCurrentPos(ticks, subticks);
+
+    // Calculate figure-8 pattern relative to parent
     return new Vector3d(
-        400 * Math.sin(t),
-        200 * Math.sin(2 * t),
-        0
+        parentPos.x + 400 * Math.sin(t),
+        parentPos.y + 200 * Math.sin(2 * t),
+        parentPos.z
     );
 }
 ```
@@ -160,7 +170,7 @@ public Vector3d getCurrentPos(long ticks, float subticks) {
 
 ```java
 @Override
-public Quaterniondc getRotation(long ticks, float subticks) {
+public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
     // Rotate based on time - completes one rotation every 20000 ticks (1000 seconds)
     double angle = (ticks + subticks) * Math.PI * 2.0 / 20000.0;
     return new Quaterniond().rotateY(angle);
@@ -171,10 +181,13 @@ public Quaterniondc getRotation(long ticks, float subticks) {
 
 ```java
 @Override
-public Quaterniondc getRotation(long ticks, float subticks) {
+public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
     // Calculate rotation to always face the parent body
-    Vector3d pos = getCurrentPos(ticks, subticks);
-    Vector3d toParent = new Vector3d(0, 0, 0).sub(pos).normalize();
+    Vector3d myPos = getCurrentPos(ticks, subticks, parent);
+    Vector3d parentPos = parent.getCurrentPos(ticks, subticks);
+
+    // Calculate direction from this body to parent
+    Vector3d toParent = new Vector3d(parentPos).sub(myPos).normalize();
 
     // Create rotation that points toward parent
     Quaterniond rotation = new Quaterniond();
@@ -187,7 +200,7 @@ public Quaterniondc getRotation(long ticks, float subticks) {
 
 ```java
 @Override
-public Quaterniondc getRotation(long ticks, float subticks) {
+public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
     // Tumble on multiple axes like an asteroid
     double t = (ticks + subticks) * Math.PI * 2.0 / 20000.0;
     return new Quaterniond()
@@ -199,7 +212,7 @@ public Quaterniondc getRotation(long ticks, float subticks) {
 
 ## Important Notes
 
-1. **Stateless & Deterministic**: Both `getCurrentPos()` and `getRotation()` should be pure functions that only depend on the `ticks` and `subticks` parameters. Given the same time, they should always return the same result. **Do not mutate internal state** - create and return new objects each time.
+1. **Stateless & Deterministic**: Both `getCurrentPos()` and `getRotation()` should be pure functions that only depend on the `ticks`, `subticks`, and `parent` parameters. Given the same inputs, they should always return the same result. **Do not mutate internal state** - create and return new objects each time.
 
 2. **Thread Safety**: Your provider may be called from multiple threads. Because methods should be stateless (see above), thread safety is automatic if you follow that guideline.
 
@@ -252,9 +265,10 @@ public interface CustomTransformProvider {
      *
      * @param ticks The current game time in ticks
      * @param subticks Partial tick for smooth interpolation (0.0 to 1.0)
+     * @param parent The parent celestial body that this body orbits
      * @return A quaternion representing the celestial body's rotation
      */
-    Quaterniondc getRotation(long ticks, float subticks);
+    Quaterniondc getRotation(long ticks, float subticks, Orbitable parent);
 
     /**
      * Returns the current position of the celestial body at the given time.
@@ -262,9 +276,10 @@ public interface CustomTransformProvider {
      *
      * @param ticks The current game time in ticks
      * @param subticks Partial tick for smooth interpolation (0.0 to 1.0)
+     * @param parent The parent celestial body that this body orbits
      * @return A Vector3d representing the celestial body's position in space
      */
-    Vector3d getCurrentPos(long ticks, float subticks);
+    Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent);
 
     /**
      * Registers a custom transform provider type.
@@ -281,6 +296,7 @@ public interface CustomTransformProvider {
 
 - **`ticks`**: The game time in ticks (20 ticks = 1 second)
 - **`subticks`**: A value between 0.0 and 1.0 representing partial progress through the current tick, used for smooth interpolation between frames
+- **`parent`**: The parent celestial body that this body orbits. Can be used to calculate positions relative to the parent or implement behaviors like tidal locking
 - **Return values**: Always create and return new objects. Don't return mutable fields that could be modified by callers.
 
 ## Questions?
