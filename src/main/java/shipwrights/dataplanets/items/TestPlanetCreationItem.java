@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import shipwrights.dataplanets.PlanetLookup;
 import shipwrights.dataplanets.systemCreation.PlanetSource;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.runtimeRegistration.ServerPhase;
@@ -24,7 +25,7 @@ public class TestPlanetCreationItem extends Item {
 
             PlanetSource source = PlanetSource.createRandom(context.nextPlanetName(), context.random);
             creator.createPlanet(source, context);
-
+            PlanetLookup.store(context.server, source);
         }
         return InteractionResultHolder.success(arg2.getItemInHand(arg3));
     }
