@@ -19,6 +19,7 @@ import shipwrights.dataplanets.systemCreation.dimension.biome.BiomeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.DimensionTypeCreator;
 import shipwrights.dataplanets.systemCreation.dimension.noise.TerrainGenCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.util.ServerPhase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,8 @@ import static shipwrights.dataplanets.DataplanetsMod.MOD_ID;
 
 public class SystemCreator {
 
-    public void createSystem(MinecraftServer server, boolean scientificNamingStyle) {
-        SystemCreationContext context = new SystemCreationContext(server, scientificNamingStyle);
+    public void createSystem(MinecraftServer server, boolean scientificNamingStyle, ServerPhase phase) {
+        SystemCreationContext context = new SystemCreationContext(server, scientificNamingStyle, phase);
 
         List<PlanetSource> sources = createPlanetSources(context);
 
@@ -66,7 +67,7 @@ public class SystemCreator {
 
         LevelStem stem = new LevelStem(dimensionTypeHolder, noiseBasedChunkGenerator);
 
-        RegistryUtil.registerLevelStem(context.server, ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name()), stem);
+        RegistryUtil.registerLevelStem(context.server, ResourceLocation.fromNamespaceAndPath(MOD_ID, planetData.name()), stem, context.serverPhase);
 
         return planetData;
     }
@@ -78,10 +79,12 @@ public class SystemCreator {
         public final String systemName;
         public int currentPlanetIndex = 0;
         public Compat compat = Compat.get();
+        public final ServerPhase serverPhase;
 
-        public SystemCreationContext(MinecraftServer server, boolean scientificNameStyle) {
+        public SystemCreationContext(MinecraftServer server, boolean scientificNameStyle, ServerPhase phase) {
             this.server = server;
             this.systemName = SystemNameGenerator.get(scientificNameStyle).generate(random);
+            this.serverPhase = phase;
         }
 
         public String nextPlanetName() {

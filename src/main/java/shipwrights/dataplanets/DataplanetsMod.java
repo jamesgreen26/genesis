@@ -17,6 +17,7 @@ import shipwrights.dataplanets.registry.DPItems;
 import shipwrights.dataplanets.systemCreation.naming.FantasySystemNameGenerator;
 import shipwrights.dataplanets.systemCreation.SystemCreator;
 import shipwrights.dataplanets.util.RegistryUtil;
+import shipwrights.dataplanets.util.ServerPhase;
 import shipwrights.genesis.GenesisMod;
 
 import java.util.List;
@@ -51,8 +52,8 @@ public class DataplanetsMod {
 
         boolean isNewSave = RegistryUtil.setupDatapackFolder(server);
 
-        if (isNewSave) {
-            new SystemCreator().createSystem(server, true);
-        }
+//        if (isNewSave) {
+//            new SystemCreator().createSystem(server, true, ServerPhase.starting);
+//        }
     }
 }

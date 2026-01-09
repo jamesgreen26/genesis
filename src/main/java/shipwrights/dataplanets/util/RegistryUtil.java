@@ -19,6 +19,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelResource;
 import shipwrights.dataplanets.DataplanetsMod;
+import shipwrights.dataplanets.systemCreation.DimensionManager;
 import shipwrights.genesis.mixin.MinecraftServerAccessor;
 
 import java.io.IOException;
@@ -53,9 +54,13 @@ public class RegistryUtil {
     public static void registerLevelStem(
             MinecraftServer server,
             ResourceLocation resourceLocation,
-            LevelStem levelStem
-    ) {
-        registerThing(server, Registries.LEVEL_STEM, ResourceKey.create(Registries.LEVEL_STEM, resourceLocation), levelStem);
+            LevelStem levelStem,
+            ServerPhase serverPhase) {
+        if (serverPhase == ServerPhase.starting) {
+            registerThing(server, Registries.LEVEL_STEM, ResourceKey.create(Registries.LEVEL_STEM, resourceLocation), levelStem);
+        } else {
+            DimensionManager.INSTANCE.queueLevelForRegistration(ResourceKey.create(Registries.DIMENSION, resourceLocation), levelStem);
+        }
         writeToDatapack(server, resourceLocation, "dimension", LevelStem.CODEC, levelStem);
     }
 
@@ -75,7 +80,6 @@ public class RegistryUtil {
             PlacedFeature placedFeature
     ) {
         registerThing(server, Registries.PLACED_FEATURE, ResourceKey.create(Registries.PLACED_FEATURE, resourceLocation), placedFeature);
-        //TODO write to datapack
         writeToDatapack(server, resourceLocation, "worldgen/placed_feature", PlacedFeature.DIRECT_CODEC, placedFeature);
 
     }
@@ -86,7 +90,6 @@ public class RegistryUtil {
             ConfiguredFeature<?, ?> configuredFeature
     ) {
         registerThing(server, Registries.CONFIGURED_FEATURE, ResourceKey.create(Registries.CONFIGURED_FEATURE, resourceLocation), configuredFeature);
-        //TODO write to datapack
         writeToDatapack(server, resourceLocation, "worldgen/configured_feature", ConfiguredFeature.DIRECT_CODEC, configuredFeature);
 
     }

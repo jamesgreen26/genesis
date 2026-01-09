@@ -16,6 +16,7 @@ public class DPItems {
     public static ItemEntry<Item> NEUM_TRACKS = DataplanetsMod.REGISTRATE.item("neum_tracks",Item::new).properties((a)->a).lang("Neum Tracks").register();
     public static ItemEntry<Item> NEUM_HEAD = DataplanetsMod.REGISTRATE.item("neum_head",Item::new).properties((a)->a).lang("Neum Head").register();
     public static ItemEntry<SpaceHelmetItem> SPACE_HELMET = DataplanetsMod.REGISTRATE.item("breathing_helmet",SpaceHelmetItem::new).properties((a)->a).lang("Space Helmet").register();
+    public static ItemEntry<TestPlanetCreationItem> CREATE_PLANET_ITEM = DataplanetsMod.REGISTRATE.item("test_planet_creator",TestPlanetCreationItem::new).properties((a)->a).lang("Test Planet Creator").register();
 
     public static final SpaceSuitArmourMaterial SPACE_SUIT_ARMOUR = new SpaceSuitArmourMaterial();
     public static ItemEntry<SpaceArmourItem> SPACE_SUIT_HELMET = DataplanetsMod.REGISTRATE.item("space_helmet", a->new SpaceArmourItem(SPACE_SUIT_ARMOUR, SpaceArmourItem.Type.HELMET,a)).properties((a)->a).lang("Space Helmet").register();
