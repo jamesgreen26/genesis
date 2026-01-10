@@ -18,11 +18,7 @@ import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
-import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
 import shipwrights.genesis.space.ExampleCustomTransformProvider;
-import shipwrights.genesis.space.registry.SpaceRegistrySyncPacket;
-import shipwrights.genesis.networking.VoidEngineSoundPacket;
-import shipwrights.genesis.networking.WormholeTravelSoundPacket;
 import shipwrights.genesis.content.particle.GenesisParticles;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.space.OrbitingBody;
@@ -59,29 +55,8 @@ public final class GenesisMod {
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
 
-        GenesisNetworking.INSTANCE.messageBuilder(WormholeTravelSoundPacket.class, 0)
-                .encoder(WormholeTravelSoundPacket::encode)
-                .decoder(WormholeTravelSoundPacket::decode)
-                .consumerMainThread(WormholeTravelSoundPacket::handle)
-                .add();
-
-        GenesisNetworking.INSTANCE.messageBuilder(VoidEngineSoundPacket.class, 1)
-                .encoder(VoidEngineSoundPacket::encode)
-                .decoder(VoidEngineSoundPacket::decode)
-                .consumerMainThread(VoidEngineSoundPacket::handle)
-                .add();
-
-        GenesisNetworking.INSTANCE.messageBuilder(StopVoidEngineStartSoundPacket.class, 2)
-                .encoder(StopVoidEngineStartSoundPacket::encode)
-                .decoder(StopVoidEngineStartSoundPacket::decode)
-                .consumerMainThread(StopVoidEngineStartSoundPacket::handle)
-                .add();
-
-        GenesisNetworking.INSTANCE.messageBuilder(SpaceRegistrySyncPacket.class, 3)
-                .encoder(SpaceRegistrySyncPacket::encode)
-                .decoder(SpaceRegistrySyncPacket::decode)
-                .consumerMainThread(SpaceRegistrySyncPacket::handle)
-                .add();
+        // Register packet handlers
+        GenesisNetworking.init();
 
         // Register custom transform providers
         ExampleCustomTransformProvider.register();
