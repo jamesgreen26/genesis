@@ -35,7 +35,7 @@ public class SpaceArmourMaterial implements ArmorMaterial {
 
     @Override
     public String getName() {
-        return "dataplanets:space_suit";
+        return "genesis:space_suit";
     }
 
     @Override
@@ -45,6 +45,6 @@ public class SpaceArmourMaterial implements ArmorMaterial {
 
     @Override
     public float getKnockbackResistance() {
-        return 1;
+        return 0;
     }
 }

@@ -24,13 +24,11 @@
     "FallingBlockEntityMixin",
     "LevelChunkMixin",
     "LivingEntityMixin",
-    "MinecraftServerAccessor",
     "MinecraftServerMixin",
     "ServerLevelMixin",
     "VSBlockItemMixin",
     "VSExplosionForceMixin",
     "VSMountedCameraMixin",
-    "dataplanets.LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
