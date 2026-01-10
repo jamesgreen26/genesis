@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.RenderType;
 
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class GenesisClientSetup {
+    @SuppressWarnings("removal")
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
