@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Unique;
 import shipwrights.dataplanets.MutableTags;
 import shipwrights.dataplanets.PlanetLookup;
-import shipwrights.dataplanets.items.SpaceArmourItem;
+import shipwrights.genesis.content.item.SpaceArmourItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

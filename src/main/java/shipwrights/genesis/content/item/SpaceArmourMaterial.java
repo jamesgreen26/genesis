@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.items;
+package shipwrights.genesis.content.item;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -7,7 +7,7 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 
-public class SpaceSuitArmourMaterial implements ArmorMaterial {
+public class SpaceArmourMaterial implements ArmorMaterial {
     @Override
     public int getDurabilityForType(ArmorItem.Type arg) {
         return 200;

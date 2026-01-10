@@ -1,6 +1,7 @@
 package shipwrights.genesis.content.item;
 
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.block.GenesisBlocks;
@@ -293,4 +294,11 @@ public class GenesisItems {
         () -> new BlockItem(GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> TEST_ITEM = ITEMS.register("test_item",()->new TestItem(new Item.Properties()));
+
+    public static final SpaceArmourMaterial SPACE_ARMOUR_MATERIAL = new SpaceArmourMaterial();
+    public static final RegistryObject<Item> SPACE_HELMET = ITEMS.register("space_helmet", ()-> new SpaceArmourItem(SPACE_ARMOUR_MATERIAL, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistryObject<Item> SPACE_CHESTPLATE = ITEMS.register("space_chestplate", ()-> new SpaceArmourItem(SPACE_ARMOUR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistryObject<Item> SPACE_LEGGINGS = ITEMS.register("space_leggings", ()-> new SpaceArmourItem(SPACE_ARMOUR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final RegistryObject<Item> SPACE_BOOTS = ITEMS.register("space_boots", ()-> new SpaceArmourItem(SPACE_ARMOUR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Properties()));
+
 }

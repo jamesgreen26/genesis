@@ -1,10 +1,11 @@
 package shipwrights.dataplanets.registry;
 
 import shipwrights.dataplanets.DataplanetsMod;
-import shipwrights.dataplanets.items.SpaceArmourItem;
+import shipwrights.genesis.content.item.SpaceArmourItem;
 import shipwrights.dataplanets.items.*;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.world.item.Item;
+import shipwrights.genesis.content.item.SpaceArmourMaterial;
 
 public class DPItems {
 
@@ -18,7 +19,7 @@ public class DPItems {
     public static ItemEntry<SpaceHelmetItem> SPACE_HELMET = DataplanetsMod.REGISTRATE.item("breathing_helmet",SpaceHelmetItem::new).properties((a)->a).lang("Space Helmet").register();
     public static ItemEntry<TestPlanetCreationItem> CREATE_PLANET_ITEM = DataplanetsMod.REGISTRATE.item("test_planet_creator",TestPlanetCreationItem::new).properties((a)->a).lang("Test Planet Creator").register();
 
-    public static final SpaceSuitArmourMaterial SPACE_SUIT_ARMOUR = new SpaceSuitArmourMaterial();
+    public static final SpaceArmourMaterial SPACE_SUIT_ARMOUR = new SpaceArmourMaterial();
     public static ItemEntry<SpaceArmourItem> SPACE_SUIT_HELMET = DataplanetsMod.REGISTRATE.item("space_helmet", a->new SpaceArmourItem(SPACE_SUIT_ARMOUR, SpaceArmourItem.Type.HELMET,a)).properties((a)->a).lang("Space Helmet").register();
     public static ItemEntry<SpaceArmourItem> SPACE_SUIT_CHEST = DataplanetsMod.REGISTRATE.item("space_chestplate",a->new SpaceArmourItem(SPACE_SUIT_ARMOUR, SpaceArmourItem.Type.CHESTPLATE,a)).properties((a)->a).lang("Space Chestplate").register();
     public static ItemEntry<SpaceArmourItem> SPACE_SUIT_LEGS = DataplanetsMod.REGISTRATE.item("space_leggings",a->new SpaceArmourItem(SPACE_SUIT_ARMOUR, SpaceArmourItem.Type.LEGGINGS,a)).properties((a)->a).lang("Space Leggings").register();

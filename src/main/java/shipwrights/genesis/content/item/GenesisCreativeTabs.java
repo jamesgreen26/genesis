@@ -37,7 +37,10 @@ public class GenesisCreativeTabs {
                 output.accept(GenesisItems.VOID_ENGINE_FRAME.get());
                 output.accept(GenesisItems.VOID_ENGINE_VIEWPORT.get());
                 output.accept(GenesisItems.VOID_CORE.get());
-                output.accept(shipwrights.genesis.content.fluid.GenesisFluids.MIASMA.getBucket().get());
+                output.accept(GenesisItems.SPACE_HELMET.get());
+                output.accept(GenesisItems.SPACE_CHESTPLATE.get());
+                output.accept(GenesisItems.SPACE_LEGGINGS.get());
+                output.accept(GenesisItems.SPACE_BOOTS.get());
                 addPaintings(parameters, output);
             })
             .build());
@@ -105,6 +108,7 @@ public class GenesisCreativeTabs {
                         output.accept(GenesisItems.WITHERING_WILLOW_LOG.get());
                         output.accept(GenesisItems.WITHERING_WILLOW_BRANCH.get());
                         output.accept(GenesisItems.WITHERING_WILLOW_LEAVES.get());
+                        output.accept(shipwrights.genesis.content.fluid.GenesisFluids.MIASMA.getBucket().get());
                         for (var item : GenesisItems.DYNAMIC_ITEMS.values()) {
                             if (alreadyAdded.contains(item.getId().getPath())) {
                                 continue;

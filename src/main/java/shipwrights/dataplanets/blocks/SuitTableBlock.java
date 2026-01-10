@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import shipwrights.dataplanets.MutableTags;
-import shipwrights.dataplanets.items.SpaceArmourItem;
+import shipwrights.genesis.content.item.SpaceArmourItem;
 import shipwrights.dataplanets.registry.DPBlocks;
 
 public class SuitTableBlock extends BaseEntityBlock {

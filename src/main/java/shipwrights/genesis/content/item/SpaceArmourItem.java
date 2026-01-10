@@ -1,4 +1,4 @@
-package shipwrights.dataplanets.items;
+package shipwrights.genesis.content.item;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
