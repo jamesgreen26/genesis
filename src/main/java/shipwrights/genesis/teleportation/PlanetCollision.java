@@ -1,4 +1,4 @@
-package shipwrights.genesis.event;
+package shipwrights.genesis.teleportation;
 
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
@@ -19,7 +19,6 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.OrbitingBody;
 import shipwrights.genesis.space.SpaceLevel;
 import shipwrights.genesis.ship.ShipLandingAttachment;
-import shipwrights.genesis.teleportation.TeleportationHandler;
 
 import java.util.HashMap;
 import java.util.List;

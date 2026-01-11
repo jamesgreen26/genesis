@@ -1,4 +1,4 @@
-package shipwrights.genesis.event;
+package shipwrights.genesis.teleportation;
 
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
@@ -15,7 +15,6 @@ import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.space.OrbitingBody;
-import shipwrights.genesis.teleportation.TeleportationHandler;
 
 import static shipwrights.genesis.ship.VSUtils.getLoadedShipsInLevel;
 

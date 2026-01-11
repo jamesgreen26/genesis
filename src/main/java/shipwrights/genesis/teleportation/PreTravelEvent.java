@@ -1,4 +1,4 @@
-package shipwrights.genesis.event;
+package shipwrights.genesis.teleportation;
 
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
