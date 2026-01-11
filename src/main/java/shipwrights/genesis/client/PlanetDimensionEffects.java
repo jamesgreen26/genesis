@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -119,11 +120,22 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             Vector3dc scaledOffset = actualOffset.mul(requiredScaling, new Vector3d());
 
             // TODO should not write depth
-            SimplePlanetRenderer.RenderPlanetAt(otherBody.getID(), poseStack, scaledOffset.x(), scaledOffset.y(), scaledOffset.z(), actualHalfSize * requiredScaling, otherBody.getRotation(ticks, partialTick), lightOffset);
+            SimplePlanetRenderer.RenderPlanetAt(otherBody.getID(), poseStack, scaledOffset.x(), scaledOffset.y(), scaledOffset.z(), actualHalfSize * requiredScaling, otherBody.getRotation(ticks, partialTick), lightOffset, 1.0f);
         }
 
 
         poseStack.popPose();
+        LocalPlayer player = Minecraft.getInstance().player;
+
+        if (player != null) {
+            double planetFadeIn = (player.getEyePosition(partialTick).y - (desiredDistance + 128)) /128;
+            double halfExtent = body.getActualSize() * 8 / Math.max(planetFadeIn + 1, 1);
+
+            if (planetFadeIn > -0.5) {
+                float alpha = Math.max(Math.min(1f, (float) planetFadeIn), 0);
+                SimplePlanetRenderer.RenderPlanetAt(body.getID(), poseStack, 0, -2 * desiredDistance - (halfExtent * 0.5), 0, halfExtent, new Quaterniond(), lightOrigin.normalize(new Vector3d()), alpha);
+            }
+        }
 
         return true;
     }

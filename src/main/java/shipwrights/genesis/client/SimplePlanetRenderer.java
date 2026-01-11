@@ -13,7 +13,7 @@ import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderT
 
 public class SimplePlanetRenderer {
 
-    public static void RenderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, Vector3dc lightOffset) {
+    public static void RenderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, Vector3dc lightOffset, float alpha) {
         // Get the texture for this planet
         ResourceLocation textureLocation = PlanetTextures.getTexture(planetID);
         if (textureLocation == null) {
@@ -50,12 +50,12 @@ public class SimplePlanetRenderer {
         float third = 1.0f / 3.0f;
         float twoThirds = 2.0f / 3.0f;
 
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f);        // South face (+Z)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f);        // North face (-Z)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f);       // West face (-X)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f);            // East face (+X)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f);       // Down face (-Y)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f);        // Up face (+Y)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f, alpha);        // South face (+Z)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f, alpha);        // North face (-Z)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f, alpha);       // West face (-X)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f, alpha);            // East face (+X)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f, alpha);       // Down face (-Y)
+        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f, alpha);        // Up face (+Y)
 
 
         // End batch to flush rendering
@@ -68,25 +68,25 @@ public class SimplePlanetRenderer {
                                             float x2, float y2, float z2,
                                             float x3, float y3, float z3,
                                             float x4, float y4, float z4,
-                                            float u1, float v1, float u2, float v2) {
-        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, lightDir, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, lightDir, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, lightDir, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, lightDir, rotation);
+                                            float u1, float v1, float u2, float v2, float alpha) {
+        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, lightDir, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, lightDir, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, lightDir, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, lightDir, rotation, alpha);
     }
 
     private static void addTexturedVertexWithLighting(Matrix4f matrix, VertexConsumer buffer,
                                                       float x, float y, float z,
                                                       float u, float v,
-                                                      Vector3d lightDir, Quaternionf rotation) {
+                                                      Vector3d lightDir, Quaternionf rotation, float alpha) {
         Vector3f vertexNormal = new Vector3f(x, y, z).normalize();
         rotation.transform(vertexNormal);
 
         Vector3d worldNormal = new Vector3d(vertexNormal.x, vertexNormal.y, vertexNormal.z);
         float lighting = (float) Math.max(0.05, worldNormal.dot(lightDir)); // Minimum ambient lighting
 
-        int litValue = (int) (255 * lighting);
+        int litValue = (int) (255 * lighting * alpha);
 
-        buffer.vertex(matrix, x, y, z).color(litValue, litValue, litValue, 255).uv(u, v).endVertex();
+        buffer.vertex(matrix, x, y, z).color(litValue, litValue, litValue, (int) (255 * alpha)).uv(u, v).endVertex();
     }
 }
