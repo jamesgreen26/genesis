@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.*;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import java.lang.Math;
 
@@ -16,10 +17,9 @@ public class SunRenderer {
             (float) camera.getPosition().x,
             (float) camera.getPosition().y,
             (float) camera.getPosition().z
-        );
+        ).sub((float) center.x(), (float) center.y(), (float) center.z());
 
         float halfSize = (float) size / 2;
-
 
         ShaderInstance shader = ShaderRegistry.SUN_SHADER.getInstance().get();
         if (shader != null) {
@@ -41,9 +41,7 @@ public class SunRenderer {
             throw new RuntimeException(e);
         }
 
-        matrix.translate((float) -camera.getPosition().x,
-                (float) -camera.getPosition().y,
-                (float) -camera.getPosition().z);
+        matrix.translate(cameraPos.negate(new Vector3f()));
 
         matrix.rotate(new Quaternionf().rotationXYZ(0, 0, 0));
 
