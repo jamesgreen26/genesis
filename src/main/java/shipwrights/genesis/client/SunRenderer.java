@@ -3,23 +3,23 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.world.phys.Vec3;
 import org.joml.*;
 
 import java.lang.Math;
 
 public class SunRenderer {
-    public static void renderSun(Camera camera, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation) {
+    public static void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation) {
 
-        Vector3f cameraPos = new Vector3f(
-            (float) camera.getPosition().x,
-            (float) camera.getPosition().y,
-            (float) camera.getPosition().z
+        Vector3f cameraPos0 = new Vector3f(
+            (float) cameraPos.x,
+            (float) cameraPos.y,
+            (float) cameraPos.z
         ).sub((float) center.x(), (float) center.y(), (float) center.z());
 
         // Transform camera position into sun's local rotated space
-        Vector3f rotatedCameraPos = new Vector3f(cameraPos);
+        Vector3f rotatedCameraPos = new Vector3f(cameraPos0);
         new Quaternionf(localRotation).conjugate().transform(rotatedCameraPos);
 
         float halfSize = (float) size / 2;
@@ -44,7 +44,7 @@ public class SunRenderer {
             throw new RuntimeException(e);
         }
 
-        matrix.translate(cameraPos.negate(new Vector3f()));
+        matrix.translate(cameraPos0.negate(new Vector3f()));
 
         matrix.rotate(new Quaternionf(localRotation));
 

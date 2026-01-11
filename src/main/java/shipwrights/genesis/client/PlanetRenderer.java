@@ -127,7 +127,7 @@ public class PlanetRenderer {
         GL11.glDepthMask(true);
 
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(event.getCamera(), event.getPoseStack(), sunBuffer, 1440, new Vector3d(), new Quaterniond());
+        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, 1440, new Vector3d(), new Quaterniond());
         bufferSource.endBatch(getSunRenderType());
 
         RenderSystem.enableDepthTest();

@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -105,6 +106,24 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         double desiredDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 2;
 
+        // Render the star
+        if (star.isPresent()) {
+            Star starBody = star.get().celestial;
+            Vector3dc actualOffset = starBody.getCurrentPos(ticks, partialTick).sub(origin, new Vector3d());
+            double actualDistance = actualOffset.length();
+            double requiredScaling = desiredDistance / actualDistance;
+            double actualSize = starBody.getActualSize();
+            Vector3dc scaledOffset = actualOffset.mul(requiredScaling, new Vector3d());
+
+            // Set up buffer for sun rendering
+            MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+            var renderType = ShaderRegistry.getSunRenderType();
+            VertexConsumer buffer = bufferSource.getBuffer(renderType);
+
+            SunRenderer.renderSun(new Vec3(0,0,0), poseStack, buffer, actualSize * requiredScaling, scaledOffset, starBody.getRotation(ticks, partialTick));
+
+            bufferSource.endBatch(renderType);
+        }
 
         for (var otherBody : spaceRegistry.getAllOrbitingBodies().stream()
                 .sorted(Comparator.comparingDouble(
