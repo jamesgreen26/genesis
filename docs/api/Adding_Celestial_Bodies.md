@@ -18,7 +18,7 @@ For example: `data/genesis/system_config/builtin.json`
     {
       "ID": "genesis:sun",
       "temperature": 1.0,
-      "size": 1440.0,
+      "size": 15.0,
       "x": 0.0,
       "y": 0.0,
       "z": 0.0
@@ -52,14 +52,14 @@ For example: `data/genesis/system_config/builtin.json`
 
 Stars are fixed-position celestial objects that emit light.
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `ID` | String | Yes | Resource location identifier for the star |
-| `temperature` | Number | Yes | Temperature of the star (affects color/brightness, 1.0 = Sun) |
-| `size` | Number | Yes | Visual size of the star in the sky |
-| `x` | Number | Yes | X position in space |
-| `y` | Number | Yes | Y position in space |
-| `z` | Number | Yes | Z position in space |
+| Property | Type | Required | Description                                                          |
+|----------|------|----------|----------------------------------------------------------------------|
+| `ID` | String | Yes | Resource location identifier for the star                            |
+| `temperature` | Number | Yes | Temperature of the star (affects color/brightness, 1.0 = Sun)        |
+| `size` | Number | Yes | Visual size of the star (1.0 = Earth size, 15.0 = Sun size) |
+| `x` | Number | Yes | X position in space                                                  |
+| `y` | Number | Yes | Y position in space                                                  |
+| `z` | Number | Yes | Z position in space                                                  |
 
 ## Orbiting Body Properties
 
@@ -150,9 +150,9 @@ public class MyMod {
             Star customStar = new Star(
                 "mymod:custom_star",  // ID
                 1.2,                  // temperature
-                1500.0,               // size
-                100.0,                // x
-                0.0,                  // y
+                20.0,                 // size
+                100000.0,             // x
+                50000.0,              // y
                 0.0                   // z
             );
             registerEvent.accept(customStar.getID(), customStar);
