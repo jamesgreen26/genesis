@@ -13,10 +13,9 @@ import org.joml.Vector3dc;
 import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.ship.ShipLandingAttachment;
 import shipwrights.genesis.space.OrbitingBody;
 
-import static shipwrights.genesis.ship.VSUtils.getLoadedShipsInLevel;
+import static shipwrights.genesis.teleportation.VSUtils.getLoadedShipsInLevel;
 
 public class AtmosphericCollision {
 	private static final Logger LOGGER = GenesisMod.LOGGER;

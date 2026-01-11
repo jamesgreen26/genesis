@@ -20,7 +20,7 @@ import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.space.ExampleCustomTransformProvider;
 import shipwrights.genesis.content.particle.GenesisParticles;
-import shipwrights.genesis.ship.ShipLandingAttachment;
+import shipwrights.genesis.teleportation.ShipLandingAttachment;
 import shipwrights.genesis.space.OrbitingBody;
 import shipwrights.genesis.space.registry.SpaceRegistry;
 import shipwrights.genesis.teleportation.TeleportationHandler;

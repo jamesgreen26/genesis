@@ -1,4 +1,4 @@
-package shipwrights.genesis.ship;
+package shipwrights.genesis.teleportation;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
-import org.valkyrienskies.core.api.ships.ServerShip;
 
 import java.util.HashMap;
 import java.util.Map;

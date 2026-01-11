@@ -1,4 +1,4 @@
-package shipwrights.genesis.ship;
+package shipwrights.genesis.teleportation;
 
 import net.minecraft.server.level.ServerLevel;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;

@@ -18,13 +18,12 @@ import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.OrbitingBody;
 import shipwrights.genesis.space.SpaceLevel;
-import shipwrights.genesis.ship.ShipLandingAttachment;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static shipwrights.genesis.ship.VSUtils.getLoadedShipsInLevel;
+import static shipwrights.genesis.teleportation.VSUtils.getLoadedShipsInLevel;
 
 public class PlanetCollision {
 	private static final Logger LOGGER = GenesisMod.LOGGER;

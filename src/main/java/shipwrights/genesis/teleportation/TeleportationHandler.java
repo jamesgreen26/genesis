@@ -8,7 +8,6 @@ import org.valkyrienskies.core.internal.ShipTeleportData;
 import org.valkyrienskies.core.internal.joints.VSJoint;
 import org.valkyrienskies.core.internal.world.VsiPhysLevel;
 import org.valkyrienskies.core.internal.world.VsiServerShipWorld;
-import shipwrights.genesis.ship.ShipLandingAttachment;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
