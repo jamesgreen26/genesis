@@ -1,0 +1,44 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.4482456,
+  "downfall": 0.94,
+  "effects": {
+    "sky_color": 0,
+    "foliage_color": 6724126,
+    "grass_color": 7842607,
+    "fog_color": 1352054015,
+    "water_color": 4159204,
+    "water_fog_color": 2046834
+  },
+  "carvers": {
+    "air": [
+      "minecraft:canyon",
+      "minecraft:cave",
+      "minecraft:cave_extra_underground"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    ["genesis:hematite_disk", "genesis:malachite_disk"],
+    ["genesis:constant_chalcopyrite_disk", "genesis:malachite_delta"],
+    ["genesis:chalcopyrite_sprouts_patch","genesis:hematite_sprouts_patch","genesis:malachite_sprouts_patch","genesis:chalcopyrite_bramble_patch","genesis:malachite_bramble_patch","genesis:hematite_bramble_patch","genesis:hematite_chalcopyrite_disk"],
+    []
+  ],
+  "spawners": {
+    "monster": [],
+    "creature": [],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {}
+}
