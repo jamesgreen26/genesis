@@ -1,0 +1,48 @@
+{
+  "type": "dataplanets:malachite_dimension_type",
+  "generator": {
+    "biome_source": {
+      "biomes": [
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0,
+            "weirdness": 0.7,
+            "offset": 0,
+            "temperature": 0.4482,
+            "humidity": 0.94,
+            "continentalness": 0.1
+          },
+          "biome": "dataplanets:malachite_barrens"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0,
+            "weirdness": 0.25,
+            "offset": 0,
+            "temperature": 0.5482,
+            "humidity": 0.94,
+            "continentalness": 0.5
+          },
+          "biome": "dataplanets:malachite_bramble"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 0,
+            "weirdness": 0.5,
+            "offset": 0,
+            "temperature": 0.6482,
+            "humidity": 0.94,
+            "continentalness": 0.3
+          },
+          "biome": "dataplanets:malachite_crags"
+        }
+      ],
+      "type": "minecraft:multi_noise"
+    },
+    "settings": "dataplanets:malachite_noise_settings",
+    "type": "minecraft:noise"
+  }
+}

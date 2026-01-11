@@ -1,0 +1,24 @@
+{
+  "variants": {
+    "facing=north": [
+      {"model": "genesis:block/wall_zaplight_spindles_0", "y": 180},
+      {"model": "genesis:block/wall_zaplight_spindles_1", "y": 180},
+      {"model": "genesis:block/wall_zaplight_spindles_2", "y": 180}
+    ],
+    "facing=south": [
+      {"model": "genesis:block/wall_zaplight_spindles_0"},
+      {"model": "genesis:block/wall_zaplight_spindles_1"},
+      {"model": "genesis:block/wall_zaplight_spindles_2"}
+    ],
+    "facing=east": [
+      {"model": "genesis:block/wall_zaplight_spindles_0", "y": 270},
+      {"model": "genesis:block/wall_zaplight_spindles_1", "y": 270},
+      {"model": "genesis:block/wall_zaplight_spindles_2", "y": 270}
+    ],
+    "facing=west": [
+      {"model": "genesis:block/wall_zaplight_spindles_0", "y": 90},
+      {"model": "genesis:block/wall_zaplight_spindles_1", "y": 90},
+      {"model": "genesis:block/wall_zaplight_spindles_2", "y": 90}
+    ]
+  }
+}

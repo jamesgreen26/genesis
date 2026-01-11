@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:block_column",
+  "config": {
+    "state_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "genesis:malachite_bramble",
+        "Properties": {}
+      }
+    },
+    "direction": "up",
+    "allowed_placement": {
+      "type": "minecraft:replaceable"
+    },
+    "prioritize_tip": false,
+    "layers": [
+      {
+        "height": {
+          "type": "minecraft:biased_to_bottom",
+          "value": {
+            "min_inclusive": 1,
+            "max_inclusive": 2
+          }
+        },
+        "provider": {
+          "type": "minecraft:simple_state_provider",
+          "state": {
+            "Name": "genesis:malachite_bramble"
+          }
+        }
+      }
+    ]
+  }
+}

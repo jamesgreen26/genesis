@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "genesis:block/tall_spindle_grass_top"
+  }
+}

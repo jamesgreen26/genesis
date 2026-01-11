@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "genesis:block/verdite_void_coil_top",
+    "side": "genesis:block/verdite_void_coil"
+  }
+}

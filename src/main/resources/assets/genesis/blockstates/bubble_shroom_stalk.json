@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "axis=x": [
+      { "model": "genesis:block/bubble_shroom_stalk_0", "y": 90, "x": 90, "weight": 3},
+      { "model": "genesis:block/bubble_shroom_stalk_1", "y": 90, "x": 90 },
+      { "model": "genesis:block/bubble_shroom_stalk_2", "y": 90, "x": 90 }
+    ],
+    "axis=y": [
+      { "model": "genesis:block/bubble_shroom_stalk_0", "weight": 3 },
+      { "model": "genesis:block/bubble_shroom_stalk_1" },
+      { "model": "genesis:block/bubble_shroom_stalk_2" }
+    ],
+    "axis=z": [
+      { "model": "genesis:block/bubble_shroom_stalk_0", "x": 90, "weight": 3 },
+      { "model": "genesis:block/bubble_shroom_stalk_1", "x": 90 },
+      { "model": "genesis:block/bubble_shroom_stalk_2", "x": 90 }
+    ]
+  }
+}

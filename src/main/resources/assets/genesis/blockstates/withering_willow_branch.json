@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": [
+      {"model": "genesis:block/withering_willow_branch","y": 90,"x": 90},
+      {"model": "genesis:block/withering_willow_spiked_branch","y": 90,"x": 90}
+    ],
+    "axis=y": [
+      {"model": "genesis:block/withering_willow_branch"},
+      {"model": "genesis:block/withering_willow_spiked_branch"}
+    ],
+    "axis=z": [
+      {"model": "genesis:block/withering_willow_branch", "x": 90},
+      {"model": "genesis:block/withering_willow_spiked_branch", "x": 90}
+    ]
+  }
+}

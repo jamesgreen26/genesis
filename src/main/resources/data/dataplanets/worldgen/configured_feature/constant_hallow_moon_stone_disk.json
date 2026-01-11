@@ -1,0 +1,48 @@
+{
+  "type": "minecraft:disk",
+  "config": {
+    "state_provider": {
+      "fallback": {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "genesis:wavy_moon_sand"
+        }
+      },
+      "rules": [
+        {
+          "if_true": {
+            "type": "minecraft:matching_blocks",
+            "offset": [
+              0,
+              -1,
+              0
+            ],
+            "blocks": [
+              "genesis:moon_stone",
+              "genesis:moon_sand",
+              "genesis:wavy_moon_sand",
+              "genesis:hallow_moon_stone"
+            ]
+          },
+          "then": {
+            "type": "minecraft:simple_state_provider",
+            "state": {
+              "Name": "genesis:hallow_moon_stone"
+            }
+          }
+        }
+      ]
+    },
+    "radius": 6,
+    "half_height": 3,
+    "target": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "genesis:hallow_moon_stone",
+        "genesis:moon_stone",
+        "genesis:wavy_moon_sand",
+        "genesis:moon_sand"
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:delta_feature",
+  "config": {
+    "contents": {
+      "Name": "genesis:chalcopyrite_gravel"
+    },
+    "rim": {
+      "Name": "genesis:chalcopyrite_sand"
+    },
+    "size": 6,
+    "rim_size": 2
+  }
+}

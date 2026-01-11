@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
-      "model": "genesis:block/warpstone_ore"
-    }
+    "": [
+      {"model": "genesis:block/warpstone_ore"},
+      {"model": "genesis:block/warpstone_ore_alt"},
+      {"model": "genesis:block/warpstone_ore_alt", "x": 270},
+      {"model": "genesis:block/warpstone_ore_alt", "x": 90}
+    ]
   }
 }

@@ -27,6 +27,7 @@ import team.lodestar.lodestone.systems.postprocess.PostProcessHandler;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 
+@SuppressWarnings("removal")
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class GenesisClientSetup {
     @SuppressWarnings("removal")
@@ -44,6 +45,7 @@ public class GenesisClientSetup {
 
             // IDK why it's whining, it says that it's depreciated for 1.21.4+, but were not on that version sooo
             // also this is how im changing render types for plants
+
             ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.DEAD_MOON_CORAL.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.DEAD_MOON_CORAL_FAN.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(GenesisBlocks.DEAD_MOON_CORAL_WALL_FAN.get(), RenderType.cutout());

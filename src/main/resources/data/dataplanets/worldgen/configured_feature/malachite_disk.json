@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:disk",
+  "config": {
+    "state_provider": {
+      "fallback": {
+        "type": "minecraft:simple_state_provider",
+        "state": {
+          "Name": "genesis:malachite_sand"
+        }
+      },
+      "rules": [
+        {
+          "if_true": {
+            "type": "minecraft:matching_blocks",
+            "offset": [
+              0,
+              -1,
+              0
+            ],
+            "blocks": [
+              "genesis:chalcopyrite_sand",
+              "genesis:chalcopyrite_gravel"
+            ]
+          },
+          "then": {
+            "type": "minecraft:weighted_state_provider",
+            "entries": [
+              {
+                "weight": 1,
+                "data": {
+                  "Name": "genesis:malachite_gravel"
+                }
+              },
+              {
+                "weight": 1,
+                "data": {
+                  "Name": "genesis:malachite_sand"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "radius": 6,
+    "half_height": 4,
+    "target": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "genesis:chalcopyrite_sand",
+        "genesis:chalcopyrite_gravel"
+      ]
+    }
+  }
+}

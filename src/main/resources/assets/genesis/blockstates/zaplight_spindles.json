@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": [
+      {"model": "genesis:block/zaplight_spindles_0", "weight": 1},
+      {"model": "genesis:block/zaplight_spindles_1", "weight": 3},
+      {"model": "genesis:block/zaplight_spindles_2", "weight": 1}
+    ]
+  }
+}

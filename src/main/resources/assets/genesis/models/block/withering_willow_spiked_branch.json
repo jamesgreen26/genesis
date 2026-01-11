@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "genesis:block/withering_willow_spiked_branch"
+  }
+}

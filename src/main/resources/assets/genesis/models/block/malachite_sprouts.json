@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "genesis:block/malachite_sprouts"
+  }
+}

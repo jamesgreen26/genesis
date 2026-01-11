@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "genesis:block/verdite_void_coil",
+        "y": 90,
+        "x": 90
+    },
+    "axis=y": {
+      "model": "genesis:block/verdite_void_coil"
+    },
+    "axis=z": {
+      "model": "genesis:block/verdite_void_coil",
+        "x": 90
+    }
+  }
+}
