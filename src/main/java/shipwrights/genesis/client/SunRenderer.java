@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.*;
-import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import java.lang.Math;
 
@@ -19,13 +18,17 @@ public class SunRenderer {
             (float) camera.getPosition().z
         ).sub((float) center.x(), (float) center.y(), (float) center.z());
 
+        // Transform camera position into sun's local rotated space
+        Vector3f rotatedCameraPos = new Vector3f(cameraPos);
+        new Quaternionf(localRotation).conjugate().transform(rotatedCameraPos);
+
         float halfSize = (float) size / 2;
 
         ShaderInstance shader = ShaderRegistry.SUN_SHADER.getInstance().get();
         if (shader != null) {
              Uniform uniform = shader.getUniform("CameraPosition");
              if (uniform != null) {
-                 uniform.set(cameraPos.x, cameraPos.y, cameraPos.z);
+                 uniform.set(rotatedCameraPos.x, rotatedCameraPos.y, rotatedCameraPos.z);
              }
 
             Uniform uniform1 = shader.getUniform("HalfSize");
@@ -43,7 +46,7 @@ public class SunRenderer {
 
         matrix.translate(cameraPos.negate(new Vector3f()));
 
-        matrix.rotate(new Quaternionf().rotationXYZ(0, 0, 0));
+        matrix.rotate(new Quaternionf(localRotation));
 
 
         addCubeFaceSun(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
