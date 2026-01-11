@@ -3,6 +3,7 @@ package shipwrights.genesis.client.blockentityRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.blockentity.NavProjectorBlockEntity;
 import shipwrights.genesis.space.Orbitable;
@@ -22,12 +23,13 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import java.lang.Math;
 import java.util.Objects;
 
+@SuppressWarnings("deprecation")
 public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavProjectorBlockEntity> {
     public NavProjectorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
     public void render(NavProjectorBlockEntity blockEntity, float partialTick, PoseStack poseStack,
-                      MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+                       @NotNull MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         poseStack.pushPose();
 
         BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
@@ -48,7 +50,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
         Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
         boolean isOnShip = ship != null;
 
-        Vector3dc shipPos = null;
+        Vector3dc currentPos = null;
 
         int scale_factor = 1000;
 
@@ -63,29 +65,43 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        if(!isOnShip) {
+        OrbitingBody currentPlanet = GenesisMod.SPACE_REGISTRY.getOrbitingBody(level.dimension().location());
+
+        if (currentPlanet != null) {
+            Quaterniondc rot = currentPlanet.getRotation(ticks, partialTick).invert(new Quaterniond());
+            poseStack.mulPose(new Quaternionf(rot.x(), rot.y(), rot.z(), rot.w()));
+
+            if (isOnShip) {
+                Quaterniondc rot1 = ship.getTransform().getShipToWorldRotation().invert(new Quaterniond());
+                poseStack.mulPose(new Quaternionf(rot1));
+            }
+
+            currentPos = currentPlanet.getCurrentPos(ticks, partialTick);
+
+            poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
+        } else if(!isOnShip) {
             poseStack.translate((float) -pos.getX() / scale_factor, (float) -pos.getY() / scale_factor, (float) -pos.getZ() / scale_factor);
         } else {
             Quaterniondc rot = ship.getTransform().getShipToWorldRotation().invert(new Quaterniond());
             poseStack.mulPose(new Quaternionf(rot.x(), rot.y(), rot.z(), rot.w()));
-            shipPos = ship.getWorldAABB().center(new Vector3d());
+            currentPos = ship.getWorldAABB().center(new Vector3d());
             ResourceLocation currentDimension = Objects.requireNonNull(blockEntity.getLevel()).dimension().location();
 
             if (currentDimension.toString().equals(GenesisMod.WORMHOLE_DIM.toString())) {
-                shipPos = shipPos.mul(32.0, new Vector3d());
+                currentPos = currentPos.mul(32.0, new Vector3d());
             }
 
-            poseStack.translate((float) -shipPos.x() / scale_factor, (float) -shipPos.y() / scale_factor, (float) -shipPos.z() / scale_factor);
+            poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
         }
 
         // Render planets from Genesis space registry
         for (OrbitingBody body : GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies()) {
-            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick, false);
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, false);
         }
 
         // Render stars
         for (Star star : GenesisMod.SPACE_REGISTRY.getAllStars()) {
-            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, star, isOnShip, shipPos, pos, scale_factor, blockRenderer, ticks, partialTick, true);
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, star, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, true);
         }
 
 
@@ -137,7 +153,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
     }
 
     @Override
-    public boolean shouldRenderOffScreen(NavProjectorBlockEntity blockEntity) {
+    public boolean shouldRenderOffScreen(@NotNull NavProjectorBlockEntity blockEntity) {
         return true;
     }
 }
