@@ -112,6 +112,10 @@ public final class OrbitingBody extends Orbitable.Celestial {
         if (this.customTransformProvider != null) {
             return customTransformProvider.getRotation(ticks, subticks, getParent());
         }
+        // TODO
+        if (dimensionID.equals("minecraft:overworld")) {
+            return new Quaterniond().rotateZ(-Math.PI * 2 * (ticks + subticks) / 1400d);
+        }
         return new Quaterniond().rotateZ(-Math.PI * 2 * (ticks + subticks) / 2400d);
     }
 
