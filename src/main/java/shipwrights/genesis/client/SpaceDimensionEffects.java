@@ -24,8 +24,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DimensionEffects extends DimensionSpecialEffects {
-    public DimensionEffects() {
+public class SpaceDimensionEffects extends DimensionSpecialEffects {
+    public SpaceDimensionEffects() {
         super(Float.NaN, false, SkyType.NONE, false, false);
         createStars();
     }

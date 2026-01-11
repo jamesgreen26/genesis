@@ -23,12 +23,13 @@
     "FallingBlockEntityAccessor",
     "FallingBlockEntityMixin",
     "LevelChunkMixin",
+    "LevelMixin",
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "ServerLevelMixin",
     "VSBlockItemMixin",
     "VSExplosionForceMixin",
-    "VSMountedCameraMixin",
+    "VSMountedCameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1

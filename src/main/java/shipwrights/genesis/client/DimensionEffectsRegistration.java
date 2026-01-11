@@ -4,15 +4,17 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import shipwrights.genesis.GenesisMod;
 
-import static shipwrights.genesis.GenesisMod.SPACE_DIM;
-import static shipwrights.genesis.GenesisMod.WORMHOLE_DIM;
+import static shipwrights.genesis.GenesisMod.*;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class ClientModRegistries {
+public class DimensionEffectsRegistration {
+
     @SubscribeEvent
     public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
-        event.register(SPACE_DIM, new DimensionEffects());
+        event.register(SPACE_DIM, new SpaceDimensionEffects());
         event.register(WORMHOLE_DIM, new WormholeDimensionEffects());
+        event.register(ORBITING_ID, new PlanetDimensionEffects(GenesisMod.SPACE_REGISTRY));
     }
 }

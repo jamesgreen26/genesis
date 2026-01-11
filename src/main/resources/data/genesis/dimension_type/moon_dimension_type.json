@@ -1,6 +1,6 @@
 {
   "infiniburn": "#minecraft:infiniburn_overworld",
-  "effects": "genesis:great_unknown",
+  "effects": "genesis:orbiting",
   "ambient_light": 0.0,
   "piglin_safe": true,
   "has_raids": false,

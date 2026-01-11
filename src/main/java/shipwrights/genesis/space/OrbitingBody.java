@@ -2,17 +2,24 @@ package shipwrights.genesis.space;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 
 import java.util.Optional;
 import java.util.Random;
 
 public final class OrbitingBody extends Orbitable.Celestial {
+
+    private static final Vector3dc EAST = VectorConversionsMCKt.toJOMLD(Direction.EAST.getNormal());
+    private static final Vector3dc UP = VectorConversionsMCKt.toJOMLD(Direction.UP.getNormal());
 
     private final String dimensionID;
     private final String parentID;
@@ -105,7 +112,7 @@ public final class OrbitingBody extends Orbitable.Celestial {
         if (this.customTransformProvider != null) {
             return customTransformProvider.getRotation(ticks, subticks, getParent());
         }
-        return rotation;
+        return new Quaterniond().rotateZ(-Math.PI * 2 * (ticks + subticks) / 2400d);
     }
 
     public double orbitRadius() { return orbitDistance; }
@@ -140,6 +147,40 @@ public final class OrbitingBody extends Orbitable.Celestial {
     public WithDistanceSq withDistanceSq(double distanceSquared) {
         return new WithDistanceSq(this, distanceSquared);
     }
+
+    public Star getStar() {
+        Orbitable starCandidate = this;
+        while (!(starCandidate instanceof Star)) {
+            starCandidate = ((OrbitingBody) starCandidate).getParent();
+        }
+        return (Star) starCandidate;
+    }
+
+    public long getDayTime(long gameTime) {
+        return getDayTime(gameTime, 0);
+    }
+
+    public long getDayTime(long gameTime, float subtick) {
+        Star star = getStar();
+
+        Vector3d toStar = new Vector3d(star.getCurrentPos(gameTime, subtick))
+                .sub(getCurrentPos(gameTime, subtick))
+                .normalize();
+
+        Quaterniondc rot = getRotation(gameTime, subtick);
+
+        Vector3d up = UP.rotate(rot, new Vector3d());
+        Vector3d east = EAST.rotate(rot, new Vector3d());
+
+        double angle = Math.atan2(-east.dot(toStar), up.dot(toStar));
+
+        double d = (angle / (2.0 * Math.PI) + 1.0) % 1.0;
+
+        d = (d + 0.25) % 1.0;
+
+        return Math.round(d * 24000.0);
+    }
+
     public static class WithDistanceSq extends Celestial.WithDistanceSq<OrbitingBody> {
         public WithDistanceSq(OrbitingBody celestial, double distanceSquared) {
             super(celestial, distanceSquared);
