@@ -10,15 +10,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3d;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.OrbitingBody;
 
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,7 +127,7 @@ public class PlanetRenderer {
         GL11.glDepthMask(true);
 
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(event, sunBuffer);
+        renderSun(event.getCamera(), event.getPoseStack(), sunBuffer, 1440, new Vector3d(), new Quaterniond());
         bufferSource.endBatch(getSunRenderType());
 
         RenderSystem.enableDepthTest();

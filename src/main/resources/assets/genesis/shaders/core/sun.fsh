@@ -2,15 +2,14 @@
 
 in vec3 v_camera_pos;
 in vec3 v_entry_position;
+in float v_half_size;
 
 out vec4 frag_color;
 
 const vec3 v_cube_center = vec3(0);
 
-const float cube_half_size = 720.0;
 const vec3 cube_rotationXYZ = vec3(0, 0, 0);
 const float euler = 2.718281828459;
-const float corner_roundness = 0.15; // Higher values = more rounded corners (0.0 = sharp, 0.5 = very round)
 
 float smoothNormalize(float it) {
     return -log(1/euler + pow(euler, -4 * (it + 0.11467)));
@@ -20,7 +19,7 @@ float smoothMax3(vec3 p, float roundness) {
     vec3 q = abs(p);
     float m = max(max(q.x, q.y), q.z);
 
-    return clamp(m, 0, cube_half_size);
+    return clamp(m, 0, v_half_size);
 }
 
 
@@ -102,7 +101,7 @@ void main() {
 
     mat3 rot = rotationMatrix(cube_rotationXYZ);
 
-    float exit_distance = rayBoxIntersection(v_entry_position, ray_direction, v_cube_center, cube_half_size, rot);
+    float exit_distance = rayBoxIntersection(v_entry_position, ray_direction, v_cube_center, v_half_size, rot);
 
     float thickness = exit_distance;
 
@@ -181,7 +180,7 @@ void main() {
         }
     }
 
-    float distanceFromCenter = minDist / cube_half_size;
+    float distanceFromCenter = minDist / v_half_size;
 
     float brightness = 1 - distanceFromCenter;
 
