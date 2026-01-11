@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniondc;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.math.OBB;
 
 public sealed interface Orbitable {
 
@@ -29,6 +30,14 @@ public sealed interface Orbitable {
 
         public double getActualSize() {
             return this.size() * BASE_SIZE;
+        }
+
+        public OBB getOBB(long ticks) {
+            return getOBB(ticks, 0);
+        }
+
+        public OBB getOBB(long ticks, float subticks) {
+            return OBB.createCube(getActualSize(), getRotation(ticks, subticks), getCurrentPos(ticks, subticks));
         }
 
         public abstract Quaterniondc getRotation(long ticks, float subticks);
