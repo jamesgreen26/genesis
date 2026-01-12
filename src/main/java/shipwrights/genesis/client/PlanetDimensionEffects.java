@@ -74,6 +74,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     public boolean renderSky(ClientLevel level, int unused, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
         FogRenderer.setupNoFog();
 
+        //TODO atmosphere + sky
+
         long gameTicks = level.getGameTime();
 
         final OrbitingBody body = GenesisMod.getDataForLevel(level);

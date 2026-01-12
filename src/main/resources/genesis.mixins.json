@@ -6,6 +6,7 @@
   "client": [
     "ChannelAccessor",
     "ChunkBorderRendererMixin",
+    "DimensionSpecialEffectsManagerMixin",
     "EntityRenderDispatcherMixin",
     "FallingBlockRendererMixin",
     "GameRendererMixin",

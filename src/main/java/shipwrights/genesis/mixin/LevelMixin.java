@@ -23,7 +23,7 @@ public abstract class LevelMixin {
     public long getDayTimeWrap(Operation<Long> original) {
         OrbitingBody body = GenesisMod.SPACE_REGISTRY.getOrbitingBody(dimension.location());
 
-        if (body != null && !dimension.location().getNamespace().equals("minecraft")) {
+        if (body != null) {
             return body.getDayTime(getGameTime());
         }
         return original.call();
