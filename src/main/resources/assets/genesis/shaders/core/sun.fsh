@@ -182,7 +182,7 @@ void main() {
 
     float distanceFromCenter = minDist / v_half_size;
 
-    float brightness = 1 - distanceFromCenter;
+    float brightness = max(0.0, 1.0 - distanceFromCenter);
 
     vec3 color = temperatureToColor(pow(0.5 * sin(3.1415 * (sqrt(2 * brightness + 0.25) - 1)) + 0.5, 0.3));
 
