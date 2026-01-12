@@ -42,7 +42,7 @@ public class SimplePlanetRenderer {
 
         float halfSize = (float) halfExtent;
 
-        Vector3d lightDir = new Vector3d(lightOffset).mul(-1);
+        Vector3d lightDir = new Vector3d(lightOffset);
 
         // UV layout (3x2 grid):
         // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
