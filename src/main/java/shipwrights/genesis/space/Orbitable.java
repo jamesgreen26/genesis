@@ -11,6 +11,7 @@ public sealed interface Orbitable {
     double BASE_SIZE = 96;
     double BASE_ORBIT_DISTANCE = 15_000;
     double BASE_ORBIT_TIME = 4_608_000;
+    double BASE_DAY_LENGTH = 24_000;
 
     ResourceLocation getID();
 

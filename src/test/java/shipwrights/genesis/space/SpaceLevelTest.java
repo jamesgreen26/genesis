@@ -171,7 +171,7 @@ class SpaceLevelTest {
         OrbitingBody testBody = new OrbitingBody(
             "test:body1",
             "test:parent",
-            0.5, 50, 1000, 1.0, 1f, 1f, 1f,
+            0.5, 50, 1000, 1.0, 1f, 1f, 1f, 1d,
             new FixedTransformProvider(50, 0, 0)
         );
         addOrbitingBodyToRegistry(testBody, parentStar);
@@ -369,7 +369,7 @@ class SpaceLevelTest {
         OrbitingBody testBody = new OrbitingBody(
             "test:body1",
             "test:parent",
-            0.5, 50, 1000, 1.0, 1f, 1f, 1f,
+            0.5, 50, 1000, 1.0, 1f, 1f, 1f, 1d,
             tickDependentProvider
         );
         addOrbitingBodyToRegistry(testBody, parentStar);
@@ -422,7 +422,7 @@ class SpaceLevelTest {
         OrbitingBody closeBody = new OrbitingBody(
             "test:close_body",
             "test:parent",
-            0.5, 50, 1000, 1.0, 1f, 1f, 1f,
+            0.5, 50, 1000, 1.0, 1f, 1f, 1f, 1d,
             new FixedTransformProvider(200, 0, 0)
         );
 

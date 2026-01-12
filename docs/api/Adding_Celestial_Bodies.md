@@ -42,9 +42,11 @@ For example: `data/genesis/system_config/builtin.json`
       "gravity": 0.1622,
       "r": 0.8,
       "g": 0.8,
-      "b": 0.8
+      "b": 0.8,
+      "dayLength": 0.75
     }
   ]
+}
 }
 ```
 
@@ -73,6 +75,7 @@ Orbiting bodies are planets or moons that orbit around a parent star or planet.
 | `orbitDistance` | Number | Yes | Distance from the parent body (1.0 = Earth's distance from Sun) |
 | `orbitTime` | Number | Yes | Time to complete one orbit (1.0 = Earth year) |
 | `gravity` | Number | Yes | Gravitational strength (1.0 = Earth gravity, 0.1622 = Moon gravity) |
+| `dayLength` | Number | No | Length of one rotation/day (1.0 = Earth day). Default: 1.0 |
 | `r` | Number | No | Red color component (0.0-1.0). Optional fallback if no texture is provided. Default: 0.5 |
 | `g` | Number | No | Green color component (0.0-1.0). Optional fallback if no texture is provided. Default: 0.5 |
 | `b` | Number | No | Blue color component (0.0-1.0). Optional fallback if no texture is provided. Default: 0.5 |
@@ -85,6 +88,7 @@ All orbital mechanics values use Earth as the baseline (1.0):
 - **size**: 1.0 = Earth diameter
 - **orbitDistance**: 1.0 = 1 AU (Earth-Sun distance)
 - **orbitTime**: 1.0 = 1 Earth year (365.25 days)
+- **dayLength**: 1.0 = 1 Earth day (24 hours)
 - **gravity**: 1.0 = Earth gravity (9.8 m/s²)
 
 ### Important Notes
@@ -167,7 +171,9 @@ public class MyMod {
                 1.1,                       // gravity (1.1g)
                 0.7f,                      // red
                 0.5f,                      // green
-                0.3f                       // blue
+                0.3f,                      // blue
+                0.8,                       // day length (0.8 Earth days)
+                null                       // custom transform provider
             );
             registerEvent.accept(customPlanet.getID(), customPlanet);
         });
@@ -191,7 +197,8 @@ public class MyMod {
       "gravity": 0.38,
       "r": 0.8,
       "g": 0.4,
-      "b": 0.3
+      "b": 0.3,
+      "dayLength": 1.03
     }
   ]
 }
@@ -208,7 +215,8 @@ public class MyMod {
       "size": 11.0,
       "orbitDistance": 5.2,
       "orbitTime": 11.86,
-      "gravity": 2.5
+      "gravity": 2.5,
+      "dayLength": 1.41
     },
     {
       "ID": "mymod:moon_1",
@@ -216,7 +224,8 @@ public class MyMod {
       "size": 0.4,
       "orbitDistance": 0.02,
       "orbitTime": 0.01,
-      "gravity": 0.15
+      "gravity": 0.15,
+      "dayLength": 2.7
     },
     {
       "ID": "mymod:moon_2",
@@ -224,7 +233,8 @@ public class MyMod {
       "size": 0.3,
       "orbitDistance": 0.03,
       "orbitTime": 0.02,
-      "gravity": 0.12
+      "gravity": 0.12,
+      "dayLength": 0.86
     }
   ]
 }

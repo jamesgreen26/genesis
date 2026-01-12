@@ -37,13 +37,14 @@ public final class OrbitingBody extends Orbitable.Celestial {
     private final Quaterniondc rotation;
 
     private final @Nullable CustomTransformProvider customTransformProvider;
+    private final double dayLength;
 
     public OrbitingBody(String ID, String parentID, double size, double orbitDistance, double orbitTime, double gravity, float r, float g, float b) {
-        this(ID, parentID, size, orbitDistance, orbitTime, gravity, r, g, b, null);
+        this(ID, parentID, size, orbitDistance, orbitTime, gravity, r, g, b, 1.0, null);
     }
 
     @TestOnly
-    public OrbitingBody(String ID, String parentID, double size, double orbitDistance, double orbitTime, double gravity, float r, float g, float b, @Nullable CustomTransformProvider customTransformProvider) {
+    public OrbitingBody(String ID, String parentID, double size, double orbitDistance, double orbitTime, double gravity, float r, float g, float b, double dayLength, @Nullable CustomTransformProvider customTransformProvider) {
         this.dimensionID = ID;
         this.parentID = parentID;
         this.size = size;
@@ -53,10 +54,18 @@ public final class OrbitingBody extends Orbitable.Celestial {
         this.r = r;
         this.g = g;
         this.b = b;
+        this.dayLength = Math.max(0.001, dayLength);
         this.customTransformProvider = customTransformProvider;
 
         Random rand = new Random(ID.hashCode());
-        this.rotation = new Quaterniond().rotationXYZ(rand.nextDouble(Math.PI), rand.nextDouble(Math.PI), rand.nextDouble(Math.PI));
+        for (int i = 0; i < rand.nextInt(10); i++) {
+            rand.nextDouble();
+        }
+        if (dimensionID.equals("minecraft:overworld")) {
+            this.rotation = new Quaterniond();
+        } else {
+            this.rotation = new Quaterniond().rotationXYZ(rand.nextDouble(Math.PI), rand.nextDouble(Math.PI), rand.nextDouble(Math.PI));
+        }
         this.orbitalTheta = rand.nextDouble() * 2 * Math.PI;   // longitude
         this.orbitalPhi   = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
     }
@@ -112,15 +121,13 @@ public final class OrbitingBody extends Orbitable.Celestial {
         if (this.customTransformProvider != null) {
             return customTransformProvider.getRotation(ticks, subticks, getParent());
         }
-        // TODO
-        if (dimensionID.equals("minecraft:overworld")) {
-            return new Quaterniond().rotateZ(-Math.PI * 2 * (ticks + subticks) / 1400d);
-        }
-        return new Quaterniond().rotateZ(-Math.PI * 2 * (ticks + subticks) / 2400d);
+
+        return new Quaterniond(rotation).rotateZ(-Math.PI * 2 * (ticks + subticks) / (this.dayLength * BASE_DAY_LENGTH));
     }
 
     public double orbitRadius() { return orbitDistance; }
     public double yearLength() { return orbitTime; }
+    public double dayLength() { return dayLength; }
     public double gravity() { return gravity; }
     public float r() { return r; }
     public float g() { return g; }
@@ -141,11 +148,12 @@ public final class OrbitingBody extends Orbitable.Celestial {
             Codec.FLOAT.optionalFieldOf("r", 0.5f).forGetter(OrbitingBody::r),
             Codec.FLOAT.optionalFieldOf("g", 0.5f).forGetter(OrbitingBody::g),
             Codec.FLOAT.optionalFieldOf("b", 0.5f).forGetter(OrbitingBody::b),
+            Codec.DOUBLE.optionalFieldOf("dayLength", 1.0).forGetter(OrbitingBody::dayLength),
             CustomTransformProvider.DISPATCH_CODEC.optionalFieldOf("customTransform").forGetter(
                 body -> Optional.ofNullable(body.customTransformProvider())
             )
-    ).apply(instance, (id, parentId, size, orbitDist, orbitTime, grav, r, g, b, customTransform) ->
-        new OrbitingBody(id, parentId, size, orbitDist, orbitTime, grav, r, g, b, customTransform.orElse(null))
+    ).apply(instance, (id, parentId, size, orbitDist, orbitTime, grav, r, g, b, dayLength, customTransform) ->
+        new OrbitingBody(id, parentId, size, orbitDist, orbitTime, grav, r, g, b, dayLength, customTransform.orElse(null))
     ));
 
     public WithDistanceSq withDistanceSq(double distanceSquared) {
