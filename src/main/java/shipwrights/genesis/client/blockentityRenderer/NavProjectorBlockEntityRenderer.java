@@ -65,11 +65,10 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        OrbitingBody currentPlanet = GenesisMod.SPACE_REGISTRY.getOrbitingBody(level.dimension().location());
+        OrbitingBody currentPlanet = GenesisMod.getDataForLevel(level);
 
         if (currentPlanet != null) {
-            Quaterniondc rot = currentPlanet.getRotation(ticks, partialTick).invert(new Quaterniond());
-            poseStack.mulPose(new Quaternionf(rot.x(), rot.y(), rot.z(), rot.w()));
+            poseStack.mulPose(new Quaternionf(currentPlanet.getRotation(ticks, partialTick)).invert());
 
             if (isOnShip) {
                 Quaterniondc rot1 = ship.getTransform().getShipToWorldRotation().invert(new Quaterniond());

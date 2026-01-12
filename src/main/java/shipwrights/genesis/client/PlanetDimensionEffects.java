@@ -71,8 +71,10 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     }
 
     @Override
-    public boolean renderSky(ClientLevel level, int ticks, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
+    public boolean renderSky(ClientLevel level, int unused, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
         FogRenderer.setupNoFog();
+
+        long gameTicks = level.getGameTime();
 
         final OrbitingBody body = GenesisMod.getDataForLevel(level);
         if (body == null) {
@@ -81,27 +83,28 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         poseStack.pushPose();
 
-        poseStack.rotateAround(new Quaternionf(body.getRotation(ticks, partialTick)).invert(), 0, 0, 0);
+        poseStack.mulPose(new Quaternionf(body.getRotation(gameTicks, partialTick)).invert());
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);
             RenderSystem.setShaderColor(color.x(), color.y(), color.z(), color.w());
             VertexBuffer starBuffer = starBuffers.get(i);
             starBuffer.bind();
+            assert GameRenderer.getPositionShader() != null;
             starBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
             VertexBuffer.unbind();
         }
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
-        Vector3dc origin = body.getCurrentPos(ticks, partialTick);
+        Vector3dc origin = body.getCurrentPos(gameTicks, partialTick);
 
-        Optional<Star.WithDistanceSq> star = SpaceLevel.getNearestStar(origin, ticks);
+        Optional<Star.WithDistanceSq> star = SpaceLevel.getNearestStar(origin, gameTicks);
 
         Vector3dc lightOrigin = origin;
 
         if (star.isPresent()) {
-            lightOrigin = star.get().celestial.getCurrentPos(ticks, partialTick).sub(origin, new Vector3d());
+            lightOrigin = star.get().celestial.getCurrentPos(gameTicks, partialTick).sub(origin, new Vector3d());
         }
 
         double desiredDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 2;
@@ -109,7 +112,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         // Render the star
         if (star.isPresent()) {
             Star starBody = star.get().celestial;
-            Vector3dc actualOffset = starBody.getCurrentPos(ticks, partialTick).sub(origin, new Vector3d());
+            Vector3dc actualOffset = starBody.getCurrentPos(gameTicks, partialTick).sub(origin, new Vector3d());
             double actualDistance = actualOffset.length();
             double requiredScaling = desiredDistance / actualDistance;
             double actualSize = starBody.getActualSize();
@@ -120,18 +123,18 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             var renderType = ShaderRegistry.getSunRenderType();
             VertexConsumer buffer = bufferSource.getBuffer(renderType);
 
-            SunRenderer.renderSun(new Vec3(0,0,0), poseStack, buffer, actualSize * requiredScaling, scaledOffset, starBody.getRotation(ticks, partialTick));
+            SunRenderer.renderSun(new Vec3(0,0,0), poseStack, buffer, actualSize * requiredScaling, scaledOffset, starBody.getRotation(gameTicks, partialTick));
 
             bufferSource.endBatch(renderType);
         }
 
         for (var otherBody : spaceRegistry.getAllOrbitingBodies().stream()
                 .sorted(Comparator.comparingDouble(
-                        b -> -1 * b.getCurrentPos(ticks, partialTick).distanceSquared(origin)
+                        b -> -1 * b.getCurrentPos(gameTicks, partialTick).distanceSquared(origin)
                 )).toList()) {
             if (otherBody == body) continue;
 
-            Vector3dc actualOffset = otherBody.getCurrentPos(ticks, partialTick).sub(origin);
+            Vector3dc actualOffset = otherBody.getCurrentPos(gameTicks, partialTick).sub(origin);
             Vector3dc lightOffset = lightOrigin.sub(actualOffset, new Vector3d()).normalize();
             double actualDistance = actualOffset.length();
             double requiredScaling = desiredDistance / actualDistance;
@@ -139,7 +142,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             Vector3dc scaledOffset = actualOffset.mul(requiredScaling, new Vector3d());
 
             // TODO should not write depth
-            SimplePlanetRenderer.RenderPlanetAt(otherBody.getID(), poseStack, scaledOffset.x(), scaledOffset.y(), scaledOffset.z(), actualHalfSize * requiredScaling, otherBody.getRotation(ticks, partialTick), lightOffset, 1.0f);
+            SimplePlanetRenderer.RenderPlanetAt(otherBody.getID(), poseStack, scaledOffset.x(), scaledOffset.y(), scaledOffset.z(), actualHalfSize * requiredScaling, otherBody.getRotation(gameTicks, partialTick), lightOffset, 1.0f);
         }
 
 
