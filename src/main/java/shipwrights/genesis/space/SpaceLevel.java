@@ -6,6 +6,7 @@ import org.joml.Matrix3d;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 
 import java.util.Comparator;
@@ -67,9 +68,9 @@ public class SpaceLevel {
         Matrix3d invRot = new Matrix3d(rotation).transpose();
 
         // Transform ray into box-local space
-        Vector3d localOrigin = new Vector3d(origin).sub(center).mul(invRot);
+        Vector3d localOrigin = invRot.transform(new Vector3d(origin).sub(center));
 
-        Vector3d localDir = new Vector3d(direction).mul(invRot);
+        Vector3d localDir = invRot.transform(new Vector3d(direction));
 
         return raycastAABB(localOrigin, localDir, localMin, localMax);
     }
@@ -85,15 +86,17 @@ public class SpaceLevel {
 
         for (Orbitable.Celestial body : celestials) {
             Vector3dc pos = body.getCurrentPos(ticks);
-            double oR  = body.getActualSize()/2 + ((body.getActualSize()/2)/2);
+            double oR  = body.getActualSize()/2;
             AABB box = new AABB(pos.x()-oR,pos.y()-oR,pos.z()-oR,pos.x()+oR,pos.y()+oR,pos.z()+oR);
             Quaterniondc rotation = body.getRotation(ticks);
             Vec3 center = box.getCenter();
-            double t = raycastAABB(
+            double t = raycastOBB(
                     origin,
                     direction,
-                    new Vector3d(box.minX,box.minY,box.minZ),
-                    new Vector3d(box.maxX,box.maxY,box.maxZ)
+                    VectorConversionsMCKt.toJOML(center),
+                    new Matrix3d().rotation(rotation),
+                    new Vector3d(-oR, -oR, -oR),
+                    new Vector3d(oR, oR, oR)
             );
 
             if (t < closestT) {
