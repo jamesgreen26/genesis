@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -89,7 +90,10 @@ public final class GenesisMod {
     }
 
     public static long getTicks(Level level) {
-        return level.getGameTime();
+        boolean doDayLight = level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).get();
+        if (doDayLight) {
+            return level.getGameTime();
+        } else return 0;
     }
 
     public static boolean isMiniScale(ResourceLocation dimensionLocation) {
