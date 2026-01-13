@@ -9,14 +9,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import shipwrights.genesis.GenesisMod;
 
-@Mixin(GameRenderer.class)
+@Mixin(value = GameRenderer.class, priority = 500)
 public class GameRendererMixin {
 
     @Inject(method = "getDepthFar", at = @At("HEAD"), cancellable = true)
     public void getDepthFarMixin(CallbackInfoReturnable<Float> cir) {
-        ClientLevel level = Minecraft.getInstance().level;
-        if (level != null && GenesisMod.isSpaceDimension(level)) {
-            cir.setReturnValue(50000f);
-        }
+        cir.setReturnValue(Float.POSITIVE_INFINITY);
     }
 }

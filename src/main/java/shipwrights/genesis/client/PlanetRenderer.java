@@ -15,6 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
@@ -107,21 +108,44 @@ public class PlanetRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
         Level level = Minecraft.getInstance().level;
-        if (level == null || !GenesisMod.isSpaceDimension(level)) {
+
+        if (level == null) {return;}
+
+        OrbitingBody body = GenesisMod.getDataForLevel(level);
+
+        if (body == null && !GenesisMod.isSpaceDimension(level)) {
             return;
         }
+
+        PoseStack poseStack = event.getPoseStack();
+
         renderSpaceScene(
                 level,
+                body,
                 event.getCamera(),
-                event.getPoseStack(),
+                poseStack,
                 event.getPartialTick()
         );
     }
 
 
-    public static void renderSpaceScene(Level level, Camera camera, PoseStack poseStack, float partialTick) {
-
+    public static void renderSpaceScene(Level level, @Nullable OrbitingBody planetWeAreOn, Camera camera, PoseStack poseStack, float partialTick) {
+        poseStack.pushPose();
         long ticks = GenesisMod.getTicks(level);
+
+        if (planetWeAreOn != null) {
+
+            Vec3 cameraPos = camera.getPosition();
+            poseStack.translate(cameraPos.x, cameraPos.y - planetWeAreOn.getActualSize() - 200, cameraPos.z);
+
+            Vector3dc offset = planetWeAreOn.getCurrentPos(ticks, partialTick);
+            Quaternionf rotation = new Quaternionf(planetWeAreOn.getRotation(ticks, partialTick));
+
+            poseStack.mulPoseMatrix(new Matrix4f().rotate(rotation.invert()));
+            poseStack.translate(-offset.x(), -offset.y(), -offset.z());
+
+
+        }
 
         // Separate planets into textured and non-textured
         List<OrbitingBody> proceduralPlanets = new ArrayList<>();
@@ -202,13 +226,22 @@ public class PlanetRenderer {
         GL11.glDepthMask(true);
 
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(camera.getPosition(), poseStack, sunBuffer, 1440, new Vector3d(), new Quaterniond());
+        Vector3d center = new Vector3d();
+        Quaterniond rotation = new Quaterniond();
+
+
+        if (planetWeAreOn != null) {
+            center = planetWeAreOn.getCurrentPos(ticks, partialTick).mul(-1);
+            center.rotate(planetWeAreOn.getRotation(ticks, partialTick).invert(new Quaterniond()));
+        }
+        renderSun(camera.getPosition(), poseStack, sunBuffer, 1440, center, new Quaterniond(rotation));
         bufferSource.endBatch(getSunRenderType());
 
         RenderSystem.enableDepthTest();
         RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(true);
         RenderSystem.enableCull();
+        poseStack.popPose();
     }
 
     private static void renderProceduralPlanet(Camera camera, PoseStack poseStack, OrbitingBody data, VertexConsumer buffer,
