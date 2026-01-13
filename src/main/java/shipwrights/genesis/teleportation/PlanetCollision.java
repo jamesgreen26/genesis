@@ -61,7 +61,7 @@ public class PlanetCollision {
 			final Vec3 shipCenter = VectorConversionsMCKt.toMinecraft(ship.getWorldAABB().center(new Vector3d()));
 
 			// Find nearest planet
-			final OrbitingBody.WithDistanceSq nearestPlanetData = SpaceLevel.getNearestOrbitingBody(new Vector3d(shipCenter.x, shipCenter.y, shipCenter.z), level.getGameTime()).orElse(null);
+			final OrbitingBody.WithDistanceSq nearestPlanetData = SpaceLevel.getNearestOrbitingBody(new Vector3d(shipCenter.x, shipCenter.y, shipCenter.z), GenesisMod.getTicks(level)).orElse(null);
 			if (nearestPlanetData == null) {
 				continue;
 			}
@@ -122,7 +122,7 @@ public class PlanetCollision {
 				SectionPos.sectionToBlockCoord(landingChunkPos.z)
 			);
 
-			final long ticks = level.getGameTime();
+			final long ticks = GenesisMod.getTicks(level);
 			final Vector3dc planetPos = planet.getCurrentPos(ticks);
 
 			// Calculate rotation based on planet position

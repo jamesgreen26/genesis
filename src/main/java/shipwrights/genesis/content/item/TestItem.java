@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
+import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.SpaceLevel;
 
 public class TestItem extends Item {
@@ -24,7 +25,7 @@ public class TestItem extends Item {
 
             Vector3d origin = new Vector3d(arg2.position().x,arg2.position().y,arg2.position().z);
             Vector3d direction = new Vector3d(v3d.x,v3d.y,v3d.z);
-            SpaceLevel.celestialRaycast(arg.getGameTime(),origin,direction)
+            SpaceLevel.celestialRaycast(GenesisMod.getTicks(arg),origin,direction)
                 .ifPresent(hit -> arg2.sendSystemMessage(Component.literal("BODY FOUND: " + hit.getCelestial().getID())));
         }
         return super.use(arg, arg2, arg3);

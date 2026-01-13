@@ -42,7 +42,7 @@ public class AtmosphericCollision {
 		}
 
 		final ResourceKey<Level> dimension = level.dimension();
-		final Vector3dc planetPos = body.getCurrentPos(level.getGameTime());
+		final Vector3dc planetPos = body.getCurrentPos(GenesisMod.getTicks(level));
 		final double atmoHeight = GenesisMod.atmosphereExitHeight;
 
 		final TeleportationHandler teleportHandler = TELEPORT_HANDLER;
@@ -65,7 +65,7 @@ public class AtmosphericCollision {
 
 			// Calculate target position in space
 			final Vector3d targetPos = new Vector3d(0, body.getActualSize() * 0.7 + 20, 0);
-			final Quaterniondc rotation = body.getRotation(level.getGameTime());
+			final Quaterniondc rotation = body.getRotation(GenesisMod.getTicks(level));
 			rotation.transform(targetPos);
 			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
 

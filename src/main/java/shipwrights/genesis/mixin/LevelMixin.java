@@ -17,14 +17,12 @@ public abstract class LevelMixin {
     @Shadow
     private ResourceKey<Level> dimension;
 
-    @Shadow public abstract long getGameTime();
-
     @WrapMethod(method = "getDayTime")
     public long getDayTimeWrap(Operation<Long> original) {
         OrbitingBody body = GenesisMod.SPACE_REGISTRY.getOrbitingBody(dimension.location());
 
         if (body != null) {
-            return body.getDayTime(getGameTime());
+            return body.getDayTime(GenesisMod.getTicks((Level)(Object)this));
         }
         return original.call();
     }

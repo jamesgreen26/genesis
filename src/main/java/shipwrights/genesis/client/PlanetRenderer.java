@@ -39,7 +39,7 @@ public class PlanetRenderer {
             return;
         }
 
-        long ticks = level.getGameTime();
+        long ticks = GenesisMod.getTicks(level);
 
         // Separate planets into textured and non-textured
         List<OrbitingBody> proceduralPlanets = new ArrayList<>();

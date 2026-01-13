@@ -40,7 +40,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             return;
         }
 
-        long ticks = level.getGameTime();
+        long ticks = GenesisMod.getTicks(level);
 
         // Move to center of block
         poseStack.translate(0.5D, 1.5D, 0.5D);

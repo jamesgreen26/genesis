@@ -88,6 +88,10 @@ public final class GenesisMod {
         return SPACE_REGISTRY.getOrbitingBody(level.dimension().location());
     }
 
+    public static long getTicks(Level level) {
+        return level.getGameTime();
+    }
+
     public static boolean isMiniScale(ResourceLocation dimensionLocation) {
         return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
     }

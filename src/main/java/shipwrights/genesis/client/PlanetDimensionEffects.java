@@ -76,7 +76,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         //TODO atmosphere + sky
 
-        long gameTicks = level.getGameTime();
+        long gameTicks = GenesisMod.getTicks(level);
 
         final OrbitingBody body = GenesisMod.getDataForLevel(level);
         if (body == null) {
