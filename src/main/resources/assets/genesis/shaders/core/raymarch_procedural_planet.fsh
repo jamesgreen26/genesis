@@ -1,9 +1,10 @@
 #version 150
+#moj_import <genesis:raymarch.glsl>
+// above should be copied from raymarch.glsl
+// in vec3 positionData;
+uniform float textureScale;
 
-in vec3 positionData;
-in float textureScale;
-in vec3 vertexColor;
-
+in vec3 vModelPos;
 out vec4 frag_color;
 
 float hash(vec3 p) {
@@ -33,13 +34,16 @@ float noise(vec3 p) {
 }
 
 void main() {
-    vec3 pos = positionData * 8.0 * textureScale;
+    // 8192 is pulled outta nowhere
+    vec3 pos = (vWorldPos) * 1.0/8192.0 * textureScale;
 
     float n = noise(pos * 3.0);
 
     float swirl = sin(pos.x * 8.0 + n * 6.283) * 0.5 + 0.5;
 
-    vec3 finalColor = mix(vertexColor, vertexColor * (0.5 + 0.5*swirl), 0.6);
 
-    frag_color = vec4(finalColor, 1.0);
+    vec3 base = mix(vColor.xyz, vColor.xyz * (0.5 + 0.5*swirl), 0.6);
+    vec3 lighting = calcLighting(base);
+
+    frag_color = vec4(base * lighting, 1.0);
 }

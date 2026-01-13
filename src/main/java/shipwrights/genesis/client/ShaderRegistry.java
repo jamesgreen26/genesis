@@ -23,24 +23,22 @@ import static team.lodestar.lodestone.registry.client.LodestoneShaderRegistry.re
 public class ShaderRegistry {
 
     public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_TEX);
-    public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
-    public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_COLOR_TEX);
-    public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
+    public static final ShaderHolder RAYMARCH_PROCEDURAL_PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "raymarch_procedural_planet"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
     public static final ShaderHolder WORMHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole"), DefaultVertexFormat.POSITION_COLOR_TEX);
+    public static final ShaderHolder RAYMARCH_TEXTURED_PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "raymarch_textured_planet"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+
 
     @SubscribeEvent
     public static void shaderRegistry(RegisterShadersEvent event) {
         registerShader(event, SUN_SHADER);
-        registerShader(event, PLANET_SHADER);
-        registerShader(event, PLANET_TEXTURED_SHADER);
-        registerShader(event, PLANET_MASK_SHADER);
+        registerShader(event, RAYMARCH_PROCEDURAL_PLANET_SHADER);
         registerShader(event, WORMHOLE_SHADER);
+        registerShader(event, RAYMARCH_TEXTURED_PLANET_SHADER);
     }
 
     private static LodestoneRenderType SUN_RENDER_TYPE;
     private static LodestoneRenderType PLANET_RENDER_TYPE;
-    private static LodestoneRenderType PLANET_MASK_RENDER_TYPE;
-    private static final ConcurrentHashMap<ResourceLocation, LodestoneRenderType> TEXTURED_PLANET_RENDER_TYPES = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<ResourceLocation, LodestoneRenderType> RAYMARCH_TEXTURED_PLANET_RENDER_TYPES = new ConcurrentHashMap<>();
 
     public static LodestoneRenderType getSunRenderType() {
         if (SUN_RENDER_TYPE == null) {
@@ -55,10 +53,10 @@ public class ShaderRegistry {
         return SUN_RENDER_TYPE;
     }
 
-    public static LodestoneRenderType getPlanetRenderType() {
+    public static LodestoneRenderType getRaymarchProceduralPlanetRenderType() {
         if (PLANET_RENDER_TYPE == null) {
-            PLANET_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("planet_render_type", DefaultVertexFormat.POSITION_COLOR_TEX, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
-                    .setShaderState(PLANET_SHADER)
+            PLANET_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("raymarch_procedural_planet_render_type", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
+                    .setShaderState(RAYMARCH_PROCEDURAL_PLANET_SHADER)
                     .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
@@ -68,27 +66,8 @@ public class ShaderRegistry {
         return PLANET_RENDER_TYPE;
     }
 
-    public static LodestoneRenderType getPlanetMaskRenderType() {
-        if (PLANET_MASK_RENDER_TYPE == null) {
-            PLANET_MASK_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("planet_mask_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
-                    .setShaderState(PLANET_MASK_SHADER)
-                    .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
-                    .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
-                    .setCullState(LodestoneRenderTypeRegistry.CULL)
-            );
-        }
-        return PLANET_MASK_RENDER_TYPE;
-    }
-
-    /**
-     * Gets a render type for a textured planet.
-     *
-     * @param textureLocation The texture location (without textures/ prefix or .png extension)
-     * @return A render type that uses the textured planet shader with the specified texture
-     */
-    public static LodestoneRenderType getTexturedPlanetRenderType(ResourceLocation textureLocation) {
-        return TEXTURED_PLANET_RENDER_TYPES.computeIfAbsent(textureLocation, loc -> {
+    public static LodestoneRenderType getRaymarchTexturedPlanetRenderType(ResourceLocation textureLocation) {
+        return RAYMARCH_TEXTURED_PLANET_RENDER_TYPES.computeIfAbsent(textureLocation, loc -> {
             // Build the full texture path
             ResourceLocation fullTexturePath = ResourceLocation.fromNamespaceAndPath(
                 loc.getNamespace(),
@@ -96,11 +75,11 @@ public class ShaderRegistry {
             );
 
             return LodestoneRenderTypeRegistry.createGenericRenderType(
-                "planet_textured_" + loc.getNamespace() + "_" + loc.getPath().replace("/", "_"),
-                DefaultVertexFormat.POSITION_COLOR_TEX,
+                "raymarch_textured_planet_" + loc.getNamespace() + "_" + loc.getPath().replace("/", "_") + "_render_type",
+                DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,
                 VertexFormat.Mode.QUADS,
                 LodestoneRenderTypeRegistry.builder()
-                    .setShaderState(PLANET_TEXTURED_SHADER)
+                    .setShaderState(RAYMARCH_TEXTURED_PLANET_SHADER)
                     .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
@@ -114,6 +93,6 @@ public class ShaderRegistry {
      * Clears cached textured planet render types. Call when resources are reloaded.
      */
     public static void clearTexturedPlanetRenderTypes() {
-        TEXTURED_PLANET_RENDER_TYPES.clear();
+        RAYMARCH_TEXTURED_PLANET_RENDER_TYPES.clear();
     }
 }

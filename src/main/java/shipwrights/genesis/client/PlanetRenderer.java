@@ -1,11 +1,16 @@
 package shipwrights.genesis.client;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -15,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.OrbitingBody;
+import team.lodestar.lodestone.helpers.RenderHelper;
 
 import java.lang.Math;
 import java.util.ArrayList;
@@ -27,17 +33,93 @@ import static shipwrights.genesis.client.SunRenderer.renderSun;
 public class PlanetRenderer {
 
 
+    public static Matrix3f inverseViewMatrix = new Matrix3f();
 
+    private static void setUniforms(ShaderInstance shader, Vec3 camPos, List<OrbitingBody> allPlanets,
+            long ticks, float partialTick) {
+        Uniform cameraPosUniform = shader.getUniform("CameraPos");
+        if (cameraPosUniform != null) {
+            cameraPosUniform.set((float) camPos.x, (float) camPos.y, (float) camPos.z);
+        }
+        for (int planetIdx = 0; planetIdx < allPlanets.size(); planetIdx++) {
+            OrbitingBody planet = allPlanets.get(planetIdx);
+            Vector3d pos = planet.getCurrentPos(ticks, partialTick);
+            // Vector3d pos = new Vector3d(2000f + (float)planet.getActualSize() * (planetIdx + 1), 0f, 0f);
+            Uniform planetPosUniform = shader.getUniform("planetPos[" + planetIdx + "]");
+            if (planetPosUniform != null) {
+                // planetPosUniform.set((float) pos.x, (float) pos.y, (float) pos.z);
+                // in view Pos for precision reasons (?)
+                planetPosUniform.set((float) (pos.x - camPos.x), (float) (pos.y - camPos.y),
+                        (float) (pos.z - camPos.z));
+            }
+            Uniform planetRotUniform = shader.getUniform("planetRot[" + planetIdx + "]");
+            if (planetRotUniform != null) {
+                //todo: make this work with quats in shader
+                Vector3d planetRot = planet.getRotation(ticks, partialTick).getEulerAnglesXYZ(new Vector3d());
+                planetRotUniform.set((float) planetRot.x,
+                        (float) planetRot.y,
+                        (float) planetRot.z);
+            }
+            Uniform planetRoundednessUniform = shader.getUniform("planetRoundedness[" + planetIdx + "]");
+            if (planetRoundednessUniform != null) {
+                planetRoundednessUniform.set(0.f);
+            }
+            float halfSize = (float) planet.getActualSize() / 2;
+            Uniform planetHalfSizeUniform = shader.getUniform("planetHalfSize[" + planetIdx + "]");
+            if (planetHalfSizeUniform != null) {
+                planetHalfSizeUniform.set(halfSize, halfSize, halfSize);
+            }
+        }
+
+        Uniform inverseViewMatrixUniform = shader.getUniform("InverseViewMatrix");
+        if (inverseViewMatrixUniform != null) {
+            inverseViewMatrixUniform.set(inverseViewMatrix);
+        }
+
+        for (int i = 0; i < 3; i++) {
+            Uniform sunPosUniform = shader.getUniform("sunPos[" + i + "]");
+            if (sunPosUniform != null) {
+                // sunPosUniform.set(0f, 0f, 0f);
+                sunPosUniform.set((float) -camPos.x, (float) -camPos.y, (float) -camPos.z);
+            }
+            Uniform sunColUniform = shader.getUniform("sunCol[" + i + "]");
+            if (sunColUniform != null) {
+                sunColUniform.set(1f, 1f, 1f);
+            }
+            Uniform sunRotUniform = shader.getUniform("sunRot[" + i + "]");
+            if (sunRotUniform != null) {
+                sunRotUniform.set(0f, 0f, 0f);
+            }
+            Uniform sunHalfSizeUniform = shader.getUniform("sunHalfSize[" + i + "]");
+            if (sunHalfSizeUniform != null) {
+                sunHalfSizeUniform.set(720.f, 720.f, 720.f);
+            }
+            Uniform sunRoundednessUniform = shader.getUniform("sunRoundedness[" + i + "]");
+            if (sunRoundednessUniform != null) {
+                sunRoundednessUniform.set(0.f);
+            }
+        }
+
+    }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
 
-        Minecraft minecraft = Minecraft.getInstance();
-        Level level = minecraft.level;
+        Level level = Minecraft.getInstance().level;
         if (level == null || !GenesisMod.isSpaceDimension(level)) {
             return;
         }
+        renderSpaceScene(
+                level,
+                event.getCamera(),
+                event.getPoseStack(),
+                event.getPartialTick()
+        );
+    }
+
+
+    public static void renderSpaceScene(Level level, Camera camera, PoseStack poseStack, float partialTick) {
 
         long ticks = GenesisMod.getTicks(level);
 
@@ -57,69 +139,62 @@ public class PlanetRenderer {
         allPlanets.addAll(proceduralPlanets);
         allPlanets.addAll(texturedPlanets);
 
-        // First pass: Render planets to the mask target for post-processing exclusion
-        PlanetMaskTarget.clear();
-        PlanetMaskTarget.bindWrite();
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glDepthFunc(GL11.GL_LEQUAL);
-        GL11.glDepthMask(true);
-
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        var maskRenderType = getPlanetMaskRenderType();
-        VertexConsumer maskBuffer = bufferSource.getBuffer(maskRenderType);
-        for (var planet : allPlanets) {
-            renderMask(event, planet, maskBuffer, ticks);
-        }
-        bufferSource.endBatch(maskRenderType);
-        PlanetMaskTarget.unbindWrite();
-
-        // Second pass: Render planets to the main target with their visual shaders
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(true);
         RenderSystem.depthFunc(GL11C.GL_LEQUAL);
         RenderSystem.enableCull();
 
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+
+        Vec3 camPos = camera.getPosition();
+
         // Render non-textured planets with procedural shader
         if (!proceduralPlanets.isEmpty()) {
             GL11.glEnable(GL11.GL_DEPTH_TEST);
             GL11.glDepthFunc(GL11.GL_LEQUAL);
             GL11.glDepthMask(true);
+            var renderType = getRaymarchProceduralPlanetRenderType();
+            ShaderInstance shader = RenderHelper.getShader(renderType);
+            setUniforms(shader, camPos, allPlanets, ticks, partialTick);
 
-            VertexConsumer planetBuffer = bufferSource.getBuffer(getPlanetRenderType());
+            VertexConsumer planetBuffer = bufferSource.getBuffer(renderType);
             for (var planet : proceduralPlanets) {
-                renderProceduralPlanet(event, planet, planetBuffer, ticks);
+                Uniform vPlanetIndexUniform = shader.getUniform("vPlanetIndex");
+                if (vPlanetIndexUniform != null) {
+                    vPlanetIndexUniform.set(allPlanets.indexOf(planet));
+                }
+
+                // for procedural planets
+                Uniform textureScaleUniform = shader.getUniform("textureScale");
+                if (textureScaleUniform != null) {
+                    int textureScale = planet.getID().hashCode() % 256;
+                    textureScaleUniform.set((float) textureScale);
+                }
+                renderProceduralPlanet(camera, poseStack, planet, planetBuffer, ticks, partialTick);
             }
-            bufferSource.endBatch(getPlanetRenderType());
+            bufferSource.endBatch(renderType);
         }
 
-        // Render textured planets - each needs its own render type for the texture binding
+        // Render each planet cube
         for (var planet : texturedPlanets) {
             ResourceLocation textureLocation = PlanetTextures.getTexture(planet.getID());
             if (textureLocation != null) {
                 GL11.glEnable(GL11.GL_DEPTH_TEST);
                 GL11.glDepthFunc(GL11.GL_LEQUAL);
                 GL11.glDepthMask(true);
-
-                var renderType = getTexturedPlanetRenderType(textureLocation);
+                var renderType = getRaymarchTexturedPlanetRenderType(textureLocation);
+                ShaderInstance shader = RenderHelper.getShader(renderType);
+                setUniforms(shader, camPos, allPlanets, ticks, partialTick);
+                Uniform vPlanetIndexUniform = shader.getUniform("vPlanetIndex");
+                if (vPlanetIndexUniform != null) {
+                    vPlanetIndexUniform.set(allPlanets.indexOf(planet));
+                }
                 VertexConsumer texturedBuffer = bufferSource.getBuffer(renderType);
-                renderTexturedPlanet(event, planet, texturedBuffer, ticks);
+                renderTexturedPlanet(camera, poseStack, planet, texturedBuffer, ticks, partialTick);
                 bufferSource.endBatch(renderType);
             }
         }
-
-        // Third pass: Write depth only for all planets to ensure proper occlusion
-        GL11.glColorMask(false, false, false, false);
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glDepthFunc(GL11.GL_LEQUAL);
-        var depthRenderType = getPlanetMaskRenderType();
-        VertexConsumer depthBuffer = bufferSource.getBuffer(depthRenderType);
-        for (var planet : allPlanets) {
-            renderMask(event, planet, depthBuffer, ticks);
-        }
-        bufferSource.endBatch(depthRenderType);
-        GL11.glColorMask(true, true, true, true);
 
         // Render sun
         GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -127,7 +202,7 @@ public class PlanetRenderer {
         GL11.glDepthMask(true);
 
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, 1440, new Vector3d(), new Quaterniond());
+        renderSun(camera.getPosition(), poseStack, sunBuffer, 1440, new Vector3d(), new Quaterniond());
         bufferSource.endBatch(getSunRenderType());
 
         RenderSystem.enableDepthTest();
@@ -136,9 +211,8 @@ public class PlanetRenderer {
         RenderSystem.enableCull();
     }
 
-    private static void renderProceduralPlanet(RenderLevelStageEvent event, OrbitingBody data, VertexConsumer buffer, long ticks) {
-        PoseStack poseStack = event.getPoseStack();
-
+    private static void renderProceduralPlanet(Camera camera, PoseStack poseStack, OrbitingBody data, VertexConsumer buffer,
+            long ticks, float partialTick) {
         Matrix4f matrix;
         try {
             matrix = (Matrix4f) poseStack.last().pose().clone();
@@ -146,13 +220,12 @@ public class PlanetRenderer {
             throw new RuntimeException(e);
         }
 
-        Vector3d pos = new Vector3d(data.getCurrentPos(ticks, event.getPartialTick()));
+        Vector3d pos = data.getCurrentPos(ticks, partialTick);
 
-        matrix.translate((float) (pos.x -event.getCamera().getPosition().x),
-                (float) (pos.y -event.getCamera().getPosition().y),
-                (float) (pos.z -event.getCamera().getPosition().z));
-
-        Quaternionf rotation = new Quaternionf(data.getRotation(ticks, event.getPartialTick()));
+        matrix.translate((float) (pos.x - camera.getPosition().x),
+                (float) (pos.y - camera.getPosition().y),
+                (float) (pos.z - camera.getPosition().z));
+        Quaternionf rotation = new Quaternionf(data.getRotation(ticks, partialTick));
         matrix.rotate(rotation);
 
         float halfSize = (float) (data.getActualSize() / 2);
@@ -160,17 +233,28 @@ public class PlanetRenderer {
         int textureScale = data.getID().hashCode() % 256;
         float color = packColor(data.r(), data.g(), data.b());
 
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, color, pos, rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, color, pos, rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, color, pos, rotation);
-        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, color, pos, rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, color, pos, rotation);
-        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, color, pos, rotation);
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize,
+                halfSize, halfSize, -halfSize, halfSize, halfSize, textureScale, color, pos, rotation,
+                new Vector3d(0, 0, 1));
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize,
+                halfSize, -halfSize, halfSize, -halfSize, -halfSize, textureScale, color, pos, rotation,
+                new Vector3d(0, 0, -1));
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize,
+                halfSize, halfSize, -halfSize, halfSize, -halfSize, textureScale, color, pos, rotation,
+                new Vector3d(-1, 0, 0));
+        addCubeFacePlanet(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize,
+                halfSize, halfSize, halfSize, -halfSize, halfSize, textureScale, color, pos, rotation,
+                new Vector3d(1, 0, 0));
+        addCubeFacePlanet(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize,
+                -halfSize, halfSize, -halfSize, -halfSize, halfSize, textureScale, color, pos, rotation,
+                new Vector3d(0, -1, 0));
+        addCubeFacePlanet(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize,
+                halfSize, halfSize, halfSize, halfSize, -halfSize, textureScale, color, pos, rotation,
+                new Vector3d(0, 1, 0));
     }
 
-    private static void renderTexturedPlanet(RenderLevelStageEvent event, OrbitingBody data, VertexConsumer buffer, long ticks) {
-        PoseStack poseStack = event.getPoseStack();
-
+    private static void renderTexturedPlanet(Camera camera, PoseStack poseStack, OrbitingBody data, VertexConsumer buffer,
+            long ticks, float partialTick) {
         Matrix4f matrix;
         try {
             matrix = (Matrix4f) poseStack.last().pose().clone();
@@ -178,169 +262,127 @@ public class PlanetRenderer {
             throw new RuntimeException(e);
         }
 
-        Vector3d pos = new Vector3d(data.getCurrentPos(ticks, event.getPartialTick()));
+        Vector3d pos = data.getCurrentPos(ticks, partialTick);
 
-        matrix.translate((float) (pos.x - event.getCamera().getPosition().x),
-                (float) (pos.y - event.getCamera().getPosition().y),
-                (float) (pos.z - event.getCamera().getPosition().z));
+        matrix.translate((float) (pos.x - camera.getPosition().x),
+                (float) (pos.y - camera.getPosition().y),
+                (float) (pos.z - camera.getPosition().z));
 
-        Quaternionf rotation = new Quaternionf(data.getRotation(ticks, event.getPartialTick()));
+        Quaternionf rotation = new Quaternionf(data.getRotation(ticks, partialTick));
         matrix.rotate(rotation);
 
         float halfSize = (float) (data.getActualSize() / 2);
 
-        // Calculate light direction (from planet toward sun at origin)
-        Vector3d lightDir = new Vector3d(-pos.x, -pos.y, -pos.z).normalize();
 
         // UV layout (3x2 grid):
-        // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
-        // | east (0,0.5)    | down (1/3,0.5) | up (2/3,0.5)   |
+        // | north (0,0) | west (1/3,0) | south (2/3,0) |
+        // | east (0,0.5) | down (1/3,0.5) | up (2/3,0.5) |
         float third = 1.0f / 3.0f;
         float twoThirds = 2.0f / 3.0f;
 
         // South face (+Z)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-            -halfSize, -halfSize, halfSize,
-             halfSize, -halfSize, halfSize,
-             halfSize,  halfSize, halfSize,
-            -halfSize,  halfSize, halfSize,
-            twoThirds, 0.0f, 1.0f, 0.5f);
+        addTexturedCubeFace(matrix, buffer, halfSize, rotation,
+                new Vector3d(0, 0, 1),
+                -halfSize, -halfSize, halfSize,
+                halfSize, -halfSize, halfSize,
+                halfSize, halfSize, halfSize,
+                -halfSize, halfSize, halfSize,
+                twoThirds, 0.0f, 1.0f, 0.5f);
 
         // North face (-Z)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-             halfSize, -halfSize, -halfSize,
-            -halfSize, -halfSize, -halfSize,
-            -halfSize,  halfSize, -halfSize,
-             halfSize,  halfSize, -halfSize,
-            0.0f, 0.0f, third, 0.5f);
+        addTexturedCubeFace(matrix, buffer, halfSize, rotation,
+                new Vector3d(0, 0, -1),
+                halfSize, -halfSize, -halfSize,
+                -halfSize, -halfSize, -halfSize,
+                -halfSize, halfSize, -halfSize,
+                halfSize, halfSize, -halfSize,
+                0.0f, 0.0f, third, 0.5f);
 
         // West face (-X)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-            -halfSize, -halfSize, -halfSize,
-            -halfSize, -halfSize,  halfSize,
-            -halfSize,  halfSize,  halfSize,
-            -halfSize,  halfSize, -halfSize,
-            third, 0.0f, twoThirds, 0.5f);
+        addTexturedCubeFace(matrix, buffer, halfSize, rotation,
+                new Vector3d(-1, 0, 0),
+                -halfSize, -halfSize, -halfSize,
+                -halfSize, -halfSize, halfSize,
+                -halfSize, halfSize, halfSize,
+                -halfSize, halfSize, -halfSize,
+                third, 0.0f, twoThirds, 0.5f);
 
         // East face (+X)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-             halfSize, -halfSize,  halfSize,
-             halfSize, -halfSize, -halfSize,
-             halfSize,  halfSize, -halfSize,
-             halfSize,  halfSize,  halfSize,
-            0.0f, 0.5f, third, 1.0f);
+        addTexturedCubeFace(matrix, buffer, halfSize, rotation,
+                new Vector3d(1, 0, 0),
+                halfSize, -halfSize, halfSize,
+                halfSize, -halfSize, -halfSize,
+                halfSize, halfSize, -halfSize,
+                halfSize, halfSize, halfSize,
+                0.0f, 0.5f, third, 1.0f);
 
         // Down face (-Y)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-            -halfSize, -halfSize, -halfSize,
-             halfSize, -halfSize, -halfSize,
-             halfSize, -halfSize,  halfSize,
-            -halfSize, -halfSize,  halfSize,
-            third, 0.5f, twoThirds, 1.0f);
+        addTexturedCubeFace(matrix, buffer, halfSize, rotation,
+                new Vector3d(0, -1, 0),
+                -halfSize, -halfSize, -halfSize,
+                halfSize, -halfSize, -halfSize,
+                halfSize, -halfSize, halfSize,
+                -halfSize, -halfSize, halfSize,
+                third, 0.5f, twoThirds, 1.0f);
 
         // Up face (+Y)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation,
-            -halfSize,  halfSize,  halfSize,
-             halfSize,  halfSize,  halfSize,
-             halfSize,  halfSize, -halfSize,
-            -halfSize,  halfSize, -halfSize,
-            twoThirds, 0.5f, 1.0f, 1.0f);
+        addTexturedCubeFace(matrix, buffer, halfSize, rotation,
+                new Vector3d(0, 1, 0),
+                -halfSize, halfSize, halfSize,
+                halfSize, halfSize, halfSize,
+                halfSize, halfSize, -halfSize,
+                -halfSize, halfSize, -halfSize,
+                twoThirds, 0.5f, 1.0f, 1.0f);
     }
 
-    private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize,
-                                            Vector3d lightDir, Quaternionf rotation,
-                                            float x1, float y1, float z1,
-                                            float x2, float y2, float z2,
-                                            float x3, float y3, float z3,
-                                            float x4, float y4, float z4,
-                                            float u1, float v1, float u2, float v2) {
-        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, lightDir, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, lightDir, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, lightDir, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, lightDir, rotation);
+    private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize, Quaternionf rotation, Vector3d normal,
+            float x1, float y1, float z1,
+            float x2, float y2, float z2,
+            float x3, float y3, float z3,
+            float x4, float y4, float z4,
+            float u1, float v1, float u2, float v2) {
+        addTexturedVertex(matrix, buffer, x1, y1, z1, u1, v2, rotation, normal);
+        addTexturedVertex(matrix, buffer, x2, y2, z2, u2, v2, rotation, normal);
+        addTexturedVertex(matrix, buffer, x3, y3, z3, u2, v1, rotation, normal);
+        addTexturedVertex(matrix, buffer, x4, y4, z4, u1, v1, rotation, normal);
     }
 
-    private static void addTexturedVertexWithLighting(Matrix4f matrix, VertexConsumer buffer,
-                                                      float x, float y, float z,
-                                                      float u, float v,
-                                                      Vector3d lightDir, Quaternionf rotation) {
-        Vector3f vertexNormal = new Vector3f(x, y, z).normalize();
-        rotation.transform(vertexNormal);
+    private static void addTexturedVertex(Matrix4f matrix, VertexConsumer buffer,
+            float x, float y, float z,
+            float u, float v,
+            Quaternionf rotation, Vector3d normal) {
+        Vector3d rotatedNormal = new Vector3d(normal);
+        rotation.transform(rotatedNormal);
 
-        Vector3d worldNormal = new Vector3d(vertexNormal.x, vertexNormal.y, vertexNormal.z);
-        float lighting = (float) Math.max(0.05, worldNormal.dot(lightDir)); // Minimum ambient lighting
-
-        int litValue = (int) (255 * lighting);
-
-        buffer.vertex(matrix, x, y, z).color(litValue, litValue, litValue, 255).uv(u, v).endVertex();
+        buffer.vertex(matrix, x, y, z)
+                .uv(u, v)
+                .color(255, 255, 255, 255) // Placeholder; actual lighting to be handled in shader
+                .normal((float) rotatedNormal.x, (float) rotatedNormal.y, (float) rotatedNormal.z)
+                .endVertex();
     }
 
-    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale, float color, Vector3d planetPos, Quaternionf rotation) {
+    private static void addCubeFacePlanet(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1,
+            float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, int textureScale,
+            float color, Vector3d planetPos, Quaternionf rotation, Vector3d normal) {
         int[] rgb = unpackColor(color);
         int r = rgb[0], g = rgb[1], b = rgb[2];
 
-        Vector3d lightDir = new Vector3d(-planetPos.x, -planetPos.y, -planetPos.z).normalize();
-
-        addVertexWithLighting(matrix, buffer, x1, y1, z1, r, g, b, textureScale, lightDir, rotation);
-        addVertexWithLighting(matrix, buffer, x2, y2, z2, r, g, b, textureScale, lightDir, rotation);
-        addVertexWithLighting(matrix, buffer, x3, y3, z3, r, g, b, textureScale, lightDir, rotation);
-        addVertexWithLighting(matrix, buffer, x4, y4, z4, r, g, b, textureScale, lightDir, rotation);
+        addVertex(matrix, buffer, x1, y1, z1, r, g, b, textureScale, rotation, normal);
+        addVertex(matrix, buffer, x2, y2, z2, r, g, b, textureScale, rotation, normal);
+        addVertex(matrix, buffer, x3, y3, z3, r, g, b, textureScale, rotation, normal);
+        addVertex(matrix, buffer, x4, y4, z4, r, g, b, textureScale, rotation, normal);
     }
 
-    private static void addVertexWithLighting(Matrix4f matrix, VertexConsumer buffer, float x, float y, float z, int r, int g, int b, int textureScale, Vector3d lightDir, Quaternionf rotation) {
-        Vector3f vertexNormal = new Vector3f(x, y, z).normalize();
+    private static void addVertex(Matrix4f matrix, VertexConsumer buffer, float x, float y, float z, int r,
+            int g, int b, int textureScale, Quaternionf rotation, Vector3d normal) {
+        Vector3d rotatedNormal = new Vector3d(normal);
+        rotation.transform(rotatedNormal);
 
-        rotation.transform(vertexNormal);
-
-        Vector3d worldNormal = new Vector3d(vertexNormal.x, vertexNormal.y, vertexNormal.z);
-        float lighting = (float) Math.max(0.0, worldNormal.dot(lightDir));
-
-        int litR = (int) (r * lighting);
-        int litG = (int) (g * lighting);
-        int litB = (int) (b * lighting);
-
-        buffer.vertex(matrix, x, y, z).color(litR, litG, litB, textureScale).uv((x < 0 ? 0 : 0.25f) + (y < 0 ? 0 : 0.5f), z < 0 ? 0 : 1).endVertex();
-    }
-
-    private static void renderMask(RenderLevelStageEvent event, OrbitingBody data, VertexConsumer buffer, long ticks) {
-        PoseStack poseStack = event.getPoseStack();
-
-        Matrix4f matrix;
-        try {
-            matrix = (Matrix4f) poseStack.last().pose().clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-
-        Vector3d pos = new Vector3d(data.getCurrentPos(ticks, event.getPartialTick()));
-
-        matrix.translate((float) (pos.x - event.getCamera().getPosition().x),
-                (float) (pos.y - event.getCamera().getPosition().y),
-                (float) (pos.z - event.getCamera().getPosition().z));
-
-        matrix.rotate(new Quaternionf(data.getRotation(ticks, event.getPartialTick())));
-
-        float halfSize = (float) (data.getActualSize() / 2);
-
-        // Render a simple white cube using POSITION_COLOR format
-        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
-        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize);
-        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize);
-        addMaskCubeFace(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize);
-        addMaskCubeFace(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize);
-        addMaskCubeFace(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize);
-    }
-
-    private static void addMaskCubeFace(Matrix4f matrix, VertexConsumer buffer,
-                                         float x1, float y1, float z1,
-                                         float x2, float y2, float z2,
-                                         float x3, float y3, float z3,
-                                         float x4, float y4, float z4) {
-        // POSITION_COLOR format: just position and color (white for mask)
-        buffer.vertex(matrix, x1, y1, z1).color(255, 255, 255, 255).endVertex();
-        buffer.vertex(matrix, x2, y2, z2).color(255, 255, 255, 255).endVertex();
-        buffer.vertex(matrix, x3, y3, z3).color(255, 255, 255, 255).endVertex();
-        buffer.vertex(matrix, x4, y4, z4).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(matrix, x, y, z)
+                // .color(litR, litG, litB, textureScale)
+                .color(r, g, b, 255)
+                .normal((float) rotatedNormal.x, (float) rotatedNormal.y, (float) rotatedNormal.z)
+                .endVertex();
     }
 
     private static float packColor(float r, float g, float b) {

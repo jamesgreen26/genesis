@@ -11,6 +11,7 @@
     "FallingBlockRendererMixin",
     "GameRendererMixin",
     "HugeExplosionSeedParticleMixin",
+    "LevelRendererMixin",
     "ParticleEngineMixin",
     "ParticleMixin",
     "PehkuiEntityRenderDispatcherMixin",

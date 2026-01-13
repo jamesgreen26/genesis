@@ -7,9 +7,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.*;
 
-import java.lang.Math;
+import static shipwrights.genesis.client.ShaderRegistry.getRaymarchTexturedPlanetRenderType;
 
-import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderType;
+import java.lang.Math;
 
 public class SimplePlanetRenderer {
 
@@ -22,7 +22,7 @@ public class SimplePlanetRenderer {
 
         // Set up buffer source
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        var renderType = getTexturedPlanetRenderType(textureLocation);
+        var renderType = getRaymarchTexturedPlanetRenderType(textureLocation);
         VertexConsumer buffer = bufferSource.getBuffer(renderType);
 
         // Clone the matrix
@@ -87,6 +87,6 @@ public class SimplePlanetRenderer {
 
         int litValue = (int) (255 * lighting * alpha);
 
-        buffer.vertex(matrix, x, y, z).color(litValue, litValue, litValue, (int) (255 * alpha)).uv(u, v).endVertex();
+        buffer.vertex(matrix, x, y, z).uv(u, v).color(litValue, litValue, litValue, (int) (255 * alpha)).normal(vertexNormal.x, vertexNormal.y, vertexNormal.z).endVertex();
     }
 }

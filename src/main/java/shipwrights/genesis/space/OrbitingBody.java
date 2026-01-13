@@ -93,8 +93,8 @@ public final class OrbitingBody extends Orbitable.Celestial {
         }
         Vector3d out = new Vector3d(1, 0, 0);
         out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
-        out = out.rotateY(orbitalTheta);
-        out = out.rotateX(orbitalPhi + Math.PI / 2);
+        // out = out.rotateY(orbitalTheta);
+        // out = out.rotateX(orbitalPhi + Math.PI / 2);
         out.normalize(orbitDistance * BASE_ORBIT_DISTANCE);
         return out.add(getParent().getCurrentPos(ticks, subticks), new Vector3d());
     }

@@ -1,0 +1,72 @@
+{
+  "vertex": "genesis:raymarch_textured_planet",
+  "fragment": "genesis:raymarch_textured_planet",
+  "attributes": [
+    "Position",
+    "UV0",
+    "Color",
+    "Normal"
+  ],
+  "samplers": [
+    { "name": "Sampler0" }
+  ],
+  "uniforms": [
+    { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "InverseViewMatrix", "type": "matrix3x3", "count": 9, "values": [] },
+    { "name": "CameraPos", "type": "float", "count": 3, "values": [0.0, 0.0, 0.0] },
+    { "name": "vPlanetIndex", "type": "int", "count": 1, "values": [0] },
+    
+    { "name": "planetPos[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[0]", "type": "float", "count": 1, "values": [] },
+
+    { "name": "planetPos[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[1]", "type": "float", "count": 1, "values": [] },
+
+    { "name": "planetPos[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[2]", "type": "float", "count": 1, "values": [] },
+
+    { "name": "planetPos[3]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[3]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[3]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[3]", "type": "float", "count": 1, "values": [] },
+
+    { "name": "planetPos[4]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[4]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[4]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[4]", "type": "float", "count": 1, "values": [] },
+
+    { "name": "planetPos[5]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[5]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[5]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[5]", "type": "float", "count": 1, "values": [] },
+
+    { "name": "planetPos[6]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetHalfSize[6]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRot[6]", "type": "float", "count": 3, "values": [] },
+    { "name": "planetRoundedness[6]", "type": "float", "count": 1, "values": [] },
+
+
+    { "name": "sunPos[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunPos[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunPos[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunCol[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunCol[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunCol[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunRot[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunRot[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunRot[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunHalfSize[0]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunHalfSize[1]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunHalfSize[2]", "type": "float", "count": 3, "values": [] },
+    { "name": "sunRoundedness[0]", "type": "float", "count": 1, "values": [] },
+    { "name": "sunRoundedness[1]", "type": "float", "count": 1, "values": [] },
+    { "name": "sunRoundedness[2]", "type": "float", "count": 1, "values": [] }
+  ]
+}

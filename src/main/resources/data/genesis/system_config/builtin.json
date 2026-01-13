@@ -21,9 +21,9 @@
     {
       "ID": "genesis:moon",
       "parentID": "minecraft:overworld",
-      "size": 0.3,
+      "size": 4.0,
       "orbitDistance": 0.05,
-      "orbitTime": 0.005,
+      "orbitTime": 0.0001,
       "gravity": 0.1622,
       "dayLength": 0.75
     }
