@@ -142,6 +142,16 @@ public record OBB(AABBdc localAabb, Quaterniondc orientation, Vector3dc center) 
         return true; // No separating axis found, boxes overlap
     }
 
+    public double boundingSphereRadius() {
+        Vector3dc min = new Vector3d(localAabb.minX(), localAabb.minY(), localAabb.minZ());
+        Vector3dc max = new Vector3d(localAabb.maxX(), localAabb.maxY(), localAabb.maxZ());
+        double hx = (max.x() - min.x()) * 0.5;
+        double hy = (max.y() - min.y()) * 0.5;
+        double hz = (max.z() - min.z()) * 0.5;
+        return Math.sqrt(hx * hx + hy * hy + hz * hz);
+    }
+
+
     static void getAxes(Quaterniondc q, Vector3d[] axes) {
         axes[0] = new Vector3d(1, 0, 0).rotate(q);
         axes[1] = new Vector3d(0, 1, 0).rotate(q);
