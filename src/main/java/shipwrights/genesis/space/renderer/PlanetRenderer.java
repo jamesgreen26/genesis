@@ -25,11 +25,44 @@ public class PlanetRenderer implements CelestialRenderer {
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
-        //TODO account for vantage point transform
+
         Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
         Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
+        double halfExtent = toRender.getActualSize() / 2;
 
-        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), toRender.getActualSize() / 2, rotation, toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick()), 1f);
+        // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
+        if (vantagePoint != null && vantagePoint.equals(toRender)) {
+            var camera = event.getCamera();
+            halfExtent = Minecraft.getInstance().gameRenderer.getRenderDistance();
+            position = new Vector3d(
+                0,
+                - camera.getPosition().y - halfExtent - 100,
+                0
+            );
+            rotation = new Quaterniond();
+        }
+        // Transform by inverse of vantage point if present
+        else if (vantagePoint != null) {
+            Vector3dc vantagePos = vantagePoint.getPosition(ticks, event.getPartialTick());
+            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, event.getPartialTick());
+
+            // Calculate relative position (subtract vantage point position)
+            Vector3d relativePos = new Vector3d(
+                position.x() - vantagePos.x(),
+                position.y() - vantagePos.y(),
+                position.z() - vantagePos.z()
+            );
+
+            // Apply inverse rotation of vantage point
+            Quaterniond inverseVantageRot = new Quaterniond(vantageRot).conjugate();
+            inverseVantageRot.transform(relativePos);
+            position = relativePos;
+
+            // Apply inverse rotation to the celestial's own rotation
+            rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
+        }
+
+        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick()), 1f);
     }
 
     private void renderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, Vector3dc lightOffset, float alpha) {
