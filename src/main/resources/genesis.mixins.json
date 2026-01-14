@@ -23,6 +23,7 @@
     "EntityMixin",
     "FallingBlockEntityAccessor",
     "FallingBlockEntityMixin",
+    "FogRendererAccessor",
     "LevelChunkMixin",
     "LevelMixin",
     "LevelRendererAccessor",
