@@ -13,6 +13,7 @@ import org.joml.*;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetTextures;
+import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 
@@ -141,14 +142,11 @@ public class PlanetRenderer implements CelestialRenderer {
                                                       float x, float y, float z,
                                                       float u, float v,
                                                       Vector3d lightDir, Quaternionf rotation, float alpha) {
-        Vector3f vertexNormal = new Vector3f(x, y, z).normalize();
-        rotation.transform(vertexNormal);
+        // Pass fog color in RGB and alpha in A for shader interpolation
+        int fogRed = (int) (255 * FogRendererAccessor.getFogRed());
+        int fogGreen = (int) (255 * FogRendererAccessor.getFogGreen());
+        int fogBlue = (int) (255 * FogRendererAccessor.getFogBlue());
 
-        Vector3d worldNormal = new Vector3d(vertexNormal.x, vertexNormal.y, vertexNormal.z);
-        float lighting = 1f; // Minimum ambient lighting
-
-        int litValue = (int) (255 * lighting * alpha);
-
-        buffer.vertex(matrix, x, y, z).color(litValue, litValue, litValue, (int) (255 * alpha)).uv(u, v).endVertex();
+        buffer.vertex(matrix, x, y, z).color(fogRed, fogGreen, fogBlue, (int)(alpha * 255)).uv(u, v).endVertex();
     }
 }
