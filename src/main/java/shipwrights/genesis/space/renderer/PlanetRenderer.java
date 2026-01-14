@@ -1,19 +1,38 @@
-package shipwrights.genesis.client;
+package shipwrights.genesis.space.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.*;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.PlanetTextures;
+import shipwrights.genesis.mixin.LevelRendererAccessor;
+import shipwrights.genesis.space.Celestial;
 
 import java.lang.Math;
 
 import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderType;
 
-public class SimplePlanetRenderer {
+public class PlanetRenderer implements CelestialRenderer {
 
-    public static void RenderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, Vector3dc lightOffset, float alpha) {
+    @Override
+    public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
+        ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
+        long ticks = GenesisMod.getTicks(level);
+        //TODO account for vantage point transform
+        Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
+        Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
+
+        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), toRender.getActualSize() / 2, rotation, toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick()), 1f);
+    }
+
+    private void renderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, Vector3dc lightOffset, float alpha) {
         // Get the texture for this planet
         ResourceLocation textureLocation = PlanetTextures.getTexture(planetID);
         if (textureLocation == null) {

@@ -64,7 +64,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        Celestial currentPlanet = GenesisMod.getDataForLevel(level);
+        Celestial currentPlanet = GenesisMod.getCelestialForLevel(level);
 
         if (currentPlanet != null) {
             poseStack.mulPose(new Quaternionf(currentPlanet.getRotation(ticks, partialTick)).invert());

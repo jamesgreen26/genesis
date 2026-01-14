@@ -25,6 +25,7 @@
     "FallingBlockEntityMixin",
     "LevelChunkMixin",
     "LevelMixin",
+    "LevelRendererAccessor",
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "ServerLevelMixin",

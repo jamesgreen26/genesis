@@ -1,16 +1,44 @@
-package shipwrights.genesis.client;
+package shipwrights.genesis.space.renderer;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.*;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.ShaderRegistry;
+import shipwrights.genesis.mixin.LevelRendererAccessor;
+import shipwrights.genesis.space.Celestial;
 
 import java.lang.Math;
 
-public class SunRenderer {
-    public static void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation) {
+import static shipwrights.genesis.client.ShaderRegistry.getSunRenderType;
+
+public class StarRenderer implements CelestialRenderer {
+
+    @Override
+    public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
+        ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
+        long ticks = GenesisMod.getTicks(level);
+        Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
+        Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
+
+        // TODO transform according to vantage point
+
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
+        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(),position, rotation);
+        bufferSource.endBatch(getSunRenderType());
+    }
+
+    private void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation) {
 
         Vector3f cameraPos0 = new Vector3f(
             (float) cameraPos.x,
