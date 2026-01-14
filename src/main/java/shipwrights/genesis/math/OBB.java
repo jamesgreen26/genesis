@@ -3,6 +3,7 @@ package shipwrights.genesis.math;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBdc;
 
 
@@ -53,6 +54,26 @@ public record OBB(AABBdc localAabb, Quaterniondc orientation, Vector3dc center) 
         Quaterniondc identityRotation = new org.joml.Quaterniond();
 
         return new OBB(localAabb, identityRotation, center);
+    }
+
+    /** Get 8 corners of an OBB in world space */
+    public Vector3dc[] getCorners() {
+        Vector3dc[] corners = new Vector3dc[8];
+        AABBdc aabb = localAabb;
+        int i = 0;
+        for (int x = 0; x <= 1; x++) {
+            for (int y = 0; y <= 1; y++) {
+                for (int z = 0; z <= 1; z++) {
+                    double px = (x == 0) ? aabb.minX() : aabb.maxX();
+                    double py = (y == 0) ? aabb.minY() : aabb.maxY();
+                    double pz = (z == 0) ? aabb.minZ() : aabb.maxZ();
+                    Vector3d local = new Vector3d(px, py, pz);
+                    Vector3d world = new Vector3d(local).rotate(orientation).add(center);
+                    corners[i++] = world;
+                }
+            }
+        }
+        return corners;
     }
 
     /**
