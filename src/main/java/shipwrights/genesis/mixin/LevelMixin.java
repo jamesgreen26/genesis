@@ -20,7 +20,7 @@ public abstract class LevelMixin {
     @WrapMethod(method = "getDayTime")
     public long getDayTimeWrap(Operation<Long> original) {
         Level thisAsLevel = (Level)(Object)this;
-        Celestial body = GenesisMod.getDataForLevel(thisAsLevel);
+        Celestial body = GenesisMod.getCelestialForLevel(thisAsLevel);
 
         if (body != null) {
             return body.getDayTime(GenesisMod.getTicks(thisAsLevel));

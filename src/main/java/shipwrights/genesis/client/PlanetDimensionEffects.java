@@ -2,16 +2,12 @@ package shipwrights.genesis.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import kotlin.Pair;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +19,7 @@ import shipwrights.genesis.space.registry.SpaceRegistry;
 
 import java.lang.Math;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 public class PlanetDimensionEffects extends DimensionSpecialEffects {
     final SpaceRegistry spaceRegistry;
@@ -77,18 +71,20 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         long gameTicks = GenesisMod.getTicks(level);
 
-        final Celestial body = GenesisMod.getDataForLevel(level);
-        if (body == null) {
+        final Celestial celestial = GenesisMod.getCelestialForLevel(level);
+        if (celestial == null) {
             return false;
         }
 
         poseStack.pushPose();
 
-        poseStack.mulPose(new Quaternionf(body.getRotation(gameTicks, partialTick)).invert());
+        poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTicks, partialTick)).invert());
+
+        double starBrightness = 2 * Math.min(Math.max(-celestial.getSunDot(gameTicks, partialTick), 0), 0.5);
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);
-            RenderSystem.setShaderColor(color.x(), color.y(), color.z(), color.w());
+            RenderSystem.setShaderColor(color.x(), color.y(), color.z(), (float) (color.w() * starBrightness));
             VertexBuffer starBuffer = starBuffers.get(i);
             starBuffer.bind();
             assert GameRenderer.getPositionShader() != null;
@@ -97,69 +93,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         }
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-
-        Vector3dc origin = body.getPosition(gameTicks, partialTick);
-
-        Optional<Pair<Celestial, Double>> star = null; //SpaceLevel.getNearestStar(origin, gameTicks, partialTick);
-
-        Vector3dc lightOrigin = origin;
-
-        if (star.isPresent()) {
-            lightOrigin = star.get().getFirst().getPosition(gameTicks, partialTick).sub(origin, new Vector3d());
-        }
-
-        double desiredDistance = Minecraft.getInstance().gameRenderer.getRenderDistance() * 2;
-
-        // Render the star
-        if (star.isPresent()) {
-            Celestial starBody = star.get().getFirst();
-            Vector3dc actualOffset = starBody.getPosition(gameTicks, partialTick).sub(origin, new Vector3d());
-            double actualDistance = actualOffset.length();
-            double requiredScaling = desiredDistance / actualDistance;
-            double actualSize = starBody.getActualSize();
-            Vector3dc scaledOffset = actualOffset.mul(requiredScaling, new Vector3d());
-
-            // Set up buffer for sun rendering
-            MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-            var renderType = ShaderRegistry.getSunRenderType();
-            VertexConsumer buffer = bufferSource.getBuffer(renderType);
-
-            SunRenderer.renderSun(new Vec3(0,0,0), poseStack, buffer, actualSize * requiredScaling, scaledOffset, starBody.getRotation(gameTicks, partialTick));
-
-            bufferSource.endBatch(renderType);
-        }
-
-//        for (var otherBody : spaceRegistry.getAllOrbitingBodies().stream()
-//                .sorted(Comparator.comparingDouble(
-//                        b -> -1 * b.getPosition(gameTicks, partialTick).distanceSquared(origin)
-//                )).toList()) {
-//            if (otherBody == body) continue;
-//
-//            Vector3dc actualOffset = otherBody.getPosition(gameTicks, partialTick).sub(origin);
-//            Vector3dc lightOffset = lightOrigin.sub(actualOffset, new Vector3d()).normalize();
-//            double actualDistance = actualOffset.length();
-//            double requiredScaling = desiredDistance / actualDistance;
-//            double actualHalfSize = otherBody.getActualSize() / 2;
-//            Vector3dc scaledOffset = actualOffset.mul(requiredScaling, new Vector3d());
-//
-//            // TODO should not write depth
-//            SimplePlanetRenderer.RenderPlanetAt(otherBody.getID(), poseStack, scaledOffset.x(), scaledOffset.y(), scaledOffset.z(), actualHalfSize * requiredScaling, otherBody.getRotation(gameTicks, partialTick), lightOffset, 1.0f);
-//        }
-
-
         poseStack.popPose();
-        LocalPlayer player = Minecraft.getInstance().player;
-
-        if (player != null) {
-            double planetFadeIn = (player.getEyePosition(partialTick).y - (desiredDistance + 128)) /128;
-            double halfExtent = body.getActualSize() * 8 / Math.max(planetFadeIn + 1, 1);
-
-            if (planetFadeIn > -0.5) {
-                float alpha = Math.max(Math.min(1f, (float) planetFadeIn), 0);
-                SimplePlanetRenderer.RenderPlanetAt(body.getID(), poseStack, 0, -2 * desiredDistance - (halfExtent * 0.5), 0, halfExtent, new Quaterniond(), lightOrigin.normalize(new Vector3d()), alpha);
-            }
-        }
-
         return true;
     }
 

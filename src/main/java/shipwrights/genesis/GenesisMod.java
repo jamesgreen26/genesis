@@ -85,7 +85,7 @@ public final class GenesisMod {
         registrationCallbacks.add(callback);
     }
 
-    @Nullable public static Celestial getDataForLevel(Level level) {
+    @Nullable public static Celestial getCelestialForLevel(Level level) {
         return SPACE_REGISTRY.get(level.dimension().location());
     }
 

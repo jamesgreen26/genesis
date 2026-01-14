@@ -3,6 +3,8 @@ package shipwrights.genesis.space.type;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.space.renderer.CelestialRenderer;
+import shipwrights.genesis.space.renderer.PlanetRenderer;
+import shipwrights.genesis.space.renderer.StarRenderer;
 
 public class BuiltinCelestialTypes {
 
@@ -11,8 +13,13 @@ public class BuiltinCelestialTypes {
         public boolean castsShadow() { return false; }
         public boolean isVisitable() { return false; }
 
+        private static CelestialRenderer renderer = null;
         public @NotNull CelestialRenderer getRenderer() {
-            return null; //fixme
+            CelestialRenderer result = renderer;
+            if (result == null) {
+                renderer = new StarRenderer();
+            }
+            return renderer;
         }
 
         public @NotNull ResourceLocation getID() {
@@ -25,8 +32,13 @@ public class BuiltinCelestialTypes {
         public boolean castsShadow() { return true; }
         public boolean isVisitable() { return true; }
 
+        private static CelestialRenderer renderer = null;
         public @NotNull CelestialRenderer getRenderer() {
-            return null; //fixme
+            CelestialRenderer result = renderer;
+            if (result == null) {
+                renderer = new PlanetRenderer();
+            }
+            return renderer;
         }
 
         public @NotNull ResourceLocation getID() {

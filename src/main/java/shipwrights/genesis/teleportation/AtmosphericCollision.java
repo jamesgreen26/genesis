@@ -30,7 +30,7 @@ public class AtmosphericCollision {
 	 */
 	public static void atmosphericCollisionTick(final ServerLevel level) {
 		// Check if this is a body dimension
-		final Celestial body = GenesisMod.getDataForLevel(level);
+		final Celestial body = GenesisMod.getCelestialForLevel(level);
 		if (body == null) {
 			return;
 		}

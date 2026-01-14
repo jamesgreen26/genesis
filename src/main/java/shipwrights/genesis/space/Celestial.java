@@ -142,6 +142,19 @@ public class Celestial {
         return Math.round(d * 24000.0);
     }
 
+    public double getSunDot(long gameTime, float partialTick) {
+        Celestial star = getNearestStar(gameTime, partialTick);
+
+        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
+                .sub(getPosition(gameTime, partialTick))
+                .normalize();
+
+        Quaterniondc rot = getRotation(gameTime, partialTick);
+
+        Vector3d up = UP.rotate(rot, new Vector3d());
+        return up.dot(toStar);
+    }
+
     public static final Codec<Celestial> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("ID").forGetter(it -> it.ID.toString()),
             Codec.STRING.fieldOf("type").forGetter(it -> it.type.toString()),
