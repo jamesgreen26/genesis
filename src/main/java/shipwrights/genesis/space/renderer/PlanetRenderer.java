@@ -10,6 +10,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetTextures;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
@@ -60,12 +61,14 @@ public class PlanetRenderer implements CelestialRenderer {
 
             // Apply inverse rotation to the celestial's own rotation
             rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
+        } else {
+            position = position.sub(VectorConversionsMCKt.toJOML(event.getCamera().getPosition()), new Vector3d());
         }
 
-        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick()), 1f);
+        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, 1f);
     }
 
-    private void renderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, Vector3dc lightOffset, float alpha) {
+    private void renderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
         // Get the texture for this planet
         ResourceLocation textureLocation = PlanetTextures.getTexture(planetID);
         if (textureLocation == null) {
@@ -94,7 +97,7 @@ public class PlanetRenderer implements CelestialRenderer {
 
         float halfSize = (float) halfExtent;
 
-        Vector3d lightDir = new Vector3d(lightOffset);
+        Vector3d lightDir = null;
 
         // UV layout (3x2 grid):
         // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
@@ -135,7 +138,7 @@ public class PlanetRenderer implements CelestialRenderer {
         rotation.transform(vertexNormal);
 
         Vector3d worldNormal = new Vector3d(vertexNormal.x, vertexNormal.y, vertexNormal.z);
-        float lighting = (float) Math.max(0.05, worldNormal.dot(lightDir)); // Minimum ambient lighting
+        float lighting = 1f; // Minimum ambient lighting
 
         int litValue = (int) (255 * lighting * alpha);
 
