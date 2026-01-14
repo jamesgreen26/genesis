@@ -12,7 +12,7 @@ This guide will introduce you to the core concepts of celestials and show you ho
 
 A celestial is any astronomical body in your space system. Each celestial has:
 
-- **Identity**: A unique ID (like `genesis:sun` or `minecraft:overworld`)
+- **Identity**: A unique ID (like `genesis:sun` or `minecraft:overworld`)<br>    NOTE: If your celestial has an associated dimension, it should have the same ID
 - **Type**: What kind of celestial it is (star, planet, etc.)
 - **Physical Properties**: Size, gravity, and color
 - **Transform**: Position and rotation behavior (static or orbiting)
