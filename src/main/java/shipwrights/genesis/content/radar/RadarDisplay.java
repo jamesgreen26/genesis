@@ -7,7 +7,8 @@ import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBdc;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.space.Orbitable;
+import shipwrights.genesis.space.Celestial;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,9 +58,9 @@ public class RadarDisplay {
     }
 
     private void scanPlanets(Level level, Vector3dc camera) {
-        GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies().forEach(body -> {
+        GenesisMod.SPACE_REGISTRY.getAll().forEach(body -> {
             double extent = body.getActualSize() / 2;
-            Vector3dc pos = body.getCurrentPos(GenesisMod.getTicks(level));
+            Vector3dc pos = body.getPosition(GenesisMod.getTicks(level));
             AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
             scanBox(box);
         });
@@ -67,7 +68,7 @@ public class RadarDisplay {
 
     private void scanAsteroidBelt(Level level, Vector3dc camera) {
         // Torus parameters matching worldgen
-        double majorRadius = Orbitable.Celestial.BASE_ORBIT_DISTANCE * 1.6667; // distance from center to tube center
+        double majorRadius = Celestial.BASE_ORBIT_DISTANCE * 1.6667; // distance from center to tube center
         double minorRadius = 470.0;    // radius of tube
 
         // Approximate torus as boxes arranged in a circle

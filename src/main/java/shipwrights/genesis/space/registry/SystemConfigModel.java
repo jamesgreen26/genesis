@@ -2,14 +2,12 @@ package shipwrights.genesis.space.registry;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import shipwrights.genesis.space.OrbitingBody;
-import shipwrights.genesis.space.Star;
+import shipwrights.genesis.space.Celestial;
 
 import java.util.List;
 
-public record SystemConfigModel(List<Star> stars, List<OrbitingBody> bodies) {
+public record SystemConfigModel(List<Celestial> celestials) {
     public static final Codec<SystemConfigModel> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.list(Star.CODEC).optionalFieldOf("stars", List.of()).forGetter(SystemConfigModel::stars),
-            Codec.list(OrbitingBody.CODEC).optionalFieldOf("bodies", List.of()).forGetter(SystemConfigModel::bodies)
+            Codec.list(Celestial.CODEC).fieldOf("celestials").forGetter(SystemConfigModel::celestials)
     ).apply(instance, SystemConfigModel::new));
 }

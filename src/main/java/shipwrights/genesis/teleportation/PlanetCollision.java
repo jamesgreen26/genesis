@@ -1,5 +1,6 @@
 package shipwrights.genesis.teleportation;
 
+import kotlin.Pair;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -16,8 +17,9 @@ import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.space.OrbitingBody;
+import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.SpaceLevel;
+import shipwrights.genesis.space.type.CelestialType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,13 +63,13 @@ public class PlanetCollision {
 			final Vec3 shipCenter = VectorConversionsMCKt.toMinecraft(ship.getWorldAABB().center(new Vector3d()));
 
 			// Find nearest planet
-			final OrbitingBody.WithDistanceSq nearestPlanetData = SpaceLevel.getNearestOrbitingBody(new Vector3d(shipCenter.x, shipCenter.y, shipCenter.z), GenesisMod.getTicks(level)).orElse(null);
+			final Pair<Celestial, Double> nearestPlanetData = SpaceLevel.nearestCelestialWhere(new Vector3d(shipCenter.x, shipCenter.y, shipCenter.z), GenesisMod.getTicks(level), 0f, CelestialType::isVisitable);
 			if (nearestPlanetData == null) {
 				continue;
 			}
 
-			final OrbitingBody planet = nearestPlanetData.getCelestial();
-			final double distance = Math.sqrt(nearestPlanetData.getDistanceSquared());
+			final Celestial planet = nearestPlanetData.getFirst();
+			final double distance = Math.sqrt(nearestPlanetData.getSecond());
 			double closeRange = planet.getActualSize() / 8;
 
 			final ResourceKey<Level> targetDimension = ResourceKey.create(
@@ -123,7 +125,7 @@ public class PlanetCollision {
 			);
 
 			final long ticks = GenesisMod.getTicks(level);
-			final Vector3dc planetPos = planet.getCurrentPos(ticks);
+			final Vector3dc planetPos = planet.getPosition(ticks);
 
 			// Calculate rotation based on planet position
 			final Vector3d directionToPlanet = new Vector3d(

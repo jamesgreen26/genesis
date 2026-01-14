@@ -13,7 +13,7 @@ import org.joml.Vector3dc;
 import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.space.OrbitingBody;
+import shipwrights.genesis.space.Celestial;
 
 import static shipwrights.genesis.teleportation.VSUtils.getLoadedShipsInLevel;
 
@@ -30,7 +30,7 @@ public class AtmosphericCollision {
 	 */
 	public static void atmosphericCollisionTick(final ServerLevel level) {
 		// Check if this is a body dimension
-		final OrbitingBody body = GenesisMod.getDataForLevel(level);
+		final Celestial body = GenesisMod.getDataForLevel(level);
 		if (body == null) {
 			return;
 		}
@@ -42,7 +42,7 @@ public class AtmosphericCollision {
 		}
 
 		final ResourceKey<Level> dimension = level.dimension();
-		final Vector3dc planetPos = body.getCurrentPos(GenesisMod.getTicks(level));
+		final Vector3dc planetPos = body.getPosition(GenesisMod.getTicks(level));
 		final double atmoHeight = GenesisMod.atmosphereExitHeight;
 
 		final TeleportationHandler teleportHandler = TELEPORT_HANDLER;

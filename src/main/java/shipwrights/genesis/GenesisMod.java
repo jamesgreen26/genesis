@@ -19,10 +19,10 @@ import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
-import shipwrights.genesis.space.ExampleCustomTransformProvider;
+import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
 import shipwrights.genesis.content.particle.GenesisParticles;
 import shipwrights.genesis.teleportation.ShipLandingAttachment;
-import shipwrights.genesis.space.OrbitingBody;
 import shipwrights.genesis.space.registry.SpaceRegistry;
 import shipwrights.genesis.teleportation.TeleportationHandler;
 import virtuoel.pehkui.api.ScaleData;
@@ -60,8 +60,8 @@ public final class GenesisMod {
         // Register packet handlers
         GenesisNetworking.init();
 
-        // Register custom transform providers
-        ExampleCustomTransformProvider.register();
+        // Register celestial transform providers
+        BuiltinTransformProviders.register();
 
         // Register fluids using Registrate (must be called before other registrations)
         GenesisFluids.init();
@@ -85,8 +85,8 @@ public final class GenesisMod {
         registrationCallbacks.add(callback);
     }
 
-    @Nullable public static OrbitingBody getDataForLevel(Level level) {
-        return SPACE_REGISTRY.getOrbitingBody(level.dimension().location());
+    @Nullable public static Celestial getDataForLevel(Level level) {
+        return SPACE_REGISTRY.get(level.dimension().location());
     }
 
     public static long getTicks(Level level) {

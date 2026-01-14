@@ -25,8 +25,10 @@ public class TestItem extends Item {
 
             Vector3d origin = new Vector3d(arg2.position().x,arg2.position().y,arg2.position().z);
             Vector3d direction = new Vector3d(v3d.x,v3d.y,v3d.z);
-            SpaceLevel.celestialRaycast(GenesisMod.getTicks(arg),origin,direction)
-                .ifPresent(hit -> arg2.sendSystemMessage(Component.literal("BODY FOUND: " + hit.getCelestial().getID())));
+            var result = SpaceLevel.celestialRaycast(GenesisMod.getTicks(arg), 0f, origin,direction, celestialType -> true);
+            if (result != null) {
+                arg2.sendSystemMessage(Component.literal("BODY FOUND: " + result.getFirst().getID()));
+            }
         }
         return super.use(arg, arg2, arg3);
     }
