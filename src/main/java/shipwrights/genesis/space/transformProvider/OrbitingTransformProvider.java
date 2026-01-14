@@ -1,0 +1,128 @@
+package shipwrights.genesis.space.transformProvider;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
+import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
+import org.joml.Vector3d;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.Celestial;
+
+import java.util.Random;
+
+/**
+ * Transform provider that simulates orbital mechanics for celestial bodies.
+ * <br>
+ * Uses the seed parameter to generate random but deterministic values for
+ * orbital angles and base rotation (matching OrbitingBody behavior).
+ */
+public class OrbitingTransformProvider implements CelestialTransformProvider {
+    public static final ResourceLocation TYPE = ResourceLocation.parse("genesis:orbiting");
+
+    private final ResourceLocation parentID;
+    private final int seed;
+
+    // Configurable orbital parameters (from OrbitingBody)
+    private final double orbitDistance;
+    private final double orbitTime;
+    private final double dayLength;
+
+    // Random parameters derived from seed
+    private final double orbitalTheta;
+    private final double orbitalPhi;
+    private final Quaterniondc baseRotation;
+
+    /**
+     * Creates an orbiting transform provider with specified orbital parameters.
+     * The seed is used to generate random orbital angles and rotation.
+     *
+     * @param parentID the parent celestial body to orbit around
+     * @param seed the seed for generating deterministic random orbital angles and rotation
+     * @param orbitDistance the orbit radius multiplier (multiplied by BASE_ORBIT_DISTANCE)
+     * @param orbitTime the orbit period multiplier (multiplied by BASE_ORBIT_TIME)
+     * @param dayLength the day length multiplier (multiplied by BASE_DAY_LENGTH)
+     */
+    public OrbitingTransformProvider(ResourceLocation parentID, int seed, double orbitDistance, double orbitTime, double dayLength) {
+        this.parentID = parentID;
+        this.seed = seed;
+        this.orbitDistance = orbitDistance;
+        this.orbitTime = orbitTime;
+        this.dayLength = Math.max(0.001, dayLength);
+
+        // Generate random parameters from seed (similar to OrbitingBody)
+        Random rand = new Random(seed);
+
+        // Advance RNG like OrbitingBody does for consistency
+        for (int i = 0; i < rand.nextInt(10); i++) {
+            rand.nextDouble();
+        }
+
+        // Generate random base rotation
+        this.baseRotation = new Quaterniond().rotationXYZ(
+            rand.nextDouble(Math.PI),
+            rand.nextDouble(Math.PI),
+            rand.nextDouble(Math.PI)
+        );
+
+        // Generate random orbital angles (spherical coordinates)
+        this.orbitalTheta = rand.nextDouble() * 2 * Math.PI;   // longitude
+        this.orbitalPhi = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
+    }
+
+    private Celestial getParent() {
+        return GenesisMod.SPACE_REGISTRY.get(parentID);
+    }
+
+    private int getYearLengthTicks() {
+        return (int)(this.orbitTime * Celestial.BASE_ORBIT_TIME);
+    }
+
+    @Override
+    public Quaterniondc getRotation(long ticks, float subticks) {
+        // Apply daily rotation around Z axis (similar to OrbitingBody)
+        return new Quaterniond(baseRotation).rotateZ(
+            -Math.PI * 2 * (ticks + subticks) / (this.dayLength * Celestial.BASE_DAY_LENGTH)
+        );
+    }
+
+    @Override
+    public Vector3d getPosition(long ticks, float subticks) {
+        // Calculate orbital position (similar to OrbitingBody.getCurrentPos)
+        Vector3d out = new Vector3d(1, 0, 0);
+
+        // Rotate by orbital progression
+        out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
+
+        // Apply orbital angles
+        out = out.rotateY(orbitalTheta);
+        out = out.rotateX(orbitalPhi + Math.PI / 2);
+
+        // Scale to orbit distance
+        out.normalize(orbitDistance * Celestial.BASE_ORBIT_DISTANCE);
+
+        // Add parent's position
+        return out.add(getParent().getPosition(ticks, subticks), new Vector3d());
+    }
+
+    @Override
+    public ResourceLocation getType() {
+        return TYPE;
+    }
+
+    // Codec for serialization/deserialization
+    public static final Codec<OrbitingTransformProvider> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    ResourceLocation.CODEC.fieldOf("parentID").forGetter(p -> p.parentID),
+                    Codec.INT.fieldOf("seed").forGetter(p -> p.seed),
+                    Codec.DOUBLE.fieldOf("orbitDistance").forGetter(p -> p.orbitDistance),
+                    Codec.DOUBLE.fieldOf("orbitTime").forGetter(p -> p.orbitTime),
+                    Codec.DOUBLE.optionalFieldOf("dayLength", 1.0).forGetter(p -> p.dayLength)
+            ).apply(instance, OrbitingTransformProvider::new)
+    );
+
+    // Example registration method (call this during mod initialization)
+    public static void register() {
+        CelestialTransformProvider.register(TYPE, CODEC);
+    }
+}

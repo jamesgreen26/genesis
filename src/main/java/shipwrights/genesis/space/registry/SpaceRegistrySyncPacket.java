@@ -47,8 +47,7 @@ public record SpaceRegistrySyncPacket(CompoundTag data) {
 
     private static void send(ServerPlayer player) {
         SystemConfigModel config = new SystemConfigModel(
-                GenesisMod.SPACE_REGISTRY.getAllStars(),
-                GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies()
+                GenesisMod.SPACE_REGISTRY.getAll()
         );
 
         var data = (CompoundTag) SystemConfigModel.CODEC

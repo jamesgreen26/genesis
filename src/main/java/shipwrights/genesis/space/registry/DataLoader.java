@@ -23,10 +23,9 @@ public class DataLoader {
     private static final List<SystemConfigModel> loadedConfigs = new CopyOnWriteArrayList<>();
 
     static {
-        GenesisMod.onRegisterCelestialsEvent(registerEvent -> {
+        GenesisMod.onRegisterCelestialsEvent(event -> {
             for (SystemConfigModel config : loadedConfigs) {
-                config.stars().forEach(it -> registerEvent.accept(it.getID(), it));
-                config.bodies().forEach(it -> registerEvent.accept(it.getID(), it));
+                config.celestials().forEach(event::accept);
             }
         });
     }

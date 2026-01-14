@@ -1,5 +1,7 @@
 package shipwrights.genesis.space;
 
+import kotlin.Pair;
+import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -9,11 +11,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.registry.SpaceRegistry;
+import shipwrights.genesis.space.transformProvider.CelestialTransformProvider;
+import shipwrights.genesis.space.transformProvider.StaticTransformProvider;
+import shipwrights.genesis.space.type.BuiltinCelestialTypes;
+import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,65 +70,26 @@ class SpaceLevelTest {
     }
 
     private static void clearRegistry(SpaceRegistry registry) throws Exception {
-        Method resetMethod = SpaceRegistry.class.getDeclaredMethod("reset");
-        resetMethod.setAccessible(true);
-        resetMethod.invoke(registry);
-    }
-
-    private void addStarToRegistry(Star star) throws Exception {
-        // Use reflection to access private addStar method
-        Method addStarMethod = SpaceRegistry.class.getDeclaredMethod("addStar",
-            net.minecraft.resources.ResourceLocation.class, Star.class);
-        addStarMethod.setAccessible(true);
-        addStarMethod.invoke(testRegistry, star.getID(), star);
-    }
-
-    private void addOrbitingBodyToRegistry(OrbitingBody body, Star parent) throws Exception {
-        // First add the parent star
-        addStarToRegistry(parent);
-
-        // Link the parent using the new public method
-        body.defineParent(parent);
-
-        // Add directly to orbitingBodies map using reflection
-        Field bodiesField = SpaceRegistry.class.getDeclaredField("orbitingBodies");
-        bodiesField.setAccessible(true);
+        Field celestialsField = SpaceRegistry.class.getDeclaredField("celestials");
+        celestialsField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<net.minecraft.resources.ResourceLocation, OrbitingBody> bodiesMap =
-            (java.util.Map<net.minecraft.resources.ResourceLocation, OrbitingBody>) bodiesField.get(testRegistry);
-        bodiesMap.put(body.getID(), body);
+        java.util.Map<ResourceLocation, Celestial> celestialsMap =
+            (java.util.Map<ResourceLocation, Celestial>) celestialsField.get(registry);
+        celestialsMap.clear();
     }
 
-    /**
-     * Simple test implementation of CustomTransformProvider that returns a fixed position and rotation
-     */
-    private static class FixedTransformProvider implements CustomTransformProvider {
-        private final Vector3d position;
-        private final Quaterniondc rotation;
-
-        public FixedTransformProvider(double x, double y, double z) {
-            this.position = new Vector3d(x, y, z);
-            this.rotation = new Quaterniond();
-        }
-
-        @Override
-        public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
-            return rotation;
-        }
-
-        @Override
-        public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
-            return new Vector3d(position);
-        }
-
-        @Override
-        public net.minecraft.resources.ResourceLocation getType() {
-            return net.minecraft.resources.ResourceLocation.parse("genesis:test_fixed");
-        }
+    private void addCelestialToRegistry(Celestial celestial) throws Exception {
+        // Add directly to celestials map using reflection
+        Field celestialsField = SpaceRegistry.class.getDeclaredField("celestials");
+        celestialsField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<ResourceLocation, Celestial> celestialsMap =
+            (java.util.Map<ResourceLocation, Celestial>) celestialsField.get(testRegistry);
+        celestialsMap.put(celestial.getID(), celestial);
     }
 
     @Test
-    @DisplayName("Should return empty when no celestials are registered")
+    @DisplayName("Should return null when no celestials are registered")
     void testRaycastWithNoCelestials() {
         // Arrange
         Vector3d origin = new Vector3d(0, 0, 0);
@@ -132,61 +97,67 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertFalse(result.isPresent(), "Should return empty when no celestials exist");
+        assertNull(result, "Should return null when no celestials exist");
     }
 
     @Test
     @DisplayName("Should return closest celestial when ray hits one star")
     void testRaycastHitsOneStar() throws Exception {
         // Arrange
-        Star testStar = new Star("test:star1", 5000, 1.0, 100, 0, 0);
-        addStarToRegistry(testStar);
+        Celestial testStar = new Celestial(
+            new StaticTransformProvider(100, 0, 0),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            1.0, // size
+            1.0, // gravity
+            1f, 1f, 1f // r, g, b
+        );
+        addCelestialToRegistry(testStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0); // Ray pointing directly at star
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should find the star");
-        assertEquals(testStar, result.get().getCelestial(), "Should return the star");
-        assertTrue(result.get().getDistanceSquared() >= 0, "Distance squared should be non-negative");
+        assertNotNull(result, "Should find the star");
+        assertEquals(testStar, result.getFirst(), "Should return the star");
+        assertTrue(result.getSecond() >= 0, "Distance squared should be non-negative");
     }
 
     @Test
     @DisplayName("Should return closest celestial when ray hits one orbiting body")
     void testRaycastHitsOneOrbitingBody() throws Exception {
         // Arrange
-        // Position parent star away from the ray path
-        Star parentStar = new Star("test:parent", 5000, 0.01, 0, 1000, 0);
-
-        // Create orbiting body with fixed position at (50, 0, 0) using CustomTransformProvider
-        OrbitingBody testBody = new OrbitingBody(
-            "test:body1",
-            "test:parent",
-            0.5, 50, 1000, 1.0, 1f, 1f, 1f, 1d,
-            new FixedTransformProvider(50, 0, 0)
+        // Create orbiting body at (50, 0, 0) using StaticTransformProvider
+        Celestial testBody = new Celestial(
+            new StaticTransformProvider(50, 0, 0),
+            ResourceLocation.parse("test:body1"),
+            BuiltinCelestialTypes.BODY,
+            0.5, // size
+            1.0, // gravity
+            1f, 1f, 1f // r, g, b
         );
-        addOrbitingBodyToRegistry(testBody, parentStar);
+        addCelestialToRegistry(testBody);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0);
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should find the orbiting body");
-        assertEquals(testBody, result.get().getCelestial(), "Should return the orbiting body");
+        assertNotNull(result, "Should find the orbiting body");
+        assertEquals(testBody, result.getFirst(), "Should return the orbiting body");
     }
 
     @Test
@@ -194,51 +165,71 @@ class SpaceLevelTest {
     void testRaycastHitsMultipleCelestials() throws Exception {
         // Arrange
         // Create a far star and a closer star, both on the ray path
-        Star farStar = new Star("test:far_star", 5000, 1.0, 1000, 0, 0);
-        Star closeStar = new Star("test:close_star", 6000, 1.0, 100, 0, 0);
+        Celestial farStar = new Celestial(
+            new StaticTransformProvider(1000, 0, 0),
+            ResourceLocation.parse("test:far_star"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        Celestial closeStar = new Celestial(
+            new StaticTransformProvider(100, 0, 0),
+            ResourceLocation.parse("test:close_star"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
 
-        addStarToRegistry(farStar);
-        addStarToRegistry(closeStar);
+        addCelestialToRegistry(farStar);
+        addCelestialToRegistry(closeStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0);
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should find a celestial");
-        assertEquals(closeStar, result.get().getCelestial(),
+        assertNotNull(result, "Should find a celestial");
+        assertEquals(closeStar, result.getFirst(),
             "Should return the closer star");
     }
 
     @Test
-    @DisplayName("Should return empty when ray misses all celestials")
+    @DisplayName("Should return null when ray misses all celestials")
     void testRaycastMissesAllCelestials() throws Exception {
         // Arrange
-        Star testStar = new Star("test:star1", 5000, 1.0, 100, 0, 0);
-        addStarToRegistry(testStar);
+        Celestial testStar = new Celestial(
+            new StaticTransformProvider(100, 0, 0),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        addCelestialToRegistry(testStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(0, 1, 0); // Ray pointing perpendicular to star
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertFalse(result.isPresent(), "Should return empty when ray misses all celestials");
+        assertNull(result, "Should return null when ray misses all celestials");
     }
 
     @Test
     @DisplayName("Should handle ray starting inside a celestial bounding box")
     void testRaycastStartingInsideCelestial() throws Exception {
         // Arrange
-        Star largeStar = new Star("test:large_star", 5000, 5.0, 50, 50, 50);
-        addStarToRegistry(largeStar);
+        Celestial largeStar = new Celestial(
+            new StaticTransformProvider(50, 50, 50),
+            ResourceLocation.parse("test:large_star"),
+            BuiltinCelestialTypes.STAR,
+            5.0, 1.0, 1f, 1f, 1f
+        );
+        addCelestialToRegistry(largeStar);
 
         // Origin is inside or near the star's bounding box
         Vector3d origin = new Vector3d(50, 50, 50);
@@ -246,69 +237,84 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should detect celestial even when starting inside");
+        assertNotNull(result, "Should detect celestial even when starting inside");
     }
 
     @Test
     @DisplayName("Should handle normalized ray direction")
     void testRaycastWithNormalizedDirection() throws Exception {
         // Arrange
-        Star testStar = new Star("test:star1", 5000, 1.0, 100, 100, 0);
-        addStarToRegistry(testStar);
+        Celestial testStar = new Celestial(
+            new StaticTransformProvider(100, 100, 0),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        addCelestialToRegistry(testStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 1, 0).normalize(); // Normalized diagonal direction
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should handle normalized direction vectors");
+        assertNotNull(result, "Should handle normalized direction vectors");
     }
 
     @Test
     @DisplayName("Should handle negative coordinates")
     void testRaycastWithNegativeCoordinates() throws Exception {
         // Arrange
-        Star testStar = new Star("test:star1", 5000, 1.0, -100, -100, -100);
-        addStarToRegistry(testStar);
+        Celestial testStar = new Celestial(
+            new StaticTransformProvider(-100, -100, -100),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        addCelestialToRegistry(testStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(-1, -1, -1).normalize();
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should handle negative coordinates");
+        assertNotNull(result, "Should handle negative coordinates");
     }
 
     @Test
     @DisplayName("Should correctly calculate distance squared")
     void testDistanceSquaredCalculation() throws Exception {
         // Arrange
-        Star testStar = new Star("test:star1", 5000, 0.1, 100, 0, 0); // Small star
-        addStarToRegistry(testStar);
+        Celestial testStar = new Celestial(
+            new StaticTransformProvider(100, 0, 0),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            0.1, 1.0, 1f, 1f, 1f // Small star
+        );
+        addCelestialToRegistry(testStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0);
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should find the star");
-        double distanceSq = result.get().getDistanceSquared();
+        assertNotNull(result, "Should find the star");
+        double distanceSq = result.getSecond();
         assertTrue(distanceSq >= 0, "Distance squared should be non-negative");
         assertTrue(Double.isFinite(distanceSq), "Distance squared should be finite");
     }
@@ -317,25 +323,40 @@ class SpaceLevelTest {
     @DisplayName("Should handle multiple stars along the same ray")
     void testRaycastWithMultipleStarsOnRay() throws Exception {
         // Arrange
-        Star star1 = new Star("test:star1", 5000, 1.0, 200, 0, 0);
-        Star star2 = new Star("test:star2", 6000, 1.0, 500, 0, 0);
-        Star star3 = new Star("test:star3", 7000, 1.0, 1000, 0, 0);
+        Celestial star1 = new Celestial(
+            new StaticTransformProvider(200, 0, 0),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        Celestial star2 = new Celestial(
+            new StaticTransformProvider(500, 0, 0),
+            ResourceLocation.parse("test:star2"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        Celestial star3 = new Celestial(
+            new StaticTransformProvider(1000, 0, 0),
+            ResourceLocation.parse("test:star3"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
 
-        addStarToRegistry(star1);
-        addStarToRegistry(star2);
-        addStarToRegistry(star3);
+        addCelestialToRegistry(star1);
+        addCelestialToRegistry(star2);
+        addCelestialToRegistry(star3);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0);
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should find a celestial");
-        assertEquals(star1, result.get().getCelestial(),
+        assertNotNull(result, "Should find a celestial");
+        assertEquals(star1, result.getFirst(),
             "Should return the closest celestial (star at 200)");
     }
 
@@ -343,51 +364,48 @@ class SpaceLevelTest {
     @DisplayName("Should respect different tick values with orbiting bodies")
     void testRaycastWithDifferentTicksForOrbitingBody() throws Exception {
         // Arrange
-        // Position parent star away from the ray path
-        Star parentStar = new Star("test:parent", 5000, 0.01, 0, 1000, 0);
-
-        // Create orbiting body that returns different positions based on ticks
-        CustomTransformProvider tickDependentProvider = new CustomTransformProvider() {
+        // Create body with tick-dependent provider
+        CelestialTransformProvider tickDependentProvider = new CelestialTransformProvider() {
             @Override
-            public Quaterniondc getRotation(long ticks, float subticks, Orbitable parent) {
+            public Quaterniondc getRotation(long ticks, float subticks) {
                 return new Quaterniond();
             }
 
             @Override
-            public Vector3d getCurrentPos(long ticks, float subticks, Orbitable parent) {
+            public Vector3d getPosition(long ticks, float subticks) {
                 // Position changes with ticks - at tick 0 it's at (100,0,0), at tick 1000 it's at (200,0,0)
                 double x = 100 + (ticks / 10.0);
                 return new Vector3d(x, 0, 0);
             }
 
             @Override
-            public net.minecraft.resources.ResourceLocation getType() {
-                return net.minecraft.resources.ResourceLocation.parse("genesis:test_tick_dependent");
+            public ResourceLocation getType() {
+                return ResourceLocation.parse("genesis:test_tick_dependent");
             }
         };
 
-        OrbitingBody testBody = new OrbitingBody(
-            "test:body1",
-            "test:parent",
-            0.5, 50, 1000, 1.0, 1f, 1f, 1f, 1d,
-            tickDependentProvider
+        Celestial testBody = new Celestial(
+            tickDependentProvider,
+            ResourceLocation.parse("test:body1"),
+            BuiltinCelestialTypes.BODY,
+            0.5, 1.0, 1f, 1f, 1f
         );
-        addOrbitingBodyToRegistry(testBody, parentStar);
+        addCelestialToRegistry(testBody);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0);
 
         // Act - Test at different tick values
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result1 =
-            SpaceLevel.celestialRaycast(0L, origin, direction);
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result2 =
-            SpaceLevel.celestialRaycast(1000L, origin, direction);
+        Pair<Celestial, Double> result1 =
+            SpaceLevel.celestialRaycast(0L, 0f, origin, direction, type -> true);
+        Pair<Celestial, Double> result2 =
+            SpaceLevel.celestialRaycast(1000L, 0f, origin, direction, type -> true);
 
         // Assert - Both should find the body, but at different distances
-        assertTrue(result1.isPresent(), "Should find body at tick 0");
-        assertTrue(result2.isPresent(), "Should find body at tick 1000");
+        assertNotNull(result1, "Should find body at tick 0");
+        assertNotNull(result2, "Should find body at tick 1000");
         // Distance at tick 1000 should be larger since body moved further away
-        assertTrue(result2.get().getDistanceSquared() > result1.get().getDistanceSquared(),
+        assertTrue(result2.getSecond() > result1.getSecond(),
             "Body should be further away at tick 1000");
     }
 
@@ -395,51 +413,57 @@ class SpaceLevelTest {
     @DisplayName("Should handle perpendicular rays")
     void testRaycastPerpendicular() throws Exception {
         // Arrange
-        Star testStar = new Star("test:star1", 5000, 1.0, 0, 0, 100);
-        addStarToRegistry(testStar);
+        Celestial testStar = new Celestial(
+            new StaticTransformProvider(0, 0, 100),
+            ResourceLocation.parse("test:star1"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        addCelestialToRegistry(testStar);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0); // Ray perpendicular to star direction
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertFalse(result.isPresent(), "Should miss star when ray is perpendicular");
+        assertNull(result, "Should miss star when ray is perpendicular");
     }
 
     @Test
     @DisplayName("Should prioritize closer orbiting body over far star")
     void testRaycastPrioritizesCloserBody() throws Exception {
         // Arrange
-        Star farStar = new Star("test:far_star", 5000, 1.0, 500, 0, 0);
-        // Position parent star away from the ray path
-        Star parentStar = new Star("test:parent", 5000, 0.01, 0, 1000, 0);
-
-        // Create orbiting body closer to origin than the far star
-        OrbitingBody closeBody = new OrbitingBody(
-            "test:close_body",
-            "test:parent",
-            0.5, 50, 1000, 1.0, 1f, 1f, 1f, 1d,
-            new FixedTransformProvider(200, 0, 0)
+        Celestial farStar = new Celestial(
+            new StaticTransformProvider(500, 0, 0),
+            ResourceLocation.parse("test:far_star"),
+            BuiltinCelestialTypes.STAR,
+            1.0, 1.0, 1f, 1f, 1f
+        );
+        Celestial closeBody = new Celestial(
+            new StaticTransformProvider(200, 0, 0),
+            ResourceLocation.parse("test:close_body"),
+            BuiltinCelestialTypes.BODY,
+            0.5, 1.0, 1f, 1f, 1f
         );
 
-        addStarToRegistry(farStar);
-        addOrbitingBodyToRegistry(closeBody, parentStar);
+        addCelestialToRegistry(farStar);
+        addCelestialToRegistry(closeBody);
 
         Vector3d origin = new Vector3d(0, 0, 0);
         Vector3d direction = new Vector3d(1, 0, 0);
         long ticks = 0L;
 
         // Act
-        Optional<Orbitable.Celestial.WithDistanceSq<Orbitable.Celestial>> result =
-            SpaceLevel.celestialRaycast(ticks, origin, direction);
+        Pair<Celestial, Double> result =
+            SpaceLevel.celestialRaycast(ticks, 0f, origin, direction, type -> true);
 
         // Assert
-        assertTrue(result.isPresent(), "Should find a celestial");
-        assertEquals(closeBody, result.get().getCelestial(),
+        assertNotNull(result, "Should find a celestial");
+        assertEquals(closeBody, result.getFirst(),
             "Should return the closer orbiting body, not the far star");
     }
 }

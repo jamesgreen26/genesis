@@ -5,8 +5,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import org.jetbrains.annotations.NotNull;
-import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.space.Orbitable;
+import shipwrights.genesis.space.Celestial;
 
 public class AsteroidBelt implements DensityFunction {
 
@@ -23,7 +22,7 @@ public class AsteroidBelt implements DensityFunction {
         double y = context.blockY() - 100;
         double z = context.blockZ();
 
-        double majorRadius = Orbitable.Celestial.BASE_ORBIT_DISTANCE * 1.6667; // distance from center to the tube center
+        double majorRadius = Celestial.BASE_ORBIT_DISTANCE * 1.6667; // distance from center to the tube center
         double minorRadius = 470.0;    // radius of tube
 
         double q = Math.sqrt(x * x + z * z) - majorRadius;

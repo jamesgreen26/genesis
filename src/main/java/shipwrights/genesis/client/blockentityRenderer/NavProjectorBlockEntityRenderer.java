@@ -6,9 +6,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.blockentity.NavProjectorBlockEntity;
-import shipwrights.genesis.space.Orbitable;
-import shipwrights.genesis.space.OrbitingBody;
-import shipwrights.genesis.space.Star;
+import shipwrights.genesis.space.Celestial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -19,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.joml.*;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import shipwrights.genesis.space.type.BuiltinCelestialTypes;
 
 import java.lang.Math;
 import java.util.Objects;
@@ -65,7 +64,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        OrbitingBody currentPlanet = GenesisMod.getDataForLevel(level);
+        Celestial currentPlanet = GenesisMod.getDataForLevel(level);
 
         if (currentPlanet != null) {
             poseStack.mulPose(new Quaternionf(currentPlanet.getRotation(ticks, partialTick)).invert());
@@ -75,7 +74,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
                 poseStack.mulPose(new Quaternionf(rot1));
             }
 
-            currentPos = currentPlanet.getCurrentPos(ticks, partialTick);
+            currentPos = currentPlanet.getPosition(ticks, partialTick);
 
             poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
         } else if(!isOnShip) {
@@ -93,22 +92,15 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
         }
 
-        // Render planets from Genesis space registry
-        for (OrbitingBody body : GenesisMod.SPACE_REGISTRY.getAllOrbitingBodies()) {
-            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, false);
+        for (Celestial body : GenesisMod.SPACE_REGISTRY.getAll()) {
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.getType().equals(BuiltinCelestialTypes.STAR));
         }
-
-        // Render stars
-        for (Star star : GenesisMod.SPACE_REGISTRY.getAllStars()) {
-            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, star, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, true);
-        }
-
 
         poseStack.popPose();
     }
 
-    private static void renderCelestialProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Orbitable.Celestial celestial, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick, boolean isStar) {
-        Vector3d celestialPos = new Vector3d(celestial.getCurrentPos(ticks, partialTick));
+    private static void renderCelestialProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Celestial celestial, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick, boolean isStar) {
+        Vector3d celestialPos = new Vector3d(celestial.getPosition(ticks, partialTick));
 
         if (isOnShip) {
             if (celestialPos.sub(new Vector3d(shipPos), new Vector3d()).length() > 120000) return;
