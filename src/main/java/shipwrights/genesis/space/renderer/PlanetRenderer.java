@@ -30,6 +30,7 @@ public class PlanetRenderer implements CelestialRenderer {
         Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
         Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
         double halfExtent = toRender.getActualSize() / 2;
+        float alpha = 1f;
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
         if (vantagePoint != null && vantagePoint.equals(toRender)) {
@@ -41,6 +42,12 @@ public class PlanetRenderer implements CelestialRenderer {
                 0
             );
             rotation = new Quaterniond();
+            int buildHeight = level.getMaxBuildHeight();
+            float alphaInterpolateStart = (float) (halfExtent + buildHeight / 3f);
+            float alphaInterpolateEnd = (float) (halfExtent + buildHeight);
+
+            float cameraY = (float) camera.getPosition().y;
+            alpha = Math.max(0f, Math.min(1f, (cameraY - alphaInterpolateStart) / (alphaInterpolateEnd - alphaInterpolateStart)));
         }
         // Transform by inverse of vantage point if present
         else if (vantagePoint != null) {
@@ -65,7 +72,7 @@ public class PlanetRenderer implements CelestialRenderer {
             position = position.sub(VectorConversionsMCKt.toJOML(event.getCamera().getPosition()), new Vector3d());
         }
 
-        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, 1f);
+        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
     }
 
     private void renderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
