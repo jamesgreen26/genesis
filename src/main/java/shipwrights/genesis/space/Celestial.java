@@ -105,7 +105,7 @@ public class Celestial {
 
 
     public Celestial getNearestStar(long gameTime, float partialTick) {
-        if (getType().equals(BuiltinCelestialTypes.STAR)) {
+        if (BuiltinCelestialTypes.STAR.equals(getType())) {
             return this;
         } else {
             Pair<Celestial, Double> result = SpaceLevel.nearestCelestialWhere(getPosition(gameTime, partialTick), gameTime, partialTick, Predicate.isEqual(BuiltinCelestialTypes.STAR));

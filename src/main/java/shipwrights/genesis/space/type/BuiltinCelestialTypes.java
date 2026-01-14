@@ -46,7 +46,7 @@ public class BuiltinCelestialTypes {
         }
     };
 
-    public void register() {
+    public static void register() {
         CelestialType.register(STAR);
         CelestialType.register(BODY);
     }
