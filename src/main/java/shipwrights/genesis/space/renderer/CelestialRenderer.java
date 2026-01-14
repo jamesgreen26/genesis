@@ -5,7 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import shipwrights.genesis.space.Celestial;
 
-@FunctionalInterface
 public interface CelestialRenderer {
     void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint);
+
+    default void setup(@NotNull RenderLevelStageEvent event, @Nullable Celestial vantagePoint) {}
+
+    default void teardown(@NotNull RenderLevelStageEvent event, @Nullable Celestial vantagePoint) {}
 }
