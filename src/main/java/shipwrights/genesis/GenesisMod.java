@@ -22,6 +22,7 @@ import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
 import shipwrights.genesis.content.particle.GenesisParticles;
+import shipwrights.genesis.space.type.BuiltinCelestialTypes;
 import shipwrights.genesis.teleportation.ShipLandingAttachment;
 import shipwrights.genesis.space.registry.SpaceRegistry;
 import shipwrights.genesis.teleportation.TeleportationHandler;
@@ -59,6 +60,9 @@ public final class GenesisMod {
 
         // Register packet handlers
         GenesisNetworking.init();
+
+        // Register celestial types
+        BuiltinCelestialTypes.register();
 
         // Register celestial transform providers
         BuiltinTransformProviders.register();
