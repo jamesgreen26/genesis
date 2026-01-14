@@ -488,5 +488,5 @@ double actualPeriod = periodMultiplier * Celestial.BASE_ORBIT_TIME;
 ## Next Steps
 
 - **Need API details?** See the complete [API Reference](api-reference.md)
-- **Want simpler examples?** Review the [Datapack Guide](datapack-guide.md) or [Code Guide](code-guide.md)
+- **Want simpler examples?** Review the [Implementation Guide](implementation-guide.md)
 - **Getting started?** Check the [Getting Started Guide](getting-started.md)

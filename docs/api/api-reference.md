@@ -668,6 +668,5 @@ See [StaticTransformProvider](#statictransformprovider) and [OrbitingTransformPr
 ## See Also
 
 - [Getting Started Guide](getting-started.md) - Introduction and quick start
-- [Datapack Guide](datapack-guide.md) - JSON configuration guide
-- [Code Guide](code-guide.md) - Java programming guide
+- [Implementation Guide](implementation-guide.md) - Step-by-step guide for datapacks and code
 - [Advanced Topics](advanced.md) - Custom types and transforms
