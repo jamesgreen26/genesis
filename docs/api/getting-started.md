@@ -74,19 +74,19 @@ This creates a large star named `mymod:my_sun` positioned at coordinates (0, 0, 
 
 ## How to Add Celestials
 
-There are two ways to add celestials to Genesis:
+You can add celestials to Genesis in two ways:
 
 1. **Datapacks** (Recommended for most users)
    - Create JSON configuration files
    - No programming required
    - Easy to share and modify
-   - See [Datapack Guide](datapack-guide.md)
 
 2. **Code** (For mod developers, offers more control)
    - Register celestials programmatically in Java
    - Full programmatic control
    - Can create dynamic celestials
-   - See [Code Guide](code-guide.md)
+
+Both approaches are covered in the [Implementation Guide](implementation-guide.md), which explains each concept once and shows examples for both formats.
 
 ## Prerequisites
 
@@ -102,8 +102,7 @@ There are two ways to add celestials to Genesis:
 
 ## Next Steps
 
-- **New to datapacks?** Start with the [Datapack Guide](datapack-guide.md) to learn how to create celestials using JSON files
-- **Mod developer?** Check out the [Code Guide](code-guide.md) to register celestials programmatically
+- **Ready to create celestials?** Start with the [Implementation Guide](implementation-guide.md) to learn how to create celestials using JSON datapacks or Java code
 - **Want to go deeper?** Explore [Advanced Topics](advanced.md) for custom types and transform providers
 - **Need a reference?** See the complete [API Reference](api-reference.md)
 

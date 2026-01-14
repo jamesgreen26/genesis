@@ -10,17 +10,13 @@ New to celestials? Start here to understand the basics:
 
 ## Guides
 
-Step-by-step guides for adding celestials:
+Step-by-step guide for adding celestials:
 
-- **[Datapack Guide](datapack-guide.md)** - Add celestials using JSON datapacks (recommended for most users)
-  - File structure and JSON format
+- **[Implementation Guide](implementation-guide.md)** - Add celestials using datapacks (JSON) or code (Java)
+  - Shows both datapack and code approaches side-by-side
   - Progressive examples from simple to complex
-  - Complete property reference
-
-- **[Code Guide](code-guide.md)** - Register celestials programmatically in Java (for mod developers)
-  - Event registration system
-  - Creating celestials in code
-  - Working with transform providers
+  - Complete property reference for both formats
+  - Setup instructions for datapacks and mod development
 
 ## Advanced Topics
 
