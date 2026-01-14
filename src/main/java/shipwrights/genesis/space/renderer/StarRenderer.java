@@ -30,11 +30,30 @@ public class StarRenderer implements CelestialRenderer {
         Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
         Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
 
-        // TODO transform according to vantage point
+        // Transform by inverse of vantage point if present
+        if (vantagePoint != null) {
+            Vector3dc vantagePos = vantagePoint.getPosition(ticks, event.getPartialTick());
+            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, event.getPartialTick());
+
+            // Calculate relative position (subtract vantage point position)
+            Vector3d relativePos = new Vector3d(
+                position.x() - vantagePos.x(),
+                position.y() - vantagePos.y(),
+                position.z() - vantagePos.z()
+            );
+
+            // Apply inverse rotation of vantage point
+            Quaterniond inverseVantageRot = new Quaterniond(vantageRot).conjugate();
+            inverseVantageRot.transform(relativePos);
+            position = relativePos;
+
+            // Apply inverse rotation to the celestial's own rotation
+            rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
+        }
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(),position, rotation);
+        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(), position, rotation);
         bufferSource.endBatch(getSunRenderType());
     }
 
