@@ -90,7 +90,7 @@ public class PlanetShading {
         for (AAPlane plane : planes) {
             List<Vector2dc> hits = new ArrayList<>();
             for (Vector3d corner : obb2LocalCorners) {
-                Vector2dc hit2d = intersectRayWithPlane(corner, refLocal, plane);
+                Vector2dc hit2d = intersectRayWithPlane(refLocal, corner, plane);
                 if (hit2d != null) hits.add(hit2d);
             }
             result.put(plane, hits);
