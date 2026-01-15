@@ -26,19 +26,19 @@ public class ShadowProjection {
 
         List<AAPlane> facingPlanes = PlanetShading.getFacingPlanes(self, referencePoint);
 
-        Map<AAPlane, List<Vector2d>> perPlane =
+        Map<AAPlane, List<List<Vector2d>>> perPlane =
                 accumulateProjectedPolygons(self, occluders, facingPlanes, referencePoint);
 
         return finalizeShadowPolygons(perPlane);
     }
 
-    static Map<AAPlane, List<Vector2d>> accumulateProjectedPolygons(
+    static Map<AAPlane, List<List<Vector2d>>> accumulateProjectedPolygons(
             OBB self,
             List<OBB> occluders,
             List<AAPlane> facingPlanes,
             Vector3dc referencePoint
     ) {
-        Map<AAPlane, List<Vector2d>> result = new HashMap<>();
+        Map<AAPlane, List<List<Vector2d>>> result = new HashMap<>();
 
         for (OBB occluder : occluders) {
             Map<AAPlane, List<Vector2dc>> projections =
@@ -57,7 +57,7 @@ public class ShadowProjection {
 
                 result
                         .computeIfAbsent(plane, p -> new ArrayList<>())
-                        .addAll(clipped);
+                        .add(clipped);
             }
         }
         return result;
@@ -111,20 +111,28 @@ public class ShadowProjection {
     }
 
     static List<FaceShadow> finalizeShadowPolygons(
-            Map<AAPlane, List<Vector2d>> perPlane
+            Map<AAPlane, List<List<Vector2d>>> perPlane
     ) {
         List<FaceShadow> result = new ArrayList<>();
 
-        for (Map.Entry<AAPlane, List<Vector2d>> e : perPlane.entrySet()) {
-            List<Vector2d> poly = e.getValue();
+        for (Map.Entry<AAPlane, List<List<Vector2d>>> e : perPlane.entrySet()) {
+            List<List<Vector2d>> polygons = e.getValue();
 
-            if (poly.size() < 3) continue;
+            if (polygons.isEmpty()) continue;
 
-            poly = PolygonClipping.angleSort(poly);
-            poly = PolygonClipping.pruneCollinear(poly, 1e-12);
+            // Collect all vertices from all polygons on this plane
+            List<Vector2d> allVertices = new ArrayList<>();
+            for (List<Vector2d> poly : polygons) {
+                allVertices.addAll(poly);
+            }
 
-            if (poly.size() >= 3) {
-                result.add(new FaceShadow(e.getKey(), List.copyOf(poly)));
+            if (allVertices.size() < 3) continue;
+
+            // Use convex hull to merge all shadow regions on this plane
+            List<Vector2d> merged = PolygonClipping.convexHull(allVertices);
+
+            if (merged.size() >= 3) {
+                result.add(new FaceShadow(e.getKey(), List.copyOf(merged)));
             }
         }
         return List.copyOf(result);

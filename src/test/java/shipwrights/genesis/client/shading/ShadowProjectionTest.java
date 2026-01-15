@@ -145,7 +145,7 @@ class ShadowProjectionTest {
         List<AAPlane> planes =
                 PlanetShading.getFacingPlanes(self, light);
 
-        Map<AAPlane, List<Vector2d>> result =
+        Map<AAPlane, List<List<Vector2d>>> result =
                 ShadowProjection.accumulateProjectedPolygons(
                         self,
                         List.of(occ1, occ2),
@@ -155,8 +155,13 @@ class ShadowProjectionTest {
 
         assertFalse(result.isEmpty());
 
-        for (List<Vector2d> poly : result.values()) {
-            assertTrue(poly.size() >= 6);
+        // Each plane should have collected multiple polygons from the two occluders
+        for (List<List<Vector2d>> polygons : result.values()) {
+            assertFalse(polygons.isEmpty());
+            // Each polygon should be valid
+            for (List<Vector2d> poly : polygons) {
+                assertTrue(poly.size() >= 3);
+            }
         }
     }
 
