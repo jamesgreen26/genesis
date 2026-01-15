@@ -1,8 +1,12 @@
 package shipwrights.genesis.math;
 
+import org.joml.Matrix4d;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.joml.primitives.AABBd;
+import org.joml.primitives.AABBdc;
+import org.joml.primitives.AABBi;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -393,4 +397,136 @@ class OBBTest {
         assertEquals(0.0, extent.y, 0.0001, "Half-extent Y should be 0.0");
         assertEquals(0.0, extent.z, 0.0001, "Half-extent Z should be 0.0");
     }
+    private static final double EPS = 1e-9;
+
+    @Test
+    void identityTransform_preservesCenterAndExtents() {
+        AABBi shipyardAABB = new AABBi(0, 0, 0, 10, 20, 30);
+        Matrix4d identity = new Matrix4d();
+
+        OBB obb = OBB.fromShip(shipyardAABB, identity);
+
+        // Center should be the AABB center
+        Vector3d expectedCenter = new Vector3d(5, 10, 15);
+        assertTrue(obb.center().equals(expectedCenter, EPS));
+
+        // Orientation should be identity
+        Quaterniond expectedOrientation = new Quaterniond();
+        assertTrue(obb.orientation().equals(expectedOrientation, EPS));
+
+        // Half-extents should match original AABB extents
+        AABBdc local = obb.localAabb();
+        assertEquals(-5, local.minX(), EPS);
+        assertEquals( 5, local.maxX(), EPS);
+        assertEquals(-10, local.minY(), EPS);
+        assertEquals( 10, local.maxY(), EPS);
+        assertEquals(-15, local.minZ(), EPS);
+        assertEquals( 15, local.maxZ(), EPS);
+    }
+
+    @Test
+    void translationOnly_movesCenterButKeepsOrientationAndSize() {
+        AABBi shipyardAABB = new AABBi(-2, -2, -2, 2, 2, 2);
+        Matrix4d transform = new Matrix4d().translation(10, 20, 30);
+
+        OBB obb = OBB.fromShip(shipyardAABB, transform);
+
+        // Center should be translated
+        Vector3d expectedCenter = new Vector3d(10, 20, 30);
+        assertTrue(obb.center().equals(expectedCenter, EPS));
+
+        // Orientation remains identity
+        assertTrue(obb.orientation().equals(new Quaterniond(), EPS));
+
+        // Extents unchanged
+        AABBdc local = obb.localAabb();
+        assertEquals(-2, local.minX(), EPS);
+        assertEquals( 2, local.maxX(), EPS);
+        assertEquals(-2, local.minY(), EPS);
+        assertEquals( 2, local.maxY(), EPS);
+        assertEquals(-2, local.minZ(), EPS);
+        assertEquals( 2, local.maxZ(), EPS);
+    }
+
+    @Test
+    void rotationOnly_affectsOrientationButNotCenterOrSize() {
+        AABBi shipyardAABB = new AABBi(-2, -2, -2, 2, 2, 2);
+        Matrix4d transform = new Matrix4d()
+                .rotateY(Math.toRadians(90));
+
+        OBB obb = OBB.fromShip(shipyardAABB, transform);
+
+        // Center remains at original center
+        Vector3d expectedCenter = new Vector3d(0, 0, 0);
+        assertTrue(obb.center().equals(expectedCenter, EPS));
+
+        // Orientation should match rotation
+        Quaterniond expectedOrientation = new Quaterniond().rotateY(Math.toRadians(90));
+        assertTrue(obb.orientation().equals(expectedOrientation, EPS));
+
+        // Size unchanged
+        AABBdc local = obb.localAabb();
+        assertEquals(-2, local.minX(), EPS);
+        assertEquals( 2, local.maxX(), EPS);
+        assertEquals(-2, local.minY(), EPS);
+        assertEquals( 2, local.maxY(), EPS);
+        assertEquals(-2, local.minZ(), EPS);
+        assertEquals( 2, local.maxZ(), EPS);
+    }
+
+    @Test
+    void uniformScaling_scalesLocalAabbButKeepsCenterAndOrientation() {
+        AABBi shipyardAABB = new AABBi(-1, -2, -3, 1, 2, 3);
+        Matrix4d transform = new Matrix4d()
+                .scale(2.0);
+
+        OBB obb = OBB.fromShip(shipyardAABB, transform);
+
+        // Center remains at origin (AABB center is (0,0,0))
+        Vector3d expectedCenter = new Vector3d(0, 0, 0);
+        assertTrue(obb.center().equals(expectedCenter, EPS));
+
+        // Orientation remains identity
+        assertTrue(obb.orientation().equals(new Quaterniond(), EPS), "actual value: " + obb.orientation());
+
+        // Local AABB must be centered at origin and uniformly scaled
+        AABBdc local = obb.localAabb();
+        assertEquals(-2, local.minX(), EPS);
+        assertEquals( 2, local.maxX(), EPS);
+        assertEquals(-4, local.minY(), EPS);
+        assertEquals( 4, local.maxY(), EPS);
+        assertEquals(-6, local.minZ(), EPS);
+        assertEquals( 6, local.maxZ(), EPS);
+    }
+
+
+    @Test
+    void rotationAndTranslation_affectOrientationAndCenterButNotLocalAabb() {
+        AABBi shipyardAABB = new AABBi(-2, -2, -2, 2, 2, 2);
+
+        Matrix4d transform = new Matrix4d()
+                .translate(10, 5, -7)
+                .rotateY(Math.toRadians(90));
+
+        OBB obb = OBB.fromShip(shipyardAABB, transform);
+
+        // Center should be rotated (no-op here) then translated
+        Vector3d expectedCenter = new Vector3d(10, 5, -7);
+        assertTrue(obb.center().equals(expectedCenter, EPS), "actual value: " + obb.center());
+
+        // Orientation should include rotation only (no scale)
+        Quaterniond expectedOrientation = new Quaterniond()
+                .rotateY(Math.toRadians(90));
+        assertTrue(obb.orientation().equals(expectedOrientation, EPS));
+
+        // Local AABB must remain centered on origin
+        AABBdc local = obb.localAabb();
+        assertEquals(-2, local.minX(), EPS);
+        assertEquals( 2, local.maxX(), EPS);
+        assertEquals(-2, local.minY(), EPS);
+        assertEquals( 2, local.maxY(), EPS);
+        assertEquals(-2, local.minZ(), EPS);
+        assertEquals( 2, local.maxZ(), EPS);
+    }
+
 }

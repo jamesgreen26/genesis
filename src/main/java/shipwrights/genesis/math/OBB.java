@@ -1,10 +1,12 @@
 package shipwrights.genesis.math;
 
+import org.joml.Matrix4dc;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBdc;
+import org.joml.primitives.AABBic;
 
 
 public record OBB(AABBdc localAabb, Quaterniondc orientation, Vector3dc center) {
@@ -54,6 +56,51 @@ public record OBB(AABBdc localAabb, Quaterniondc orientation, Vector3dc center) 
         Quaterniondc identityRotation = new org.joml.Quaterniond();
 
         return new OBB(localAabb, identityRotation, center);
+    }
+
+    /**
+     * Creates an OBB from a shipyard-space AABB and a ship-to-world transformation matrix.
+     * The transformation matrix may include translation, rotation, and scaling, which are
+     * decomposed and applied appropriately to create the world-space OBB.
+     *
+     * @param shipyardAABB the axis-aligned bounding box in shipyard (local) space
+     * @param shipToWorldTransform the transformation matrix from shipyard space to world space
+     * @return a new OBB representing the transformed bounding box in world space
+     */
+    public static OBB fromShip(AABBic shipyardAABB, Matrix4dc shipToWorldTransform) {
+        // Convert integer AABB to double AABB for calculations
+        AABBd shipyardAABBd = new AABBd(
+                shipyardAABB.minX(), shipyardAABB.minY(), shipyardAABB.minZ(),
+                shipyardAABB.maxX(), shipyardAABB.maxY(), shipyardAABB.maxZ()
+        );
+
+        // Calculate the center of the AABB in shipyard space
+        double localCenterX = (shipyardAABBd.minX() + shipyardAABBd.maxX()) / 2.0;
+        double localCenterY = (shipyardAABBd.minY() + shipyardAABBd.maxY()) / 2.0;
+        double localCenterZ = (shipyardAABBd.minZ() + shipyardAABBd.maxZ()) / 2.0;
+        Vector3d localCenter = new Vector3d(localCenterX, localCenterY, localCenterZ);
+
+        // Transform the center to world space
+        Vector3d worldCenter = shipToWorldTransform.transformPosition(localCenter);
+
+        // Extract the rotation from the transformation matrix (normalized, removing scale)
+        org.joml.Quaterniond orientation = new org.joml.Quaterniond();
+        shipToWorldTransform.getNormalizedRotation(orientation);
+
+        // Extract the scale from the transformation matrix
+        Vector3d scale = shipToWorldTransform.getScale(new Vector3d());
+
+        // Get the half-extents from the AABB and apply the scale
+        Vector3d halfExtents = shipyardAABBd.extent(new Vector3d());
+        halfExtents.mul(scale);
+
+        // Create a local AABB centered at the origin with the scaled dimensions
+        AABBd localAabb = new AABBd(
+                -halfExtents.x, -halfExtents.y, -halfExtents.z,
+                halfExtents.x, halfExtents.y, halfExtents.z
+        );
+
+        return new OBB(localAabb, orientation.normalize(), worldCenter);
     }
 
     /** Get 8 corners of an OBB in world space */
