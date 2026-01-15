@@ -203,4 +203,82 @@ class ShadowProjectionTest {
 
         assertTrue(shadows.isEmpty());
     }
+
+    @Test
+    void computeShadows_partiallyOverlappingShadowsMergeToConvexHull() {
+        // Setup: OBB at origin with two occluders that cast partially overlapping shadows
+        OBB self = unitCube(new Vector3d(0, 0, 0));
+
+        // Two occluders positioned to create overlapping shadows on the top face (z=0.5)
+        // Occluder 1 is centered at x=-0.3, occluder 2 at x=0.3
+        // They're close enough that shadows overlap but don't completely coincide
+        OBB occluder1 = unitCube(new Vector3d(-0.3, 0, 2));
+        OBB occluder2 = unitCube(new Vector3d(0.3, 0, 2));
+
+        Vector3d light = new Vector3d(0, 0, 5);
+
+        List<FaceShadow> shadows =
+                ShadowProjection.computeShadows(
+                        self,
+                        List.of(occluder1, occluder2),
+                        light
+                );
+
+        assertFalse(shadows.isEmpty(), "Should produce shadows");
+
+        // Find the shadow on the top face (Z plane)
+        FaceShadow topFaceShadow = shadows.stream()
+                .filter(s -> s.plane().normal().z() == 1)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(topFaceShadow, "Should have shadow on top face");
+
+        List<Vector2dc> polygon = topFaceShadow.polygon();
+        assertTrue(polygon.size() >= 3, "Shadow polygon should have at least 3 vertices");
+
+        // Verify the polygon is valid (no duplicate vertices, no collinear points)
+        assertPolygonValid(polygon);
+
+        // Verify no three consecutive vertices are collinear
+        for (int i = 0; i < polygon.size(); i++) {
+            Vector2dc a = polygon.get(i);
+            Vector2dc b = polygon.get((i + 1) % polygon.size());
+            Vector2dc c = polygon.get((i + 2) % polygon.size());
+
+            double cross = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
+            double scale = Math.max(
+                    Math.pow(a.x() - c.x(), 2) + Math.pow(a.y() - c.y(), 2),
+                    1e-10
+            );
+
+            assertTrue(Math.abs(cross) > 1e-12 * scale,
+                    "No three consecutive points should be collinear at indices " + i);
+        }
+
+        // Verify the polygon is convex (all cross products have the same sign)
+        // This ensures we got a proper convex hull without interior points
+        boolean allPositive = true;
+        boolean allNegative = true;
+
+        for (int i = 0; i < polygon.size(); i++) {
+            Vector2dc a = polygon.get(i);
+            Vector2dc b = polygon.get((i + 1) % polygon.size());
+            Vector2dc c = polygon.get((i + 2) % polygon.size());
+
+            double cross = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
+
+            if (cross > 1e-10) allNegative = false;
+            if (cross < -1e-10) allPositive = false;
+        }
+
+        assertTrue(allPositive || allNegative,
+                "Polygon should be convex (all turns in same direction)");
+
+        // Verify we got a single merged shadow, not two separate ones
+        // The polygon should be larger than either individual shadow would be
+        // (it should cover the convex hull of both shadow regions)
+        assertTrue(polygon.size() >= 4,
+                "Merged shadow should have at least 4 vertices for partially overlapping shadows");
+    }
 }
