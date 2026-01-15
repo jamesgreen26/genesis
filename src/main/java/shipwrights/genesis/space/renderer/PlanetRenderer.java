@@ -13,15 +13,27 @@ import org.joml.*;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetTextures;
+import shipwrights.genesis.client.shading.FaceShadow;
+import shipwrights.genesis.client.shading.ShadowProjection;
+import shipwrights.genesis.client.shading.ShadowRenderer;
+import shipwrights.genesis.math.AAPlane;
 import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
 
 import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderType;
+import static shipwrights.genesis.client.ShaderRegistry.getPlanetShadowRenderType;
 
 public class PlanetRenderer implements CelestialRenderer {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final boolean USE_TEST_SHADOWS = true; // Set to false to use real shadows
 
     @Override
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
@@ -32,6 +44,15 @@ public class PlanetRenderer implements CelestialRenderer {
         Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
         double halfExtent = toRender.getActualSize() / 2;
         float alpha = 1f;
+
+        List<FaceShadow> shadows;
+        if (USE_TEST_SHADOWS) {
+            shadows = createTestShadows(halfExtent);
+            LOGGER.info("Using test shadows: {} shadows created for planet {}", shadows.size(), toRender.getID());
+        } else {
+            shadows = ShadowProjection.computeShadows(toRender.getOBB(ticks, event.getPartialTick()), GenesisMod.SPACE_REGISTRY.getAll().stream().map(it -> it.getOBB(ticks, event.getPartialTick())).toList(), toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick()));
+            LOGGER.info("Computed {} real shadows for planet {}", shadows.size(), toRender.getID());
+        }
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
         if (vantagePoint != null && vantagePoint.equals(toRender)) {
@@ -73,10 +94,10 @@ public class PlanetRenderer implements CelestialRenderer {
             position = position.sub(VectorConversionsMCKt.toJOML(event.getCamera().getPosition()), new Vector3d());
         }
 
-        renderPlanetAt(toRender.getID(), event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
+        renderPlanetAt(toRender.getID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
     }
 
-    private void renderPlanetAt(ResourceLocation planetID, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
+    private void renderPlanetAt(ResourceLocation planetID, List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
         // Get the texture for this planet
         ResourceLocation textureLocation = PlanetTextures.getTexture(planetID);
         if (textureLocation == null) {
@@ -120,9 +141,11 @@ public class PlanetRenderer implements CelestialRenderer {
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f, alpha);       // Down face (-Y)
         addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f, alpha);        // Up face (+Y)
 
-
-        // End batch to flush rendering
+        // End batch to flush planet rendering
         bufferSource.endBatch(renderType);
+
+        // Render shadows on planet faces
+        renderShadows(shadows, poseStack, x, y, z, halfExtent, localRotation);
     }
 
     private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize,
@@ -148,5 +171,117 @@ public class PlanetRenderer implements CelestialRenderer {
         int fogBlue = (int) (255 * FogRendererAccessor.getFogBlue());
 
         buffer.vertex(matrix, x, y, z).color(fogRed, fogGreen, fogBlue, (int)(alpha * 255)).uv(u, v).endVertex();
+    }
+
+    private void renderShadows(List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation) {
+        if (shadows == null || shadows.isEmpty()) {
+            LOGGER.warn("renderShadows called with null or empty shadows list");
+            return;
+        }
+
+        LOGGER.info("Rendering {} shadows", shadows.size());
+
+        // Set up shadow buffer
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        VertexConsumer shadowBuffer = bufferSource.getBuffer(getPlanetShadowRenderType());
+
+        // Clone and transform matrix (same as planet rendering)
+        Matrix4f matrix;
+        try {
+            matrix = (Matrix4f) poseStack.last().pose().clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+
+        matrix.translate((float) x, (float) y, (float) z);
+        matrix.rotate(new Quaternionf(localRotation));
+
+        // Render each shadow
+        int shadowIndex = 0;
+        for (FaceShadow shadow : shadows) {
+            LOGGER.info("Rendering shadow {} with {} vertices on plane normal ({},{},{})",
+                    shadowIndex++, shadow.polygon().size(),
+                    shadow.plane().normal().x(),
+                    shadow.plane().normal().y(),
+                    shadow.plane().normal().z());
+            ShadowRenderer.renderShadow(shadow, matrix, shadowBuffer, halfExtent);
+        }
+
+        // Flush shadow rendering
+        bufferSource.endBatch(getPlanetShadowRenderType());
+        LOGGER.info("Shadow rendering complete");
+    }
+
+    /**
+     * Creates test shadows for debugging the rendering pipeline.
+     * Generates simple square shadows on each face of the cube.
+     */
+    private static List<FaceShadow> createTestShadows(double halfExtent) {
+        List<FaceShadow> testShadows = new ArrayList<>();
+
+        // Create a square shadow on the +Y face (top face) - TESTING IF Y AXIS WORKS
+        AAPlane topPlane = new AAPlane(new Vector3i(0, 1, 0), halfExtent);
+        List<Vector2dc> topSquare = List.of(
+                new Vector2d(-halfExtent * 0.3, -halfExtent * 0.3),
+                new Vector2d(halfExtent * 0.3, -halfExtent * 0.3),
+                new Vector2d(halfExtent * 0.3, halfExtent * 0.3),
+                new Vector2d(-halfExtent * 0.3, halfExtent * 0.3)
+        );
+        testShadows.add(new FaceShadow(topPlane, topSquare));
+
+        // Create a triangle shadow on the +Z face (front face)
+        // Note: Vertex order matters for face culling
+        AAPlane frontPlane = new AAPlane(new Vector3i(0, 0, 1), halfExtent);
+        List<Vector2dc> frontTriangle = List.of(
+                new Vector2d(0, -halfExtent * 0.4),
+                new Vector2d(halfExtent * 0.4, halfExtent * 0.4),
+                new Vector2d(-halfExtent * 0.4, halfExtent * 0.4)
+        );
+        testShadows.add(new FaceShadow(frontPlane, frontTriangle));
+
+        // Create a pentagon shadow on the +X face (right face)
+        AAPlane rightPlane = new AAPlane(new Vector3i(1, 0, 0), halfExtent);
+        List<Vector2dc> rightPentagon = List.of(
+                new Vector2d(0, -halfExtent * 0.4),
+                new Vector2d(halfExtent * 0.3, -halfExtent * 0.2),
+                new Vector2d(halfExtent * 0.3, halfExtent * 0.2),
+                new Vector2d(0, halfExtent * 0.4),
+                new Vector2d(-halfExtent * 0.3, 0)
+        );
+        testShadows.add(new FaceShadow(rightPlane, rightPentagon));
+
+        // Create a hexagon shadow on the -Y face (bottom face)
+        AAPlane bottomPlane = new AAPlane(new Vector3i(0, -1, 0), -halfExtent);
+        List<Vector2dc> bottomHexagon = List.of(
+                new Vector2d(halfExtent * 0.3, 0),
+                new Vector2d(halfExtent * 0.15, halfExtent * 0.3),
+                new Vector2d(-halfExtent * 0.15, halfExtent * 0.3),
+                new Vector2d(-halfExtent * 0.3, 0),
+                new Vector2d(-halfExtent * 0.15, -halfExtent * 0.3),
+                new Vector2d(halfExtent * 0.15, -halfExtent * 0.3)
+        );
+        testShadows.add(new FaceShadow(bottomPlane, bottomHexagon));
+
+        // Create a diamond shadow on the -Z face (back face)
+        AAPlane backPlane = new AAPlane(new Vector3i(0, 0, -1), -halfExtent);
+        List<Vector2dc> backDiamond = List.of(
+                new Vector2d(0, -halfExtent * 0.4),
+                new Vector2d(halfExtent * 0.3, 0),
+                new Vector2d(0, halfExtent * 0.4),
+                new Vector2d(-halfExtent * 0.3, 0)
+        );
+        testShadows.add(new FaceShadow(backPlane, backDiamond));
+
+        // Create a rectangle shadow on the -X face (left face)
+        AAPlane leftPlane = new AAPlane(new Vector3i(-1, 0, 0), -halfExtent);
+        List<Vector2dc> leftRectangle = List.of(
+                new Vector2d(-halfExtent * 0.2, -halfExtent * 0.4),
+                new Vector2d(halfExtent * 0.2, -halfExtent * 0.4),
+                new Vector2d(halfExtent * 0.2, halfExtent * 0.4),
+                new Vector2d(-halfExtent * 0.2, halfExtent * 0.4)
+        );
+        testShadows.add(new FaceShadow(leftPlane, leftRectangle));
+
+        return testShadows;
     }
 }

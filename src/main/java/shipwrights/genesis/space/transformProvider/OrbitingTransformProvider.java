@@ -102,7 +102,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         out.normalize(orbitDistance * Celestial.BASE_ORBIT_DISTANCE);
 
         // Add parent's position
-        return out.add(getParent().getPosition(ticks, subticks), new Vector3d());
+        return out.add(getParent().getPosition(ticks, subticks), new Vector3d()).setComponent(1, 0);
     }
 
     @Override

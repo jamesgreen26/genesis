@@ -26,6 +26,7 @@ public class ShaderRegistry {
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
     public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_COLOR_TEX);
     public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
+    public static final ShaderHolder PLANET_SHADOW_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_shadow"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder WORMHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole"), DefaultVertexFormat.POSITION_COLOR_TEX);
 
     @SubscribeEvent
@@ -34,6 +35,7 @@ public class ShaderRegistry {
         registerShader(event, PLANET_SHADER);
         registerShader(event, PLANET_TEXTURED_SHADER);
         registerShader(event, PLANET_MASK_SHADER);
+        registerShader(event, PLANET_SHADOW_SHADER);
         registerShader(event, WORMHOLE_SHADER);
     }
 
@@ -79,6 +81,25 @@ public class ShaderRegistry {
             );
         }
         return PLANET_MASK_RENDER_TYPE;
+    }
+
+    private static LodestoneRenderType PLANET_SHADOW_RENDER_TYPE;
+
+    public static LodestoneRenderType getPlanetShadowRenderType() {
+        if (PLANET_SHADOW_RENDER_TYPE == null) {
+            PLANET_SHADOW_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType(
+                "planet_shadow_render_type",
+                DefaultVertexFormat.POSITION_COLOR,
+                VertexFormat.Mode.TRIANGLES,
+                LodestoneRenderTypeRegistry.builder()
+                    .setShaderState(PLANET_SHADOW_SHADER)
+                    .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
+                    .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setCullState(LodestoneRenderTypeRegistry.CULL)
+            );
+        }
+        return PLANET_SHADOW_RENDER_TYPE;
     }
 
     /**

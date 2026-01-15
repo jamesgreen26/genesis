@@ -97,7 +97,7 @@ public final class GenesisMod {
         boolean doDayLight = level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).get();
         if (doDayLight) {
             return level.getGameTime();
-        } else return 0;
+        } else return level.dayTime();
     }
 
     public static boolean isMiniScale(ResourceLocation dimensionLocation) {

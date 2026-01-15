@@ -23,7 +23,7 @@ public class SpaceShaderEventHandler {
 
         if (level != null) {
             boolean shouldBeActive = GenesisMod.isSpaceDimension(level);
-            SpaceInvertPostProcessor.INSTANCE.setActive(shouldBeActive);
+            SpaceInvertPostProcessor.INSTANCE.setActive(false);
         }
     }
 }
