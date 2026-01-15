@@ -35,7 +35,7 @@
         "parentID": "minecraft:overworld",
         "seed": 67890,
         "orbitDistance": 0.05,
-        "orbitTime": 0.001,
+        "orbitTime": 0.005,
         "dayLength": 0.75
       }
     }
