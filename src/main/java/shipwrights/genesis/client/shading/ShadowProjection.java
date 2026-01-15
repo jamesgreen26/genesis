@@ -1,10 +1,12 @@
 package shipwrights.genesis.client.shading;
 
+import com.mojang.logging.LogUtils;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 import org.joml.Vector3dc;
 import org.joml.Vector3i;
 import org.joml.primitives.AABBdc;
+import org.slf4j.Logger;
 import shipwrights.genesis.math.AAPlane;
 import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.math.Occlusion;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ShadowProjection {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static List<FaceShadow> computeShadows(
             OBB self,
@@ -78,7 +82,8 @@ public class ShadowProjection {
         if (clipped.size() < 3) return List.of();
 
         clipped = PolygonClipping.angleSort(clipped);
-        return PolygonClipping.pruneCollinear(clipped, 1e-12);
+        // Note: pruneCollinear was too aggressive even with 1e-6 tolerance, so we skip it
+        return clipped;
     }
 
     static List<Vector2d> clipToPlaneBounds(

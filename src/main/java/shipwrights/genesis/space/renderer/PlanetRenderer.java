@@ -17,11 +17,13 @@ import shipwrights.genesis.client.shading.FaceShadow;
 import shipwrights.genesis.client.shading.ShadowProjection;
 import shipwrights.genesis.client.shading.ShadowRenderer;
 import shipwrights.genesis.math.AAPlane;
+import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
+import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.Math;
 import java.util.ArrayList;
@@ -32,8 +34,7 @@ import static shipwrights.genesis.client.ShaderRegistry.getPlanetShadowRenderTyp
 
 public class PlanetRenderer implements CelestialRenderer {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
-    private static final boolean USE_TEST_SHADOWS = true; // Set to false to use real shadows
+    private static final boolean USE_TEST_SHADOWS = false; // Set to false to use real shadows
 
     @Override
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
@@ -48,10 +49,14 @@ public class PlanetRenderer implements CelestialRenderer {
         List<FaceShadow> shadows;
         if (USE_TEST_SHADOWS) {
             shadows = createTestShadows(halfExtent);
-            LOGGER.info("Using test shadows: {} shadows created for planet {}", shadows.size(), toRender.getID());
         } else {
-            shadows = ShadowProjection.computeShadows(toRender.getOBB(ticks, event.getPartialTick()), GenesisMod.SPACE_REGISTRY.getAll().stream().map(it -> it.getOBB(ticks, event.getPartialTick())).toList(), toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick()));
-            LOGGER.info("Computed {} real shadows for planet {}", shadows.size(), toRender.getID());
+            // Get all the data needed for shadow computation
+            OBB selfOBB = toRender.getOBB(ticks, event.getPartialTick());
+            List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
+            List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, event.getPartialTick())).toList();
+            Vector3dc starPosition = toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick());
+
+            shadows = ShadowProjection.computeShadows(selfOBB, otherOBBs, starPosition);
         }
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
@@ -175,11 +180,8 @@ public class PlanetRenderer implements CelestialRenderer {
 
     private void renderShadows(List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation) {
         if (shadows == null || shadows.isEmpty()) {
-            LOGGER.warn("renderShadows called with null or empty shadows list");
             return;
         }
-
-        LOGGER.info("Rendering {} shadows", shadows.size());
 
         // Set up shadow buffer
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -197,19 +199,12 @@ public class PlanetRenderer implements CelestialRenderer {
         matrix.rotate(new Quaternionf(localRotation));
 
         // Render each shadow
-        int shadowIndex = 0;
         for (FaceShadow shadow : shadows) {
-            LOGGER.info("Rendering shadow {} with {} vertices on plane normal ({},{},{})",
-                    shadowIndex++, shadow.polygon().size(),
-                    shadow.plane().normal().x(),
-                    shadow.plane().normal().y(),
-                    shadow.plane().normal().z());
             ShadowRenderer.renderShadow(shadow, matrix, shadowBuffer, halfExtent);
         }
 
         // Flush shadow rendering
         bufferSource.endBatch(getPlanetShadowRenderType());
-        LOGGER.info("Shadow rendering complete");
     }
 
     /**
