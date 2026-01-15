@@ -69,8 +69,6 @@ public class AtmosphericCollision {
 			rotation.transform(targetPos);
 			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
 
-			MinecraftForge.EVENT_BUS.post(new PreTravelEvent.PlanetToSpace(dimension, shipPos, targetDimension, targetPos, rotation));
-
 			LOGGER.info("[genesis]: Handling teleport {} ({}) to {} {} {} {}", ship.getSlug(), ship.getId(), targetDimension.location(), targetPos.x, targetPos.y, targetPos.z);
 			teleportHandler.addShip(ship, targetPos, rotation);
 		}

@@ -137,14 +137,6 @@ public class PlanetCollision {
 			final Quaterniondc planetRotation = planet.getRotation(ticks, 0f);
 			planetRotation.mul(rotation, rotation).conjugate();
 
-			MinecraftForge.EVENT_BUS.post(new PreTravelEvent.SpaceToPlanet(
-				level.dimension(),
-				ship.getTransform().getPositionInWorld(),
-				targetDimension,
-				newPos,
-				rotation
-			));
-
 			LOGGER.info("[genesis]: Handling teleport {} ({}) to {} {} {} {}",
 				ship.getSlug(), ship.getId(), targetDimension.location(), newPos.x, newPos.y, newPos.z);
 

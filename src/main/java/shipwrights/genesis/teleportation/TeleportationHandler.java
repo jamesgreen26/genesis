@@ -189,10 +189,6 @@ public class TeleportationHandler {
 			velocity0.mul(0.0625);
 		}
 
-		MinecraftForge.EVENT_BUS.post(this.createPreShipTravelEvent(
-				loadedShip, oldLevel.dimension(), newLevel.dimension(), relPos, newRotataion, velocity0, omega0
-		));
-
 		this.ships.put(
 			shipId,
 			new TeleportData(
@@ -419,20 +415,6 @@ public class TeleportationHandler {
 			return ship;
 		}
 		return this.shipWorld.getAllShips().getById(shipId);
-	}
-
-	private PreShipTravelEvent createPreShipTravelEvent(
-		final ServerShip ship,
-		final ResourceKey<Level> oldLevel,
-		final ResourceKey<Level> newLevel,
-		final Vector3dc position,
-		final Quaterniondc rotation,
-		final Vector3d velocity,
-		final Vector3d omega
-	) {
-		return this.isReturning
-			? new PreShipTravelEvent.SpaceToPlanet(ship, oldLevel, newLevel, position, rotation, velocity, omega)
-			: new PreShipTravelEvent.PlanetToSpace(ship, oldLevel, newLevel, position, rotation, velocity, omega);
 	}
 
 	private record TeleportData(Vector3d newPos, Quaterniond rotation, Vector3dc velocity, Vector3dc omega) {}
