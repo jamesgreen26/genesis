@@ -1,6 +1,5 @@
 package shipwrights.genesis.teleportation;
 
-import g_mungus.vlib.dimension.DimensionSettingsManager;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import org.valkyrienskies.core.api.events.PhysTickEvent;
@@ -8,16 +7,11 @@ import org.valkyrienskies.core.internal.ShipTeleportData;
 import org.valkyrienskies.core.internal.joints.VSJoint;
 import org.valkyrienskies.core.internal.world.VsiPhysLevel;
 import org.valkyrienskies.core.internal.world.VsiServerShipWorld;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 
@@ -33,7 +27,6 @@ import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.QueryableShipData;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ServerShipTransformProvider;
-import org.valkyrienskies.core.api.ships.properties.ShipTransform;
 import org.valkyrienskies.core.impl.game.ShipTeleportDataImpl;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import shipwrights.genesis.GenesisMod;
@@ -67,10 +60,6 @@ public class TeleportationHandler {
 		// Look for the lowest ship when escaping, in order to not collide with the planet.
 		// Look for the highest ship when reentering, in order to not collide with the atmosphere.
 		this.isReturning = isReturning;
-	}
-
-	@SubscribeEvent
-	public static void onServerStart(final ServerStartedEvent event) {
 	}
 
 	public static void onPhysTick(PhysTickEvent event) {
@@ -187,6 +176,8 @@ public class TeleportationHandler {
 		// When entering space (not returning), scale velocity down!!
 		if (!this.isReturning) {
 			velocity0.mul(0.0625);
+		} else {
+			velocity0.mul(2);
 		}
 
 		this.ships.put(
@@ -331,41 +322,26 @@ public class TeleportationHandler {
 		final Vector3dc velocity = data.velocity();
 		final Vector3dc omega = data.omega();
 
-		// Get ship scale from VLib dimension settings
-		final double shipScale = DimensionSettingsManager.INSTANCE.getSettingsForLevel(vsDimName).getShipScale();
-
 		final LoadedServerShip ship = this.shipWorld.getLoadedShips().getById(id);
 		if (ship == null) {
-//			final PhysicsEntityServer physEntity = (this.shipWorld).getLoadedShips().getById(id);
-//			if (physEntity == null) {
-//				LOGGER.warn("[genesis]: Failed to teleport physics object with id " + id + "! It's neither a Ship nor a Physics Entity!");
-//				return;
-//			}
-//			LOGGER.info("[genesis]: Teleporting physics entity {} to {} {} (scale: {})", id, vsDimName, newPos, shipScale);
-//			final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, physEntity.getShipTransform().getShipToWorldRotation(), physEntity.getLinearVelocity(), physEntity.getAngularVelocity(), vsDimName, shipScale);
-//			this.shipWorld.teleportPhysicsEntity(physEntity, teleportData);
 			return;
 		}
 
-		LOGGER.info("[genesis]: Teleporting ship {} ({}) to {} {} (scale: {})", ship.getSlug(), id, vsDimName, newPos, shipScale);
 		ship.setStatic(false);
-		final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, rotation, velocity, omega, vsDimName, shipScale, null);
+		final ShipTeleportData teleportData = new ShipTeleportDataImpl(newPos, rotation, velocity, omega, vsDimName, GenesisMod.getDimensionScale(this.newLevel), null);
 		this.shipWorld.teleportShip(ship, teleportData);
 		if (velocity.lengthSquared() != 0 || omega.lengthSquared() != 0) {
-			ship.setTransformProvider(new ServerShipTransformProvider() {
-				@Override
-				public NextTransformAndVelocityData provideNextTransformAndVelocity(final ShipTransform prevTransform, final ShipTransform transform) {
-					final LoadedServerShip ship2 = TeleportationHandler.this.shipWorld.getLoadedShips().getById(id);
-					if (!prevTransform.getPositionInWorld().equals(transform.getPositionInWorld()) || !prevTransform.getShipToWorldRotation().equals(transform.getShipToWorldRotation())) {
-						ship2.setTransformProvider(null);
-						return null;
-					}
-					if (ship2.getVelocity().lengthSquared() == 0 && ship2.getOmega().lengthSquared() == 0) {
-						return new NextTransformAndVelocityData(transform, velocity, omega);
-					}
-					return null;
-				}
-			});
+			ship.setTransformProvider((prevTransform, transform) -> {
+                final LoadedServerShip ship2 = TeleportationHandler.this.shipWorld.getLoadedShips().getById(id);
+                if (!prevTransform.getPositionInWorld().equals(transform.getPositionInWorld()) || !prevTransform.getShipToWorldRotation().equals(transform.getShipToWorldRotation())) {
+                    ship2.setTransformProvider(null);
+                    return null;
+                }
+                if (ship2.getVelocity().lengthSquared() == 0 && ship2.getOmega().lengthSquared() == 0) {
+                    return new ServerShipTransformProvider.NextTransformAndVelocityData(transform, velocity, omega);
+                }
+                return null;
+            });
 		}
 	}
 

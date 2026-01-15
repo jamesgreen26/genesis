@@ -8,22 +8,24 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBdc;
+import org.joml.primitives.AABBic;
 import org.slf4j.Logger;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
+import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.SpaceLevel;
 import shipwrights.genesis.space.type.CelestialType;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static shipwrights.genesis.teleportation.VSUtils.getLoadedShipsInLevel;
 
@@ -35,6 +37,8 @@ public class PlanetCollision {
 	private static final int LANDING_ACCURACY = 8; // Randomization range in chunks
 
 	public static void planetCollisionTick(final ServerLevel level) {
+		long ticks = GenesisMod.getTicks(level);
+
 		// Only run in space dimension
 		if (!GenesisMod.isSpaceDimension(level)) {
 			return;
@@ -62,19 +66,21 @@ public class PlanetCollision {
 		for (final LoadedServerShip ship : ships) {
 			final Vec3 shipCenter = VectorConversionsMCKt.toMinecraft(ship.getWorldAABB().center(new Vector3d()));
 
+			Celestial nearest = getNearest(ship, ticks);
+			if (nearest == null) continue;
+
 			// Find nearest planet
 			final Pair<Celestial, Double> nearestPlanetData = SpaceLevel.nearestCelestialWhere(new Vector3d(shipCenter.x, shipCenter.y, shipCenter.z), GenesisMod.getTicks(level), 0f, CelestialType::isVisitable);
 			if (nearestPlanetData == null) {
 				continue;
 			}
 
-			final Celestial planet = nearestPlanetData.getFirst();
-			final double distance = Math.sqrt(nearestPlanetData.getSecond());
-			double closeRange = planet.getActualSize() / 8;
+            final double distance = Math.sqrt(nearestPlanetData.getSecond());
+			double closeRange = nearest.getActualSize() / 8;
 
 			final ResourceKey<Level> targetDimension = ResourceKey.create(
 				net.minecraft.core.registries.Registries.DIMENSION,
-				planet.getID()
+				nearest.getID()
 			);
 			final ServerLevel targetLevel = level.getServer().getLevel(targetDimension);
 			if (targetLevel == null) {
@@ -92,7 +98,7 @@ public class PlanetCollision {
 			final ShipLandingAttachment landingAttachment = ShipLandingAttachment.get(ship);
 
 			// Too far away
-			if (distance > planet.getActualSize()) {
+			if (distance > nearest.getActualSize()) {
 				landingAttachment.launching = false;
 				continue;
 			}
@@ -124,8 +130,7 @@ public class PlanetCollision {
 				SectionPos.sectionToBlockCoord(landingChunkPos.z)
 			);
 
-			final long ticks = GenesisMod.getTicks(level);
-			final Vector3dc planetPos = planet.getPosition(ticks);
+			final Vector3dc planetPos = nearest.getPosition(ticks);
 
 			// Calculate rotation based on planet position
 			final Vector3d directionToPlanet = new Vector3d(
@@ -134,11 +139,8 @@ public class PlanetCollision {
 				shipCenter.z - planetPos.z()
 			).normalize();
 			final Quaterniond rotation = new Quaterniond().rotateTo(new Vector3d(0, 1, 0), directionToPlanet);
-			final Quaterniondc planetRotation = planet.getRotation(ticks, 0f);
+			final Quaterniondc planetRotation = nearest.getRotation(ticks, 0f);
 			planetRotation.mul(rotation, rotation).conjugate();
-
-			LOGGER.info("[genesis]: Handling teleport {} ({}) to {} {} {} {}",
-				ship.getSlug(), ship.getId(), targetDimension.location(), newPos.x, newPos.y, newPos.z);
 
 			final TeleportationHandler handler = handlers.computeIfAbsent(
 				targetDimension,
@@ -155,5 +157,24 @@ public class PlanetCollision {
 			}
 			handler.finalizeTeleport();
 		}
+	}
+
+	@Nullable static Celestial getNearest(Ship ship, long ticks) {
+		final AABBic shipAABB = ship.getShipAABB();
+		if (shipAABB != null) {
+			final OBB shipOBB = OBB.fromShip(shipAABB, ship.getShipToWorld());
+
+			Optional<Celestial> nearest =
+					GenesisMod.SPACE_REGISTRY
+							.getWhere(CelestialType::isVisitable)
+							.stream()
+							.map(c -> Map.entry(c, c.getOBB(ticks).distanceTo(shipOBB)))
+							.min(Comparator.comparingDouble(Map.Entry::getValue))
+							.map(Map.Entry::getKey);
+			if (nearest.isPresent()) {
+				return nearest.get();
+			}
+		}
+		return null;
 	}
 }

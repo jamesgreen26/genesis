@@ -29,15 +29,10 @@ public class AtmosphericCollision {
 	 * @param level
 	 */
 	public static void atmosphericCollisionTick(final ServerLevel level) {
-		// Check if this is a body dimension
 		final Celestial body = GenesisMod.getCelestialForLevel(level);
-		if (body == null) {
-			return;
-		}
+		final ServerLevel spaceLevel = level.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE_DIM));
 
-		final ResourceKey<Level> targetDimension = ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE_DIM);
-		final ServerLevel targetLevel = level.getServer().getLevel(targetDimension);
-		if (targetLevel == null) {
+		if (body == null || spaceLevel == null) {
 			return;
 		}
 
@@ -46,7 +41,7 @@ public class AtmosphericCollision {
 		final double atmoHeight = GenesisMod.atmosphereExitHeight;
 
 		final TeleportationHandler teleportHandler = TELEPORT_HANDLER;
-		teleportHandler.reset(level, targetLevel);
+		teleportHandler.reset(level, spaceLevel);
 
 		for (final LoadedServerShip ship : getLoadedShipsInLevel(level)) {
 			if (ship.isStatic() || teleportHandler.hasShip(ship)) {
@@ -69,7 +64,6 @@ public class AtmosphericCollision {
 			rotation.transform(targetPos);
 			targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
 
-			LOGGER.info("[genesis]: Handling teleport {} ({}) to {} {} {} {}", ship.getSlug(), ship.getId(), targetDimension.location(), targetPos.x, targetPos.y, targetPos.z);
 			teleportHandler.addShip(ship, targetPos, rotation);
 		}
 		for (final LoadedServerShip ship : teleportHandler.getPendingShips()) {

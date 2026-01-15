@@ -100,12 +100,24 @@ public final class GenesisMod {
         } else return level.dayTime();
     }
 
+    @Deprecated
     public static boolean isMiniScale(ResourceLocation dimensionLocation) {
         return dimensionLocation.equals(SPACE_DIM) || dimensionLocation.equals(WORMHOLE_DIM);
     }
 
+    @Deprecated
     public static boolean isMiniScale(Level level) {
         return isMiniScale(level.dimension().location());
+    }
+
+    public static double getDimensionScale(Level level) {
+        if (level == null) return 1.0;
+        ResourceLocation dimension = level.dimension().location();
+        if (dimension.equals(WORMHOLE_DIM) || dimension.equals(SPACE_DIM)) {
+            return 1.0 / 16.0;
+        } else {
+            return 1.0;
+        }
     }
 
     public static boolean shouldCancelVoidDamage(ResourceLocation dimensionLocation) {
