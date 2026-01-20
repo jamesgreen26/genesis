@@ -6,6 +6,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -98,6 +99,13 @@ public final class GenesisMod {
         if (doDayLight) {
             return level.getGameTime();
         } else return level.dayTime();
+    }
+
+    public static float getPartialTick(Level level, RenderLevelStageEvent event) {
+        boolean doDayLight = level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).get();
+        if (doDayLight) {
+            return event.getPartialTick();
+        } else return 0;
     }
 
     @Deprecated

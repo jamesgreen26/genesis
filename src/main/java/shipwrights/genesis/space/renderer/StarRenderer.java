@@ -27,13 +27,14 @@ public class StarRenderer implements CelestialRenderer {
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
-        Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
-        Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
+        float partialTick = GenesisMod.getPartialTick(level, event);
+        Vector3dc position = toRender.getPosition(ticks, partialTick);
+        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
 
         // Transform by inverse of vantage point if present
         if (vantagePoint != null) {
-            Vector3dc vantagePos = vantagePoint.getPosition(ticks, event.getPartialTick());
-            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, event.getPartialTick());
+            Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
+            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, partialTick);
 
             // Calculate relative position (subtract vantage point position)
             Vector3d relativePos = new Vector3d(

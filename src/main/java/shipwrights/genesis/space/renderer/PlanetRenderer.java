@@ -43,9 +43,10 @@ public class PlanetRenderer implements CelestialRenderer {
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
+        float partialTick = GenesisMod.getPartialTick(level, event);
 
-        Vector3dc position = toRender.getPosition(ticks, event.getPartialTick());
-        Quaterniondc rotation = toRender.getRotation(ticks, event.getPartialTick());
+        Vector3dc position = toRender.getPosition(ticks, partialTick);
+        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
         double halfExtent = toRender.getActualSize() / 2;
         float alpha = 1f;
 
@@ -54,10 +55,10 @@ public class PlanetRenderer implements CelestialRenderer {
             shadows = createTestShadows(halfExtent);
         } else {
             // Get all the data needed for shadow computation
-            OBB selfOBB = toRender.getOBB(ticks, event.getPartialTick());
+            OBB selfOBB = toRender.getOBB(ticks, partialTick);
             List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
-            List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, event.getPartialTick())).toList();
-            Vector3dc starPosition = toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick());
+            List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, partialTick)).toList();
+            Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
             Vector3d lightDir = new Vector3d(position).sub(starPosition);
             ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
             shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
@@ -84,8 +85,8 @@ public class PlanetRenderer implements CelestialRenderer {
         }
         // Transform by inverse of vantage point if present
         else if (vantagePoint != null) {
-            Vector3dc vantagePos = vantagePoint.getPosition(ticks, event.getPartialTick());
-            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, event.getPartialTick());
+            Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
+            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, partialTick);
 
             // Calculate relative position (subtract vantage point position)
             Vector3d relativePos = new Vector3d(

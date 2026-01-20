@@ -77,6 +77,8 @@ public class WormholeDimensionEffects extends DimensionSpecialEffects {
 
         RenderSystem.disableBlend();
 
+        setupFog.run();
+
         return true;
     }
 

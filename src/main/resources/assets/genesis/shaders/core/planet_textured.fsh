@@ -20,7 +20,7 @@ void main() {
     vec3 n = normalize(vNormal);
     float ndotl = max(dot(n, -normalize(lightDir)), 0.0);
 
-    float ambient = 0.15;
+    float ambient = 0.5;
     float lighting = clamp(ambient + ndotl, 0.0, 1.0);
 
     vec3 finalColor = baseColor * lighting;
