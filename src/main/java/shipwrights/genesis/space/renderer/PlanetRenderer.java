@@ -1,7 +1,9 @@
 package shipwrights.genesis.space.renderer;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -183,28 +185,73 @@ public class PlanetRenderer implements CelestialRenderer {
             return;
         }
 
-        // Set up shadow buffer
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        VertexConsumer shadowBuffer = bufferSource.getBuffer(getPlanetShadowRenderType());
-
-        // Clone and transform matrix (same as planet rendering)
-        Matrix4f matrix;
-        try {
-            matrix = (Matrix4f) poseStack.last().pose().clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-
-        matrix.translate((float) x, (float) y, (float) z);
-        matrix.rotate(new Quaternionf(localRotation));
-
-        // Render each shadow
+        // Render each shadow in its own batch so we can upload
+        // per-shadow projection vertices to the shader.
         for (FaceShadow shadow : shadows) {
-            ShadowRenderer.renderShadow(shadow, matrix, shadowBuffer, halfExtent);
-        }
+            MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+            VertexConsumer shadowBuffer = bufferSource.getBuffer(getPlanetShadowRenderType());
 
-        // Flush shadow rendering
-        bufferSource.endBatch(getPlanetShadowRenderType());
+            // Clone and transform matrix (same as planet rendering)
+            Matrix4f matrix;
+            try {
+                matrix = (Matrix4f) poseStack.last().pose().clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+
+            matrix.translate((float) x, (float) y, (float) z);
+            matrix.rotate(new Quaternionf(localRotation));
+
+            // Compute up to 8 vertices for this shadow from the projected
+            // polygon, transform them with the same matrix used for
+            // rendering, and upload them as uniforms. This keeps the
+            // shader's ShadowVertexN positions in the same space as the
+            // Position/localPos attribute.
+            ShaderInstance shader = shipwrights.genesis.client.ShaderRegistry.PLANET_SHADOW_SHADER.getInstance().get();
+            if (shader != null) {
+                List<Vector2dc> polygon = shadow.polygon();
+                AAPlane plane = shadow.plane();
+
+                int count = Math.min(polygon.size(), 8);
+
+                Uniform countUniform = shader.getUniform("ShadowVertexCount");
+                if (countUniform != null) {
+                    countUniform.set((float) count);
+                }
+
+                for (int i = 0; i < 8; i++) {
+                    Uniform u = shader.getUniform("ShadowVertex[" + i + "]");
+                    if (u != null) {
+                        if (i < count) {
+                        // Start from local-space projection and apply
+                        // the same z-fighting offset and matrix that
+                        // the geometry uses.
+                        Vector3d v3d = ShadowRenderer.applyZFightingOffset(
+                            ShadowRenderer.convertPlaneToLocal3D(polygon.get(i), plane),
+                            plane,
+                            halfExtent
+                        );
+
+                        Vector3f transformed = new Vector3f(
+                            (float) v3d.x,
+                            (float) v3d.y,
+                            (float) v3d.z
+                        );
+                        matrix.transformPosition(transformed);
+
+                        u.set(transformed.x, transformed.y, transformed.z);
+                        } else {
+                            u.set(0.0F, 0.0F, 0.0F);
+                        }
+                    }
+                }
+            }
+
+            ShadowRenderer.renderShadow(shadow, matrix, shadowBuffer, halfExtent);
+
+            // Flush this shadow's batch so its uniforms apply only to it
+            bufferSource.endBatch(getPlanetShadowRenderType());
+        }
     }
 
     /**
