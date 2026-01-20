@@ -1,6 +1,7 @@
 package shipwrights.genesis.space.renderer;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -11,8 +12,6 @@ import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.type.CelestialType;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class CelestialRenderDispatcher {
@@ -28,27 +27,24 @@ public class CelestialRenderDispatcher {
             return;
         }
 
+        long ticks = GenesisMod.getTicks(level);
+        float partialTick = GenesisMod.getPartialTick(level, event);
+        Vec3 cameraPos = event.getCamera().getPosition();
+
         Celestial vantagePoint = GenesisMod.getCelestialForLevel(level);
 
         if (vantagePoint != null || GenesisMod.isSpaceDimension(level)) {
-            // Group celestials by type for organized rendering
-            Map<CelestialType, List<Celestial>> celestialsByType = GenesisMod.SPACE_REGISTRY.getAll().stream()
-                    .collect(Collectors.groupingBy(Celestial::getType));
+            List<Celestial> celestials = GenesisMod.SPACE_REGISTRY.getAll().stream()
+                .sorted((a, b) -> Double.compare(
+                    b.getPosition(ticks, partialTick).distanceSquared(cameraPos.x, cameraPos.y, cameraPos.z),
+                    a.getPosition(ticks, partialTick).distanceSquared(cameraPos.x, cameraPos.y, cameraPos.z)
+                ))
+                .toList();
 
-            // Render each type group
-            for (Map.Entry<CelestialType, List<Celestial>> entry : celestialsByType.entrySet()) {
-                CelestialType type = entry.getKey();
-                List<Celestial> celestials = entry.getValue();
-
-                // Setup before rendering this type group
+            for (Celestial celestial : celestials) {
+                CelestialType type = celestial.getType();
                 type.getRenderer().setup(event, vantagePoint);
-
-                // Render all celestials of this type
-                for (Celestial celestial : celestials) {
-                    type.getRenderer().invoke(event, celestial, vantagePoint);
-                }
-
-                // Teardown after rendering this type group
+                type.getRenderer().invoke(event, celestial, vantagePoint);
                 type.getRenderer().teardown(event, vantagePoint);
             }
         }
