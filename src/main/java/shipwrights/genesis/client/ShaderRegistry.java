@@ -24,7 +24,7 @@ public class ShaderRegistry {
 
     public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_TEX);
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
-    public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_COLOR_TEX);
+    public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
     public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_SHADOW_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_shadow"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder WORMHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole"), DefaultVertexFormat.POSITION_COLOR_TEX);
@@ -118,7 +118,7 @@ public class ShaderRegistry {
 
             return LodestoneRenderTypeRegistry.createGenericRenderType(
                 "planet_textured_" + loc.getNamespace() + "_" + loc.getPath().replace("/", "_"),
-                DefaultVertexFormat.POSITION_COLOR_TEX,
+                DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,
                 VertexFormat.Mode.QUADS,
                 LodestoneRenderTypeRegistry.builder()
                     .setShaderState(PLANET_TEXTURED_SHADER)

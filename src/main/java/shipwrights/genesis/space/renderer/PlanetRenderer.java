@@ -15,6 +15,7 @@ import org.joml.*;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetTextures;
+import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.client.shading.FaceShadow;
 import shipwrights.genesis.client.shading.ShadowProjection;
 import shipwrights.genesis.client.shading.ShadowRenderer;
@@ -57,6 +58,9 @@ public class PlanetRenderer implements CelestialRenderer {
             List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
             List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, event.getPartialTick())).toList();
             Vector3dc starPosition = toRender.getNearestStar(ticks, event.getPartialTick()).getPosition(ticks, event.getPartialTick());
+            Vector3d lightDir = new Vector3d(position).sub(starPosition);
+            ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
+            shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
 
             shadows = ShadowProjection.computeShadows(selfOBB, otherOBBs, starPosition);
         }
@@ -133,20 +137,18 @@ public class PlanetRenderer implements CelestialRenderer {
 
         float halfSize = (float) halfExtent;
 
-        Vector3d lightDir = null;
-
         // UV layout (3x2 grid):
         // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
         // | east (0,0.5)    | down (1/3,0.5) | up (2/3,0.5)   |
         float third = 1.0f / 3.0f;
         float twoThirds = 2.0f / 3.0f;
 
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f, alpha);        // South face (+Z)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f, alpha);        // North face (-Z)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f, alpha);       // West face (-X)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f, alpha);            // East face (+X)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f, alpha);       // Down face (-Y)
-        addTexturedCubeFace(matrix, buffer, halfSize, lightDir, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f, alpha);        // Up face (+Y)
+        addTexturedCubeFace(matrix, buffer, halfSize, new Vector3f(0.0f, 0.0f, 1.0f), rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f, alpha);        // South face (+Z)
+        addTexturedCubeFace(matrix, buffer, halfSize, new Vector3f(0.0f, 0.0f, -1.0f), rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f, alpha);        // North face (-Z)
+        addTexturedCubeFace(matrix, buffer, halfSize, new Vector3f(-1.0f, 0.0f, 0.0f), rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f, alpha);       // West face (-X)
+        addTexturedCubeFace(matrix, buffer, halfSize, new Vector3f(1.0f, 0.0f, 0.0f), rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f, alpha);            // East face (+X)
+        addTexturedCubeFace(matrix, buffer, halfSize, new Vector3f(0.0f, -1.0f, 0.0f), rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f, alpha);       // Down face (-Y)
+        addTexturedCubeFace(matrix, buffer, halfSize, new Vector3f(0.0f, 1.0f, 0.0f), rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f, alpha);        // Up face (+Y)
 
         // End batch to flush planet rendering
         bufferSource.endBatch(renderType);
@@ -156,28 +158,35 @@ public class PlanetRenderer implements CelestialRenderer {
     }
 
     private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize,
-                                            Vector3d lightDir, Quaternionf rotation,
+                                            Vector3f normal, Quaternionf rotation,
                                             float x1, float y1, float z1,
                                             float x2, float y2, float z2,
                                             float x3, float y3, float z3,
                                             float x4, float y4, float z4,
                                             float u1, float v1, float u2, float v2, float alpha) {
-        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, lightDir, rotation, alpha);
-        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, lightDir, rotation, alpha);
-        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, lightDir, rotation, alpha);
-        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, lightDir, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, normal, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, normal, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, normal, rotation, alpha);
+        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, normal, rotation, alpha);
     }
 
     private static void addTexturedVertexWithLighting(Matrix4f matrix, VertexConsumer buffer,
                                                       float x, float y, float z,
                                                       float u, float v,
-                                                      Vector3d lightDir, Quaternionf rotation, float alpha) {
+                                                      Vector3f normal, Quaternionf rotation, float alpha) {
         // Pass fog color in RGB and alpha in A for shader interpolation
         int fogRed = (int) (255 * FogRendererAccessor.getFogRed());
         int fogGreen = (int) (255 * FogRendererAccessor.getFogGreen());
         int fogBlue = (int) (255 * FogRendererAccessor.getFogBlue());
 
-        buffer.vertex(matrix, x, y, z).color(fogRed, fogGreen, fogBlue, (int)(alpha * 255)).uv(u, v).endVertex();
+        Vector3f rotatedNormal = new Vector3f(normal);
+        rotation.transform(rotatedNormal);
+
+        buffer.vertex(matrix, x, y, z)
+            .uv(u, v)
+            .color(fogRed, fogGreen, fogBlue, (int)(alpha * 255))
+            .normal(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z)
+            .endVertex();
     }
 
     private void renderShadows(List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation) {
@@ -207,7 +216,7 @@ public class PlanetRenderer implements CelestialRenderer {
             // rendering, and upload them as uniforms. This keeps the
             // shader's ShadowVertexN positions in the same space as the
             // Position/localPos attribute.
-            ShaderInstance shader = shipwrights.genesis.client.ShaderRegistry.PLANET_SHADOW_SHADER.getInstance().get();
+            ShaderInstance shader = ShaderRegistry.PLANET_SHADOW_SHADER.getInstance().get();
             if (shader != null) {
                 List<Vector2dc> polygon = shadow.polygon();
                 AAPlane plane = shadow.plane();
