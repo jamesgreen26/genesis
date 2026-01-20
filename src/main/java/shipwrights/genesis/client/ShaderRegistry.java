@@ -22,7 +22,7 @@ import static team.lodestar.lodestone.registry.client.LodestoneShaderRegistry.re
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ShaderRegistry {
 
-    public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_TEX);
+    public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
     public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
     public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
@@ -50,7 +50,7 @@ public class ShaderRegistry {
                     .setShaderState(SUN_SHADER)
                     .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
             );
         }
@@ -63,7 +63,7 @@ public class ShaderRegistry {
                     .setShaderState(PLANET_SHADER)
                     .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
             );
         }
@@ -76,7 +76,7 @@ public class ShaderRegistry {
                     .setShaderState(PLANET_MASK_SHADER)
                     .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
             );
         }
@@ -95,7 +95,7 @@ public class ShaderRegistry {
                     .setShaderState(PLANET_SHADOW_SHADER)
                     .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
             );
         }
@@ -124,7 +124,7 @@ public class ShaderRegistry {
                     .setShaderState(PLANET_TEXTURED_SHADER)
                     .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
                     .setTextureState(new RenderStateShard.TextureStateShard(fullTexturePath, false, false))
             );
