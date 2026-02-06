@@ -1,5 +1,6 @@
 package shipwrights.genesis.space.renderer.star;
 
+import dev.engine_room.flywheel.api.material.CardinalLightingMode;
 import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.material.WriteMask;
@@ -56,6 +57,7 @@ public class StarEffect implements Effect {
             .depthTest(DepthTest.ALWAYS)
             .writeMask(WriteMask.COLOR)
             .backfaceCulling(true)
+            .cardinalLightingMode(CardinalLightingMode.OFF)
             .ambientOcclusion(false)
             .useOverlay(false)
             .useLight(false)
