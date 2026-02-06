@@ -3,7 +3,7 @@ float getHalfSize() {
 }
 
 vec3 getLocalPos() {
-    return flw_vertexNormal.xyz * flw_vertexColor.w;
+    return flw_vertexNormal.xyz * flw_vertexColor.w * 2;
 }
 
 

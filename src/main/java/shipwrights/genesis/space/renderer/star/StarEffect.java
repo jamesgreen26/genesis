@@ -56,6 +56,7 @@ public class StarEffect implements Effect {
             .depthTest(DepthTest.ALWAYS)
             .writeMask(WriteMask.COLOR)
             .backfaceCulling(true)
+            .ambientOcclusion(false)
             .useOverlay(false)
             .useLight(false)
             .texture(GenesisMod.resource("textures/misc/white.png"))
@@ -103,9 +104,15 @@ public class StarEffect implements Effect {
 
             Vector3f cameraPos = new Vector3f(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().toVector3f());
 
+            // Transform camera position to local space (relative to star center and inverse rotation, but NOT scaled)
+            // This matches what the old renderer did - camera needs to be in the same space as the [-halfSize, +halfSize] vertices
+            Vector3f localCameraPos = new Vector3f(cameraPos);
+            localCameraPos.sub((float) position.x(), (float) position.y(), (float) position.z());
+            new Quaternionf(rotation).conjugate().transform(localCameraPos);
+
             // Apply vantage point transform if needed
             Celestial vantagePoint = GenesisMod.getCelestialForLevel(level);
-            instance.setTransform(transform, cameraPos);
+            instance.setTransform(transform, localCameraPos);
         }
 
         @Override
