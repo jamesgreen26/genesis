@@ -15,6 +15,7 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterialShaders;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
 import dev.engine_room.flywheel.lib.task.RunnablePlan;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Vec3i;
 import org.joml.*;
 import shipwrights.genesis.space.renderer.PosVertexView;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.LevelAccessor;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 
+import java.text.NumberFormat;
 import java.util.List;
 
 public class StarEffect implements Effect {
@@ -81,7 +83,7 @@ public class StarEffect implements Effect {
             SimpleModel model = new SimpleModel(List.of(new Model.ConfiguredMesh(MATERIAL, getMesh())));
             var instancer = ctx.instancerProvider().instancer(StarInstance.TYPE, model);
             instance = instancer.createInstance();
-            instance.setHalfSize((float) celestial.getActualSize());
+            instance.setHalfSize((float) celestial.getActualSize() / 2f);
             renderOrigin = ctx.renderOrigin();
 
             // Set initial transform
@@ -99,9 +101,11 @@ public class StarEffect implements Effect {
             transform.scale((float) (size / 2));
             transform.rotate(rotation);
 
+            Vector3f cameraPos = new Vector3f(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().toVector3f());
+
             // Apply vantage point transform if needed
             Celestial vantagePoint = GenesisMod.getCelestialForLevel(level);
-            instance.setTransform(transform, new Vector3f());
+            instance.setTransform(transform, cameraPos);
         }
 
         @Override
