@@ -73,6 +73,8 @@ repositories {
 
     maven { url = "https://maven.enjarai.dev/mirrors" }
 
+    maven { url = "https://maven.createmod.net" }
+
     mavenCentral()
 }
 
@@ -139,6 +141,7 @@ dependencies {
     }
 
     modImplementation("ace.actually.radios:radios-1.20.1:1.0.0")
+    include (modImplementation("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}"))
 
     //implementation("org.maplibre:earcut4j:3.0.0")
     additionalRuntimeClasspath("org.maplibre:earcut4j:3.0.0")

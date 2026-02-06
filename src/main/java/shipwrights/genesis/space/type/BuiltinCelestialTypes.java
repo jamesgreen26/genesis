@@ -2,9 +2,8 @@ package shipwrights.genesis.space.type;
 
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
-import shipwrights.genesis.space.renderer.CelestialRenderer;
-import shipwrights.genesis.space.renderer.PlanetRenderer;
-import shipwrights.genesis.space.renderer.StarRenderer;
+import shipwrights.genesis.space.renderer.*;
+import shipwrights.genesis.space.renderer.star.StarEffect;
 
 public class BuiltinCelestialTypes {
 
@@ -13,13 +12,9 @@ public class BuiltinCelestialTypes {
         public boolean castsShadow() { return false; }
         public boolean isVisitable() { return false; }
 
-        private static CelestialRenderer renderer = null;
-        public @NotNull CelestialRenderer getRenderer() {
-            CelestialRenderer result = renderer;
-            if (result == null) {
-                renderer = new StarRenderer();
-            }
-            return renderer;
+        @Override
+        public @NotNull EffectFactory getEffectFactory() {
+            return StarEffect::new;
         }
 
         public @NotNull ResourceLocation getID() {
@@ -32,13 +27,10 @@ public class BuiltinCelestialTypes {
         public boolean castsShadow() { return true; }
         public boolean isVisitable() { return true; }
 
-        private static CelestialRenderer renderer = null;
-        public @NotNull CelestialRenderer getRenderer() {
-            CelestialRenderer result = renderer;
-            if (result == null) {
-                renderer = new PlanetRenderer();
-            }
-            return renderer;
+        @Override
+        public EffectFactory getEffectFactory() {
+            // TODO: Implement planet effect with Flywheel
+            return null;
         }
 
         public @NotNull ResourceLocation getID() {

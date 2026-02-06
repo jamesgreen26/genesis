@@ -41,6 +41,9 @@ public final class GenesisMod {
     public static final String MOD_ID = "genesis";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+    public static ResourceLocation resource(String s) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, s);
+    }
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final ResourceLocation WORMHOLE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "wormhole");
