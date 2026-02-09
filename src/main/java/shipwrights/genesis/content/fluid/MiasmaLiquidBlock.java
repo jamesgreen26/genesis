@@ -3,6 +3,8 @@ package shipwrights.genesis.content.fluid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -58,6 +60,9 @@ public class MiasmaLiquidBlock extends LiquidBlock {
     private void tryDissipate(Level level, BlockPos pos) {
         BlockPos abovePos = pos.above();
         if (level.getBlockState(abovePos).isAir() && level.getFluidState(abovePos).isEmpty()) {
+            if (!level.isClientSide()) {
+                level.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
             // Dissipate - replace this fluid block with air
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
         }
