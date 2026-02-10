@@ -1,6 +1,7 @@
 package shipwrights.genesis.space.renderer;
 
 import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -12,6 +13,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
+import org.lwjgl.opengl.GL11;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetTextures;
@@ -24,8 +26,6 @@ import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
-import com.mojang.logging.LogUtils;
-import org.slf4j.Logger;
 import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.Math;
@@ -38,6 +38,17 @@ import static shipwrights.genesis.client.ShaderRegistry.getPlanetShadowRenderTyp
 public class PlanetRenderer implements CelestialRenderer {
 
     private static final boolean USE_TEST_SHADOWS = false; // Set to false to use real shadows
+
+    @Override
+    public void teardown(@NotNull RenderLevelStageEvent event, @Nullable Celestial vantagePoint) {
+        CelestialRenderer.super.teardown(event, vantagePoint);
+
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthFunc(GL11.GL_LEQUAL);
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
+        RenderSystem.defaultBlendFunc();
+    }
 
     @Override
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
