@@ -72,10 +72,10 @@ public class PlanetRenderer implements CelestialRenderer {
             halfExtent = Minecraft.getInstance().gameRenderer.getRenderDistance();
             position = new Vector3d(
                 0,
-                - camera.getPosition().y - halfExtent - 100,
+                - (camera.getPosition().y / 16) - halfExtent - 64,
                 0
             );
-            rotation = new Quaterniond();
+            rotation = new Quaterniond().rotateX(Math.PI/2);
             int buildHeight = level.getMaxBuildHeight();
             float alphaInterpolateStart = (float) (halfExtent + buildHeight / 3f);
             float alphaInterpolateEnd = (float) (halfExtent + buildHeight);
@@ -95,8 +95,11 @@ public class PlanetRenderer implements CelestialRenderer {
                 position.z() - vantagePos.z()
             );
 
+            // Transform the view to the side of the planet
+            Quaterniond planetRotation = new Quaterniond().rotateX(- Math.PI/2);
+
             // Apply inverse rotation of vantage point
-            Quaterniond inverseVantageRot = new Quaterniond(vantageRot).conjugate();
+            Quaterniond inverseVantageRot = planetRotation.premul(vantageRot).conjugate();
             inverseVantageRot.transform(relativePos);
             position = relativePos;
 

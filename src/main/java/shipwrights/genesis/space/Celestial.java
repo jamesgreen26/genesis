@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import kotlin.Pair;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -128,7 +129,7 @@ public class Celestial {
                 .sub(getPosition(gameTime, partialTick))
                 .normalize();
 
-        Quaterniondc rot = getRotation(gameTime, partialTick);
+        Quaterniondc rot = new Quaterniond().rotateX(- Math.PI/2).premul(getRotation(gameTime, partialTick));
 
         Vector3d up = UP.rotate(rot, new Vector3d());
         Vector3d east = EAST.rotate(rot, new Vector3d());
@@ -149,7 +150,7 @@ public class Celestial {
                 .sub(getPosition(gameTime, partialTick))
                 .normalize();
 
-        Quaterniondc rot = getRotation(gameTime, partialTick);
+        Quaterniondc rot = new Quaterniond().rotateX(- Math.PI/2).premul(getRotation(gameTime, partialTick));
 
         Vector3d up = UP.rotate(rot, new Vector3d());
         return up.dot(toStar);

@@ -78,6 +78,9 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         poseStack.pushPose();
 
+        //transform stars view to the side of the planet
+        poseStack.mulPose(new Quaternionf().rotateX((float) (Math.PI/2)));
+
         poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTicks, partialTick)).invert());
 
         double starBrightness = 2 * Math.min(Math.max(-celestial.getSunDot(gameTicks, partialTick), 0), 0.5);

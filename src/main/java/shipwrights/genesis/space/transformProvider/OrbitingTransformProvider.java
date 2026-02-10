@@ -59,15 +59,17 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         }
 
         // Generate random base rotation
-        this.baseRotation = new Quaterniond().rotationXYZ(
-            rand.nextDouble(Math.PI),
-            rand.nextDouble(Math.PI),
-            rand.nextDouble(Math.PI)
-        );
+        this.baseRotation = new Quaterniond();
+//        this.baseRotation = new Quaterniond().rotationXYZ(
+//            rand.nextDouble(Math.PI),
+//            rand.nextDouble(Math.PI),
+//            rand.nextDouble(Math.PI)
+//        );
 
         // Generate random orbital angles (spherical coordinates)
         this.orbitalTheta = rand.nextDouble() * 2 * Math.PI;   // longitude
-        this.orbitalPhi = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
+        this.orbitalPhi = Math.PI / 2;
+        //this.orbitalPhi = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
     }
 
     private Celestial getParent() {
@@ -80,8 +82,8 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
 
     @Override
     public Quaterniondc getRotation(long ticks, float subticks) {
-        // Apply daily rotation around Z axis (similar to OrbitingBody)
-        return new Quaterniond(baseRotation).rotateZ(
+        // Apply daily rotation around Y axis (similar to OrbitingBody)
+        return new Quaterniond(baseRotation).rotateY(
             -Math.PI * 2 * (ticks + subticks) / (this.dayLength * Celestial.BASE_DAY_LENGTH)
         );
     }

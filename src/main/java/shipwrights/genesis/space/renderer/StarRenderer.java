@@ -43,8 +43,10 @@ public class StarRenderer implements CelestialRenderer {
                 position.z() - vantagePos.z()
             );
 
+            Quaterniond starRotation = new Quaterniond().rotateX(- Math.PI/2);
+
             // Apply inverse rotation of vantage point
-            Quaterniond inverseVantageRot = new Quaterniond(vantageRot).conjugate();
+            Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
             inverseVantageRot.transform(relativePos);
             position = relativePos;
 
