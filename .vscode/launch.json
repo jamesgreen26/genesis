@@ -1,0 +1,77 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Client",
+      "presentation": {
+        "group": "Mod Development - genesis",
+        "order": 0
+      },
+      "projectName": "genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/media/Software/programming/java/modpack/shipwrights/genesis/build/moddev/clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/media/Software/programming/java/modpack/shipwrights/genesis/build/moddev/clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dtestproject%%/media/Software/programming/java/modpack/shipwrights/genesis/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {
+        "MOD_CLASSES": "testproject%%/media/Software/programming/java/modpack/shipwrights/genesis/bin/main"
+      },
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Data",
+      "presentation": {
+        "group": "Mod Development - genesis",
+        "order": 1
+      },
+      "projectName": "genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/media/Software/programming/java/modpack/shipwrights/genesis/build/moddev/dataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/media/Software/programming/java/modpack/shipwrights/genesis/build/moddev/dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dtestproject%%/media/Software/programming/java/modpack/shipwrights/genesis/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {
+        "MOD_CLASSES": "testproject%%/media/Software/programming/java/modpack/shipwrights/genesis/bin/main"
+      },
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Server",
+      "presentation": {
+        "group": "Mod Development - genesis",
+        "order": 2
+      },
+      "projectName": "genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/media/Software/programming/java/modpack/shipwrights/genesis/build/moddev/serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/media/Software/programming/java/modpack/shipwrights/genesis/build/moddev/serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dtestproject%%/media/Software/programming/java/modpack/shipwrights/genesis/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {
+        "MOD_CLASSES": "testproject%%/media/Software/programming/java/modpack/shipwrights/genesis/bin/main"
+      },
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}

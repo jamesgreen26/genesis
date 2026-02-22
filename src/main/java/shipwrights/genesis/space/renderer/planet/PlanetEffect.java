@@ -1,4 +1,4 @@
-package shipwrights.genesis.space.renderer.star;
+package shipwrights.genesis.space.renderer.planet;
 
 import dev.engine_room.flywheel.api.material.CardinalLightingMode;
 import dev.engine_room.flywheel.api.material.DepthTest;
@@ -24,16 +24,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import shipwrights.genesis.GenesisMod;
+import com.mojang.blaze3d.systems.RenderSystem;
 import shipwrights.genesis.space.Celestial;
 
-import java.text.NumberFormat;
 import java.util.List;
 
-public class StarEffect implements Effect {
+public class PlanetEffect implements Effect {
     private final Level level;
     private final Celestial celestial;
 
-    public StarEffect(Celestial celestial, Level level) {
+    public PlanetEffect(Celestial celestial, Level level) {
         this.level = level;
         this.celestial = celestial;
     }
@@ -45,51 +45,49 @@ public class StarEffect implements Effect {
 
     @Override
     public EffectVisual<?> visualize(VisualizationContext ctx, float partialTick) {
-        return new StarEffectVisual(celestial, level, ctx, partialTick);
+        return new PlanetVisual(celestial, level, ctx, partialTick);
     }
 
     private static final SimpleMaterial MATERIAL = SimpleMaterial.builder()
             .shaders(new SimpleMaterialShaders(
-                    GenesisMod.resource( "material/star.vert"),
-                    GenesisMod.resource("material/star.frag")))
+                    GenesisMod.resource("material/planet.vert"),
+                    GenesisMod.resource("material/planet.frag")))
             .fog(new SimpleFogShader(GenesisMod.resource("material/no_fog.glsl")))
-            .transparency(Transparency.TRANSLUCENT)
+            .transparency(Transparency.OPAQUE)
             .depthTest(DepthTest.LEQUAL)
             .writeMask(WriteMask.COLOR_DEPTH)
             .backfaceCulling(true)
-            .cardinalLightingMode(CardinalLightingMode.OFF)
+            .cardinalLightingMode(CardinalLightingMode.ENTITY)
             .ambientOcclusion(false)
             .useOverlay(false)
             .useLight(true)
-            .texture(GenesisMod.resource("textures/misc/white.png"))
+            //todo
+            .texture(GenesisMod.resource("textures/planets/minecraft/overworld.png"))
             .build();
 
     private static SimpleQuadMesh MESH = null;
 
     private static SimpleQuadMesh getMesh() {
-        if (MESH == null) {
-            MESH = buildCubeMesh();
-        }
+        if (MESH == null) MESH = buildCubeMesh();
         return MESH;
     }
 
-    public static class StarEffectVisual implements EffectVisual<StarEffect>, DynamicVisual {
+    public static class PlanetVisual implements EffectVisual<PlanetEffect>, DynamicVisual {
         private final Celestial celestial;
         private final Level level;
-        private final StarInstance instance;
+        private final PlanetInstance instance;
         private final Vec3i renderOrigin;
 
-        public StarEffectVisual(Celestial celestial, Level level, VisualizationContext ctx, float partialTick) {
+        public PlanetVisual(Celestial celestial, Level level, VisualizationContext ctx, float partialTick) {
             this.celestial = celestial;
             this.level = level;
 
             SimpleModel model = new SimpleModel(List.of(new Model.ConfiguredMesh(MATERIAL, getMesh())));
-            var instancer = ctx.instancerProvider().instancer(StarInstance.TYPE, model);
+            var instancer = ctx.instancerProvider().instancer(PlanetInstance.TYPE, model);
             instance = instancer.createInstance();
             instance.setHalfSize((float) celestial.getActualSize() / 2f);
             renderOrigin = ctx.renderOrigin();
 
-            // Set initial transform
             updateTransform(partialTick);
         }
 
@@ -106,14 +104,24 @@ public class StarEffect implements Effect {
 
             Vector3f cameraPos = new Vector3f(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().toVector3f());
 
-            // Transform camera position to local space (relative to star center and inverse rotation, but NOT scaled)
-            // This matches what the old renderer did - camera needs to be in the same space as the [-halfSize, +halfSize] vertices
             Vector3f localCameraPos = new Vector3f(cameraPos);
             localCameraPos.sub((float) position.x(), (float) position.y(), (float) position.z());
             new Quaternionf(rotation).conjugate().transform(localCameraPos);
 
-            // Apply vantage point transform if needed
-            Celestial vantagePoint = GenesisMod.getCelestialForLevel(level);
+            // Update shader lights for cardinal lighting
+            try {
+                Celestial star = celestial.getNearestStar(ticks, partialTick);
+                Vector3dc starPos = star.getPosition(ticks, partialTick);
+                Vector3f lightDir = new Vector3f(
+                        (float) (position.x() - starPos.x()),
+                        (float) (position.y() - starPos.y()),
+                        (float) (position.z() - starPos.z())
+                ).normalize();
+                Vector3f lightCol = new Vector3f(star.r(), star.g(), star.b());
+                RenderSystem.setShaderLights(lightDir, lightCol);
+            } catch (Exception ignored) {
+            }
+
             instance.setTransform(transform, localCameraPos);
         }
 
@@ -126,61 +134,52 @@ public class StarEffect implements Effect {
         public void update(float partialTick) {}
 
         @Override
-        public void delete() {
-            instance.delete();
-        }
+        public void delete() { instance.delete(); }
     }
-
 
     private static SimpleQuadMesh buildCubeMesh() {
         PosVertexView vertexList = new PosVertexView();
-        vertexList.vertexCount(24); // 6 faces × 4 vertices
+        vertexList.vertexCount(24);
 
         int vertexIndex = 0;
 
-        // Front face (z+)
         vertexIndex = addCubeFace(vertexList, vertexIndex,
                 -1.0f, -1.0f, 1.0f,
                 1.0f, -1.0f, 1.0f,
                 1.0f, 1.0f, 1.0f,
                 -1.0f, 1.0f, 1.0f);
 
-        // Back face (z-)
         vertexIndex = addCubeFace(vertexList, vertexIndex,
                 1.0f, -1.0f, -1.0f,
                 -1.0f, -1.0f, -1.0f,
                 -1.0f, 1.0f, -1.0f,
                 1.0f, 1.0f, -1.0f);
 
-        // Left face (x-)
         vertexIndex = addCubeFace(vertexList, vertexIndex,
                 -1.0f, -1.0f, -1.0f,
                 -1.0f, -1.0f, 1.0f,
                 -1.0f, 1.0f, 1.0f,
                 -1.0f, 1.0f, -1.0f);
 
-        // Right face (x+)
         vertexIndex = addCubeFace(vertexList, vertexIndex,
                 1.0f, -1.0f, -1.0f,
                 1.0f, 1.0f, -1.0f,
                 1.0f, 1.0f, 1.0f,
                 1.0f, -1.0f, 1.0f);
 
-        // Bottom face (y-)
         vertexIndex = addCubeFace(vertexList, vertexIndex,
                 -1.0f, -1.0f, -1.0f,
                 1.0f, -1.0f, -1.0f,
                 1.0f, -1.0f, 1.0f,
                 -1.0f, -1.0f, 1.0f);
 
-        // Top face (y+)
         addCubeFace(vertexList, vertexIndex,
                 -1.0f, 1.0f, -1.0f,
                 -1.0f, 1.0f, 1.0f,
                 1.0f, 1.0f, 1.0f,
                 1.0f, 1.0f, -1.0f);
 
-        return new SimpleQuadMesh(vertexList, "star_cube");
+        return new SimpleQuadMesh(vertexList, "planet_cube");
     }
 
     private static int addCubeFace(PosVertexView vertexList, int startIndex,

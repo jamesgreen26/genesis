@@ -187,5 +187,4 @@ void flw_materialFragment() {
 
     flw_fragLight = vec2(1.0);
     flw_fragColor = vec4(color, pow(5 * brightness, 2));
-//    flw_fragColor = vec4(getLocalPos(), 1);
 }

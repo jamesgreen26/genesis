@@ -29,8 +29,7 @@ public class BuiltinCelestialTypes {
 
         @Override
         public EffectFactory getEffectFactory() {
-            // TODO: Implement planet effect with Flywheel
-            return null;
+            return shipwrights.genesis.space.renderer.planet.PlanetEffect::new;
         }
 
         public @NotNull ResourceLocation getID() {
