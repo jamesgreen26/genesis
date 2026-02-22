@@ -77,6 +77,8 @@ repositories {
 }
 
 dependencies {
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
+
     jarJar(modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")) {
         version {
             strictly "[${registrate_version},)"
