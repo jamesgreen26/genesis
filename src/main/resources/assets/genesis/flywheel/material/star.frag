@@ -3,7 +3,7 @@ float getHalfSize() {
 }
 
 vec3 getLocalPos() {
-    return flw_vertexNormal.xyz * flw_vertexColor.w * 2;
+    return flw_vertexNormal.xyz * flw_vertexColor.w * 2.;
 }
 
 
@@ -95,7 +95,7 @@ float rayBoxIntersection(vec3 rayStart, vec3 rayDir, float boxHalfSize, mat3 rot
 
 void flw_materialFragment() {
 
-    vec3 ray_direction = normalize(getLocalPos() - flw_vertexColor.xyz);
+    vec3 ray_direction = normalize(getLocalPos() - flw_vertexColor.xyz * 2.0);
 
     mat3 rot = rotationMatrix(vec3(0));
 
