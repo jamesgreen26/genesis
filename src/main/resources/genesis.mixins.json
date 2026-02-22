@@ -1,6 +1,7 @@
 {
   "required": true,
   "package": "shipwrights.genesis.mixin",
+  "refmap": "mixins.shipwrights.genesis.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [

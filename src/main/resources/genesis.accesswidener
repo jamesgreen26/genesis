@@ -1,6 +1,0 @@
-accessWidener   v2  named
-accessible class net/minecraft/world/level/levelgen/SurfaceRules$SurfaceRule
-accessible class net/minecraft/world/level/levelgen/SurfaceRules$Context
-
-accessible class net/minecraft/world/level/chunk/LevelChunk$RebindableTickingBlockEntityWrapper
-accessible method net/minecraft/world/level/chunk/LevelChunk$RebindableTickingBlockEntityWrapper rebind (Lnet/minecraft/world/level/block/entity/TickingBlockEntity;)V
