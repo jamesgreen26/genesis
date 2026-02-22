@@ -35,6 +35,7 @@ legacyForge {
 }
 
 mixin {
+    add sourceSets.main, "mixins.shipwrights.genesis.refmap.json"
     config 'genesis.mixins.json' // This can be done for multiple configs
 }
 
