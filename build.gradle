@@ -138,7 +138,7 @@ dependencies {
 
     modImplementation("ace.actually.radios:radios-1.20.1:1.0.0")
 
-    jarJar(modImplementation("org.maplibre:earcut4j:3.0.0")) {
+    jarJar(implementation("org.maplibre:earcut4j:3.0.0")) {
         version {
             strictly "[3.0.0,)"
             prefer "3.0.0"
