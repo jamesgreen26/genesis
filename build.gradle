@@ -35,7 +35,6 @@ legacyForge {
 }
 
 mixin {
-    add sourceSets.main, 'mixins.genesis.refmap.json'
     config 'genesis.mixins.json' // This can be done for multiple configs
 }
 
@@ -138,6 +137,7 @@ dependencies {
 
     modImplementation("ace.actually.radios:radios-1.20.1:1.0.0")
 
+    //implementation("org.maplibre:earcut4j:3.0.0")
     jarJar(implementation("org.maplibre:earcut4j:3.0.0")) {
         version {
             strictly "[3.0.0,)"
@@ -193,5 +193,12 @@ publishing {
         // Notice: This block does NOT have the same function as the block in the top level.
         // The repositories here will be used for publishing your artifact, not for
         // retrieving dependencies.
+    }
+}
+
+sourceSets {
+    test {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
     }
 }
