@@ -97,11 +97,13 @@ float rayBoxIntersection(vec3 rayStart, vec3 rayDir, vec3 boxCenter, float boxHa
 }
 
 void main() {
-    vec3 ray_direction = normalize(v_entry_position - v_camera_pos);
+    vec3 ray_direction = -normalize(v_entry_position - v_camera_pos);
 
     mat3 rot = rotationMatrix(cube_rotationXYZ);
 
     float exit_distance = rayBoxIntersection(v_entry_position, ray_direction, v_cube_center, v_half_size, rot);
+
+    exit_distance = min(exit_distance,length(v_entry_position - v_camera_pos));
 
     float thickness = exit_distance;
 
@@ -109,16 +111,17 @@ void main() {
         thickness = 0.0;
     }
 
-    // Calculate minimum of distance components at intersections with 6 diagonal planes
-    float minDist = 1e10;
-
     // Transform ray to local cube space
     mat3 invRot = transpose(rot);
     vec3 localRayStart = invRot * (v_entry_position - v_cube_center);
     vec3 localRayDir = invRot * ray_direction;
+    vec3 localCamPos = invRot * v_camera_pos;
 
     // Check intersection with each of the 6 diagonal planes
     float roundness_factor = 0.5;
+
+    // Calculate minimum of distance components at intersections with 6 diagonal planes
+    float minDist = smoothMax3(vec3(abs(localCamPos.x),abs(localCamPos.y),abs(localCamPos.z)),roundness_factor);
 
     // Plane: y=x (normal: y-x=0)
     if (abs(localRayDir.y - localRayDir.x) > 0.0001) {
