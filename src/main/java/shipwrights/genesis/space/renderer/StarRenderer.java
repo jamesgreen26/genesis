@@ -107,8 +107,8 @@ public class StarRenderer implements CelestialRenderer {
         addCubeFaceSun(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize);
     }
 
-    private static void addCubeFaceSun(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
-                                       float x3, float y3, float z3, float x4, float y4, float z4) {
+    private static void addCubeFaceSun(Matrix4f matrix, VertexConsumer buffer, float x4, float y4, float z4, float x3, float y3, float z3,
+                                       float x2, float y2, float z2, float x1, float y1, float z1) {
         
         float halfSize = Math.abs(x1);
         float size = 2 * halfSize;
