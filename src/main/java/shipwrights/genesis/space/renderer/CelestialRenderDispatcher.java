@@ -36,7 +36,7 @@ public class CelestialRenderDispatcher {
 
         if (vantagePoint != null || GenesisMod.isSpaceDimension(level)) {
             List<Celestial> celestials = GenesisMod.SPACE_REGISTRY.getAll().stream()
-                .sorted(Comparator.comparingDouble(a -> a.getPosition(ticks, partialTick).distanceSquared(cameraPos.x, cameraPos.y, cameraPos.z)))
+                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick).distanceSquared(cameraPos.x, cameraPos.y, cameraPos.z)))
                 .toList();
 
             for (Celestial celestial : celestials) {

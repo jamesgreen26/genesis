@@ -187,7 +187,7 @@ void main() {
 
     float bendingFactor = pow(1. / (bendingStrength / horizonRatio),2.) * (1. - (bendingStrength - horizonRatio) / (1. - horizonRatio));
     rayPos = rayPos + rayDir * bendingDistance;
-    rayDir = normalize(mix(rayDir,normalize(-rayPos),bendingFactor));
+    rayDir = normalize(mix(rayDir,normalize(rayDir * horizonRatio - rayPos),bendingFactor));
     float accretionPlaneDistance = accretionDistance;
     accretionDistance = -rayPos.y / rayDir.y;
 

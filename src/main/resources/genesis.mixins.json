@@ -16,7 +16,8 @@
     "ParticleMixin",
     "PehkuiEntityRenderDispatcherMixin",
     "SoundEngineMixin",
-    "SoundMixin"
+    "SoundMixin",
+    "RenderStateShardAccessor"
   ],
   "mixins": [
     "BlockBehaviourAccessor",
