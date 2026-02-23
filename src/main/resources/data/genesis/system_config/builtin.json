@@ -39,6 +39,20 @@
         "orbitTime": 0.005,
         "dayLength": 0.75
       }
+    },
+    {
+      "ID": "genesis:testbh",
+      "type": "genesis:blackhole",
+      "size": 0.05,
+      "gravity": 0.1622,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:moon",
+        "seed": 67890,
+        "orbitDistance": 0.007,
+        "orbitTime": 0.001,
+        "dayLength": 0.1
+      }
     }
   ]
 }
