@@ -23,6 +23,7 @@ import static team.lodestar.lodestone.registry.client.LodestoneShaderRegistry.re
 public class ShaderRegistry {
 
     public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_COLOR);
+    public static final ShaderHolder BLACKHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "blackhole"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
     public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
     public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
@@ -32,6 +33,7 @@ public class ShaderRegistry {
     @SubscribeEvent
     public static void shaderRegistry(RegisterShadersEvent event) {
         registerShader(event, SUN_SHADER);
+        registerShader(event, BLACKHOLE_SHADER);
         registerShader(event, PLANET_SHADER);
         registerShader(event, PLANET_TEXTURED_SHADER);
         registerShader(event, PLANET_MASK_SHADER);
@@ -40,6 +42,7 @@ public class ShaderRegistry {
     }
 
     private static LodestoneRenderType SUN_RENDER_TYPE;
+    private static LodestoneRenderType BLACKHOLE_RENDER_TYPE;
     private static LodestoneRenderType PLANET_RENDER_TYPE;
     private static LodestoneRenderType PLANET_MASK_RENDER_TYPE;
     private static final ConcurrentHashMap<ResourceLocation, LodestoneRenderType> TEXTURED_PLANET_RENDER_TYPES = new ConcurrentHashMap<>();
@@ -55,6 +58,19 @@ public class ShaderRegistry {
             );
         }
         return SUN_RENDER_TYPE;
+    }
+
+    public static LodestoneRenderType getBlackholeRenderType() {
+        if (BLACKHOLE_RENDER_TYPE == null) {
+            BLACKHOLE_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("blackhole_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
+                    .setShaderState(BLACKHOLE_SHADER)
+                    .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
+                    .setDepthTestState(new RenderStateShard.DepthTestStateShard("always", 519))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
+                    .setCullState(LodestoneRenderTypeRegistry.CULL)
+            );
+        }
+        return BLACKHOLE_RENDER_TYPE;
     }
 
     public static LodestoneRenderType getPlanetRenderType() {

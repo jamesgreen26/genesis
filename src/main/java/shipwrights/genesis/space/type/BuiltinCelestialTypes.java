@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.space.renderer.CelestialRenderer;
 import shipwrights.genesis.space.renderer.PlanetRenderer;
 import shipwrights.genesis.space.renderer.StarRenderer;
+import shipwrights.genesis.space.renderer.BlackholeRenderer;
 
 public class BuiltinCelestialTypes {
 
@@ -46,8 +47,28 @@ public class BuiltinCelestialTypes {
         }
     };
 
+    public static CelestialType BLACKHOLE = new CelestialType() {
+        public boolean castsLight() { return false; }
+        public boolean castsShadow() { return false; }
+        public boolean isVisitable() { return false; }
+
+        private static CelestialRenderer renderer = null;
+        public @NotNull CelestialRenderer getRenderer() {
+            CelestialRenderer result = renderer;
+            if (result == null) {
+                renderer = new BlackholeRenderer();
+            }
+            return renderer;
+        }
+
+        public @NotNull ResourceLocation getID() {
+            return ResourceLocation.parse("genesis:blackhole");
+        }
+    };
+
     public static void register() {
         CelestialType.register(STAR);
         CelestialType.register(BODY);
+        CelestialType.register(BLACKHOLE);
     }
 }
