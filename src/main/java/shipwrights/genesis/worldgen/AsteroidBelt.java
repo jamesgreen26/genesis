@@ -22,7 +22,7 @@ public class AsteroidBelt implements DensityFunction {
         double y = context.blockY() - 100;
         double z = context.blockZ();
 
-        double majorRadius = Celestial.BASE_ORBIT_DISTANCE * 1.6667; // distance from center to the tube center
+        double majorRadius = 25_000; // distance from center to the tube center
         double minorRadius = 470.0;    // radius of tube
 
         double q = Math.sqrt(x * x + z * z) - majorRadius;

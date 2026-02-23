@@ -81,7 +81,7 @@ vec4 accretionColor(vec2 p) {
     t = (t - horizonRatio) / (1. - horizonRatio);
     t *= 3.0;
     if(t < 0.0) {
-        return accretionColor1;
+        return vec4(0,0,0,1);
     } else if(t < 1.0) {
         return mix(accretionColor1,accretionColor2,t - 0.0);
     } else if(t < 2.0) {
@@ -187,7 +187,7 @@ void main() {
 
     float bendingFactor = pow(1. / (bendingStrength / horizonRatio),2.) * (1. - (bendingStrength - horizonRatio) / (1. - horizonRatio));
     rayPos = rayPos + rayDir * bendingDistance;
-    rayDir = normalize(mix(rayDir,normalize(rayDir * horizonRatio - rayPos),bendingFactor));
+    rayDir = normalize(mix(rayDir,normalize(-rayPos),bendingFactor));
     float accretionPlaneDistance = accretionDistance;
     accretionDistance = -rayPos.y / rayDir.y;
 
