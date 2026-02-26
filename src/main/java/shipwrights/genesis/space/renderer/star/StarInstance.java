@@ -47,9 +47,7 @@ public class StarInstance extends AbstractInstance {
                 ExtraMemoryOps.putMatrix4f(ptr, instance.pose);
 
                 // vec3 (12 bytes)
-                MemoryUtil.memPutFloat(ptr + 64, instance.localCameraPos.x);
-                MemoryUtil.memPutFloat(ptr + 68, instance.localCameraPos.y);
-                MemoryUtil.memPutFloat(ptr + 72, instance.localCameraPos.z);
+                ExtraMemoryOps.putVector3f(ptr + 64, instance.localCameraPos);
 
                 // float (4 bytes)
                 MemoryUtil.memPutFloat(ptr + 76, instance.halfSize);

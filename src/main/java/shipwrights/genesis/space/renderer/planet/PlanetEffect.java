@@ -24,6 +24,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.PlanetTextures;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import shipwrights.genesis.space.Celestial;
 
@@ -48,22 +50,23 @@ public class PlanetEffect implements Effect {
         return new PlanetVisual(celestial, level, ctx, partialTick);
     }
 
-    private static final SimpleMaterial MATERIAL = SimpleMaterial.builder()
-            .shaders(new SimpleMaterialShaders(
-                    GenesisMod.resource("material/planet.vert"),
-                    GenesisMod.resource("material/planet.frag")))
-            .fog(new SimpleFogShader(GenesisMod.resource("material/no_fog.glsl")))
-            .transparency(Transparency.OPAQUE)
-            .depthTest(DepthTest.LEQUAL)
-            .writeMask(WriteMask.COLOR_DEPTH)
-            .backfaceCulling(true)
-            .cardinalLightingMode(CardinalLightingMode.ENTITY)
-            .ambientOcclusion(false)
-            .useOverlay(false)
-            .useLight(true)
-            //todo
-            .texture(GenesisMod.resource("textures/planets/minecraft/overworld.png"))
-            .build();
+    private static final SimpleMaterial getMaterial(ResourceLocation texture) {
+        return SimpleMaterial.builder()
+                .shaders(new SimpleMaterialShaders(
+                        GenesisMod.resource("material/planet.vert"),
+                        GenesisMod.resource("material/planet.frag")))
+                .fog(new SimpleFogShader(GenesisMod.resource("material/no_fog.glsl")))
+                .transparency(Transparency.OPAQUE)
+                .depthTest(DepthTest.LEQUAL)
+                .writeMask(WriteMask.COLOR_DEPTH)
+                .backfaceCulling(true)
+                .cardinalLightingMode(CardinalLightingMode.ENTITY)
+                .ambientOcclusion(false)
+                .useOverlay(false)
+                .useLight(false)
+                .texture(texture)
+                .build();
+    }
 
     private static SimpleQuadMesh MESH = null;
 
@@ -81,8 +84,7 @@ public class PlanetEffect implements Effect {
         public PlanetVisual(Celestial celestial, Level level, VisualizationContext ctx, float partialTick) {
             this.celestial = celestial;
             this.level = level;
-
-            SimpleModel model = new SimpleModel(List.of(new Model.ConfiguredMesh(MATERIAL, getMesh())));
+            SimpleModel model = new SimpleModel(List.of(new Model.ConfiguredMesh(getMaterial(PlanetTextures.getTextureLocationForFlywheel(celestial.getID())), getMesh())));
             var instancer = ctx.instancerProvider().instancer(PlanetInstance.TYPE, model);
             instance = instancer.createInstance();
             instance.setHalfSize((float) celestial.getActualSize() / 2f);

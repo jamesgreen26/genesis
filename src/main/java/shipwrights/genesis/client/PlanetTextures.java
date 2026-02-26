@@ -62,6 +62,19 @@ public class PlanetTextures {
         return ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, path);
     }
 
+    /**
+     * Same as getTextureLocation but returns a path suitable for Flywheel's texture system (starts with textures/)
+     * Format: genesis:textures/planets/<namespace>/<path>.png
+     * 
+     * @param dimensionId The dimension ID
+     * @return The ResourceLocation for the texture in Flywheel's format
+     */
+
+    public static ResourceLocation getTextureLocationForFlywheel(ResourceLocation dimensionId) {
+        String path = "textures/planets/" + dimensionId.getNamespace() + "/" + dimensionId.getPath() + ".png";
+        return ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, path);
+    }
+
     @Nullable
     private static ResourceLocation loadTexture(ResourceLocation dimensionId) {
         ResourceLocation textureLocation = getTextureLocation(dimensionId);

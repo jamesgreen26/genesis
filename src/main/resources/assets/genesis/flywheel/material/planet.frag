@@ -64,10 +64,10 @@ void flw_materialFragment() {
     vec4 color = texture(flw_diffuseTex, uv);
     // vec4 color = vec4(uv, 0.0, 1.0); // Debug: visualize UV mapping
 
-    // flw_fragLight = vec2(1.0);
-    vec2 embeddedLight;
-    if (flw_lightFetch(ivec3(floor(flw_vertexPos.xyz)) + flw_renderOrigin, embeddedLight)) {
-        flw_fragLight = max(flw_fragLight, embeddedLight);
-    }
+    flw_fragLight = vec2(1.0);
+    // vec2 embeddedLight;
+    // if (flw_lightFetch(ivec3(floor(flw_vertexPos.xyz)) + flw_renderOrigin, embeddedLight)) {
+    //     flw_fragLight = max(flw_fragLight, embeddedLight);
+    // }
     flw_fragColor = vec4(color.rgb, 1.0);
 }
