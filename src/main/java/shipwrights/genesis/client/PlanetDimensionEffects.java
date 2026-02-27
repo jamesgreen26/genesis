@@ -3,17 +3,19 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
-import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.*;
+import net.minecraft.util.CubicSampler;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.registry.SpaceRegistry;
 
@@ -22,11 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlanetDimensionEffects extends DimensionSpecialEffects {
+    public static final Vector3dc UP = new Vector3d(0.0f, 1.0f, 0.0f);
+    public static final Vector3dc EAST = new Vector3d(1.0f, 0.0f, 0.0f);
     final SpaceRegistry spaceRegistry;
 
 
     public PlanetDimensionEffects(SpaceRegistry spaceRegistry) {
-        super(Float.NaN, false, DimensionSpecialEffects.SkyType.NONE, false, false);
+        super(Float.NaN, false, SkyType.NORMAL, false, false);
         this.spaceRegistry = spaceRegistry;
         createStars();
     }
@@ -41,8 +45,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             new Vector4f(1f, 1f, 0.8f, 0.8f)
     );
 
-    public @NotNull Vec3 getBrightnessDependentFogColor(@NotNull Vec3 arg, float f) {
-        return new Vec3(0,0,0);
+    public @NotNull Vec3 getBrightnessDependentFogColor(@NotNull Vec3 color, float brightness) {
+        return color.multiply((brightness * 0.94F + 0.06F), (brightness * 0.94F + 0.06F), (brightness * 0.91F + 0.09F));
     }
 
     public boolean isFoggyAt(int i, int j) {
@@ -50,7 +54,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     }
 
     public float @Nullable [] getSunriseColor(float f, float g) {
-        return null;
+        return super.getSunriseColor(f, g);
     }
 
     @Override
@@ -65,25 +69,91 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     @Override
     public boolean renderSky(ClientLevel level, int unused, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
-        FogRenderer.setupNoFog();
 
         //TODO atmosphere + sky
-
-        long gameTicks = GenesisMod.getTicks(level);
 
         final Celestial celestial = GenesisMod.getCelestialForLevel(level);
         if (celestial == null) {
             return false;
         }
-
+        
+        long gameTime = GenesisMod.getTicks(level);
+        
+        Celestial star = celestial.getNearestStar(gameTime, partialTick);
+        
+        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
+                .sub(celestial.getPosition(gameTime, partialTick))
+                .normalize();
+        
+        Quaterniondc rot = new Quaterniond(celestial.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
+        toStar.rotate(rot);
+        
+        double starUpDot = UP.dot(toStar);
+        double starEastDot = EAST.dot(toStar);
+        double starBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d);
+        double apparentSunAngle = getApparentSunAngle(starUpDot, starEastDot);
+        // apparent world time
+        long fakeTime = (long) (apparentSunAngle * 24000);
+        
+        Vec3 skyColor = getSkyColor(camera.getPosition(), partialTick, fakeTime, level);
+        float skyR = (float)skyColor.x;
+        float skyG = (float)skyColor.y;
+        float skyB = (float)skyColor.z;
+        FogRenderer.levelFogColor();
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        RenderSystem.depthMask(false);
+        RenderSystem.setShaderColor(skyR, skyG, skyB, 1.0F);
+        ShaderInstance shader = RenderSystem.getShader();
+        VertexBuffer skyBuffer = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getSkyBuffer();
+        skyBuffer.bind();
+        skyBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, shader);
+        VertexBuffer.unbind();
+        
+        RenderSystem.enableBlend();
+        float dayTime = level.dimensionType().timeOfDay(fakeTime);
+        float[] acolor = this.getSunriseColor(dayTime, partialTick);
+        if (acolor != null) {
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            poseStack.pushPose();
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90.0F));
+            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(90.0F));
+            
+            Quaternionf fullRot = new Quaternionf();/*.set(rot).rotateTo(
+                    1.0f,
+                    0.0f,
+                    0.0f,
+                    (float) toStar.x,
+                    (float) toStar.y,
+                    (float) toStar.z
+            );*/
+            float r = acolor[0];
+            float g = acolor[1];
+            float b = acolor[2];
+            float a = (float) (acolor[3] * (1 - starBrightness));
+            poseStack.mulPose(fullRot);
+            Matrix4f pose = poseStack.last().pose();
+            
+            bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+            bufferbuilder.vertex(pose, 0.0F, 100.0F, 0.0F).color(r, g, b, a).endVertex();
+            int i = 16;
+            
+            for(int j = 0; j <= i; ++j) {
+                float angle = (float)j * ((float)Math.PI * 2F) / i;
+                float sin = Mth.sin(angle);
+                float cos = Mth.cos(angle);
+                bufferbuilder.vertex(pose, sin * 120.0F, cos * 120.0F, -cos * 40.0F * a).color(acolor[0], acolor[1], acolor[2], 0.0F).endVertex();
+            }
+            
+            BufferUploader.drawWithShader(bufferbuilder.end());
+            poseStack.popPose();
+        }
+        
         poseStack.pushPose();
 
         //transform stars view to the side of the planet
         poseStack.mulPose(new Quaternionf().rotateX((float) (Math.PI/2)));
-
-        poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTicks, partialTick)).invert());
-
-        double starBrightness = 2 * Math.min(Math.max(-celestial.getSunDot(gameTicks, partialTick), 0), 0.5);
+        poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTime, partialTick)).invert());
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);
@@ -94,8 +164,10 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             starBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, GameRenderer.getPositionShader());
             VertexBuffer.unbind();
         }
+        setupFog.run();
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.disableBlend();
         poseStack.popPose();
         return true;
     }
@@ -159,5 +231,57 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         }
 
         return bufferbuilder.end();
+    }
+    
+    public static Vec3 getSkyColor(Vec3 position, float partialTick, long time, ClientLevel level) {
+        float f = level.dimensionType().timeOfDay(time);
+        Vec3 vec3 = position.subtract(2.0F, 2.0F, 2.0F).scale(0.25F);
+        BiomeManager biomemanager = level.getBiomeManager();
+        Vec3 skyColor = CubicSampler.gaussianSampleVec3(vec3, (p_194161_, p_194162_, p_194163_) -> Vec3.fromRGB24(biomemanager.getNoiseBiomeAtQuart(p_194161_, p_194162_, p_194163_).value().getSkyColor()));
+        float intensity = Mth.cos(f * ((float)Math.PI * 2F)) * 2.0F + 0.5F;
+        intensity = Mth.clamp(intensity, 0.0F, 1.0F);
+        float r = (float)skyColor.x * intensity;
+        float g = (float)skyColor.y * intensity;
+        float b = (float)skyColor.z * intensity;
+        float rainLevel = level.getRainLevel(partialTick);
+        if (rainLevel > 0.0F) {
+            float f6 = (r * 0.3F + g * 0.59F + b * 0.11F) * 0.6F;
+            float f7 = 1.0F - rainLevel * 0.75F;
+            r = r * f7 + f6 * (1.0F - f7);
+            g = g * f7 + f6 * (1.0F - f7);
+            b = b * f7 + f6 * (1.0F - f7);
+        }
+        
+        float thunderLevel = level.getThunderLevel(partialTick);
+        if (thunderLevel > 0.0F) {
+            float f10 = (r * 0.3F + g * 0.59F + b * 0.11F) * 0.2F;
+            float f8 = 1.0F - thunderLevel * 0.75F;
+            r = r * f8 + f10 * (1.0F - f8);
+            g = g * f8 + f10 * (1.0F - f8);
+            b = b * f8 + f10 * (1.0F - f8);
+        }
+        
+        int skyFlashTime = level.getSkyFlashTime();
+        if (skyFlashTime > 0) {
+            float f11 = (float)skyFlashTime - partialTick;
+            if (f11 > 1.0F) {
+                f11 = 1.0F;
+            }
+            
+            f11 *= 0.45F;
+            r = r * (1.0F - f11) + 0.8F * f11;
+            g = g * (1.0F - f11) + 0.8F * f11;
+            b = b * (1.0F - f11) + 1.0F * f11;
+        }
+        
+        return new Vec3(r, g, b);
+    }
+    
+    public static double getApparentSunAngle(double starUpDot, double starEastDot) {
+        // is the sun above or below the horizon?
+        boolean sign = Math.signum(starUpDot) < 0;
+        double starDot0To1 = (1 - starEastDot) / 4;
+        // if the sun is below the horizon, make sure the time is correct
+        return sign ? 1 - starDot0To1 : starDot0To1;
     }
 }
