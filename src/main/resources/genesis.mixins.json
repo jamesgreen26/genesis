@@ -10,14 +10,15 @@
     "DimensionSpecialEffectsManagerMixin",
     "EntityRenderDispatcherMixin",
     "FallingBlockRendererMixin",
+    "FogRendererMixin",
     "GameRendererMixin",
     "HugeExplosionSeedParticleMixin",
     "ParticleEngineMixin",
     "ParticleMixin",
     "PehkuiEntityRenderDispatcherMixin",
+    "RenderStateShardAccessor",
     "SoundEngineMixin",
-    "SoundMixin",
-    "RenderStateShardAccessor"
+    "SoundMixin"
   ],
   "mixins": [
     "BlockBehaviourAccessor",
