@@ -68,7 +68,7 @@ public class RadarDisplay {
 
     private void scanAsteroidBelt(Level level, Vector3dc camera) {
         // Torus parameters matching worldgen
-        double majorRadius = Celestial.BASE_ORBIT_DISTANCE * 1.6667; // distance from center to tube center
+        double majorRadius = 25_000; // distance from center to tube center
         double minorRadius = 470.0;    // radius of tube
 
         // Approximate torus as boxes arranged in a circle

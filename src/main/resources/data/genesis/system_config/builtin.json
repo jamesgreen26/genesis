@@ -3,7 +3,7 @@
     {
       "ID": "genesis:sun",
       "type": "genesis:star",
-      "size": 15.0,
+      "size": 1440,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:static",
@@ -15,29 +15,43 @@
     {
       "ID": "minecraft:overworld",
       "type": "genesis:body",
-      "size": 1.0,
+      "size": 96,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "genesis:sun",
         "seed": 12345,
-        "orbitDistance": 1.0,
-        "orbitTime": 1.0,
-        "dayLength" : 0.99481865285
+        "orbitDistance": 15000,
+        "orbitTime": 4608000,
+        "dayLength" : 24000
       }
     },
     {
       "ID": "genesis:moon",
       "type": "genesis:body",
-      "size": 0.3,
+      "size": 29,
       "gravity": 0.1622,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "minecraft:overworld",
         "seed": 67890,
-        "orbitDistance": 0.05,
-        "orbitTime": 0.005,
-        "dayLength": 0.75
+        "orbitDistance": 750,
+        "orbitTime": 184320,
+        "dayLength": 0
+      }
+    },
+    {
+      "ID": "genesis:testbh",
+      "type": "genesis:blackhole",
+      "size": 5,
+      "gravity": 5,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:moon",
+        "seed": 97104,
+        "orbitDistance": 100,
+        "orbitTime": 4800,
+        "dayLength": 1000
       }
     },
     {

@@ -48,7 +48,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         this.seed = seed;
         this.orbitDistance = orbitDistance;
         this.orbitTime = orbitTime;
-        this.dayLength = Math.max(0.001, dayLength);
+        this.dayLength = dayLength;
 
         // Generate random parameters from seed (similar to OrbitingBody)
         Random rand = new Random(seed);
@@ -77,14 +77,18 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
     }
 
     private int getYearLengthTicks() {
-        return (int)(this.orbitTime * Celestial.BASE_ORBIT_TIME);
+        return (int)(this.orbitTime);
     }
 
     @Override
     public Quaterniondc getRotation(long ticks, float subticks) {
         // Apply daily rotation around Y axis (similar to OrbitingBody)
+        double rotationalPeriod = (this.orbitTime / (this.orbitTime / this.dayLength - 1.0));
+        if(this.dayLength == 0.0) {
+            rotationalPeriod = this.orbitTime;
+        }
         return new Quaterniond(baseRotation).rotateY(
-            -Math.PI * 2 * (ticks + subticks) / (this.dayLength * Celestial.BASE_DAY_LENGTH)
+            -Math.PI * 2 * (ticks + subticks) / rotationalPeriod
         );
     }
 
@@ -101,7 +105,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         out = out.rotateX(orbitalPhi + Math.PI / 2);
 
         // Scale to orbit distance
-        out.normalize(orbitDistance * Celestial.BASE_ORBIT_DISTANCE);
+        out.normalize(orbitDistance);
 
         // Add parent's position
         return out.add(getParent().getPosition(ticks, subticks), new Vector3d()).setComponent(1, 0);
