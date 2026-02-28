@@ -194,8 +194,8 @@ public class PlanetRenderer implements CelestialRenderer {
         int fogGreen = (int) (255 * FogRendererAccessor.getFogGreen());
         int fogBlue = (int) (255 * FogRendererAccessor.getFogBlue());
 
-        Vector3f rotatedNormal = new Vector3f(normal);
-        rotation.transform(rotatedNormal);
+        Vector3f rotatedNormal = new Vector3f(x,y,z);
+        rotatedNormal = rotation.transform(rotatedNormal.normalize());
 
         buffer.vertex(matrix, x, y, z)
             .uv(u, v)
