@@ -67,7 +67,7 @@ public class Celestial {
     }
 
     public double getActualSize() {
-        return this.size() * BASE_SIZE;
+        return this.size();
     }
 
     public OBB getOBB(long ticks) {
