@@ -81,7 +81,7 @@ vec4 accretionColor(vec2 p) {
     t = (t - horizonRatio) / (1. - horizonRatio);
     t *= 3.0;
     if(t < 0.0) {
-        return vec4(0,0,0,1);
+        return accretionColor1;
     } else if(t < 1.0) {
         return mix(accretionColor1,accretionColor2,t - 0.0);
     } else if(t < 2.0) {
