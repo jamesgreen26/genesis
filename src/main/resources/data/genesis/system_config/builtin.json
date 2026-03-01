@@ -22,7 +22,7 @@
         "parentID": "genesis:sun",
         "seed": 12345,
         "orbitDistance": 15000,
-        "orbitTime": 4600000,
+        "orbitTime": 4608000,
         "dayLength" : 24000
       }
     },
@@ -50,8 +50,8 @@
         "parentID": "genesis:moon",
         "seed": 97104,
         "orbitDistance": 100,
-        "orbitTime": 4809,
-        "dayLength": 1090
+        "orbitTime": 4800,
+        "dayLength": 1000
       }
     }
   ]
