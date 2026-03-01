@@ -7,8 +7,8 @@ in vec3 lightDir;
 
 const float atmosphereThickness = 1.3;
 
-const vec4 dayCol = vec4(0.5,0.8,1.0,1.0);
-const vec4 sunsetCol = vec4(0.7,0.3,0.1,0.7);
+const vec4 dayCol = vec4(0.3,0.7,0.9,0.7);
+const vec4 sunsetCol = vec4(0.7,0.3,0.1,0.5);
 const vec4 nightCol = vec4(0.2,0.1,0.4,0.1);
 
 out vec4 frag_color;
@@ -26,7 +26,7 @@ float smoothMax3(vec3 p, float roundness) {
     vec3 q = abs(p);
     float m = max(max(q.x, q.y), q.z);
 
-    return clamp(m, 0, v_half_size);
+    return m;
 }
 
 
@@ -104,17 +104,20 @@ vec2 rayBoxIntersection(vec3 rayStart, vec3 rayDir, vec3 boxCenter, float boxHal
 }
 
 void main() {
-    vec3 ray_direction = -normalize(v_entry_position - v_camera_pos);
+    vec3 ray_direction = normalize(v_entry_position - v_camera_pos);
 
     mat3 rot = rotationMatrix(cube_rotationXYZ);
 
-    float exit_distance = rayBoxIntersection(v_entry_position, ray_direction, v_cube_center, v_half_size, rot).y;
+    float exit_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).y;
+    float entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size, rot).x;
 
-    vec3 enterPos = v_camera_pos - ray_direction * rayBoxIntersection(v_camera_pos, -ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x;
+    if(entry_distance < -0.1) {
+        entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x;
+    }
 
-    exit_distance = min(exit_distance,length(v_entry_position - v_camera_pos));
+    vec3 enterPos = v_camera_pos + ray_direction * rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x;
 
-    float thickness = exit_distance;
+    float thickness = 1000000000000.0;
 
     if (thickness < 0.0) {
         thickness = 0.0;
@@ -122,10 +125,10 @@ void main() {
 
     // Transform ray to local cube space
     mat3 invRot = transpose(rot);
-    vec3 localRayStart = invRot * (v_entry_position - v_cube_center);
-    vec3 localRayDir = invRot * ray_direction;
+    vec3 localRayStart = invRot * (v_camera_pos - v_cube_center);
+    vec3 localRayDir = normalize(invRot * ray_direction);
     vec3 localCamPos = invRot * v_camera_pos;
-    vec3 localIntPos = invRot * v_entry_position;
+    vec3 localIntPos = invRot * (v_camera_pos + entry_distance * ray_direction);
     vec3 localEnterPos = invRot * enterPos;
 
     // Check intersection with each of the 6 diagonal planes
@@ -199,18 +202,21 @@ void main() {
     float alpha;
 
     if(distanceFromCenter < 1.0) {
-        alpha = (1. - dot(normalize(localIntPos),localRayDir)) * 0.1;
+        alpha = (1. - dot(normalize(localIntPos),localRayDir)) * 0.3;
     } else {
         alpha = 1. - (distanceFromCenter - 1.) / (atmosphereThickness - 1.);
     }
 
-    float lightDot = dot(normalize(localEnterPos),-lightDir);
 
-    float dayFact = clamp(lightDot * 12.0 - 1.5,0.0,1.0);
-    float nightFact = clamp(lightDot * -10.0 + 0.2,0.0,1.0);
+    float lightDot = dot(normalize(enterPos),-normalize(lightDir));
+
+    float dayFact = clamp(lightDot * 3.0,0.0,1.0);
+    float nightFact = clamp(lightDot * -4.0,0.0,1.0);
 
     frag_color = mix(mix(sunsetCol,nightCol,nightFact),dayCol,dayFact);
     frag_color.a *= alpha;
 
-    frag_color = vec4(v_entry_position,0.5);
+    //frag_color = vec4(localRayDir * 0.5 + 0.5,0.3);
+
+    //frag_color = vec4((v_entry_position + v_half_size) / (v_half_size * 2.0),0.5);
 }

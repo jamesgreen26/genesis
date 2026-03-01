@@ -176,7 +176,7 @@ void main() {
     }
 
     float closestDistance = bendingDistance;
-    bendingDistance = length(rayPos);
+    bendingDistance = length(rayPos) + accretionDistance;
 
     if(accretionDistance > 0.0 && accretionDistance < bendingDistance) {
         col1 = accretionColor((rayPos + accretionDistance * rayDir).xz);
@@ -187,7 +187,7 @@ void main() {
 
     float bendingFactor = pow(1. / (bendingStrength / horizonRatio),2.) * (1. - (bendingStrength - horizonRatio) / (1. - horizonRatio));
     rayPos = rayPos + rayDir * bendingDistance;
-    rayDir = normalize(mix(rayDir,normalize(-rayPos),bendingFactor));
+    rayDir = normalize(mix(rayDir,normalize(rayDir * accretionDistance - rayPos),bendingFactor));
     float accretionPlaneDistance = accretionDistance;
     accretionDistance = -rayPos.y / rayDir.y;
 
