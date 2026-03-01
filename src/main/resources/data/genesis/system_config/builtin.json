@@ -44,7 +44,7 @@
       "ID": "genesis:testbh",
       "type": "genesis:blackhole",
       "size": 5,
-      "gravity": 5,
+      "gravity": 8,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "genesis:moon",
