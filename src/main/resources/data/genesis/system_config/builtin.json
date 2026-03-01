@@ -4,7 +4,7 @@
       "ID": "genesis:sun",
       "type": "genesis:star",
       "size": 1440,
-      "gravity": 1.0,
+      "gravity": 2.0,
       "transformProvider": {
         "type": "genesis:static",
         "x": 0.0,

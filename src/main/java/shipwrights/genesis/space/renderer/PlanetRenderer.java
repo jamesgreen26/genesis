@@ -32,8 +32,7 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
-import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderType;
-import static shipwrights.genesis.client.ShaderRegistry.getPlanetShadowRenderType;
+import static shipwrights.genesis.client.ShaderRegistry.*;
 
 public class PlanetRenderer implements CelestialRenderer {
 
@@ -170,6 +169,51 @@ public class PlanetRenderer implements CelestialRenderer {
 
         // Render shadows on planet faces
         renderShadows(shadows, poseStack, x, y, z, halfExtent, localRotation);
+
+        MultiBufferSource.BufferSource bufferSourceAtmosphere = Minecraft.getInstance().renderBuffers().bufferSource();
+        VertexConsumer bufferAtmosphere = bufferSourceAtmosphere.getBuffer(getPlanetAtmosphereRenderType());
+
+        addCubeFaceAtmosphere(matrix, bufferAtmosphere, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize);
+        addCubeFaceAtmosphere(matrix, bufferAtmosphere, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize);
+        addCubeFaceAtmosphere(matrix, bufferAtmosphere, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, halfSize);
+        addCubeFaceAtmosphere(matrix, bufferAtmosphere, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize);
+        addCubeFaceAtmosphere(matrix, bufferAtmosphere, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize);
+        addCubeFaceAtmosphere(matrix, bufferAtmosphere, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize);
+
+        // End batch to flush planet rendering
+        bufferSourceAtmosphere.endBatch(getPlanetAtmosphereRenderType());
+    }
+
+    private static void addCubeFaceAtmosphere(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
+                                       float x3, float y3, float z3, float x4, float y4, float z4,float halfSize) {
+
+        float zFightingCorrection = 1.01f;
+
+        float size = 2 * halfSize;
+        buffer.vertex(matrix, x1 * zFightingCorrection, y1 * zFightingCorrection, z1 * zFightingCorrection).color((int)(255 * (x1 + halfSize) / size), (int)(255 * (y1 + halfSize) / size), (int)(255 * (z1 + halfSize) / size), 255).endVertex();
+        buffer.vertex(matrix, x2 * zFightingCorrection, y2 * zFightingCorrection, z2 * zFightingCorrection).color((int)(255 * (x2 + halfSize) / size), (int)(255 * (y2 + halfSize) / size), (int)(255 * (z2 + halfSize) / size), 255).endVertex();
+        buffer.vertex(matrix, x3 * zFightingCorrection, y3 * zFightingCorrection, z3 * zFightingCorrection).color((int)(255 * (x3 + halfSize) / size), (int)(255 * (y3 + halfSize) / size), (int)(255 * (z3 + halfSize) / size), 255).endVertex();
+        buffer.vertex(matrix, x4 * zFightingCorrection, y4 * zFightingCorrection, z4 * zFightingCorrection).color((int)(255 * (x4 + halfSize) / size), (int)(255 * (y4 + halfSize) / size), (int)(255 * (z4 + halfSize) / size), 255).endVertex();
+
+        float atmosphereThickness = 1.3f;
+
+        x1 *= atmosphereThickness;
+        y1 *= atmosphereThickness;
+        z1 *= atmosphereThickness;
+        x2 *= atmosphereThickness;
+        y2 *= atmosphereThickness;
+        z2 *= atmosphereThickness;
+        x3 *= atmosphereThickness;
+        y3 *= atmosphereThickness;
+        z3 *= atmosphereThickness;
+        x4 *= atmosphereThickness;
+        y4 *= atmosphereThickness;
+        z4 *= atmosphereThickness;
+
+        buffer.vertex(matrix, x4, y4, z4).color((int)(255 * (x4 + halfSize) / size), (int)(255 * (y4 + halfSize) / size), (int)(255 * (z4 + halfSize) / size), 255).endVertex();
+        buffer.vertex(matrix, x3, y3, z3).color((int)(255 * (x3 + halfSize) / size), (int)(255 * (y3 + halfSize) / size), (int)(255 * (z3 + halfSize) / size), 255).endVertex();
+        buffer.vertex(matrix, x2, y2, z2).color((int)(255 * (x2 + halfSize) / size), (int)(255 * (y2 + halfSize) / size), (int)(255 * (z2 + halfSize) / size), 255).endVertex();
+        buffer.vertex(matrix, x1, y1, z1).color((int)(255 * (x1 + halfSize) / size), (int)(255 * (y1 + halfSize) / size), (int)(255 * (z1 + halfSize) / size), 255).endVertex();
     }
 
     private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize,
