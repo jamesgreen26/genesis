@@ -165,8 +165,11 @@ public class PolygonClipping {
         final Vector2d finalPivot = pivot;
         List<Vector2d> sorted = new ArrayList<>(points);
         sorted.sort((a, b) -> {
-            if (a.equals(finalPivot)) return -1;
-            if (b.equals(finalPivot)) return 1;
+            boolean aIsPivot = a.equals(finalPivot);
+            boolean bIsPivot = b.equals(finalPivot);
+            if (aIsPivot && bIsPivot) return 0;
+            if (aIsPivot) return -1;
+            if (bIsPivot) return 1;
 
             double angleA = Math.atan2(a.y - finalPivot.y, a.x - finalPivot.x);
             double angleB = Math.atan2(b.y - finalPivot.y, b.x - finalPivot.x);
