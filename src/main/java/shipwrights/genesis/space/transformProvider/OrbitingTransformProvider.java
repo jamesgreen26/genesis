@@ -39,9 +39,9 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
      *
      * @param parentID the parent celestial body to orbit around
      * @param seed the seed for generating deterministic random orbital angles and rotation
-     * @param orbitDistance the orbit radius multiplier (multiplied by BASE_ORBIT_DISTANCE)
-     * @param orbitTime the orbit period multiplier (multiplied by BASE_ORBIT_TIME)
-     * @param dayLength the day length multiplier (multiplied by BASE_DAY_LENGTH)
+     * @param orbitDistance the orbit radius in blocks
+     * @param orbitTime the orbit period in ticks
+     * @param dayLength the day length in ticks
      */
     public OrbitingTransformProvider(ResourceLocation parentID, int seed, double orbitDistance, double orbitTime, double dayLength) {
         this.parentID = parentID;
@@ -97,8 +97,14 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         // Calculate orbital position (similar to OrbitingBody.getCurrentPos)
         Vector3d out = new Vector3d(1, 0, 0);
 
+        int yearLength = getYearLengthTicks();
+
+        if (yearLength <= 0) {
+            throw new IllegalStateException("YearLength should be > 0");
+        }
+
         // Rotate by orbital progression
-        out = out.rotateY(Math.PI * 2 * (ticks + subticks) / getYearLengthTicks());
+        out = out.rotateY(Math.PI * 2 * (ticks + subticks) / yearLength);
 
         // Apply orbital angles
         out = out.rotateY(orbitalTheta);

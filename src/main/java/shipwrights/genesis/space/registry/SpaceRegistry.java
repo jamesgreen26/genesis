@@ -12,12 +12,14 @@ import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.type.CelestialType;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber
 public class SpaceRegistry {
-    private final Map<ResourceLocation, Celestial> celestials = new HashMap<>();
+    private volatile Map<ResourceLocation, Celestial> celestials = new ConcurrentHashMap<>();
+    private volatile Map<ResourceLocation, Celestial> pending = null;
 
     static final Logger LOGGER = LoggerFactory.getLogger("Expander");
     private final List<Consumer<RegisterCelestialsEvent>> registrationCallbacks;
@@ -40,26 +42,27 @@ public class SpaceRegistry {
 
 
     private void addCelestial(ResourceLocation id, Celestial it) {
-        celestials.putIfAbsent(id, it);
+        (pending != null ? pending : celestials).putIfAbsent(id, it);
     }
 
     @SubscribeEvent
     public static void onServerStop(ServerStoppedEvent event) {
-        GenesisMod.SPACE_REGISTRY.reset();
-    }
-
-    void reset() {
-        celestials.clear();
+        GenesisMod.SPACE_REGISTRY.celestials.clear();
     }
 
     void applyClientSync(SystemConfigModel config) {
-        reset();
+        pending = new ConcurrentHashMap<>();
         RegisterCelestialsEvent event = new RegisterCelestialsEvent(this);
         config.celestials().forEach(event::accept);
+        celestials = pending;
+        pending = null;
     }
 
     void bake() {
+        pending = new ConcurrentHashMap<>();
         registrationCallbacks.forEach(it -> it.accept(new RegisterCelestialsEvent(this)));
+        celestials = pending;
+        pending = null;
         SpaceRegistrySyncPacket.sendToAllClients();
     }
 
