@@ -51,7 +51,6 @@ public class DataLoader {
                 }
             }
 
-            GenesisMod.SPACE_REGISTRY.reset();
             GenesisMod.SPACE_REGISTRY.bake();
         });
     }
