@@ -35,8 +35,8 @@
         "type": "genesis:orbiting",
         "parentID": "minecraft:overworld",
         "seed": 67890,
-        "orbitDistance": 75000,
-        "orbitTime": 184320,
+        "orbitDistance": 750,
+        "orbitTime": 184329,
         "dayLength": 0
       }
     },
@@ -50,8 +50,8 @@
         "parentID": "genesis:moon",
         "seed": 97104,
         "orbitDistance": 100,
-        "orbitTime": 4800,
-        "dayLength": 1000
+        "orbitTime": 4809,
+        "dayLength": 1090
       }
     }
   ]

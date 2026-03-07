@@ -150,24 +150,28 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         float correctionDist = relativeAtmosphereSize;
 
+        float outOverexposureCancel = 1.0f;
+
         if(
         Math.abs(testPos.x) < halfSize * relativeAtmosphereSize &&
         Math.abs(testPos.y) < halfSize * relativeAtmosphereSize &&
         Math.abs(testPos.z) < halfSize * relativeAtmosphereSize
         ) {
             correctionDist = 1.001f;
+        } else {
+            outOverexposureCancel = 0.000000001f;
         }
 
-        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize,  halfSize, correctionDist, relativeAtmosphereSize);
-        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize,  halfSize, correctionDist, relativeAtmosphereSize);
-        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize,  halfSize, correctionDist, relativeAtmosphereSize);
-        addCubeFaceAtmosphere(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize,  halfSize, correctionDist, relativeAtmosphereSize);
-        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize,  halfSize, correctionDist, relativeAtmosphereSize);
-        addCubeFaceAtmosphere(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize,  halfSize, correctionDist, relativeAtmosphereSize);
+        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize,  halfSize, correctionDist, relativeAtmosphereSize,outOverexposureCancel);
+        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize,  halfSize, correctionDist, relativeAtmosphereSize,outOverexposureCancel);
+        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize,  halfSize, correctionDist, relativeAtmosphereSize,outOverexposureCancel);
+        addCubeFaceAtmosphere(matrix, buffer, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize,  halfSize, correctionDist, relativeAtmosphereSize,outOverexposureCancel);
+        addCubeFaceAtmosphere(matrix, buffer, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize,  halfSize, correctionDist, relativeAtmosphereSize,outOverexposureCancel);
+        addCubeFaceAtmosphere(matrix, buffer, -halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize,  halfSize, correctionDist, relativeAtmosphereSize,outOverexposureCancel);
     }
 
     private static void addCubeFaceAtmosphere(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
-                                              float x3, float y3, float z3, float x4, float y4, float z4,float halfSize,float zFightingCorrection,float atmosphereThickness) {
+                                              float x3, float y3, float z3, float x4, float y4, float z4,float halfSize,float zFightingCorrection,float atmosphereThickness,float outFact) {
 
         float size = 2 * halfSize;
         float sclFct;
@@ -178,7 +182,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         buffer.vertex(matrix, x3 * sclFct, y3 * sclFct, z3 * sclFct).color((int)(255 * (x3 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (y3 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (z3 * sclFct / atmosphereThickness + halfSize) / size), 255).endVertex();
         buffer.vertex(matrix, x4 * sclFct, y4 * sclFct, z4 * sclFct).color((int)(255 * (x4 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (y4 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (z4 * sclFct / atmosphereThickness + halfSize) / size), 255).endVertex();
 
-        sclFct = -atmosphereThickness;
+        sclFct = -atmosphereThickness * outFact;
         buffer.vertex(matrix, x1 * sclFct, y1 * sclFct, z1 * sclFct).color((int)(255 * (x1 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (y1 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (z1 * sclFct / atmosphereThickness + halfSize) / size), 255).endVertex();
         buffer.vertex(matrix, x2 * sclFct, y2 * sclFct, z2 * sclFct).color((int)(255 * (x2 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (y2 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (z2 * sclFct / atmosphereThickness + halfSize) / size), 255).endVertex();
         buffer.vertex(matrix, x3 * sclFct, y3 * sclFct, z3 * sclFct).color((int)(255 * (x3 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (y3 * sclFct / atmosphereThickness + halfSize) / size), (int)(255 * (z3 * sclFct / atmosphereThickness + halfSize) / size), 255).endVertex();

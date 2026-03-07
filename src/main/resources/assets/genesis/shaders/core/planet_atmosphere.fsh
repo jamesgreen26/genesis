@@ -112,10 +112,10 @@ void main() {
     float entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size, rot).x;
 
     if(entry_distance < -0.1) {
-        entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x;
+        entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).y;
     }
 
-    vec3 enterPos = v_camera_pos + ray_direction * rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x;
+    vec3 enterPos = v_camera_pos + ray_direction * max(rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x,0.0);
 
     float thickness = 1000000000000.0;
 
@@ -130,6 +130,7 @@ void main() {
     vec3 localCamPos = invRot * v_camera_pos;
     vec3 localIntPos = invRot * (v_camera_pos + entry_distance * ray_direction);
     vec3 localEnterPos = invRot * enterPos;
+    vec3 localLightDir = normalize(invRot * lightDir);
 
     // Check intersection with each of the 6 diagonal planes
     float roundness_factor = 0.5;
@@ -202,13 +203,17 @@ void main() {
     float alpha;
 
     if(distanceFromCenter < 1.0) {
-        alpha = (1. - dot(normalize(localIntPos),localRayDir)) * 0.3;
+        alpha = (1. - dot(normalize(localIntPos),-localRayDir));
+        alpha *= alpha * 0.6;
     } else {
         alpha = 1. - (distanceFromCenter - 1.) / (atmosphereThickness - 1.);
+        alpha *= alpha;
     }
 
+    vec3 hPos1 = localEnterPos / v_half_size;
+    vec3 hPos2 = localIntPos / v_half_size;
 
-    float lightDot = dot(normalize(enterPos),-normalize(lightDir));
+    float lightDot = (dot(hPos1,-localLightDir) + dot(hPos2,-localLightDir)) / 2. / length(hPos1 - hPos2);
 
     float dayFact = clamp(lightDot * 3.0,0.0,1.0);
     float nightFact = clamp(lightDot * -4.0,0.0,1.0);
