@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
-import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.util.Mth;
@@ -17,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.planet_properties.PlanetProperties;
 
 import java.lang.Math;
 
@@ -45,7 +45,7 @@ public class FogRendererMixin {
             apparentAngle.set(_apparentAngle);
             long fakeTime = (long) (_apparentAngle * 24000);
             
-            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance);
+            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.getID()).color());
         }
         
         apparentAngle.set(instance.getSunAngle(partialTick) / Mth.TWO_PI);

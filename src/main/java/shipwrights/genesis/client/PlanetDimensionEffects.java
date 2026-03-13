@@ -17,6 +17,8 @@ import org.joml.*;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.planet_properties.PlanetColorPalette;
+import shipwrights.genesis.space.planet_properties.PlanetProperties;
 import shipwrights.genesis.space.registry.SpaceRegistry;
 
 import java.lang.Math;
@@ -35,6 +37,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         createStars();
     }
 
+    private static double cachedDensity = 1.0;
+
     private final int starBufferCount = 3;
 
     private final List<VertexBuffer> starBuffers = new ArrayList<>(starBufferCount);
@@ -46,7 +50,11 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     );
 
     public @NotNull Vec3 getBrightnessDependentFogColor(@NotNull Vec3 color, float brightness) {
-        return color.multiply((brightness * 0.94F + 0.06F), (brightness * 0.94F + 0.06F), (brightness * 0.91F + 0.09F));
+        return color.multiply(
+                cachedDensity * (brightness * 0.94F + 0.06F),
+                cachedDensity * (brightness * 0.94F + 0.06F),
+                cachedDensity * (brightness * 0.91F + 0.09F)
+        );
     }
 
     public boolean isFoggyAt(int i, int j) {
@@ -54,27 +62,38 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     }
 
     public float @Nullable [] getSunriseColor(float f, float g) {
-        return super.getSunriseColor(f, g);
+        float[] original = super.getSunriseColor(f, g);
+        if (original != null) {
+            original[3] = (float) (original[3] * cachedDensity);
+        }
+        return original;
     }
 
-    private boolean hasPrecipitation() {
-        return true; //TODO: make this data driven
+    @Nullable
+    private PlanetProperties getPlanetProperties(ClientLevel level) {
+        Celestial celestial = GenesisMod.getCelestialForLevel(level);
+        if (celestial == null) return null;
+        return PlanetProperties.get(celestial.getID());
+    }
+
+    private boolean hasPrecipitation(ClientLevel level) {
+        PlanetProperties props = getPlanetProperties(level);
+        if (props == null) return true;
+        return props.precipitation();
     }
 
     @Override
     public boolean renderSnowAndRain(ClientLevel level, int ticks, float partialTick, LightTexture lightTexture, double camX, double camY, double camZ) {
-        return !hasPrecipitation();
+        return !hasPrecipitation(level);
     }
 
     @Override
     public boolean tickRain(ClientLevel level, int ticks, Camera camera) {
-        return !hasPrecipitation();
+        return !hasPrecipitation(level);
     }
 
     @Override
     public boolean renderSky(ClientLevel level, int unused, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
-
-        //TODO atmosphere + sky
 
         final Celestial celestial = GenesisMod.getCelestialForLevel(level);
         if (celestial == null) {
@@ -94,13 +113,19 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         
         double starUpDot = UP.dot(toStar);
         double starEastDot = EAST.dot(toStar);
-        float rainLevel = hasPrecipitation() ? level.getRainLevel(partialTick) : 0f;
-        double starBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d) * (1f - rainLevel);
+        PlanetProperties planetProps = getPlanetProperties(level);
+        double density = Mth.clamp(planetProps != null ? planetProps.density() : 1.0, 0.0, 1.0);
+        cachedDensity = density;
+        PlanetColorPalette palette = planetProps != null ? planetProps.color() : new PlanetColorPalette.Overworld();
+
+        float rainLevel = hasPrecipitation(level) ? level.getRainLevel(partialTick) : 0f;
+        double rawStarBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d) * (1f - rainLevel);
+        double starBrightness = Mth.lerp(density, 1.0, rawStarBrightness);
         double apparentSunAngle = getApparentSunAngle(starUpDot, starEastDot);
         // apparent world time
         long fakeTime = (long) (apparentSunAngle * 24000);
-        
-        Vec3 skyColor = getSkyColor(camera.getPosition(), partialTick, fakeTime, level);
+
+        Vec3 skyColor = getSkyColor(camera.getPosition(), partialTick, fakeTime, level, palette);
         float skyR = (float)skyColor.x;
         float skyG = (float)skyColor.y;
         float skyB = (float)skyColor.z;
@@ -238,16 +263,26 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         return bufferbuilder.end();
     }
     
-    public static Vec3 getSkyColor(Vec3 position, float partialTick, long time, ClientLevel level) {
+    public static Vec3 getSkyColor(Vec3 position, float partialTick, long time, ClientLevel level, PlanetColorPalette palette) {
         float f = level.dimensionType().timeOfDay(time);
-        Vec3 vec3 = position.subtract(2.0F, 2.0F, 2.0F).scale(0.25F);
-        BiomeManager biomemanager = level.getBiomeManager();
-        Vec3 skyColor = CubicSampler.gaussianSampleVec3(vec3, (p_194161_, p_194162_, p_194163_) -> Vec3.fromRGB24(biomemanager.getNoiseBiomeAtQuart(p_194161_, p_194162_, p_194163_).value().getSkyColor()));
-        float intensity = Mth.cos(f * ((float)Math.PI * 2F)) * 2.0F + 0.5F;
+        float intensity = Mth.cos(f * ((float) Math.PI * 2F)) * 2.0F + 0.5F;
         intensity = Mth.clamp(intensity, 0.0F, 1.0F);
-        float r = (float)skyColor.x * intensity;
-        float g = (float)skyColor.y * intensity;
-        float b = (float)skyColor.z * intensity;
+
+        float r, g, b;
+        if (palette.isOverworld()) {
+            Vec3 vec3 = position.subtract(2.0F, 2.0F, 2.0F).scale(0.25F);
+            BiomeManager biomemanager = level.getBiomeManager();
+            Vec3 skyColor = CubicSampler.gaussianSampleVec3(vec3, (p1, p2, p3) -> Vec3.fromRGB24(biomemanager.getNoiseBiomeAtQuart(p1, p2, p3).value().getSkyColor()));
+            r = (float) skyColor.x * intensity;
+            g = (float) skyColor.y * intensity;
+            b = (float) skyColor.z * intensity;
+        } else {
+            int[] rgb = palette.getRGB();
+            r = (rgb[0] / 255.0f) * intensity;
+            g = (rgb[1] / 255.0f) * intensity;
+            b = (rgb[2] / 255.0f) * intensity;
+        }
+
         float rainLevel = level.getRainLevel(partialTick);
         if (rainLevel > 0.0F) {
             float f6 = (r * 0.3F + g * 0.59F + b * 0.11F) * 0.6F;
@@ -256,7 +291,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             g = g * f7 + f6 * (1.0F - f7);
             b = b * f7 + f6 * (1.0F - f7);
         }
-        
+
         float thunderLevel = level.getThunderLevel(partialTick);
         if (thunderLevel > 0.0F) {
             float f10 = (r * 0.3F + g * 0.59F + b * 0.11F) * 0.2F;
@@ -265,23 +300,24 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             g = g * f8 + f10 * (1.0F - f8);
             b = b * f8 + f10 * (1.0F - f8);
         }
-        
+
         int skyFlashTime = level.getSkyFlashTime();
         if (skyFlashTime > 0) {
-            float f11 = (float)skyFlashTime - partialTick;
-            if (f11 > 1.0F) {
-                f11 = 1.0F;
-            }
-            
+            float f11 = (float) skyFlashTime - partialTick;
+            if (f11 > 1.0F) f11 = 1.0F;
             f11 *= 0.45F;
             r = r * (1.0F - f11) + 0.8F * f11;
             g = g * (1.0F - f11) + 0.8F * f11;
-            b = b * (1.0F - f11) + 1.0F * f11;
+            b = b * (1.0F - f11) + f11;
         }
-        
+
+        r *= (float) cachedDensity;
+        g *= (float) cachedDensity;
+        b *= (float) cachedDensity;
+
         return new Vec3(r, g, b);
     }
-    
+
     public static double getApparentSunAngle(double starUpDot, double starEastDot) {
         // is the sun above or below the horizon?
         boolean sign = Math.signum(starUpDot) < 0;

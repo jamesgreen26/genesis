@@ -35,6 +35,14 @@ The `PlanetColorPalette` SHALL be a polymorphic type with two variants, serializ
 - **WHEN** a planet's color is `{ "type": "genesis:overworld" }`
 - **THEN** `isOverworld()` returns `true` and calling `getRGB()` throws `UnsupportedOperationException`
 
+#### Scenario: RGB palette drives sky renderer
+- **WHEN** a planet's color has `isOverworld() == false`
+- **THEN** `PlanetDimensionEffects` uses `getRGB()` for sky color rather than biome sampling
+
+#### Scenario: Overworld palette drives sky renderer
+- **WHEN** a planet's color has `isOverworld() == true`
+- **THEN** `PlanetDimensionEffects` uses biome-sampled sky color
+
 ---
 
 ### Requirement: Planet Properties Data Files
