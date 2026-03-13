@@ -57,14 +57,18 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         return super.getSunriseColor(f, g);
     }
 
+    private boolean hasPrecipitation() {
+        return true; //TODO: make this data driven
+    }
+
     @Override
     public boolean renderSnowAndRain(ClientLevel level, int ticks, float partialTick, LightTexture lightTexture, double camX, double camY, double camZ) {
-        return true;
+        return !hasPrecipitation();
     }
 
     @Override
     public boolean tickRain(ClientLevel level, int ticks, Camera camera) {
-        return true;
+        return !hasPrecipitation();
     }
 
     @Override
