@@ -1,5 +1,5 @@
 {
-  "type": "genesis:moon_dimension_type",
+  "type": "genesis:moon",
   "generator": {
     "biome_source": {
       "biomes": [

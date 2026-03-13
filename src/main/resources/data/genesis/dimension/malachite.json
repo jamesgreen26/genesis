@@ -1,5 +1,5 @@
 {
-  "type": "genesis:malachite_dimension_type",
+  "type": "genesis:malachite",
   "generator": {
     "biome_source": {
       "biomes": [

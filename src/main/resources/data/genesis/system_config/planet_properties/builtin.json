@@ -1,0 +1,18 @@
+{
+  "planets": [
+    {
+      "id": "minecraft:overworld",
+      "density": 1.0,
+      "thickness": 1.0,
+      "precipitation": true,
+      "color": { "type": "genesis:overworld" }
+    },
+    {
+      "id": "genesis:moon",
+      "density": 0.0,
+      "thickness": 0.0,
+      "precipitation": false,
+      "color": { "type": "genesis:rgb", "r": 0, "g": 0, "b": 0 }
+    }
+  ]
+}
