@@ -25,6 +25,10 @@ legacyForge {
         server {
             server()
         }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'forge.enabledGameTestNamespaces', 'genesis'
+        }
     }
 
     mods {

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -24,9 +25,11 @@ import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
 import shipwrights.genesis.content.particle.GenesisParticles;
 import shipwrights.genesis.space.type.BuiltinCelestialTypes;
-import shipwrights.genesis.teleportation.ShipLandingAttachment;
 import shipwrights.genesis.space.registry.SpaceRegistry;
-import shipwrights.genesis.teleportation.TeleportationHandler;
+import shipwrights.genesis.teleportation.integration.PlanetToSpaceTeleporter;
+import shipwrights.genesis.teleportation.impl.ShipCollector;
+import shipwrights.genesis.teleportation.integration.SpaceToPlanetTeleporter;
+import shipwrights.genesis.tests.commands.GameTestCommands;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -81,9 +84,15 @@ public final class GenesisMod {
         shipwrights.genesis.content.item.GenesisCreativeTabs.register(eventBus);
         shipwrights.genesis.content.painting.GenesisPaintings.PAINTING_VARIANTS.register(eventBus);
 
-        ValkyrienSkies.api().registerAttachment(ShipLandingAttachment.class);
+        ValkyrienSkies.api().getPhysTickEvent().on(ShipCollector::onPhysTick);
 
-        ValkyrienSkies.api().getPhysTickEvent().on(TeleportationHandler::onPhysTick);
+        boolean isGameTest = System.getProperty("forge.enabledGameTestNamespaces") != null;
+        MinecraftForge.EVENT_BUS.register(new PlanetToSpaceTeleporter(isGameTest));
+        MinecraftForge.EVENT_BUS.register(new SpaceToPlanetTeleporter(isGameTest));
+
+        if (isGameTest) {
+            MinecraftForge.EVENT_BUS.addListener(GameTestCommands::onRegisterCommandsEvent);
+        }
     }
 
     public static void onRegisterCelestialsEvent(Consumer<SpaceRegistry.RegisterCelestialsEvent> callback) {
