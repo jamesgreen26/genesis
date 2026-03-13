@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "powered=false": {
+            "model": "genesis:block/tulcite_catalyzer_empty"
+        },
+        "powered=true": {
+            "model": "genesis:block/tulcite_catalyzer_active"
+        }
+    }
+} 

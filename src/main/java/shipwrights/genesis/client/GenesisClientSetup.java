@@ -38,7 +38,7 @@ public class GenesisClientSetup {
             BlockEntityRenderers.register(GenesisBlockEntities.RADAR_DISPLAY.get(), RadarDisplayBlockEntityRenderer::new);
             BlockEntityRenderers.register(GenesisBlockEntities.VOID_CORE.get(), VoidCoreBlockEntityRenderer::new);
             BlockEntityRenderers.register(GenesisBlockEntities.VOID_ENGINE_INTERFACE.get(), VoidEngineInterfaceBlockEntityRenderer::new);
-            MenuScreens.register(GenesisBlocks.WARPSTONE_CATALYZER_CONTAINER.get(), WarpstoneCatalyzerScreen::new);
+            MenuScreens.register(GenesisBlocks.TULCITE_CATALYZER_CONTAINER.get(), TulciteCatalyzerScreen::new);
 
             // Register post-processing shader for space dimension
             PostProcessHandler.addInstance(SpaceInvertPostProcessor.INSTANCE);

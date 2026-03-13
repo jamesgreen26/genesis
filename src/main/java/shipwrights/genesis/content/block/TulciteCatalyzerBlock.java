@@ -24,13 +24,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
-import shipwrights.genesis.content.blockentity.WarpstoneCatalyzerBlockEntity;
+import shipwrights.genesis.content.blockentity.TulciteCatalyzerBlockEntity;
 
-public class WarpstoneCatalyzerBlock extends Block implements EntityBlock {
+public class TulciteCatalyzerBlock extends Block implements EntityBlock {
 
-    public static final String SCREEN_TUTORIAL_GENERATOR = "genesis.screen.warpstone_catalyzer";
+    public static final String SCREEN_TUTORIAL_GENERATOR = "genesis.screen.tulcite_catalyzer";
 
-    public WarpstoneCatalyzerBlock() {
+    public TulciteCatalyzerBlock() {
         super(BlockBehaviour.Properties.of()
                 .strength(3.5F)
                 .requiresCorrectToolForDrops()
@@ -40,7 +40,7 @@ public class WarpstoneCatalyzerBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new WarpstoneCatalyzerBlockEntity(blockPos, blockState);
+        return new TulciteCatalyzerBlockEntity(blockPos, blockState);
     }
 
     @Nullable
@@ -50,7 +50,7 @@ public class WarpstoneCatalyzerBlock extends Block implements EntityBlock {
             return null;
         } else {
             return (lvl, pos, st, be) -> {
-                if (be instanceof WarpstoneCatalyzerBlockEntity generator) {
+                if (be instanceof TulciteCatalyzerBlockEntity generator) {
                     generator.tickServer();
                 }
             };
@@ -61,7 +61,7 @@ public class WarpstoneCatalyzerBlock extends Block implements EntityBlock {
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult trace) {
         if (!level.isClientSide) {
             BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof WarpstoneCatalyzerBlockEntity) {
+            if (be instanceof TulciteCatalyzerBlockEntity) {
                 MenuProvider containerProvider = new MenuProvider() {
                     @Override
                     public Component getDisplayName() {
@@ -70,7 +70,7 @@ public class WarpstoneCatalyzerBlock extends Block implements EntityBlock {
 
                     @Override
                     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player playerEntity) {
-                        return new WarpstoneCatalyzerContainer(windowId, playerEntity, pos);
+                        return new TulciteCatalyzerContainer(windowId, playerEntity, pos);
                     }
                 };
                 NetworkHooks.openScreen((ServerPlayer) player, containerProvider, be.getBlockPos());

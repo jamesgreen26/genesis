@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      {"model": "genesis:block/verdite_ore"},
+      {"model": "genesis:block/verdite_ore_alt"},
+      {"model": "genesis:block/verdite_ore_alt", "x": 270},
+      {"model": "genesis:block/verdite_ore_alt", "x": 90}
+    ]
+  }
+}

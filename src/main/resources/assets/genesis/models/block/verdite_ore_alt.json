@@ -3,7 +3,7 @@
 	"credit": "Made with Blockbench",
 	"parent": "minecraft:block/cube_all",
 	"textures": {
-		"all": "genesis:block/warpstone_ore"
+		"all": "genesis:block/verdite_ore"
 	},
 	"elements": [
 		{

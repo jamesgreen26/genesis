@@ -6,7 +6,8 @@
     "genesis:echostone",
     "genesis:phaserock",
     "genesis:warpstone",
-    "genesis:warpstone_ore",
+    "genesis:tulcite_ore",
+    "genesis:verdite_ore",
     "genesis:lunar_dust",
     "genesis:stellar_sand",
     "genesis:nav_projector",
@@ -14,6 +15,6 @@
     "genesis:void_engine_frame",
     "genesis:void_core",
     "genesis:void_engine_viewport",
-    "genesis:warpstone_catalyzer_block"
+    "genesis:tulcite_catalyzer_block"
   ]
 }

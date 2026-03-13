@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "genesis:warpstone_chunk",
+          "name": "genesis:tulcite_chunk",
           "functions": [
             {
               "function": "minecraft:set_count",

@@ -1,0 +1,12 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "down": "genesis:block/nav_projector_bottom",
+        "up": "genesis:block/nav_projector_bottom",
+        "north": "genesis:block/tulcite_catalyzer_active",
+        "south": "genesis:block/tulcite_catalyzer_active",
+        "east": "genesis:block/tulcite_catalyzer_active",
+        "west": "genesis:block/tulcite_catalyzer_active",
+        "particle": "genesis:block/tulcite_catalyzer_active"
+    }
+} 

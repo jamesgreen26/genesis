@@ -202,7 +202,7 @@ public class AsteroidBlock extends Block {
                 ),
                 List.of(
                         new WeightedBlockState(GenesisBlocks.WARPSTONE.get().defaultBlockState(), 1),
-                        new WeightedBlockState(GenesisBlocks.WARPSTONE_ORE.get().defaultBlockState(), 1),
+                        new WeightedBlockState(GenesisBlocks.TULCITE_ORE.get().defaultBlockState(), 1),
                         new WeightedBlockState(GenesisBlocks.RIFTROCK.get().defaultBlockState(), 1),
                         new WeightedBlockState(GenesisBlocks.ECHOSTONE.get().defaultBlockState(), 1)
                 ),

@@ -20,7 +20,7 @@ import shipwrights.genesis.content.item.GenesisItems;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class WarpstoneCatalyzerBlockEntity extends BlockEntity {
+public class TulciteCatalyzerBlockEntity extends BlockEntity {
 
     public static final String ITEMS_TAG = "Inventory";
     public static final String ENERGY_TAG = "Energy";
@@ -50,8 +50,8 @@ public class WarpstoneCatalyzerBlockEntity extends BlockEntity {
 
     private int burnTime;
 
-    public WarpstoneCatalyzerBlockEntity(BlockPos pos, BlockState state) {
-        super(GenesisBlockEntities.WARPSTONE_CATALYZER_BLOCK_ENTITY.get(), pos, state);
+    public TulciteCatalyzerBlockEntity(BlockPos pos, BlockState state) {
+        super(GenesisBlockEntities.TULCITE_CATALYZER_BLOCK_ENTITY.get(), pos, state);
     }
 
     public void tickServer() {
@@ -64,7 +64,7 @@ public class WarpstoneCatalyzerBlockEntity extends BlockEntity {
         if (energy.getEnergyStored() < energy.getMaxEnergyStored()) {
             if (burnTime <= 0) {
                 ItemStack fuel = items.getStackInSlot(SLOT);
-                if (fuel.isEmpty() || !fuel.is(GenesisItems.WARPSTONE_CHUNK.get())) {
+                if (fuel.isEmpty() || !fuel.is(GenesisItems.TULCITE_CHUNK.get())) {
                     // No fuel
                     return;
                 }
