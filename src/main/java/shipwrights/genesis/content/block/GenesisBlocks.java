@@ -6,7 +6,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -128,7 +127,16 @@ public class GenesisBlocks {
         )
     );
 
-    public static final RegistryObject<Block> WARPSTONE_ORE = BLOCKS.register("warpstone_ore", () ->
+    public static final RegistryObject<Block> TULCITE_ORE = BLOCKS.register("tulcite_ore", () ->
+            new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PINK)
+                    .strength(3.0F, 6.0F)
+                    .sound(SoundType.STONE)
+                    .requiresCorrectToolForDrops()
+            )
+    );
+
+    public static final RegistryObject<Block> VERDITE_ORE = BLOCKS.register("verdite_ore", () ->
         new Block(BlockBehaviour.Properties.of()
             .mapColor(MapColor.COLOR_PINK)
             .strength(3.0F, 6.0F)
@@ -842,10 +850,10 @@ public class GenesisBlocks {
 
 
 
-    public static final RegistryObject<WarpstoneCatalyzerBlock> WARPSTONE_CATALYZER_BLOCK = BLOCKS.register("warpstone_catalyzer_block", WarpstoneCatalyzerBlock::new);
+    public static final RegistryObject<TulciteCatalyzerBlock> TULCITE_CATALYZER_BLOCK = BLOCKS.register("tulcite_catalyzer_block", TulciteCatalyzerBlock::new);
 
-    public static final RegistryObject<MenuType<WarpstoneCatalyzerContainer>> WARPSTONE_CATALYZER_CONTAINER = MENU_TYPES.register("warpstone_catalyzer_block",
-            () -> IForgeMenuType.create((windowId, inv, data) -> new WarpstoneCatalyzerContainer(windowId, inv.player, data.readBlockPos())));
+    public static final RegistryObject<MenuType<TulciteCatalyzerContainer>> TULCITE_CATALYZER_CONTAINER = MENU_TYPES.register("tulcite_catalyzer_block",
+            () -> IForgeMenuType.create((windowId, inv, data) -> new TulciteCatalyzerContainer(windowId, inv.player, data.readBlockPos())));
 
 
     static {

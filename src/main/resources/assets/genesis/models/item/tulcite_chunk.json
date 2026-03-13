@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "genesis:item/warpstone_chunk"
+    "layer0": "genesis:item/tulcite_chunk"
   }
 }

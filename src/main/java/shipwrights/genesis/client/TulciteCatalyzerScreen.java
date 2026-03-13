@@ -6,19 +6,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.content.block.WarpstoneCatalyzerContainer;
-import shipwrights.genesis.content.blockentity.WarpstoneCatalyzerBlockEntity;
+import shipwrights.genesis.content.block.TulciteCatalyzerContainer;
+import shipwrights.genesis.content.blockentity.TulciteCatalyzerBlockEntity;
 
-public class WarpstoneCatalyzerScreen extends AbstractContainerScreen<WarpstoneCatalyzerContainer> {
+public class TulciteCatalyzerScreen extends AbstractContainerScreen<TulciteCatalyzerContainer> {
 
     private static final int ENERGY_LEFT = 36;
     private static final int ENERGY_WIDTH = 72;
     private static final int ENERGY_TOP = 44;
     private static final int ENERGY_HEIGHT = 8;
 
-    private final ResourceLocation GUI = ResourceLocation.tryBuild(GenesisMod.MOD_ID, "textures/gui/warpstone_catalyzer.png");
+    private final ResourceLocation GUI = ResourceLocation.tryBuild(GenesisMod.MOD_ID, "textures/gui/tulcite_catalyzer.png");
 
-    public WarpstoneCatalyzerScreen(WarpstoneCatalyzerContainer container, Inventory inventory, Component title) {
+    public TulciteCatalyzerScreen(TulciteCatalyzerContainer container, Inventory inventory, Component title) {
         super(container, inventory, title);
         this.inventoryLabelY = this.imageHeight - 110;
     }
@@ -27,7 +27,7 @@ public class WarpstoneCatalyzerScreen extends AbstractContainerScreen<WarpstoneC
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
         graphics.blit(GUI, leftPos, topPos, 0, 0, this.imageWidth, this.imageHeight);
         int power = menu.getPower();
-        int p = (int) ((power / (float) WarpstoneCatalyzerBlockEntity.CAPACITY) * ENERGY_WIDTH);
+        int p = (int) ((power / (float) TulciteCatalyzerBlockEntity.CAPACITY) * ENERGY_WIDTH);
         graphics.fillGradient(leftPos + ENERGY_LEFT, topPos + ENERGY_TOP, leftPos + ENERGY_LEFT + p, topPos + ENERGY_TOP + ENERGY_HEIGHT, 0xff00ff00, 0xff003300);
         graphics.fill(leftPos + ENERGY_LEFT + p, topPos + ENERGY_TOP, leftPos + ENERGY_LEFT + ENERGY_WIDTH, topPos + ENERGY_TOP + ENERGY_HEIGHT, 0xff000000);
     }

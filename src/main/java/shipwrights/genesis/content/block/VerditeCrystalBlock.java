@@ -57,9 +57,9 @@ public class VerditeCrystalBlock extends AmethystBlock {
                     block = GenesisBlocks.WARPSTONE.get();
                     level.playSound((Player) null, blockPos, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 0.5F + level.random.nextFloat() * 1.2F);
                 } else if (blockState.is(GenesisBlocks.WARPSTONE.get())) {
-                    block = GenesisBlocks.WARPSTONE_ORE.get();
+                    block = GenesisBlocks.VERDITE_ORE.get();
                     level.playSound((Player) null, blockPos, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 0.5F + level.random.nextFloat() * 1.2F);
-                } else if (blockState.is(GenesisBlocks.WARPSTONE_ORE.get())) {
+                } else if (blockState.is(GenesisBlocks.VERDITE_ORE.get())) {
                     block = GenesisBlocks.VERDITE_CRYSTAL_BLOCK.get();
                     level.playSound((Player) null, blockPos, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.BLOCKS, 1.0F, 0.5F + level.random.nextFloat() * 1.2F);
                 }

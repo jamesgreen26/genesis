@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "genesis:block/warpstone_ore"
+    "all": "genesis:block/tulcite_ore"
   }
 }

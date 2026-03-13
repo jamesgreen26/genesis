@@ -31,8 +31,8 @@ public class GenesisCreativeTabs {
             .displayItems((parameters, output) -> {
                 output.accept(GenesisItems.NAV_PROJECTOR.get());
                 output.accept(GenesisItems.RADAR_DISPLAY.get());
-                output.accept(GenesisItems.WARPSTONE_CATALYZER_BLOCK_ITEM.get());
-                output.accept(GenesisItems.WARPSTONE_CHUNK.get());
+                output.accept(GenesisItems.TULCITE_CATALYZER_BLOCK_ITEM.get());
+                output.accept(GenesisItems.TULCITE_CHUNK.get());
                 output.accept(GenesisItems.VOID_ENGINE_INTERFACE.get());
                 output.accept(GenesisItems.VOID_ENGINE_FRAME.get());
                 output.accept(GenesisItems.VOID_ENGINE_VIEWPORT.get());
@@ -53,7 +53,8 @@ public class GenesisCreativeTabs {
                     .icon(() -> new ItemStack(GenesisItems.NULLSTONE.get()))
                     .displayItems((parameters, output) -> {
                         addItemGroup(output, GenesisItems.WARPSTONE);
-                        addItemGroup(output, GenesisItems.WARPSTONE_ORE);
+                        addItemGroup(output, GenesisItems.TULCITE_ORE);
+                        addItemGroup(output, GenesisItems.VERDITE_ORE);
                         addItemGroup(output, GenesisItems.NULLSTONE);
                         addItemGroup(output, GenesisItems.VOIDSTONE);
                         addItemGroup(output, GenesisItems.RIFTROCK);
@@ -109,6 +110,11 @@ public class GenesisCreativeTabs {
                         output.accept(GenesisItems.WITHERING_WILLOW_BRANCH.get());
                         output.accept(GenesisItems.WITHERING_WILLOW_LEAVES.get());
                         output.accept(shipwrights.genesis.content.fluid.GenesisFluids.MIASMA.getBucket().get());
+
+                        output.accept(GenesisItems.VERDITE_ORE.get());
+                        output.accept(GenesisItems.VERDITE_CLUSTER.get());
+                        output.accept(GenesisItems.VERDITE_CRYSTAL_BLOCK.get());
+
                         for (var item : GenesisItems.DYNAMIC_ITEMS.values()) {
                             if (alreadyAdded.contains(item.getId().getPath())) {
                                 continue;

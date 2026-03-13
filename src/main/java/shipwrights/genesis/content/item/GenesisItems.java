@@ -57,8 +57,11 @@ public class GenesisItems {
     public static final RegistryObject<Item> WARPSTONE = ITEMS.register("warpstone",
         () -> new BlockItem(GenesisBlocks.WARPSTONE.get(), new Item.Properties()));
 
-    public static final RegistryObject<Item> WARPSTONE_ORE = ITEMS.register("warpstone_ore",
-        () -> new BlockItem(GenesisBlocks.WARPSTONE_ORE.get(), new Item.Properties()));
+    public static final RegistryObject<Item> TULCITE_ORE = ITEMS.register("tulcite_ore",
+            () -> new BlockItem(GenesisBlocks.TULCITE_ORE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> VERDITE_ORE = ITEMS.register("verdite_ore",
+        () -> new BlockItem(GenesisBlocks.VERDITE_ORE.get(), new Item.Properties()));
 
     // Alien sands
     public static final RegistryObject<Item> LUNAR_DUST = ITEMS.register("lunar_dust",
@@ -296,11 +299,11 @@ public class GenesisItems {
             () -> new BlockItem(GenesisBlocks.VERDITE_VOID_COIL.get(), new Item.Properties()));
 
 
-    public static final RegistryObject<Item> WARPSTONE_CHUNK = ITEMS.register("warpstone_chunk",
+    public static final RegistryObject<Item> TULCITE_CHUNK = ITEMS.register("tulcite_chunk",
             () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> WARPSTONE_CATALYZER_BLOCK_ITEM = ITEMS.register("warpstone_catalyzer_block",
-        () -> new BlockItem(GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> TULCITE_CATALYZER_BLOCK_ITEM = ITEMS.register("tulcite_catalyzer_block",
+        () -> new BlockItem(GenesisBlocks.TULCITE_CATALYZER_BLOCK.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> TEST_ITEM = ITEMS.register("test_item",()->new TestItem(new Item.Properties()));
 

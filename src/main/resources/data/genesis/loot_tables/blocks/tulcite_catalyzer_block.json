@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "genesis:warpstone_catalyzer_block"
+          "name": "genesis:tulcite_catalyzer_block"
         }
       ],
       "conditions": [

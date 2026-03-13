@@ -10,20 +10,20 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.SlotItemHandler;
-import shipwrights.genesis.content.blockentity.WarpstoneCatalyzerBlockEntity;
+import shipwrights.genesis.content.blockentity.TulciteCatalyzerBlockEntity;
 
-import static shipwrights.genesis.content.blockentity.WarpstoneCatalyzerBlockEntity.SLOT;
-import static shipwrights.genesis.content.blockentity.WarpstoneCatalyzerBlockEntity.SLOT_COUNT;
+import static shipwrights.genesis.content.blockentity.TulciteCatalyzerBlockEntity.SLOT;
+import static shipwrights.genesis.content.blockentity.TulciteCatalyzerBlockEntity.SLOT_COUNT;
 
-public class WarpstoneCatalyzerContainer extends AbstractContainerMenu {
+public class TulciteCatalyzerContainer extends AbstractContainerMenu {
 
     private final BlockPos pos;
     private int power;
 
-    public WarpstoneCatalyzerContainer(int windowId, Player player, BlockPos pos) {
-        super(GenesisBlocks.WARPSTONE_CATALYZER_CONTAINER.get(), windowId);
+    public TulciteCatalyzerContainer(int windowId, Player player, BlockPos pos) {
+        super(GenesisBlocks.TULCITE_CATALYZER_CONTAINER.get(), windowId);
         this.pos = pos;
-        if (player.level().getBlockEntity(pos) instanceof WarpstoneCatalyzerBlockEntity generator) {
+        if (player.level().getBlockEntity(pos) instanceof TulciteCatalyzerBlockEntity generator) {
             addSlot(new SlotItemHandler(generator.getItems(), SLOT, 64, 24));
             addDataSlot(new DataSlot() {
                 @Override
@@ -33,7 +33,7 @@ public class WarpstoneCatalyzerContainer extends AbstractContainerMenu {
 
                 @Override
                 public void set(int pValue) {
-                    WarpstoneCatalyzerContainer.this.power = (WarpstoneCatalyzerContainer.this.power & 0xffff0000) | (pValue & 0xffff);
+                    TulciteCatalyzerContainer.this.power = (TulciteCatalyzerContainer.this.power & 0xffff0000) | (pValue & 0xffff);
                 }
             });
             addDataSlot(new DataSlot() {
@@ -44,7 +44,7 @@ public class WarpstoneCatalyzerContainer extends AbstractContainerMenu {
 
                 @Override
                 public void set(int pValue) {
-                    WarpstoneCatalyzerContainer.this.power = (WarpstoneCatalyzerContainer.this.power & 0xffff) | ((pValue & 0xffff) << 16);
+                    TulciteCatalyzerContainer.this.power = (TulciteCatalyzerContainer.this.power & 0xffff) | ((pValue & 0xffff) << 16);
                 }
             });
         }
@@ -121,6 +121,6 @@ public class WarpstoneCatalyzerContainer extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(ContainerLevelAccess.create(player.level(), pos), player, GenesisBlocks.WARPSTONE_CATALYZER_BLOCK.get());
+        return stillValid(ContainerLevelAccess.create(player.level(), pos), player, GenesisBlocks.TULCITE_CATALYZER_BLOCK.get());
     }
 }
