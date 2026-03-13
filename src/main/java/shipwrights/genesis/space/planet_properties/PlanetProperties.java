@@ -7,19 +7,14 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public record PlanetProperties(
         ResourceLocation id,
-        double density,
-        double thickness,
-        boolean precipitation,
-        PlanetColorPalette color
+        Atmosphere atmosphere
 ) {
     public static final Codec<PlanetProperties> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(PlanetProperties::id),
-            Codec.DOUBLE.fieldOf("density").forGetter(PlanetProperties::density),
-            Codec.DOUBLE.fieldOf("thickness").forGetter(PlanetProperties::thickness),
-            Codec.BOOL.fieldOf("precipitation").forGetter(PlanetProperties::precipitation),
-            PlanetColorPalette.CODEC.fieldOf("color").forGetter(PlanetProperties::color)
+            Atmosphere.CODEC.fieldOf("atmosphere").forGetter(PlanetProperties::atmosphere)
     ).apply(instance, PlanetProperties::new));
 
     static final Map<ResourceLocation, PlanetProperties> PLANET_PROPERTIES = new HashMap<>();

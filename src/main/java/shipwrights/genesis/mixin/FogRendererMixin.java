@@ -45,7 +45,7 @@ public class FogRendererMixin {
             apparentAngle.set(_apparentAngle);
             long fakeTime = (long) (_apparentAngle * 24000);
             
-            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.getID()).color());
+            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.getID()).atmosphere().color());
         }
         
         apparentAngle.set(instance.getSunAngle(partialTick) / Mth.TWO_PI);
