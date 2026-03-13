@@ -5,7 +5,8 @@ in vec3 v_entry_position;
 in float v_half_size;
 in vec3 lightDir;
 
-const float atmosphereThickness = 1.3;
+uniform float AtmosphereThickness;
+uniform float Density;
 
 const vec4 dayCol = vec4(0.3,0.7,0.9,0.7);
 const vec4 sunsetCol = vec4(0.7,0.3,0.1,0.5);
@@ -108,14 +109,14 @@ void main() {
 
     mat3 rot = rotationMatrix(cube_rotationXYZ);
 
-    float exit_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).y;
+    float exit_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * AtmosphereThickness, rot).y;
     float entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size, rot).x;
 
     if(entry_distance < -0.1) {
-        entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).y;
+        entry_distance = rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * AtmosphereThickness, rot).y;
     }
 
-    vec3 enterPos = v_camera_pos + ray_direction * max(rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * atmosphereThickness, rot).x,0.0);
+    vec3 enterPos = v_camera_pos + ray_direction * max(rayBoxIntersection(v_camera_pos, ray_direction, v_cube_center, v_half_size * AtmosphereThickness, rot).x,0.0);
 
     float thickness = 1000000000000.0;
 
@@ -206,7 +207,7 @@ void main() {
         alpha = (1. - dot(normalize(localIntPos),-localRayDir));
         alpha *= alpha * 0.6;
     } else {
-        alpha = 1. - (distanceFromCenter - 1.) / (atmosphereThickness - 1.);
+        alpha = clamp(1. - (distanceFromCenter - 1.) / (AtmosphereThickness - 1.), 0.0, 1.0);
         alpha *= alpha;
     }
 
@@ -220,6 +221,7 @@ void main() {
 
     frag_color = mix(mix(sunsetCol,nightCol,nightFact),dayCol,dayFact);
     frag_color.a *= alpha;
+    frag_color.a *= Density;
 
     //frag_color = vec4(localRayDir * 0.5 + 0.5,0.3);
 

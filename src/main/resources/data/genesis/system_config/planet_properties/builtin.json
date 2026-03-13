@@ -9,8 +9,8 @@
     },
     {
       "id": "genesis:moon",
-      "density": 0.0,
-      "thickness": 0.0,
+      "density": 0.1,
+      "thickness": 0.2,
       "precipitation": false,
       "color": { "type": "genesis:rgb", "r": 0, "g": 0, "b": 0 }
     }
