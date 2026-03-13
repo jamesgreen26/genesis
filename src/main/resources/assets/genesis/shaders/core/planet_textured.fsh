@@ -5,6 +5,8 @@ in vec4 vertexColor;
 in vec3 vNormal;
 in vec3 lightDir;
 
+in vec3 v_entry_position;
+
 uniform sampler2D Sampler0;
 
 out vec4 frag_color;
@@ -17,10 +19,12 @@ void main() {
     vec3 baseColor = mix(vertexColor.rgb, texColor.rgb, vertexColor.a);
 
     // Simple directional lighting from the passed-in normal
-    vec3 n = normalize(vNormal);
+    vec3 n = normalize(v_entry_position);
     float ndotl = max(dot(n, -normalize(lightDir)), 0.0);
 
-    float ambient = 0.5;
+    ndotl = 1. - 1. / (ndotl * ndotl * 5. + 1.);
+
+    float ambient = 0.1;
     float lighting = clamp(ambient + ndotl, 0.0, 1.0);
 
     vec3 finalColor = baseColor * lighting;

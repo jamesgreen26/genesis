@@ -32,8 +32,7 @@ import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
-import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderType;
-import static shipwrights.genesis.client.ShaderRegistry.getPlanetShadowRenderType;
+import static shipwrights.genesis.client.ShaderRegistry.*;
 
 public class PlanetRenderer implements CelestialRenderer {
 
@@ -121,6 +120,8 @@ public class PlanetRenderer implements CelestialRenderer {
         }
 
         renderPlanetAt(toRender.getID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
+
+        new PlanetAtmosphereRenderer().invoke(event, toRender, vantagePoint);
     }
 
     private void renderPlanetAt(ResourceLocation planetID, List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
@@ -194,8 +195,8 @@ public class PlanetRenderer implements CelestialRenderer {
         int fogGreen = (int) (255 * FogRendererAccessor.getFogGreen());
         int fogBlue = (int) (255 * FogRendererAccessor.getFogBlue());
 
-        Vector3f rotatedNormal = new Vector3f(normal);
-        rotation.transform(rotatedNormal);
+        Vector3f rotatedNormal = new Vector3f(x,y,z);
+        rotatedNormal = rotation.transform(rotatedNormal.normalize());
 
         buffer.vertex(matrix, x, y, z)
             .uv(u, v)
