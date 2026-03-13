@@ -7,6 +7,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.planet_properties.PlanetPropertiesSyncPacket;
 import shipwrights.genesis.space.registry.SpaceRegistrySyncPacket;
 
 public class GenesisNetworking {
@@ -54,6 +55,12 @@ public class GenesisNetworking {
                 .encoder(SpaceRegistrySyncPacket::encode)
                 .decoder(SpaceRegistrySyncPacket::decode)
                 .consumerMainThread(SpaceRegistrySyncPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(PlanetPropertiesSyncPacket.class, 4)
+                .encoder(PlanetPropertiesSyncPacket::encode)
+                .decoder(PlanetPropertiesSyncPacket::decode)
+                .consumerMainThread(PlanetPropertiesSyncPacket::handle)
                 .add();
     }
 }

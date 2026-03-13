@@ -45,7 +45,7 @@ public final class GenesisMod {
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final ResourceLocation WORMHOLE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "wormhole");
     public static final ResourceLocation ASTEROID_RULE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "asteroid_block_surface_rule");
-    public static ResourceLocation ORBITING_ID = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "orbiting");
+    public static ResourceLocation GENERIC_PLANET_ID = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet");
 
     private static final Pattern SEAT_REGISTRY_NAME =
             Pattern.compile("(?<![a-z])(seat|chair)(?![a-z])", Pattern.CASE_INSENSITIVE);

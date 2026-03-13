@@ -8,13 +8,15 @@ import org.joml.Vector3d;
 import org.joml.Vector3i;
 import org.maplibre.earcut4j.Earcut;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import shipwrights.genesis.math.AAPlane;
+import shipwrights.genesis.util.NoOpLogger;
 
 import java.util.List;
 
 public class ShadowRenderer {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = NoOpLogger.INSTANCE;
     private static final double Z_FIGHTING_EPSILON = 0.005;
 
     /**
