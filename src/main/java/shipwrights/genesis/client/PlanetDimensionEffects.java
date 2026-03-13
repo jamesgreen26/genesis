@@ -94,7 +94,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         
         double starUpDot = UP.dot(toStar);
         double starEastDot = EAST.dot(toStar);
-        double starBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d);
+        float rainLevel = hasPrecipitation() ? level.getRainLevel(partialTick) : 0f;
+        double starBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d) * (1f - rainLevel);
         double apparentSunAngle = getApparentSunAngle(starUpDot, starEastDot);
         // apparent world time
         long fakeTime = (long) (apparentSunAngle * 24000);
