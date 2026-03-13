@@ -15,6 +15,6 @@ public class DimensionEffectsRegistration {
     public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
         event.register(SPACE_DIM, new SpaceDimensionEffects());
         event.register(WORMHOLE_DIM, new WormholeDimensionEffects());
-        event.register(ORBITING_ID, new PlanetDimensionEffects(GenesisMod.SPACE_REGISTRY));
+        event.register(GENERIC_PLANET_ID, new PlanetDimensionEffects(GenesisMod.SPACE_REGISTRY));
     }
 }
