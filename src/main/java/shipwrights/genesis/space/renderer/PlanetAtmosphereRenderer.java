@@ -16,6 +16,7 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.planet_properties.PlanetProperties;
 
 import java.lang.Math;
 
@@ -30,6 +31,9 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         float partialTick = GenesisMod.getPartialTick(level, event);
         Vector3dc position = toRender.getPosition(ticks, partialTick);
         Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
+
+        // Skip rendering for the planet the player is currently on
+        if (vantagePoint != null && vantagePoint.equals(toRender)) return;
 
         // Transform by inverse of vantage point if present
         if (vantagePoint != null) {
@@ -74,7 +78,11 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         float halfSize = (float) size / 2;
 
-        float relativeAtmosphereSize = 1.3f;
+        PlanetProperties props = PlanetProperties.get(toRender.getID());
+        if (props == null) return;
+        if (props.density() == 0.0) return;
+
+        float relativeAtmosphereSize = 1.0f + 0.3f * (float) props.thickness();
 
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
@@ -85,19 +93,8 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
 
-        if (vantagePoint != null && vantagePoint.equals(toRender)) {
-            var camera = event.getCamera();
-            halfSize = 0.000001f;
-            cameraPos0 = new Vector3f(
-                    0,
-                    1000000000000.0f,
-                    0
-            );
-            localRotation = new Quaterniond().rotateX(Math.PI/2);
-
-        }
         // Transform by inverse of vantage point if present
-        else if (vantagePoint != null) {
+        if (vantagePoint != null) {
             Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
             Quaterniondc vantageRot = vantagePoint.getRotation(ticks, partialTick);
 
@@ -132,6 +129,16 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
             Uniform uniform1 = shader.getUniform("HalfSize");
             if (uniform1 != null) {
                 uniform1.set(halfSize);
+            }
+
+            Uniform uniformThickness = shader.getUniform("AtmosphereThickness");
+            if (uniformThickness != null) {
+                uniformThickness.set(relativeAtmosphereSize);
+            }
+
+            Uniform uniformDensity = shader.getUniform("Density");
+            if (uniformDensity != null) {
+                uniformDensity.set((float) props.density());
             }
         }
 

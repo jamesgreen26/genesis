@@ -13,13 +13,12 @@ uniform mat4 ModelViewMat;
 uniform vec3 CameraPosition;
 uniform float HalfSize;
 uniform vec3 LightDirection;
-
-const float atmosphereThickness = 1.3;
+uniform float AtmosphereThickness;
 
 void main() {
 
     v_camera_pos = CameraPosition.xyz;
-    v_entry_position = ((Color.rgb * HalfSize * 2) - HalfSize) * atmosphereThickness;
+    v_entry_position = ((Color.rgb * HalfSize * 2) - HalfSize) * AtmosphereThickness;
     v_half_size = HalfSize;
 
     lightDir = LightDirection;
