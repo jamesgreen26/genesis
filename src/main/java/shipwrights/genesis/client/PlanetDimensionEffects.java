@@ -79,7 +79,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     private boolean hasPrecipitation(ClientLevel level) {
         PlanetProperties props = getPlanetProperties(level);
         if (props == null) return true;
-        return props.precipitation();
+        return props.atmosphere().precipitation();
     }
 
     @Override
@@ -114,9 +114,9 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         double starUpDot = UP.dot(toStar);
         double starEastDot = EAST.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
-        double density = Mth.clamp(planetProps != null ? planetProps.density() : 1.0, 0.0, 1.0);
+        double density = Mth.clamp(planetProps != null ? planetProps.atmosphere().density() : 1.0, 0.0, 1.0);
         cachedDensity = density;
-        PlanetColorPalette palette = planetProps != null ? planetProps.color() : new PlanetColorPalette.Overworld();
+        PlanetColorPalette palette = planetProps != null ? planetProps.atmosphere().color() : new PlanetColorPalette.Overworld();
 
         float rainLevel = hasPrecipitation(level) ? level.getRainLevel(partialTick) : 0f;
         double rawStarBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d) * (1f - rainLevel);

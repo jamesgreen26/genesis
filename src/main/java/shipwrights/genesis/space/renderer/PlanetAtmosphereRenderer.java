@@ -80,9 +80,9 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         PlanetProperties props = PlanetProperties.get(toRender.getID());
         if (props == null) return;
-        if (props.density() == 0.0) return;
+        if (props.atmosphere().density() == 0.0) return;
 
-        float relativeAtmosphereSize = 1.0f + 0.3f * (float) props.thickness();
+        float relativeAtmosphereSize = 1.0f + 0.3f * (float) props.atmosphere().thickness();
 
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
@@ -138,7 +138,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
             Uniform uniformDensity = shader.getUniform("Density");
             if (uniformDensity != null) {
-                uniformDensity.set((float) props.density());
+                uniformDensity.set((float) props.atmosphere().density());
             }
         }
 
