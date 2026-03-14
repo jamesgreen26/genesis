@@ -115,6 +115,12 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         double starEastDot = EAST.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
         double density = Mth.clamp(planetProps != null ? planetProps.atmosphere().density() : 1.0, 0.0, 1.0);
+
+        // fade out density with camera y level, from y=320 to y=GenesisMod.atmosphereEntryHeight
+        double cameraY = camera.getPosition().y;
+        double densityFade = 1.0 - Mth.clamp((cameraY - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+        density *= densityFade;
+
         cachedDensity = density;
         PlanetColorPalette palette = planetProps != null ? planetProps.atmosphere().color() : new PlanetColorPalette.Overworld();
 
@@ -134,10 +140,12 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(skyR, skyG, skyB, 1.0F);
         ShaderInstance shader = RenderSystem.getShader();
-        VertexBuffer skyBuffer = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getSkyBuffer();
-        skyBuffer.bind();
-        skyBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, shader);
-        VertexBuffer.unbind();
+        if (shader != null) {
+            VertexBuffer skyBuffer = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getSkyBuffer();
+            skyBuffer.bind();
+            skyBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, shader);
+            VertexBuffer.unbind();
+        }
         
         RenderSystem.enableBlend();
         float dayTime = level.dimensionType().timeOfDay(fakeTime);
