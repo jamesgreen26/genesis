@@ -156,6 +156,10 @@ dependencies {
     testImplementation("org.joml:joml-primitives:1.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
+    modImplementation("maven.modrinth:zps:1.20.1-2.0.0")
+    modImplementation("maven.modrinth:fusion-connected-textures:1.2.12-forge-mc1.20.1")
+    modRuntimeOnly("maven.modrinth:zpl:1.20.1-1.5.0")
+
 }
 
 test {
