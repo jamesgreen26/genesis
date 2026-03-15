@@ -110,13 +110,11 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
                 .sub(celestial.getPosition(gameTime, partialTick))
                 .normalize();
         
-        Quaterniondc rot = new Quaterniond(celestial.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
+        Quaterniondc rot = new Quaterniond(vp.getRotation()).conjugate();
         toStar.rotate(rot);
         
-        Vector3d up = new Vector3d(UP).rotate(vpOc.cameraRotationFromNorthPole());
-        Vector3d east = new Vector3d(EAST).rotate(vpOc.cameraRotationFromNorthPole());
-        double starUpDot = up.dot(toStar);
-        double starEastDot = east.dot(toStar);
+        double starUpDot = UP.dot(toStar);
+        double starEastDot = EAST.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
         double density = Mth.clamp(planetProps != null ? planetProps.atmosphere().density() : 1.0, 0.0, 1.0);
 

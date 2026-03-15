@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.util.Mth;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
@@ -85,7 +86,10 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         PlanetProperties props = PlanetProperties.get(toRender.getID());
         if (props == null) return;
-        if (props.atmosphere().density() == 0.0) return;
+
+        double densityFade = Mth.clamp((event.getCamera().getPosition().y - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+
+        if (props.atmosphere().density() * densityFade < 0.01) return;
 
         float relativeAtmosphereSize = 1.0f + 0.3f * (float) props.atmosphere().thickness();
 
@@ -116,7 +120,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         Uniform uniformDensity = shader.getUniform("Density");
         if (uniformDensity != null) {
-            uniformDensity.set((float) props.atmosphere().density());
+            uniformDensity.set((float) (props.atmosphere().density() * densityFade));
         }
 
         Matrix4f matrix;
