@@ -10,6 +10,7 @@
     "DimensionSpecialEffectsManagerMixin",
     "EntityRenderDispatcherMixin",
     "FallingBlockRendererMixin",
+    "FlameParticleMixin",
     "FogRendererMixin",
     "GameRendererMixin",
     "HugeExplosionSeedParticleMixin",
@@ -18,6 +19,7 @@
     "ParticleMixin",
     "PehkuiEntityRenderDispatcherMixin",
     "RenderStateShardAccessor",
+    "RisingParticleMixin",
     "SoundEngineMixin",
     "SoundMixin"
   ],
