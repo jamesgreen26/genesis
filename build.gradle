@@ -3,6 +3,19 @@ plugins {
     id 'net.neoforged.moddev.legacyforge' version '2.0.137'
 }
 
+configurations {
+    clientOnlyMods {
+        // Request Mojang-mapped ("named") artifacts so NeoForged's SRG→Mojang
+        // RemappingTransform is applied, matching what modRuntimeOnly gets.
+        attributes {
+            attribute(
+                Attribute.of("net.neoforged.moddevgradle.legacy.minecraft_mappings.v2", Named),
+                objects.named(Named, "named")
+            )
+        }
+    }
+}
+
 group = project.maven_group
 version = project.mod_version
 
@@ -157,9 +170,15 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
     modImplementation("maven.modrinth:zps:1.20.1-2.0.0")
-    modImplementation("maven.modrinth:fusion-connected-textures:1.2.12-forge-mc1.20.1")
+    clientOnlyMods("maven.modrinth:fusion-connected-textures:1.2.12-forge-mc1.20.1")
     modRuntimeOnly("maven.modrinth:zpl:1.20.1-1.5.0")
 
+}
+
+afterEvaluate {
+    tasks.named('runClient') {
+        classpath += configurations.clientOnlyMods.incoming.files
+    }
 }
 
 test {
