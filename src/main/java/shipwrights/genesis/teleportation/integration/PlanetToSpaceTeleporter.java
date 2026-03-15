@@ -7,11 +7,13 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Quaterniondc;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.teleportation.DimensionTravelTeleporter;
 import shipwrights.genesis.teleportation.TravelDirection;
 
@@ -25,7 +27,7 @@ public class PlanetToSpaceTeleporter {
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
-	public void onLevelTick(final TickEvent.LevelTickEvent event) {
+	public void onLevelTick(TickEvent.LevelTickEvent event) {
 		if (TickEvent.Phase.END.equals(event.phase) && event.level instanceof ServerLevel serverLevel) {
 			if (gameTest || !serverLevel.getPlayers(u -> true, 1).isEmpty()) {
 				tick(serverLevel);
@@ -33,37 +35,45 @@ public class PlanetToSpaceTeleporter {
 		}
 	}
 
-	private static void tick(final ServerLevel level) {
-		final Celestial body = GenesisMod.getCelestialForLevel(level);
-		final ServerLevel spaceLevel = level.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE_DIM));
+	private static void tick(ServerLevel level) {
+		Celestial body = GenesisMod.getCelestialForLevel(level);
+		ServerLevel spaceLevel = level.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE_DIM));
 
 		if (body == null || spaceLevel == null) {
 			return;
 		}
 
-		final long ticks = GenesisMod.getTicks(level);
-		final Vector3dc planetPos = body.getPosition(ticks);
-		final Quaterniondc rotation = body.getRotation(ticks);
-		final Vector3d spaceTarget = computeSpaceTarget(body, planetPos, rotation);
+		long ticks = GenesisMod.getTicks(level);
 
-		for (final LoadedServerShip ship : getSortedShips(level)) {
-			if (!ship.isStatic() && ship.getTransform().getPositionInWorld().y() > GenesisMod.atmosphereExitHeight) {
-				DimensionTravelTeleporter.teleportShip(
-						ship,
-						TravelDirection.PLANET_TO_SPACE,
-						level,
-						spaceLevel,
-						spaceTarget,
-						rotation
-				);
+		for (LoadedServerShip ship : getSortedShips(level)) {
+			Vector3dc shipPos = ship.getTransform().getPositionInWorld();
+			if (!ship.isStatic() && shipPos.y() > GenesisMod.atmosphereExitHeight) {
+
+
+				if (VantagePoint.get(level, shipPos, ticks, 0f) instanceof VantagePoint.OnCelestial vantagePoint) {
+					DimensionTravelTeleporter.teleportShip(
+							ship,
+							TravelDirection.PLANET_TO_SPACE,
+							level,
+							spaceLevel,
+							computeSpaceTarget(vantagePoint),
+							computeSpaceRotation(vantagePoint, ship.getTransform().getRotation())
+					);
+				}
 			}
 		}
 	}
 
-	private static Vector3d computeSpaceTarget(final Celestial body, final Vector3dc planetPos, final Quaterniondc rotation) {
-		final Vector3d targetPos = new Vector3d(0, body.getActualSize() + 20, 0);
-		rotation.transform(targetPos);
-		targetPos.add(planetPos.x(), planetPos.y(), planetPos.z());
-		return targetPos;
+    private static Quaterniondc computeSpaceRotation(VantagePoint.OnCelestial vantagePoint, Quaterniondc shipRotation) {
+		// Transform the ship's local (planet) rotation into space using the same
+		// vantage rotation used for position.
+		return new Quaterniond(vantagePoint.getRotation()).mul(shipRotation, new Quaterniond());
 	}
+
+	private static Vector3d computeSpaceTarget(VantagePoint.OnCelestial vantagePoint) {
+		Vector3d targetPos = new Vector3d(0, vantagePoint.celestial().getActualSize() + 20, 0);
+		vantagePoint.getRotation().transform(targetPos);
+		targetPos.add(vantagePoint.getPosition());
+		return targetPos;
+    }
 }
