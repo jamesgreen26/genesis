@@ -17,6 +17,7 @@ import org.joml.*;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.planet_properties.PlanetColorPalette;
 import shipwrights.genesis.space.planet_properties.PlanetProperties;
 import shipwrights.genesis.space.registry.SpaceRegistry;
@@ -71,7 +72,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     @Nullable
     private PlanetProperties getPlanetProperties(ClientLevel level) {
-        Celestial celestial = GenesisMod.getCelestialForLevel(level);
+        VantagePoint vp = VantagePoint.get(level, new Vector3d(), 0, 0f);
+        Celestial celestial = vp instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
         if (celestial == null) return null;
         return PlanetProperties.get(celestial.getID());
     }
@@ -95,12 +97,12 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     @Override
     public boolean renderSky(ClientLevel level, int unused, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
 
-        final Celestial celestial = GenesisMod.getCelestialForLevel(level);
-        if (celestial == null) {
+        long gameTime = GenesisMod.getTicks(level);
+        VantagePoint vp = VantagePoint.get(level, new Vector3d(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z), gameTime, partialTick);
+        if (!(vp instanceof VantagePoint.OnCelestial vpOc)) {
             return false;
         }
-        
-        long gameTime = GenesisMod.getTicks(level);
+        final Celestial celestial = vpOc.celestial();
         
         Celestial star = celestial.getNearestStar(gameTime, partialTick);
         
@@ -111,8 +113,10 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         Quaterniondc rot = new Quaterniond(celestial.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
         toStar.rotate(rot);
         
-        double starUpDot = UP.dot(toStar);
-        double starEastDot = EAST.dot(toStar);
+        Vector3d up = new Vector3d(UP).rotate(vpOc.cameraRotationFromNorthPole());
+        Vector3d east = new Vector3d(EAST).rotate(vpOc.cameraRotationFromNorthPole());
+        double starUpDot = up.dot(toStar);
+        double starEastDot = east.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
         double density = Mth.clamp(planetProps != null ? planetProps.atmosphere().density() : 1.0, 0.0, 1.0);
 

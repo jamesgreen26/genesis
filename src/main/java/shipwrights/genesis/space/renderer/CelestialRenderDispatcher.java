@@ -7,8 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.type.CelestialType;
 
 import java.util.Comparator;
@@ -32,11 +34,11 @@ public class CelestialRenderDispatcher {
         float partialTick = GenesisMod.getPartialTick(level, event);
         Vec3 cameraPos = event.getCamera().getPosition();
 
-        Celestial vantagePoint = GenesisMod.getCelestialForLevel(level);
+        VantagePoint vantagePoint = VantagePoint.get(level, new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z), ticks, partialTick);
 
-        if (vantagePoint != null || GenesisMod.isSpaceDimension(level)) {
+        if (vantagePoint != null) {
             List<Celestial> celestials = GenesisMod.SPACE_REGISTRY.getAll().stream()
-                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick).distanceSquared(cameraPos.x, cameraPos.y, cameraPos.z)))
+                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick).distanceSquared(vantagePoint.getPosition())))
                 .toList();
 
             for (Celestial celestial : celestials) {
