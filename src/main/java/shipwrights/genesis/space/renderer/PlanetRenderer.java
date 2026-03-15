@@ -105,8 +105,7 @@ public class PlanetRenderer implements CelestialRenderer {
                 position.z() - vantagePos.z()
             );
 
-            // Transform the view to the side of the planet
-            Quaterniond planetRotation = new Quaterniond().rotateX(- Math.PI/2);
+            Quaterniond planetRotation = new Quaterniond();
 
             // Apply inverse rotation of vantage point
             Quaterniond inverseVantageRot = planetRotation.premul(vantageRot).conjugate();

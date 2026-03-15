@@ -42,7 +42,7 @@ public class BlackholeRenderer implements CelestialRenderer {
             position.z() - vantagePos.z()
         );
 
-        Quaterniond starRotation = new Quaterniond().rotateX(- Math.PI/2);
+        Quaterniond starRotation = new Quaterniond();
 
         // Apply inverse rotation of vantage point
         Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
