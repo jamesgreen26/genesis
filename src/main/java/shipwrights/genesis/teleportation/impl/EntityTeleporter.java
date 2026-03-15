@@ -56,6 +56,11 @@ public class EntityTeleporter {
             return entity;
         }
 
+        if (entity.level() == newLevel) {
+            entity.moveTo(newPos.x, newPos.y, newPos.z, entity.getYRot(), entity.getXRot());
+            return entity;
+        }
+
         return (T) cloneAndTeleportEntity(entity, newLevel, newPos);
     }
 

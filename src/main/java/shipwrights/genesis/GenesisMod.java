@@ -21,6 +21,7 @@ import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.networking.GenesisNetworking;
+import shipwrights.genesis.commands.GenesisCommandArguments;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
 import shipwrights.genesis.content.particle.GenesisParticles;
@@ -73,6 +74,8 @@ public final class GenesisMod {
 
         // Register fluids using Registrate (must be called before other registrations)
         GenesisFluids.init();
+
+        GenesisCommandArguments.register(eventBus);
 
         GenesisBlocks.BLOCKS.register(eventBus);
         GenesisBlocks.MENU_TYPES.register(eventBus);
