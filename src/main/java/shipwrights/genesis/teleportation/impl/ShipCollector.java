@@ -124,7 +124,7 @@ public class ShipCollector {
 
 		rotation.transform(relPos);
 		velocity = rotation.transform(velocity, new Vector3d());
-		newRotation.mul(rotation).normalize();
+		newRotation.premul(rotation).normalize();
 
 		if (this.direction == TravelDirection.SPACE_TO_PLANET) {
 			double offset = relPos.y;
