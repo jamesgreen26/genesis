@@ -13,6 +13,7 @@
     "FogRendererMixin",
     "GameRendererMixin",
     "HugeExplosionSeedParticleMixin",
+    "LevelRendererMixin",
     "ParticleEngineMixin",
     "ParticleMixin",
     "PehkuiEntityRenderDispatcherMixin",
@@ -21,13 +22,13 @@
     "SoundMixin"
   ],
   "mixins": [
+    "ArgumentTypeInfosMixin",
     "BlockBehaviourAccessor",
     "EntityDraggerMixin",
     "EntityMixin",
     "FallingBlockEntityAccessor",
     "FallingBlockEntityMixin",
     "FogRendererAccessor",
-    "ArgumentTypeInfosMixin",
     "LevelChunkMixin",
     "LevelMixin",
     "LevelRendererAccessor",
