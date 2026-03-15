@@ -8,6 +8,8 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
@@ -36,9 +38,11 @@ public class CelestialRenderDispatcher {
 
         VantagePoint vantagePoint = VantagePoint.get(level, new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z), ticks, partialTick);
 
+        Vector3dc cameraForRenderOrder = vantagePoint instanceof VantagePoint.OnCelestial ? vantagePoint.getPosition() : VectorConversionsMCKt.toJOML(cameraPos);
+
         if (vantagePoint != null) {
             List<Celestial> celestials = GenesisMod.SPACE_REGISTRY.getAll().stream()
-                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick).distanceSquared(vantagePoint.getPosition())))
+                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick).distanceSquared(cameraForRenderOrder)))
                 .toList();
 
             for (Celestial celestial : celestials) {
