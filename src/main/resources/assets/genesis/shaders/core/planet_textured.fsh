@@ -15,9 +15,6 @@ void main() {
     // Sample the planet texture
     vec4 texColor = texture(Sampler0, texCoord);
 
-    // Interpolate between fog color and texture color based on alpha
-    vec3 baseColor = mix(vertexColor.rgb, texColor.rgb, vertexColor.a);
-
     // Simple directional lighting from the passed-in normal
     vec3 n = normalize(v_entry_position);
     float ndotl = max(dot(n, -normalize(lightDir)), 0.0);
@@ -27,7 +24,10 @@ void main() {
     float ambient = 0.1;
     float lighting = clamp(ambient + ndotl, 0.0, 1.0);
 
-    vec3 finalColor = baseColor * lighting;
+    vec3 litTexColor = texColor.rgb * lighting;
+
+    // Interpolate between fog color and texture color based on alpha
+    vec3 finalColor = mix(vertexColor.rgb, litTexColor, vertexColor.a);
 
     // Planets are always fully opaque
     frag_color = vec4(finalColor, 1.0);
