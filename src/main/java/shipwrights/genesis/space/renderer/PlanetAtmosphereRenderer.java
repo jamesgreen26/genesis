@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
@@ -31,42 +30,54 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         float partialTick = GenesisMod.getPartialTick(level, event);
         Vector3dc position = toRender.getPosition(ticks, partialTick);
         Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
+        double size = toRender.getActualSize();
 
-        Vector3dc vantagePos = vantagePoint.getPosition();
-        Quaterniondc vantageRot = vantagePoint.getRotation();
+        // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
+        if (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender)) {
+            var camera = event.getCamera();
+            double halfExtent = Minecraft.getInstance().gameRenderer.getRenderDistance();
+            position = new Vector3d(
+                0,
+                - (camera.getPosition().y / 16) - halfExtent - 64,
+                0
+            );
+            rotation = oc.cameraRotationFromNorthPole();
+            size = halfExtent * 2;
+        }
+        // Transform by inverse of vantage point
+        else {
+            Vector3dc vantagePos = vantagePoint.getPosition();
+            Quaterniondc vantageRot = vantagePoint.getRotation();
 
-        // Calculate relative position (subtract vantage point position)
-        Vector3d relativePos = new Vector3d(
-            position.x() - vantagePos.x(),
-            position.y() - vantagePos.y(),
-            position.z() - vantagePos.z()
-        );
+            // Calculate relative position (subtract vantage point position)
+            Vector3d relativePos = new Vector3d(
+                position.x() - vantagePos.x(),
+                position.y() - vantagePos.y(),
+                position.z() - vantagePos.z()
+            );
 
-        Quaterniond starRotation = new Quaterniond().rotateX(- Math.PI/2);
+            Quaterniond starRotation = new Quaterniond();
 
-        // Apply inverse rotation of vantage point
-        Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
-        inverseVantageRot.transform(relativePos);
-        position = relativePos;
+            // Apply inverse rotation of vantage point
+            Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
+            inverseVantageRot.transform(relativePos);
+            position = relativePos;
 
-        // Apply inverse rotation to the celestial's own rotation
-        rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
+            // Apply inverse rotation to the celestial's own rotation
+            rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
+        }
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer atmosphereBuffer = bufferSource.getBuffer(getPlanetAtmosphereRenderType());
-        renderAtmosphere(event.getCamera().getPosition(), event.getPoseStack(), atmosphereBuffer, toRender.getActualSize(), position, rotation, event, toRender, vantagePoint);
+        renderAtmosphere(event.getPoseStack(), atmosphereBuffer, size, position, rotation, event, toRender);
         bufferSource.endBatch(getPlanetAtmosphereRenderType());
     }
 
-    private void renderAtmosphere(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, @NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @NotNull VantagePoint vantagePoint) {
+    private void renderAtmosphere(PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, @NotNull RenderLevelStageEvent event, @NotNull Celestial toRender) {
 
-        Vector3f cameraPos0 = new Vector3f(
-            (float) cameraPos.x,
-            (float) cameraPos.y,
-            (float) cameraPos.z
-        ).sub((float) center.x(), (float) center.y(), (float) center.z());
-
-        // Transform camera position into sun's local rotated space
+        // Camera is at render origin; planet center is at `center` in render space.
+        // Camera relative to planet = -center; transform into planet local space for shader.
+        Vector3f cameraPos0 = new Vector3f((float) -center.x(), (float) -center.y(), (float) -center.z());
         Vector3f rotatedCameraPos = new Vector3f(cameraPos0);
         new Quaternionf(localRotation).conjugate().transform(rotatedCameraPos);
 
@@ -83,53 +94,29 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         float partialTick = GenesisMod.getPartialTick(level, event);
 
         Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
-        Vector3dc position = toRender.getPosition(ticks, partialTick);
+        Vector3dc planetPosition = toRender.getPosition(ticks, partialTick);
 
-        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
-
-        Vector3dc vantagePos = vantagePoint.getPosition();
-        Quaterniondc vantageRot = vantagePoint.getRotation();
-
-        // Calculate relative position (subtract vantage point position)
-        cameraPos0 = new Vector3f(
-                (float) (vantagePos.x() - position.x()),
-                (float) (vantagePos.y() - position.y()),
-                (float) (vantagePos.z() - position.z())
-        );
-
-        // Transform the view to the side of the planet
-        Quaterniond planetRotation = new Quaterniond().rotateX(- Math.PI/2);
-
-        // Apply inverse rotation of vantage point
-        Quaterniond inverseVantageRot = planetRotation.premul(vantageRot).conjugate();
-        inverseVantageRot.transform(cameraPos0);
-
-        // Apply inverse rotation to the celestial's own rotation
-        localRotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
-
-        Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(new Quaterniond(localRotation).conjugate());
+        Vector3d lightDir = new Vector3d(planetPosition).sub(starPosition).rotate(new Quaterniond(localRotation).conjugate());
         ShaderInstance shader = ShaderRegistry.PLANET_ATMOSPHERE_SHADER.getInstance().get();
         shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
-        if (shader != null) {
-            Uniform uniform = shader.getUniform("CameraPosition");
-            if (uniform != null) {
-                uniform.set(rotatedCameraPos.x, rotatedCameraPos.y, rotatedCameraPos.z);
-            }
+        Uniform uniform = shader.getUniform("CameraPosition");
+        if (uniform != null) {
+            uniform.set(rotatedCameraPos.x, rotatedCameraPos.y, rotatedCameraPos.z);
+        }
 
-            Uniform uniform1 = shader.getUniform("HalfSize");
-            if (uniform1 != null) {
-                uniform1.set(halfSize);
-            }
+        Uniform uniform1 = shader.getUniform("HalfSize");
+        if (uniform1 != null) {
+            uniform1.set(halfSize);
+        }
 
-            Uniform uniformThickness = shader.getUniform("AtmosphereThickness");
-            if (uniformThickness != null) {
-                uniformThickness.set(relativeAtmosphereSize);
-            }
+        Uniform uniformThickness = shader.getUniform("AtmosphereThickness");
+        if (uniformThickness != null) {
+            uniformThickness.set(relativeAtmosphereSize);
+        }
 
-            Uniform uniformDensity = shader.getUniform("Density");
-            if (uniformDensity != null) {
-                uniformDensity.set((float) props.atmosphere().density());
-            }
+        Uniform uniformDensity = shader.getUniform("Density");
+        if (uniformDensity != null) {
+            uniformDensity.set((float) props.atmosphere().density());
         }
 
         Matrix4f matrix;
