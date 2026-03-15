@@ -16,7 +16,7 @@ public interface VantagePoint {
     Quaterniondc getRotation();
 
     /// if null, the observer has no access to space. Example: the observer is in The Nether
-    static @Nullable VantagePoint get(Level level, Vector3dc camera, long ticks, float partialTick) {
+    static @Nullable VantagePoint get(Level level, Vector3dc posInLevel, long ticks, float partialTick) {
         if (GenesisMod.isSpaceDimension(level)) {
             return new VantagePoint.InSpace();
         } else {
