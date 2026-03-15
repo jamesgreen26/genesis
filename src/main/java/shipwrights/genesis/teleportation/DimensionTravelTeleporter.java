@@ -53,7 +53,7 @@ public class DimensionTravelTeleporter {
         }
 
         for (var entry : entities.entrySet()) {
-            EntityTeleporter.teleportEntityAndPassengers(entry.getKey(), newLevel, entry.getValue());
+            EntityTeleporter.teleportEntityAndPassengers(entry.getKey(), newLevel, entry.getValue(), newRotation);
         }
     }
 
