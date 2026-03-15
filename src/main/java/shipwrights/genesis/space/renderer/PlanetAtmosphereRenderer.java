@@ -10,12 +10,12 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.planet_properties.PlanetProperties;
 
 import java.lang.Math;
@@ -25,38 +25,32 @@ import static shipwrights.genesis.client.ShaderRegistry.getPlanetAtmosphereRende
 public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
     @Override
-    public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
+    public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @NotNull VantagePoint vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
         Vector3dc position = toRender.getPosition(ticks, partialTick);
         Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
 
-        // Skip rendering for the planet the player is currently on
-        if (vantagePoint != null && vantagePoint.equals(toRender)) return;
+        Vector3dc vantagePos = vantagePoint.getPosition();
+        Quaterniondc vantageRot = vantagePoint.getRotation();
 
-        // Transform by inverse of vantage point if present
-        if (vantagePoint != null) {
-            Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
-            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, partialTick);
+        // Calculate relative position (subtract vantage point position)
+        Vector3d relativePos = new Vector3d(
+            position.x() - vantagePos.x(),
+            position.y() - vantagePos.y(),
+            position.z() - vantagePos.z()
+        );
 
-            // Calculate relative position (subtract vantage point position)
-            Vector3d relativePos = new Vector3d(
-                position.x() - vantagePos.x(),
-                position.y() - vantagePos.y(),
-                position.z() - vantagePos.z()
-            );
+        Quaterniond starRotation = new Quaterniond().rotateX(- Math.PI/2);
 
-            Quaterniond starRotation = new Quaterniond().rotateX(- Math.PI/2);
+        // Apply inverse rotation of vantage point
+        Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
+        inverseVantageRot.transform(relativePos);
+        position = relativePos;
 
-            // Apply inverse rotation of vantage point
-            Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
-            inverseVantageRot.transform(relativePos);
-            position = relativePos;
-
-            // Apply inverse rotation to the celestial's own rotation
-            rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
-        }
+        // Apply inverse rotation to the celestial's own rotation
+        rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer atmosphereBuffer = bufferSource.getBuffer(getPlanetAtmosphereRenderType());
@@ -64,7 +58,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         bufferSource.endBatch(getPlanetAtmosphereRenderType());
     }
 
-    private void renderAtmosphere(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, @NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
+    private void renderAtmosphere(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, @NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @NotNull VantagePoint vantagePoint) {
 
         Vector3f cameraPos0 = new Vector3f(
             (float) cameraPos.x,
@@ -93,29 +87,25 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
 
-        // Transform by inverse of vantage point if present
-        if (vantagePoint != null) {
-            Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
-            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, partialTick);
+        Vector3dc vantagePos = vantagePoint.getPosition();
+        Quaterniondc vantageRot = vantagePoint.getRotation();
 
-            // Calculate relative position (subtract vantage point position)
-            cameraPos0 = new Vector3f(
-                    (float) (vantagePos.x() - position.x()),
-                    (float) (vantagePos.y() - position.y()),
-                    (float) (vantagePos.z() - position.z())
-            );
+        // Calculate relative position (subtract vantage point position)
+        cameraPos0 = new Vector3f(
+                (float) (vantagePos.x() - position.x()),
+                (float) (vantagePos.y() - position.y()),
+                (float) (vantagePos.z() - position.z())
+        );
 
-            // Transform the view to the side of the planet
-            Quaterniond planetRotation = new Quaterniond().rotateX(- Math.PI/2);
+        // Transform the view to the side of the planet
+        Quaterniond planetRotation = new Quaterniond().rotateX(- Math.PI/2);
 
-            // Apply inverse rotation of vantage point
-            Quaterniond inverseVantageRot = planetRotation.premul(vantageRot).conjugate();
-            inverseVantageRot.transform(cameraPos0);
-            //position = Vector3dc(cameraPos0);
+        // Apply inverse rotation of vantage point
+        Quaterniond inverseVantageRot = planetRotation.premul(vantageRot).conjugate();
+        inverseVantageRot.transform(cameraPos0);
 
-            // Apply inverse rotation to the celestial's own rotation
-            localRotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
-        }
+        // Apply inverse rotation to the celestial's own rotation
+        localRotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
 
         Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(new Quaterniond(localRotation).conjugate());
         ShaderInstance shader = ShaderRegistry.PLANET_ATMOSPHERE_SHADER.getInstance().get();

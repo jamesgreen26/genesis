@@ -7,8 +7,9 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 
 @Mixin(Level.class)
 public abstract class LevelMixin {
@@ -20,10 +21,10 @@ public abstract class LevelMixin {
     @WrapMethod(method = "getDayTime")
     public long getDayTimeWrap(Operation<Long> original) {
         Level thisAsLevel = (Level)(Object)this;
-        Celestial body = GenesisMod.getCelestialForLevel(thisAsLevel);
+        VantagePoint vp = VantagePoint.get(thisAsLevel, new Vector3d(), GenesisMod.getTicks(thisAsLevel), 0f);
 
-        if (body != null) {
-            return body.getDayTime(GenesisMod.getTicks(thisAsLevel));
+        if (vp instanceof VantagePoint.OnCelestial oc) {
+            return oc.celestial().getDayTime(GenesisMod.getTicks(thisAsLevel));
         }
         return original.call();
     }
