@@ -45,7 +45,12 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
             rotation = oc.cameraRotationFromNorthPole();
             size = halfExtent * 2;
         }
-        // Transform by inverse of vantage point
+        // In space: planets are at absolute positions, so subtract camera position
+        else if (vantagePoint instanceof VantagePoint.InSpace) {
+            var cameraPos = event.getCamera().getPosition();
+            position = new Vector3d(position).sub(cameraPos.x, cameraPos.y, cameraPos.z);
+        }
+        // Transform by inverse of vantage point (OnCelestial)
         else {
             Vector3dc vantagePos = vantagePoint.getPosition();
             Quaterniondc vantageRot = vantagePoint.getRotation();
@@ -87,7 +92,11 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         PlanetProperties props = PlanetProperties.get(toRender.getID());
         if (props == null) return;
 
-        double densityFade = Mth.clamp((event.getCamera().getPosition().y - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+        // densityFade only applies when leaving a planet's atmosphere (y-based fade in planet dimension).
+        // When viewing from space, use full density.
+        double densityFade = (vantagePoint instanceof VantagePoint.InSpace)
+                ? 1.0
+                : Mth.clamp((event.getCamera().getPosition().y - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
 
         if (props.atmosphere().density() * densityFade < 0.01) return;
 
