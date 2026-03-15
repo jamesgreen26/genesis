@@ -38,7 +38,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         createStars();
     }
 
-    private static double cachedDensity = 1.0;
+    private static double cachedClampedDensity = 1.0;
+    private static double cachedRawDensity = 1.0;
 
     private final int starBufferCount = 3;
 
@@ -52,20 +53,20 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     public @NotNull Vec3 getBrightnessDependentFogColor(@NotNull Vec3 color, float brightness) {
         return color.multiply(
-                cachedDensity * (brightness * 0.94F + 0.06F),
-                cachedDensity * (brightness * 0.94F + 0.06F),
-                cachedDensity * (brightness * 0.91F + 0.09F)
+                cachedClampedDensity * (brightness * 0.94F + 0.06F),
+                cachedClampedDensity * (brightness * 0.94F + 0.06F),
+                cachedClampedDensity * (brightness * 0.91F + 0.09F)
         );
     }
 
     public boolean isFoggyAt(int i, int j) {
-        return false;
+        return cachedRawDensity > 1.3;
     }
 
     public float @Nullable [] getSunriseColor(float f, float g) {
         float[] original = super.getSunriseColor(f, g);
         if (original != null) {
-            original[3] = (float) (original[3] * cachedDensity);
+            original[3] = (float) (original[3] * cachedClampedDensity);
         }
         return original;
     }
@@ -116,14 +117,15 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         double starUpDot = UP.dot(toStar);
         double starEastDot = EAST.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
-        double density = Mth.clamp(planetProps != null ? planetProps.atmosphere().density() : 1.0, 0.0, 1.0);
+        cachedRawDensity = planetProps != null ? planetProps.atmosphere().density() : 1.0;
+        double density = Mth.clamp(cachedRawDensity, 0.0, 1.0);
 
         // fade out density with camera y level, from y=320 to y=GenesisMod.atmosphereEntryHeight
         double cameraY = camera.getPosition().y;
         double densityFade = 1.0 - Mth.clamp((cameraY - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
         density *= densityFade;
 
-        cachedDensity = density;
+        cachedClampedDensity = density;
         PlanetColorPalette palette = planetProps != null ? planetProps.atmosphere().color() : new PlanetColorPalette.Overworld();
 
         float rainLevel = hasPrecipitation(level) ? level.getRainLevel(partialTick) : 0f;
@@ -321,9 +323,9 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             b = b * (1.0F - f11) + f11;
         }
 
-        r *= (float) cachedDensity;
-        g *= (float) cachedDensity;
-        b *= (float) cachedDensity;
+        r *= (float) cachedClampedDensity;
+        g *= (float) cachedClampedDensity;
+        b *= (float) cachedClampedDensity;
 
         return new Vec3(r, g, b);
     }
