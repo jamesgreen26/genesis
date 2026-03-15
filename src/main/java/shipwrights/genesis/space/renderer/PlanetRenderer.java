@@ -9,6 +9,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
@@ -95,7 +96,12 @@ public class PlanetRenderer implements CelestialRenderer {
             float cameraY = (float) camera.getPosition().y;
             alpha = Math.max(0f, Math.min(1f, (cameraY - alphaInterpolateStart) / (alphaInterpolateEnd - alphaInterpolateStart)));
         }
-        // Transform by inverse of vantage point
+        // In space: planets are at absolute positions, so subtract camera position
+        else if (vantagePoint instanceof VantagePoint.InSpace) {
+            Vec3 cameraPos = event.getCamera().getPosition();
+            position = new Vector3d(position).sub(cameraPos.x, cameraPos.y, cameraPos.z);
+        }
+        // Transform by inverse of vantage point (OnCelestial)
         else {
             Vector3dc vantagePos = vantagePoint.getPosition();
             Quaterniondc vantageRot = vantagePoint.getRotation();
