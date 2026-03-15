@@ -62,10 +62,12 @@ public interface VantagePoint {
 
         @Override
         public Quaterniondc getRotation() {
-            Quaterniondc baseRotation = celestial.getRotation(ticks, partialTick);
-
             // worldRotation = celestialRotation * localCameraRotation
-            return baseRotation.mul(cameraRotationFromNorthPole, new Quaterniond());
+            return getCelestialRotation().mul(cameraRotationFromNorthPole, new Quaterniond());
+        }
+
+        public Quaterniondc getCelestialRotation() {
+            return celestial.getRotation(ticks, partialTick);
         }
     }
 }

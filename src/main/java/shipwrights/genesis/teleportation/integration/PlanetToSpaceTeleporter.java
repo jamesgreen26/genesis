@@ -57,22 +57,22 @@ public class PlanetToSpaceTeleporter {
 							level,
 							spaceLevel,
 							computeSpaceTarget(vantagePoint),
-							computeSpaceRotation(vantagePoint, ship.getTransform().getRotation())
+							vantagePoint.getCelestialRotation().mul(vantagePoint.cameraRotationFromNorthPole().conjugate(new Quaterniond()), new Quaterniond())
 					);
 				}
 			}
 		}
 	}
 
-    private static Quaterniondc computeSpaceRotation(VantagePoint.OnCelestial vantagePoint, Quaterniondc shipRotation) {
-		// Transform the ship's local (planet) rotation into space using the same
-		// vantage rotation used for position.
-		return new Quaterniond(vantagePoint.getRotation()).mul(shipRotation, new Quaterniond());
+    // Package-private — accessed by tests
+	static Quaterniondc computeSpaceRotation(Quaterniondc vantageRotation, Quaterniondc shipRotation) {
+		return new Quaterniond(vantageRotation).mul(shipRotation, new Quaterniond());
 	}
 
 	private static Vector3d computeSpaceTarget(VantagePoint.OnCelestial vantagePoint) {
 		Vector3d targetPos = new Vector3d(0, vantagePoint.celestial().getActualSize() + 20, 0);
-		vantagePoint.getRotation().transform(targetPos);
+		vantagePoint.cameraRotationFromNorthPole().conjugate(new Quaterniond()).transform(targetPos);
+		vantagePoint.getCelestialRotation().transform(targetPos);
 		targetPos.add(vantagePoint.getPosition());
 		return targetPos;
     }
