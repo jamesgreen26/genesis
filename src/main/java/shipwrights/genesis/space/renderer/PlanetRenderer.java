@@ -69,7 +69,9 @@ public class PlanetRenderer implements CelestialRenderer {
             List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
             List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, partialTick)).toList();
             Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
-            Vector3d lightDir = new Vector3d(position).sub(starPosition);
+
+
+            Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(vantagePoint.getRotation().conjugate(new Quaterniond()));
             ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
             shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
 
