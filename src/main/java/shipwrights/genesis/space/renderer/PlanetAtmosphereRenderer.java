@@ -70,11 +70,11 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer atmosphereBuffer = bufferSource.getBuffer(getPlanetAtmosphereRenderType());
-        renderAtmosphere(event.getPoseStack(), atmosphereBuffer, size, position, rotation, event, toRender);
+        renderAtmosphere(event.getPoseStack(), atmosphereBuffer, size, position, rotation, event, toRender, vantagePoint);
         bufferSource.endBatch(getPlanetAtmosphereRenderType());
     }
 
-    private void renderAtmosphere(PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, @NotNull RenderLevelStageEvent event, @NotNull Celestial toRender) {
+    private void renderAtmosphere(PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, @NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, VantagePoint vantagePoint) {
 
         // Camera is at render origin; planet center is at `center` in render space.
         // Camera relative to planet = -center; transform into planet local space for shader.
@@ -100,7 +100,10 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
         Vector3dc planetPosition = toRender.getPosition(ticks, partialTick);
 
-        Vector3d lightDir = new Vector3d(planetPosition).sub(starPosition).rotate(new Quaterniond(localRotation).conjugate());
+        Quaterniondc lightRot = (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender))
+                ? vantagePoint.getRotation().mul(oc.cameraRotationFromNorthPole(), new Quaterniond())
+                : toRender.getRotation(ticks, partialTick);
+        Vector3d lightDir = new Vector3d(planetPosition).sub(starPosition).rotate(new Quaterniond(lightRot).conjugate());
         ShaderInstance shader = ShaderRegistry.PLANET_ATMOSPHERE_SHADER.getInstance().get();
         shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
         Uniform uniform = shader.getUniform("CameraPosition");
