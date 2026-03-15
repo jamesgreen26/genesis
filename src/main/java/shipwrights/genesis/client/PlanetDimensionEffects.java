@@ -86,7 +86,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     @Override
     public boolean renderSnowAndRain(ClientLevel level, int ticks, float partialTick, LightTexture lightTexture, double camX, double camY, double camZ) {
-        return !hasPrecipitation(level);
+        return !hasPrecipitation(level) || camY > 360;
     }
 
     @Override
