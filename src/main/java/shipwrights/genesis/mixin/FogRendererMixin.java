@@ -37,6 +37,7 @@ public class FogRendererMixin {
                     .sub(vantagePoint.getPosition(gameTime, partialTick))
                     .normalize();
 
+            // TODO get rid of hardcoded rotation
             Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
             toStar.rotate(rot);
 
