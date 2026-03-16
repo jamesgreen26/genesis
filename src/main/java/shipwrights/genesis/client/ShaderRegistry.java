@@ -14,7 +14,6 @@ import team.lodestar.lodestone.registry.client.LodestoneRenderTypeRegistry;
 import team.lodestar.lodestone.systems.rendering.LodestoneRenderType;
 import team.lodestar.lodestone.systems.rendering.StateShards;
 import team.lodestar.lodestone.systems.rendering.shader.ShaderHolder;
-import shipwrights.genesis.mixin.RenderStateShardAccessor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +21,19 @@ import static team.lodestar.lodestone.registry.client.LodestoneShaderRegistry.re
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ShaderRegistry {
+
+    private static final RenderStateShard.TransparencyStateShard ADDITIVE_TRANSPARENCY =
+        new RenderStateShard.TransparencyStateShard(
+            "additive_transparency",
+            () -> {
+                RenderSystem.enableBlend();
+                RenderSystem.blendFunc(770, 1);
+            },
+            () -> {
+                RenderSystem.disableBlend();
+                RenderSystem.defaultBlendFunc();
+            }
+        );
 
     public static final ShaderHolder SUN_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "sun"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder BLACKHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "blackhole"), DefaultVertexFormat.POSITION_COLOR);
@@ -55,7 +67,7 @@ public class ShaderRegistry {
         if (SUN_RENDER_TYPE == null) {
             SUN_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("sun_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
                     .setShaderState(SUN_SHADER)
-                    .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
+                    .setTransparencyState(ADDITIVE_TRANSPARENCY)
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
