@@ -10,17 +10,6 @@
       "heightmap": "MOTION_BLOCKING_NO_LEAVES"
     },
     {
-      "type": "minecraft:random_offset",
-      "xz_spread": {
-        "type": "minecraft:biased_to_bottom",
-        "value": {
-          "min_inclusive": 0,
-          "max_inclusive": 16
-        }
-      },
-      "y_spread": 0
-    },
-    {
       "type": "minecraft:biome"
     },
     {
