@@ -122,6 +122,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         double cameraY = camera.getPosition().y;
         double densityFade = 1.0 - Mth.clamp((cameraY - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
         density *= densityFade;
+        cachedRawDensity *= densityFade;
 
         cachedClampedDensity = density;
         PlanetColorPalette palette = planetProps != null ? planetProps.atmosphere().color() : new PlanetColorPalette.Overworld();
