@@ -21,6 +21,16 @@ public class TextureSynthesizer {
     /** Controls how strongly patch pixels override noise-derived colours. [0=noise only, 1=patch only] */
     private static final float PATCH_BLEND = 0.72f;
 
+    /**
+     * Detail noise strength: signed offset added to each channel before palette
+     * remapping to break up large flat colour regions.
+     * Range ±DETAIL_STRENGTH in [0,255] space.
+     */
+    private static final float DETAIL_STRENGTH = 28f;
+
+    /** Scale of the high-frequency detail noise relative to the sphere. */
+    private static final double DETAIL_SCALE = 18.0;
+
     public TextureSynthesizer(
             CubeMapper    cubeMapper,
             NoiseModel    noiseModel,
@@ -114,9 +124,34 @@ public class TextureSynthesizer {
                 int g = lerp(noiseGrey, pg, PATCH_BLEND);
                 int b = lerp(noiseGrey, pb, PATCH_BLEND);
 
+                // Add high-frequency detail noise to break up flat palette regions.
+                // Two octaves sampled at a much higher frequency give fine-grained
+                // variation; the signed offset pushes pixels toward different palette
+                // entries without changing the overall hue distribution.
+                int detail = detailOffset(dir);
+                r = clamp(r + detail);
+                g = clamp(g + detail);
+                b = clamp(b + detail);
+
                 face.setRGB(x, y, (r << 16) | (g << 8) | b);
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Detail noise
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns a signed integer offset in [-DETAIL_STRENGTH, +DETAIL_STRENGTH]
+     * computed from two octaves of high-frequency fractal noise.
+     * Applied to all channels equally so hue is preserved while brightness varies.
+     */
+    private int detailOffset(Vec3 dir) {
+        // Two octaves at high frequency
+        double n = noiseModel.fractal(dir.scale(DETAIL_SCALE), 2);
+        // n is in [0,1]; remap to [-1,+1] then scale
+        return Math.round((float)((n * 2.0 - 1.0) * DETAIL_STRENGTH));
     }
 
     // -------------------------------------------------------------------------
