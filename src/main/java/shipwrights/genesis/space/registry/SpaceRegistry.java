@@ -37,7 +37,7 @@ public class SpaceRegistry {
     }
 
     public Collection<Celestial> getWhere(Predicate<CelestialType> predicate) {
-        return celestials.values().stream().filter(a -> predicate.test(a.getType())).toList();
+        return celestials.values().stream().filter(a -> predicate.test(a.type())).toList();
     }
 
 
@@ -74,7 +74,7 @@ public class SpaceRegistry {
         }
 
         public void accept(Celestial it) {
-            registry.addCelestial(it.getID(), it);
+            registry.addCelestial(it.ID(), it);
         }
     }
 }

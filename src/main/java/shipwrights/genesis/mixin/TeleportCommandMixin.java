@@ -102,11 +102,11 @@ public class TeleportCommandMixin {
         if (targets.size() == 1) {
             Entity target = targets.iterator().next();
             source.sendSuccess(() -> Component.literal(
-                    "Teleported " + target.getName().getString() + " to celestial " + celestial.getID()
+                    "Teleported " + target.getName().getString() + " to celestial " + celestial.ID()
             ), true);
         } else {
             source.sendSuccess(() -> Component.literal(
-                    "Teleported " + targets.size() + " entities to celestial " + celestial.getID()
+                    "Teleported " + targets.size() + " entities to celestial " + celestial.ID()
             ), true);
         }
 

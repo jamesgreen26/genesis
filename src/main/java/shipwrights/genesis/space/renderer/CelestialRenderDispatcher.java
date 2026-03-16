@@ -46,7 +46,7 @@ public class CelestialRenderDispatcher {
                 .toList();
 
             for (Celestial celestial : celestials) {
-                CelestialType type = celestial.getType();
+                CelestialType type = celestial.type();
                 type.getRenderer().setup(event, vantagePoint);
                 type.getRenderer().invoke(event, celestial, vantagePoint);
                 type.getRenderer().teardown(event, vantagePoint);

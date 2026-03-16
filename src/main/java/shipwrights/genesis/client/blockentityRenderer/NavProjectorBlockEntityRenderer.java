@@ -95,7 +95,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
         }
 
         for (Celestial body : GenesisMod.SPACE_REGISTRY.getAll()) {
-            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.getType().equals(BuiltinCelestialTypes.STAR));
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.type().equals(BuiltinCelestialTypes.STAR));
         }
 
         poseStack.popPose();

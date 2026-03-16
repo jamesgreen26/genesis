@@ -154,7 +154,7 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
             String typed = remaining.substring(prefix.length());
             Collection<String> ids = new ArrayList<>();
             for (Celestial celestial : GenesisMod.SPACE_REGISTRY.getAll()) {
-                ids.add(celestial.getID().toString());
+                ids.add(celestial.ID().toString());
             }
 
             if (typed.isEmpty()) {
@@ -193,7 +193,7 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
             String prefix = "@c[id=";
             Collection<String> options = new ArrayList<>();
             for (Celestial celestial : GenesisMod.SPACE_REGISTRY.getAll()) {
-                options.add(celestial.getID().toString());
+                options.add(celestial.ID().toString());
             }
             return SharedSuggestionProvider.suggest(options, builder.createOffset(builder.getStart() + prefix.length()));
         }
