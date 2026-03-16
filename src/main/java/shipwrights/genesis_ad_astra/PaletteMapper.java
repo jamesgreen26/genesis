@@ -30,14 +30,14 @@ public class PaletteMapper {
      * Matches BLOCK_SIZE in TextureSynthesizer so dither boundaries align with
      * colour block boundaries — this is what gives the pixel-art checkerboard look.
      */
-    private static final int DITHER_BLOCK = 4;
+    private static final int DITHER_BLOCK = 1;
 
     /**
      * Dither spread: maximum ±offset applied to each channel before palette snap.
      * Larger = more colour transitions visible at boundaries.
      * Should be roughly half the distance between adjacent palette colours in RGB space.
      */
-    private static final int DITHER_SPREAD = 48;
+    private static final int DITHER_SPREAD = 28;
 
     private final List<PaletteColor> palette;
     private final boolean dither;

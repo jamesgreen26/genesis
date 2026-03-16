@@ -26,18 +26,33 @@ public class TextureSynthesizer {
      * remapping to break up large flat colour regions.
      * Range ±DETAIL_STRENGTH in [0,255] space.
      */
-    private static final float DETAIL_STRENGTH = 28f;
+    private static final float DETAIL_STRENGTH = 16f;
 
     /** Scale of the high-frequency detail noise relative to the sphere. */
-    private static final double DETAIL_SCALE = 18.0;
+    private static final double DETAIL_SCALE = 26.0;
 
     /**
      * Block size for pixel quantisation.
      * The noise field is sampled once per block and held constant across the block,
      * producing the flat squared-off regions seen in the reference textures.
-     * Must be a power of 2. 4 = coarse chunky blocks, 2 = finer blocks.
+     * Must be a power of 2. 32 = very chunky blocks, 16 = medium, 8 = finer blocks.
      */
-    private static final int BLOCK_SIZE = 4;
+    private static final int BLOCK_SIZE = 32;
+
+    /** Block size variation range (average remains BLOCK_SIZE). */
+    private static final int BLOCK_SIZE_VARIATION = 8;
+
+    /** Noise scale that drives block-size changes (lower = bigger regions). */
+    private static final double BLOCK_SIZE_NOISE_SCALE = 0.9;
+
+    /** Per-block origin jitter to avoid low-res grid alignment. */
+    private static final int BLOCK_JITTER = 8;
+
+    /** Noise scale that drives block jitter. */
+    private static final double BLOCK_JITTER_SCALE = 1.5;
+
+    /** How much of the fine noise to mix into the coarse block value. */
+    private static final double DETAIL_BLEND = 0.18;
 
     public TextureSynthesizer(
             CubeMapper    cubeMapper,
@@ -119,39 +134,61 @@ public class TextureSynthesizer {
             }
         }
 
-        // Step 2 – write pixels using the block-quantised noise value
-        for (int by = 0; by < res; by += BLOCK_SIZE) {
-            for (int bx = 0; bx < res; bx += BLOCK_SIZE) {
-                Vec3 dir   = cubeMapper.toDirection(faceIdx, bx + BLOCK_SIZE / 2, by + BLOCK_SIZE / 2);
-                double val = noiseModel.sample(generatorType, dir);
-                int noiseGrey = clamp((int)(val * 255));
-                int detail = detailOffset(dir);
+        // Step 2 – write pixels using a jittered, variable-size block field
+        for (int y = 0; y < res; y++) {
+            for (int x = 0; x < res; x++) {
+                int cellX = x / BLOCK_SIZE;
+                int cellY = y / BLOCK_SIZE;
+                int cellOriginX = cellX * BLOCK_SIZE;
+                int cellOriginY = cellY * BLOCK_SIZE;
+                int cellCenterX = clamp(cellOriginX + BLOCK_SIZE / 2, 0, res - 1);
+                int cellCenterY = clamp(cellOriginY + BLOCK_SIZE / 2, 0, res - 1);
+                Vec3 cellDir = cubeMapper.toDirection(faceIdx, cellCenterX, cellCenterY);
 
-                for (int dy = 0; dy < BLOCK_SIZE; dy++) {
-                    for (int dx = 0; dx < BLOCK_SIZE; dx++) {
-                        int x = bx + dx, y = by + dy;
-                        if (x >= res || y >= res) continue;
+                // Vary block size per region but keep average at BLOCK_SIZE
+                double sizeNoise = noiseModel.fractal(cellDir.scale(BLOCK_SIZE_NOISE_SCALE), 1);
+                int size = BLOCK_SIZE - BLOCK_SIZE_VARIATION
+                        + (int) Math.round(sizeNoise * (BLOCK_SIZE_VARIATION * 2.0));
+                if (size < 4) size = 4;
 
-                        int pr, pg, pb;
-                        if (totalW[y][x] > 0) {
-                            pr = clamp((int)(weightR[y][x] / totalW[y][x]));
-                            pg = clamp((int)(weightG[y][x] / totalW[y][x]));
-                            pb = clamp((int)(weightB[y][x] / totalW[y][x]));
-                        } else {
-                            pr = pg = pb = noiseGrey;
-                        }
+                // Jitter the block origin to avoid low-res grid alignment
+                double jitterA = noiseModel.fractal(cellDir.scale(BLOCK_JITTER_SCALE), 1);
+                double jitterB = noiseModel.fractal(cellDir.scale(BLOCK_JITTER_SCALE + 5.3), 1);
+                int jx = (int) Math.round((jitterA * 2.0 - 1.0) * BLOCK_JITTER);
+                int jy = (int) Math.round((jitterB * 2.0 - 1.0) * BLOCK_JITTER);
 
-                        int r = lerp(noiseGrey, pr, PATCH_BLEND);
-                        int g = lerp(noiseGrey, pg, PATCH_BLEND);
-                        int b = lerp(noiseGrey, pb, PATCH_BLEND);
+                int bx = cellOriginX + jx;
+                int by = cellOriginY + jy;
 
-                        r = clamp(r + detail);
-                        g = clamp(g + detail);
-                        b = clamp(b + detail);
+                int cx = clamp(bx + size / 2, 0, res - 1);
+                int cy = clamp(by + size / 2, 0, res - 1);
+                Vec3 baseDir = cubeMapper.toDirection(faceIdx, cx, cy);
+                double baseVal = noiseModel.sample(generatorType, baseDir);
 
-                        face.setRGB(x, y, (r << 16) | (g << 8) | b);
-                    }
+                Vec3 dir = cubeMapper.toDirection(faceIdx, x, y);
+                double fineVal = noiseModel.sample(generatorType, dir);
+                double val = baseVal + (fineVal - baseVal) * DETAIL_BLEND;
+                int noiseGrey = clamp((int) (val * 255));
+
+                int pr, pg, pb;
+                if (totalW[y][x] > 0) {
+                    pr = clamp((int)(weightR[y][x] / totalW[y][x]));
+                    pg = clamp((int)(weightG[y][x] / totalW[y][x]));
+                    pb = clamp((int)(weightB[y][x] / totalW[y][x]));
+                } else {
+                    pr = pg = pb = noiseGrey;
                 }
+
+                int r = lerp(noiseGrey, pr, PATCH_BLEND);
+                int g = lerp(noiseGrey, pg, PATCH_BLEND);
+                int b = lerp(noiseGrey, pb, PATCH_BLEND);
+
+                int detail = detailOffset(dir);
+                r = clamp(r + detail);
+                g = clamp(g + detail);
+                b = clamp(b + detail);
+
+                face.setRGB(x, y, (r << 16) | (g << 8) | b);
             }
         }
     }
@@ -186,6 +223,7 @@ public class TextureSynthesizer {
     // -------------------------------------------------------------------------
 
     private int clamp(int v) { return Math.max(0, Math.min(255, v)); }
+    private int clamp(int v, int min, int max) { return Math.max(min, Math.min(max, v)); }
 
     private int lerp(int a, int b, float t) {
         return clamp(Math.round(a + t * (b - a)));

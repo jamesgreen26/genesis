@@ -37,7 +37,7 @@ public class PlanetGenTest {
         PlanetTextureGenerator gen = new PlanetTextureGenerator()
                 .resolution(256)
                 .paletteSize(16)
-                .dither(false)
+                .dither(true)
                 .seed(99887766L);
 
         // ------------------------------------------------------------------
