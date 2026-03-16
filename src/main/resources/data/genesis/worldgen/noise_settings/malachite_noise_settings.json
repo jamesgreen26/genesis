@@ -220,23 +220,12 @@
     },
     "lava": -1.0,
     "temperature": {
-      "argument1": 0.6482456140350877,
-      "argument2": {
-        "xz_scale": 0.25,
-        "y_scale": 0.0,
-        "noise": "minecraft:temperature",
-        "shift_x": {
-          "argument": "minecraft:offset",
-          "type": "minecraft:shift_a"
-        },
-        "shift_y": 0.0,
-        "shift_z": {
-          "argument": "minecraft:offset",
-          "type": "minecraft:shift_b"
-        },
-        "type": "minecraft:shifted_noise"
-      },
-      "type": "minecraft:mul"
+      "type": "genesis:radial_gradient",
+      "radius": 1000.0,
+      "max_value": 1.0,
+      "min_value": 0.0,
+      "center_x": 0.0,
+      "center_z": 0.0
     },
     "vegetation": {
       "argument1": 0.13,
