@@ -3,6 +3,7 @@ package shipwrights.genesis_ad_astra;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Quick standalone test: creates a synthetic seed image (16×16 gas-giant-like stripes),
@@ -19,15 +20,16 @@ public class PlanetGenTest {
         // ------------------------------------------------------------------
         // 1. Create or load a seed texture
         // ------------------------------------------------------------------
-        BufferedImage seed;
-        if (args.length > 0) {
-            seed = ImageIO.read(new File(args[0]));
-            System.out.println("Loaded seed texture: " + args[0]
-                    + " (" + seed.getWidth() + "x" + seed.getHeight() + ")");
-        } else {
-            seed = syntheticGasGiant(16);
-            System.out.println("Generated synthetic gas-giant seed (16×16).");
+        File inputsDir = new File("src/main/java/shipwrights/genesis_ad_astra/inputs");
+        File[] inputFiles = inputsDir.listFiles((dir, name) -> {
+            String lower = name.toLowerCase();
+            return lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg");
+        });
+        if (inputFiles == null || inputFiles.length == 0) {
+            System.out.println("No seed images found in " + inputsDir.getPath() + " (png/jpg/jpeg).");
+            return;
         }
+        Arrays.sort(inputFiles, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
         // ------------------------------------------------------------------
         // 2. Run the generator
@@ -38,23 +40,31 @@ public class PlanetGenTest {
                 .dither(false)
                 .seed(99887766L);
 
-        BufferedImage[] faces = gen.generate(seed);
-
         // ------------------------------------------------------------------
-        // 3. Save output
+        // 3. Process each input and save output
         // ------------------------------------------------------------------
         String[] faceNames = {"+X", "-X", "+Y", "-Y", "+Z", "-Z"};
         new File("output").mkdirs();
-        for (int f = 0; f < 6; f++) {
-            String filename = "output/face_" + f + "_" + faceNames[f].replace("+","pos").replace("-","neg") + ".png";
-            ImageIO.write(faces[f], "PNG", new File(filename));
-            System.out.println("Saved: " + filename);
-        }
+        for (File inputFile : inputFiles) {
+            BufferedImage seed = ImageIO.read(inputFile);
+            System.out.println("Loaded seed texture: " + inputFile.getPath()
+                    + " (" + seed.getWidth() + "x" + seed.getHeight() + ")");
 
-        // Also save a 3×2 strip overview for quick visual inspection
-        BufferedImage strip = makeStrip(faces, 256);
-        ImageIO.write(strip, "PNG", new File("output/planet_strip.png"));
-        System.out.println("Saved overview: output/planet_strip.png");
+            BufferedImage[] faces = gen.generate(seed);
+            String baseName = stripExtension(inputFile.getName());
+
+            for (int f = 0; f < 6; f++) {
+                String filename = "output/face_" + f + "_" + faceNames[f].replace("+","pos").replace("-","neg")
+                        + "_" + baseName + ".png";
+                ImageIO.write(faces[f], "PNG", new File(filename));
+                System.out.println("Saved: " + filename);
+            }
+
+            BufferedImage strip = makeStrip(faces, 256);
+            String stripName = "output/planet_strip_" + baseName + ".png";
+            ImageIO.write(strip, "PNG", new File(stripName));
+            System.out.println("Saved overview: " + stripName);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -97,6 +107,11 @@ public class PlanetGenTest {
         }
         g2d.dispose();
         return strip;
+    }
+
+    private static String stripExtension(String filename) {
+        int dot = filename.lastIndexOf('.');
+        return (dot > 0) ? filename.substring(0, dot) : filename;
     }
 
     private static int clamp(int v) { return Math.max(0, Math.min(255, v)); }
