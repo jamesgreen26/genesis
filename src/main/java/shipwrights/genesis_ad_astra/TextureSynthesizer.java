@@ -31,6 +31,14 @@ public class TextureSynthesizer {
     /** Scale of the high-frequency detail noise relative to the sphere. */
     private static final double DETAIL_SCALE = 18.0;
 
+    /**
+     * Block size for pixel quantisation.
+     * The noise field is sampled once per block and held constant across the block,
+     * producing the flat squared-off regions seen in the reference textures.
+     * Must be a power of 2. 4 = coarse chunky blocks, 2 = finer blocks.
+     */
+    private static final int BLOCK_SIZE = 4;
+
     public TextureSynthesizer(
             CubeMapper    cubeMapper,
             NoiseModel    noiseModel,
@@ -75,65 +83,75 @@ public class TextureSynthesizer {
         float[][] weightB = new float[res][res];
         float[][] totalW  = new float[res][res];
 
-        // Step 1 – noise pass: compute noise value per pixel, scatter patches
-        for (int y = 0; y < res; y++) {
-            for (int x = 0; x < res; x++) {
-                Vec3 dir   = cubeMapper.toDirection(faceIdx, x, y);
+        // Step 1 – noise pass: sample noise ONCE PER BLOCK and fill all pixels in
+        // that block with the same value. This creates the flat squared-off colour
+        // regions characteristic of the reference pixel-art style.
+        for (int by = 0; by < res; by += BLOCK_SIZE) {
+            for (int bx = 0; bx < res; bx += BLOCK_SIZE) {
+                // Sample at the block centre
+                Vec3 dir = cubeMapper.toDirection(faceIdx, bx + BLOCK_SIZE / 2, by + BLOCK_SIZE / 2);
                 double val = noiseModel.sample(generatorType, dir);
 
                 Patch patch = patchLibrary.match(val);
                 int half    = patch.size / 2;
 
-                // Place patch centred on (x, y)
+                // Scatter patch centred on the block centre, snapped to block grid
                 for (int pr = 0; pr < patch.size; pr++) {
                     for (int pc = 0; pc < patch.size; pc++) {
-                        int tx = x + pc - half;
-                        int ty = y + pr - half;
-                        if (tx < 0 || tx >= res || ty < 0 || ty >= res) continue;
-
-                        float w = patchWeight(pc - half, pr - half, patch.size);
-                        weightR[ty][tx] += patch.getR(pr, pc) * w;
-                        weightG[ty][tx] += patch.getG(pr, pc) * w;
-                        weightB[ty][tx] += patch.getB(pr, pc) * w;
-                        totalW [ty][tx] += w;
+                        // Snap target position to block grid
+                        int rawX = bx + (pc - half) * BLOCK_SIZE;
+                        int rawY = by + (pr - half) * BLOCK_SIZE;
+                        // Fill every pixel in the target block
+                        for (int dy = 0; dy < BLOCK_SIZE; dy++) {
+                            for (int dx = 0; dx < BLOCK_SIZE; dx++) {
+                                int tx = rawX + dx;
+                                int ty = rawY + dy;
+                                if (tx < 0 || tx >= res || ty < 0 || ty >= res) continue;
+                                float w = patchWeight(pc - half, pr - half, patch.size);
+                                weightR[ty][tx] += patch.getR(pr, pc) * w;
+                                weightG[ty][tx] += patch.getG(pr, pc) * w;
+                                weightB[ty][tx] += patch.getB(pr, pc) * w;
+                                totalW [ty][tx] += w;
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // Step 2 – write pixels: blend patch accumulation with direct noise colour
-        for (int y = 0; y < res; y++) {
-            for (int x = 0; x < res; x++) {
-                Vec3 dir   = cubeMapper.toDirection(faceIdx, x, y);
+        // Step 2 – write pixels using the block-quantised noise value
+        for (int by = 0; by < res; by += BLOCK_SIZE) {
+            for (int bx = 0; bx < res; bx += BLOCK_SIZE) {
+                Vec3 dir   = cubeMapper.toDirection(faceIdx, bx + BLOCK_SIZE / 2, by + BLOCK_SIZE / 2);
                 double val = noiseModel.sample(generatorType, dir);
-
-                // Noise-derived grey (will be palette-remapped later)
                 int noiseGrey = clamp((int)(val * 255));
-
-                int pr, pg, pb;
-                if (totalW[y][x] > 0) {
-                    pr = clamp((int)(weightR[y][x] / totalW[y][x]));
-                    pg = clamp((int)(weightG[y][x] / totalW[y][x]));
-                    pb = clamp((int)(weightB[y][x] / totalW[y][x]));
-                } else {
-                    pr = pg = pb = noiseGrey;
-                }
-
-                // Blend patch colour with noise grey
-                int r = lerp(noiseGrey, pr, PATCH_BLEND);
-                int g = lerp(noiseGrey, pg, PATCH_BLEND);
-                int b = lerp(noiseGrey, pb, PATCH_BLEND);
-
-                // Add high-frequency detail noise to break up flat palette regions.
-                // Two octaves sampled at a much higher frequency give fine-grained
-                // variation; the signed offset pushes pixels toward different palette
-                // entries without changing the overall hue distribution.
                 int detail = detailOffset(dir);
-                r = clamp(r + detail);
-                g = clamp(g + detail);
-                b = clamp(b + detail);
 
-                face.setRGB(x, y, (r << 16) | (g << 8) | b);
+                for (int dy = 0; dy < BLOCK_SIZE; dy++) {
+                    for (int dx = 0; dx < BLOCK_SIZE; dx++) {
+                        int x = bx + dx, y = by + dy;
+                        if (x >= res || y >= res) continue;
+
+                        int pr, pg, pb;
+                        if (totalW[y][x] > 0) {
+                            pr = clamp((int)(weightR[y][x] / totalW[y][x]));
+                            pg = clamp((int)(weightG[y][x] / totalW[y][x]));
+                            pb = clamp((int)(weightB[y][x] / totalW[y][x]));
+                        } else {
+                            pr = pg = pb = noiseGrey;
+                        }
+
+                        int r = lerp(noiseGrey, pr, PATCH_BLEND);
+                        int g = lerp(noiseGrey, pg, PATCH_BLEND);
+                        int b = lerp(noiseGrey, pb, PATCH_BLEND);
+
+                        r = clamp(r + detail);
+                        g = clamp(g + detail);
+                        b = clamp(b + detail);
+
+                        face.setRGB(x, y, (r << 16) | (g << 8) | b);
+                    }
+                }
             }
         }
     }

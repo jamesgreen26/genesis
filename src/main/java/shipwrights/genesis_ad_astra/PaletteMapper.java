@@ -5,17 +5,39 @@ import java.util.List;
 
 /**
  * Maps each pixel in a generated texture to the nearest color in the extracted palette.
- * Optionally applies ordered dithering to reduce visible banding.
+ *
+ * Dithering mode uses an 8×8 Bayer ordered dither matrix scaled to BLOCK_SIZE so the
+ * dither pattern aligns with the pixel blocks produced by TextureSynthesizer.
+ * This creates the characteristic checkerboard boundary transitions seen in
+ * pixel-art planet textures.
  */
 public class PaletteMapper {
 
-    // 4x4 Bayer matrix for ordered dithering (values 0–15)
-    private static final int[][] BAYER4 = {
-        { 0,  8,  2, 10},
-        {12,  4, 14,  6},
-        { 3, 11,  1,  9},
-        {15,  7, 13,  5}
+    // 8×8 Bayer matrix (values 0–63), gives finer dither gradations than 4×4
+    private static final int[][] BAYER8 = {
+            { 0, 32,  8, 40,  2, 34, 10, 42},
+            {48, 16, 56, 24, 50, 18, 58, 26},
+            {12, 44,  4, 36, 14, 46,  6, 38},
+            {60, 28, 52, 20, 62, 30, 54, 22},
+            { 3, 35, 11, 43,  1, 33,  9, 41},
+            {51, 19, 59, 27, 49, 17, 57, 25},
+            {15, 47,  7, 39, 13, 45,  5, 37},
+            {63, 31, 55, 23, 61, 29, 53, 21}
     };
+
+    /**
+     * How many output pixels correspond to one dither matrix cell.
+     * Matches BLOCK_SIZE in TextureSynthesizer so dither boundaries align with
+     * colour block boundaries — this is what gives the pixel-art checkerboard look.
+     */
+    private static final int DITHER_BLOCK = 4;
+
+    /**
+     * Dither spread: maximum ±offset applied to each channel before palette snap.
+     * Larger = more colour transitions visible at boundaries.
+     * Should be roughly half the distance between adjacent palette colours in RGB space.
+     */
+    private static final int DITHER_SPREAD = 48;
 
     private final List<PaletteColor> palette;
     private final boolean dither;
@@ -29,18 +51,10 @@ public class PaletteMapper {
         this(palette, false);
     }
 
-    /**
-     * Remap all pixels in-place across all six cube faces.
-     */
     public void remap(BufferedImage[] faces) {
-        for (int f = 0; f < faces.length; f++) {
-            remap(faces[f]);
-        }
+        for (BufferedImage face : faces) remap(face);
     }
 
-    /**
-     * Remap all pixels in a single face image.
-     */
     public void remap(BufferedImage face) {
         int w = face.getWidth();
         int h = face.getHeight();
@@ -48,12 +62,21 @@ public class PaletteMapper {
             for (int x = 0; x < w; x++) {
                 int rgb = face.getRGB(x, y);
                 int r = (rgb >> 16) & 0xFF;
-                int g = (rgb >> 8) & 0xFF;
-                int b = rgb & 0xFF;
+                int g = (rgb >> 8)  & 0xFF;
+                int b =  rgb        & 0xFF;
 
                 if (dither) {
-                    int threshold = BAYER4[y & 3][x & 3]; // 0..15
-                    int offset = (threshold - 7) * 4;     // spread: -28..+28
+                    // Index into Bayer matrix using block-scaled coordinates.
+                    // Dividing by DITHER_BLOCK means each matrix cell covers a
+                    // DITHER_BLOCK×DITHER_BLOCK region of pixels, so the dither
+                    // pattern appears as visible pixel blocks rather than single dots.
+                    int bx = (x / DITHER_BLOCK) & 7;
+                    int by = (y / DITHER_BLOCK) & 7;
+                    int threshold = BAYER8[by][bx]; // 0..63
+
+                    // Remap threshold to a signed offset: centre at 31.5 → ±DITHER_SPREAD
+                    int offset = (int)((threshold - 31.5) / 63.0 * DITHER_SPREAD * 2);
+
                     r = clamp(r + offset);
                     g = clamp(g + offset);
                     b = clamp(b + offset);
@@ -65,9 +88,6 @@ public class PaletteMapper {
         }
     }
 
-    /**
-     * Find the nearest palette color for the given RGB.
-     */
     public PaletteColor nearest(int r, int g, int b) {
         PaletteColor best = null;
         double bestDist = Double.MAX_VALUE;
@@ -78,12 +98,9 @@ public class PaletteMapper {
         return best;
     }
 
-    /**
-     * Interpolate between two palette colors by t ∈ [0,1], then snap.
-     */
     public PaletteColor lerp(PaletteColor a, PaletteColor b, float t) {
-        int r = clamp(Math.round(a.r + t * (b.r - a.r)));
-        int g = clamp(Math.round(a.g + t * (b.g - a.g)));
+        int r  = clamp(Math.round(a.r + t * (b.r - a.r)));
+        int g  = clamp(Math.round(a.g + t * (b.g - a.g)));
         int bv = clamp(Math.round(a.b + t * (b.b - a.b)));
         return nearest(r, g, bv);
     }

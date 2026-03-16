@@ -27,7 +27,7 @@ public class PlanetTextureGenerator {
     private int paletteSize = 16;
 
     /** Whether to apply dithering during palette remapping. */
-    private boolean dither = false;
+    private boolean dither = true;
 
     /** Random seed for noise generation. */
     private long noiseSeed = 12345L;
@@ -37,12 +37,29 @@ public class PlanetTextureGenerator {
     // -----------------------------------------------------------------------
 
     /**
-     * Generate six seamless cube-face textures from a small input texture.
+     * Generate six seamless cube-face textures from a small input texture,
+     * using the planet name to deterministically seed the noise offset so
+     * that different planets look distinct even with the same generator type.
      *
-     * @param inputTexture a 8–32 px RGB image representing one face of the planet
-     * @return array of 6 BufferedImage objects (256×256 each, TYPE_INT_RGB)
+     * @param inputTexture a 8–32 px RGB image
+     * @param planetName   any stable identifier (filename, registry key, etc.)
      */
-    public BufferedImage[] generate(BufferedImage inputTexture, int seed) {
+    public BufferedImage[] generate(BufferedImage inputTexture, String planetName) {
+        // Combine the manual seed with the name's hashcode so:
+        //   - Same name + same seed → identical output (deterministic)
+        //   - Different names → different noise offset even with same seed
+        long combinedSeed = noiseSeed ^ ((long) planetName.hashCode() * 0x9e3779b97f4a7c15L);
+        return generateWithSeed(inputTexture, combinedSeed);
+    }
+
+    /**
+     * Generate using only the manual seed (no name). Kept for compatibility.
+     */
+    public BufferedImage[] generate(BufferedImage inputTexture) {
+        return generateWithSeed(inputTexture, noiseSeed);
+    }
+
+    private BufferedImage[] generateWithSeed(BufferedImage inputTexture, long seed) {
         long start = System.currentTimeMillis();
 
         // -----------------------------------------------------------------
