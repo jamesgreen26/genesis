@@ -20,13 +20,13 @@ public class NoiseModel {
     private final int[] perm = new int[512];
 
     private static final double[] GRAD_X = {
-        1,-1, 1,-1, 1,-1, 1,-1, 0, 0, 0, 0, 1,-1, 0, 0
+            1,-1, 1,-1, 1,-1, 1,-1, 0, 0, 0, 0, 1,-1, 0, 0
     };
     private static final double[] GRAD_Y = {
-        1, 1,-1,-1, 0, 0, 0, 0, 1,-1, 1,-1, 1, 1,-1,-1
+            1, 1,-1,-1, 0, 0, 0, 0, 1,-1, 1,-1, 1, 1,-1,-1
     };
     private static final double[] GRAD_Z = {
-        0, 0, 0, 0, 1, 1,-1,-1, 1, 1,-1,-1, 0, 0, 1,-1
+            0, 0, 0, 0, 1, 1,-1,-1, 1, 1,-1,-1, 0, 0, 1,-1
     };
 
     public NoiseModel(long seed) {
@@ -98,31 +98,60 @@ public class NoiseModel {
     }
 
     /**
-     * Sinusoidal stripe generator.
-     * Latitude derived from direction vector, distorted by fractal noise.
+     * Smooth wavy stripe generator, suitable for gas giants.
      *
-     * @param p          unit direction vector
-     * @param frequency  band frequency (e.g. 6–12 for gas giants)
-     * @param distortion strength of noise-based distortion
+     * Design goals:
+     *   - Stripes run horizontally (constant latitude on the sphere)
+     *   - Gentle lateral undulation: the bands wave slightly but never zig-zag
+     *   - Varying band widths: achieved by domain-warping the latitude with
+     *     a very low-frequency, low-amplitude warp before the sine
+     *   - The distortion noise is sampled at LOW frequency and LOW amplitude
+     *     so it bends the stripes smoothly rather than shredding them
+     *
+     * @param p          unit direction vector on the sphere
+     * @param frequency  number of stripe pairs around the planet (4–8 is typical)
+     * @param warpAmp    how much the stripes undulate laterally (0.04–0.10)
      */
-    public double stripes(Vec3 p, double frequency, double distortion) {
-        // Latitude angle: 0 at equator, ±1 at poles
-        double lat = p.y; // already in [-1,1] for a unit sphere
+    public double stripes(Vec3 p, double frequency, double warpAmp) {
+        // --- Step 1: gentle domain warp ---
+        // Sample two independent low-frequency noise values to smoothly
+        // displace the latitude coordinate. Using two offsets avoids the
+        // "axis-aligned" artefact you get from warping with a single octave.
+        double warpU = perlin(p.x * 1.2 + 3.7, p.y * 1.2 + 1.3, p.z * 1.2 + 0.5);
+        double warpV = perlin(p.x * 1.1 - 1.5, p.y * 1.1 + 4.2, p.z * 1.1 - 2.1);
 
-        // Add turbulence
-        double noise = perlin(p.x * 3, p.y * 3, p.z * 3) * distortion;
+        // Remap warp from [0,1] to [-1,+1] and scale by amplitude
+        double warpedLat = p.y + (warpU * 2.0 - 1.0) * warpAmp
+                + (warpV * 2.0 - 1.0) * warpAmp * 0.4;
 
-        double raw = Math.sin((lat + noise) * Math.PI * frequency);
-        return (raw + 1.0) * 0.5; // [0, 1]
+        // --- Step 2: width variation ---
+        // A second very-low-frequency noise modulates the stripe frequency
+        // slightly so bands aren't all the same width.
+        double widthMod = 1.0 + (perlin(p.x * 0.6, p.y * 0.6, p.z * 0.6) - 0.5) * 0.25;
+
+        // --- Step 3: smooth sine bands ---
+        double raw = Math.sin(warpedLat * Math.PI * frequency * widthMod);
+
+        // Sharpen slightly with a smoothstep so bands have flatter middles
+        // and narrower transitions (more gas-giant-like)
+        double t = (raw + 1.0) * 0.5;          // [0,1]
+        t = smootherstep(t);                    // flatten plateau regions
+        return t;
     }
 
     /**
-     * Hybrid: stripes modulated by fractal noise.
+     * Hybrid: smooth stripes modulated by subtle fractal detail.
      */
-    public double hybrid(Vec3 p, double stripeFreq, double distortion, int octaves) {
-        double s = stripes(p, stripeFreq, distortion);
+    public double hybrid(Vec3 p, double stripeFreq, double warpAmp, int octaves) {
+        double s = stripes(p, stripeFreq, warpAmp);
         double f = fractal(p, octaves);
-        return s * 0.65 + f * 0.35;
+        return s * 0.70 + f * 0.30;
+    }
+
+    /** Smootherstep: 6t^5 − 15t^4 + 10t^3 — flattens plateau regions. */
+    private double smootherstep(double t) {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * t * (t * (t * 6 - 15) + 10);
     }
 
     // -------------------------------------------------------------------------
@@ -133,8 +162,8 @@ public class NoiseModel {
         switch (type) {
             case FRACTAL: return fractal(p, 6);
             case WORLEY:  return worley(p, 4.0);
-            case STRIPES: return stripes(p, 8.0, 0.35);
-            case HYBRID:  return hybrid(p, 8.0, 0.25, 5);
+            case STRIPES: return stripes(p, 6.0, 0.06);   // gentle warp amplitude
+            case HYBRID:  return hybrid(p, 6.0, 0.06, 4);
             default:      return fractal(p, 6);
         }
     }
@@ -164,12 +193,12 @@ public class NoiseModel {
         int bbb = perm[perm[perm[X+1] + Y+1] + Z+1];
 
         return lerp(w,
-            lerp(v,
-                lerp(u, grad(aaa, x,   y,   z  ), grad(baa, x-1, y,   z  )),
-                lerp(u, grad(aba, x,   y-1, z  ), grad(bba, x-1, y-1, z  ))),
-            lerp(v,
-                lerp(u, grad(aab, x,   y,   z-1), grad(bab, x-1, y,   z-1)),
-                lerp(u, grad(abb, x,   y-1, z-1), grad(bbb, x-1, y-1, z-1))));
+                lerp(v,
+                        lerp(u, grad(aaa, x,   y,   z  ), grad(baa, x-1, y,   z  )),
+                        lerp(u, grad(aba, x,   y-1, z  ), grad(bba, x-1, y-1, z  ))),
+                lerp(v,
+                        lerp(u, grad(aab, x,   y,   z-1), grad(bab, x-1, y,   z-1)),
+                        lerp(u, grad(abb, x,   y-1, z-1), grad(bbb, x-1, y-1, z-1))));
     }
 
     private double fade(double t) { return t * t * t * (t * (t * 6 - 15) + 10); }
@@ -186,7 +215,7 @@ public class NoiseModel {
 
     private int hash3(int x, int y, int z) {
         return perm[(perm[(perm[Math.floorMod(x, 256)] + Math.floorMod(y, 256)) & 255]
-                    + Math.floorMod(z, 256)) & 255];
+                + Math.floorMod(z, 256)) & 255];
     }
 
     private double pseudoRand(int hash, int component) {
