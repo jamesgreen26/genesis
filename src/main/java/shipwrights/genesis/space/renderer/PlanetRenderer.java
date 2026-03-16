@@ -124,7 +124,7 @@ public class PlanetRenderer implements CelestialRenderer {
             rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
         }
 
-        renderPlanetAt(toRender.getID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
+        renderPlanetAt(toRender.ID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
 
         new PlanetAtmosphereRenderer().invoke(event, toRender, vantagePoint);
     }

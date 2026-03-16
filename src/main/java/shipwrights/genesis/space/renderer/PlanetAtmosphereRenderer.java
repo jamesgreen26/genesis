@@ -89,7 +89,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         float halfSize = (float) size / 2;
 
-        PlanetProperties props = PlanetProperties.get(toRender.getID());
+        PlanetProperties props = PlanetProperties.get(toRender.ID());
         if (props == null) return;
 
         // densityFade only applies when leaving a planet's atmosphere (y-based fade in planet dimension).

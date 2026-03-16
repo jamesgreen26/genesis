@@ -40,16 +40,16 @@ public class FogRendererMixin {
             Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
             toStar.rotate(rot);
 
-            Vector3d up = new Vector3d(PlanetDimensionEffects.UP).rotate(oc.cameraRotationFromNorthPole());
-            Vector3d east = new Vector3d(PlanetDimensionEffects.EAST).rotate(oc.cameraRotationFromNorthPole());
+            Vector3d up = new Vector3d(GenesisMod.UP).rotate(oc.cameraRotationFromNorthPole());
+            Vector3d east = new Vector3d(GenesisMod.EAST).rotate(oc.cameraRotationFromNorthPole());
             double starUpDot = up.dot(toStar);
             double starEastDot = east.dot(toStar);
 
-            double _apparentAngle = PlanetDimensionEffects.getApparentSunAngle(starUpDot, starEastDot);
+            double _apparentAngle = GenesisMod.getApparentSunAngle(starUpDot, starEastDot);
             apparentAngle.set(_apparentAngle);
             long fakeTime = (long) (_apparentAngle * 24000);
 
-            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.getID()).atmosphere().color());
+            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.ID()).atmosphere().color());
         }
         
         apparentAngle.set(instance.getSunAngle(partialTick) / Mth.TWO_PI);

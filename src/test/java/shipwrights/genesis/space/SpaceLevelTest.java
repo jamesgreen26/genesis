@@ -14,7 +14,6 @@ import shipwrights.genesis.space.registry.SpaceRegistry;
 import shipwrights.genesis.space.transformProvider.CelestialTransformProvider;
 import shipwrights.genesis.space.transformProvider.StaticTransformProvider;
 import shipwrights.genesis.space.type.BuiltinCelestialTypes;
-import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -85,7 +84,7 @@ class SpaceLevelTest {
         @SuppressWarnings("unchecked")
         java.util.Map<ResourceLocation, Celestial> celestialsMap =
             (java.util.Map<ResourceLocation, Celestial>) celestialsField.get(testRegistry);
-        celestialsMap.put(celestial.getID(), celestial);
+        celestialsMap.put(celestial.ID(), celestial);
     }
 
     @Test

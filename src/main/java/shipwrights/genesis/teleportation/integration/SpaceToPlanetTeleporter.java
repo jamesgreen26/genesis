@@ -75,7 +75,7 @@ public class SpaceToPlanetTeleporter {
 	private static @Nullable ServerLevel getTargetLevel(ServerLevel level, Celestial nearest) {
 		ResourceKey<Level> targetDimension = ResourceKey.create(
 			net.minecraft.core.registries.Registries.DIMENSION,
-			nearest.getID()
+			nearest.ID()
 		);
         return level.getServer().getLevel(targetDimension);
 	}

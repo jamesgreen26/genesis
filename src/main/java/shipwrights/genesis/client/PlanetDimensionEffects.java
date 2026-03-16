@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlanetDimensionEffects extends DimensionSpecialEffects {
-    public static final Vector3dc UP = new Vector3d(0.0f, 1.0f, 0.0f);
-    public static final Vector3dc EAST = new Vector3d(1.0f, 0.0f, 0.0f);
     final SpaceRegistry spaceRegistry;
 
 
@@ -76,7 +74,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         VantagePoint vp = VantagePoint.get(level, new Vector3d(), 0, 0f);
         Celestial celestial = vp instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
         if (celestial == null) return null;
-        return PlanetProperties.get(celestial.getID());
+        return PlanetProperties.get(celestial.ID());
     }
 
     private boolean hasPrecipitation(ClientLevel level) {
@@ -114,8 +112,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         Quaterniondc rot = new Quaterniond(vp.getRotation()).conjugate();
         toStar.rotate(rot);
         
-        double starUpDot = UP.dot(toStar);
-        double starEastDot = EAST.dot(toStar);
+        double starUpDot = GenesisMod.UP.dot(toStar);
+        double starEastDot = GenesisMod.EAST.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
         cachedRawDensity = planetProps != null ? planetProps.atmosphere().density() : 1.0;
         double density = Mth.clamp(cachedRawDensity, 0.0, 1.0);
@@ -331,10 +329,6 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     }
 
     public static double getApparentSunAngle(double starUpDot, double starEastDot) {
-        // is the sun above or below the horizon?
-        boolean sign = Math.signum(starUpDot) < 0;
-        double starDot0To1 = (1 - starEastDot) / 4;
-        // if the sun is below the horizon, make sure the time is correct
-        return sign ? 1 - starDot0To1 : starDot0To1;
+        return GenesisMod.getApparentSunAngle(starUpDot, starEastDot);
     }
 }

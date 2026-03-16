@@ -13,6 +13,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.valkyrienskies.mod.api.ValkyrienSkies;
@@ -44,6 +46,9 @@ import java.util.regex.Pattern;
 public final class GenesisMod {
     public static final String MOD_ID = "genesis";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    public static final Vector3dc UP = new Vector3d(0.0, 1.0, 0.0);
+    public static final Vector3dc EAST = new Vector3d(1.0, 0.0, 0.0);
 
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
@@ -154,6 +159,12 @@ public final class GenesisMod {
 
     public static boolean isSpaceDimension(Level level) {
         return isSpaceDimension(level.dimension().location());
+    }
+
+    public static double getApparentSunAngle(double starUpDot, double starEastDot) {
+        boolean sign = Math.signum(starUpDot) < 0;
+        double starDot0To1 = (1 - starEastDot) / 4;
+        return sign ? 1 - starDot0To1 : starDot0To1;
     }
 
     @ApiStatus.Internal
