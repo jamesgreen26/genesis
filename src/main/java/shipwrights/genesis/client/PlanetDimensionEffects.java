@@ -17,6 +17,7 @@ import org.joml.*;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.planet_properties.PlanetColorPalette;
 import shipwrights.genesis.space.planet_properties.PlanetProperties;
 import shipwrights.genesis.space.registry.SpaceRegistry;
@@ -37,7 +38,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         createStars();
     }
 
-    private static double cachedDensity = 1.0;
+    private static double cachedClampedDensity = 1.0;
+    private static double cachedRawDensity = 1.0;
 
     private final int starBufferCount = 3;
 
@@ -51,27 +53,28 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     public @NotNull Vec3 getBrightnessDependentFogColor(@NotNull Vec3 color, float brightness) {
         return color.multiply(
-                cachedDensity * (brightness * 0.94F + 0.06F),
-                cachedDensity * (brightness * 0.94F + 0.06F),
-                cachedDensity * (brightness * 0.91F + 0.09F)
+                cachedClampedDensity * (brightness * 0.94F + 0.06F),
+                cachedClampedDensity * (brightness * 0.94F + 0.06F),
+                cachedClampedDensity * (brightness * 0.91F + 0.09F)
         );
     }
 
     public boolean isFoggyAt(int i, int j) {
-        return false;
+        return cachedRawDensity > 1.3;
     }
 
     public float @Nullable [] getSunriseColor(float f, float g) {
         float[] original = super.getSunriseColor(f, g);
         if (original != null) {
-            original[3] = (float) (original[3] * cachedDensity);
+            original[3] = (float) (original[3] * cachedClampedDensity);
         }
         return original;
     }
 
     @Nullable
     private PlanetProperties getPlanetProperties(ClientLevel level) {
-        Celestial celestial = GenesisMod.getCelestialForLevel(level);
+        VantagePoint vp = VantagePoint.get(level, new Vector3d(), 0, 0f);
+        Celestial celestial = vp instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
         if (celestial == null) return null;
         return PlanetProperties.get(celestial.getID());
     }
@@ -84,7 +87,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     @Override
     public boolean renderSnowAndRain(ClientLevel level, int ticks, float partialTick, LightTexture lightTexture, double camX, double camY, double camZ) {
-        return !hasPrecipitation(level);
+        return !hasPrecipitation(level) || camY > 360;
     }
 
     @Override
@@ -95,12 +98,12 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
     @Override
     public boolean renderSky(ClientLevel level, int unused, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
 
-        final Celestial celestial = GenesisMod.getCelestialForLevel(level);
-        if (celestial == null) {
+        long gameTime = GenesisMod.getTicks(level);
+        VantagePoint vp = VantagePoint.get(level, new Vector3d(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z), gameTime, partialTick);
+        if (!(vp instanceof VantagePoint.OnCelestial vpOc)) {
             return false;
         }
-        
-        long gameTime = GenesisMod.getTicks(level);
+        final Celestial celestial = vpOc.celestial();
         
         Celestial star = celestial.getNearestStar(gameTime, partialTick);
         
@@ -108,14 +111,21 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
                 .sub(celestial.getPosition(gameTime, partialTick))
                 .normalize();
         
-        Quaterniondc rot = new Quaterniond(celestial.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
+        Quaterniondc rot = new Quaterniond(vp.getRotation()).conjugate();
         toStar.rotate(rot);
         
         double starUpDot = UP.dot(toStar);
         double starEastDot = EAST.dot(toStar);
         PlanetProperties planetProps = getPlanetProperties(level);
-        double density = Mth.clamp(planetProps != null ? planetProps.atmosphere().density() : 1.0, 0.0, 1.0);
-        cachedDensity = density;
+        cachedRawDensity = planetProps != null ? planetProps.atmosphere().density() : 1.0;
+        double density = Mth.clamp(cachedRawDensity, 0.0, 1.0);
+
+        // fade out density with camera y level, from y=320 to y=GenesisMod.atmosphereEntryHeight
+        double cameraY = camera.getPosition().y;
+        double densityFade = 1.0 - Mth.clamp((cameraY - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+        density *= densityFade;
+
+        cachedClampedDensity = density;
         PlanetColorPalette palette = planetProps != null ? planetProps.atmosphere().color() : new PlanetColorPalette.Overworld();
 
         float rainLevel = hasPrecipitation(level) ? level.getRainLevel(partialTick) : 0f;
@@ -134,10 +144,12 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         RenderSystem.depthMask(false);
         RenderSystem.setShaderColor(skyR, skyG, skyB, 1.0F);
         ShaderInstance shader = RenderSystem.getShader();
-        VertexBuffer skyBuffer = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getSkyBuffer();
-        skyBuffer.bind();
-        skyBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, shader);
-        VertexBuffer.unbind();
+        if (shader != null) {
+            VertexBuffer skyBuffer = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getSkyBuffer();
+            skyBuffer.bind();
+            skyBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, shader);
+            VertexBuffer.unbind();
+        }
         
         RenderSystem.enableBlend();
         float dayTime = level.dimensionType().timeOfDay(fakeTime);
@@ -311,9 +323,9 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             b = b * (1.0F - f11) + f11;
         }
 
-        r *= (float) cachedDensity;
-        g *= (float) cachedDensity;
-        b *= (float) cachedDensity;
+        r *= (float) cachedClampedDensity;
+        g *= (float) cachedClampedDensity;
+        b *= (float) cachedClampedDensity;
 
         return new Vec3(r, g, b);
     }

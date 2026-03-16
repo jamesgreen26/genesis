@@ -3,6 +3,19 @@ plugins {
     id 'net.neoforged.moddev.legacyforge' version '2.0.137'
 }
 
+configurations {
+    clientOnlyMods {
+        // Request Mojang-mapped ("named") artifacts so NeoForged's SRG→Mojang
+        // RemappingTransform is applied, matching what modRuntimeOnly gets.
+        attributes {
+            attribute(
+                Attribute.of("net.neoforged.moddevgradle.legacy.minecraft_mappings.v2", Named),
+                objects.named(Named, "named")
+            )
+        }
+    }
+}
+
 group = project.maven_group
 version = project.mod_version
 
@@ -24,6 +37,10 @@ legacyForge {
         }
         server {
             server()
+        }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'forge.enabledGameTestNamespaces', 'genesis'
         }
     }
 
@@ -133,9 +150,8 @@ dependencies {
 
     jarJar(modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge"))
 
-    modImplementation("ace.actually.radios:radios-1.20.1:1.0.0")
+    modImplementation("ace.actually.radios:radios:1.2.0")
 
-    //implementation("org.maplibre:earcut4j:3.0.0")
     additionalRuntimeClasspath("org.maplibre:earcut4j:3.0.0")
     jarJar(implementation("org.maplibre:earcut4j:3.0.0")) {
         version {
@@ -144,6 +160,7 @@ dependencies {
         }
     }
 
+    //noinspection DifferentStdlibGradleVersion
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
 
     // Test dependencies
@@ -152,6 +169,16 @@ dependencies {
     testImplementation("org.joml:joml-primitives:1.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
+    modImplementation("maven.modrinth:zps:1.20.1-2.0.0")
+    clientOnlyMods("maven.modrinth:fusion-connected-textures:1.2.12-forge-mc1.20.1")
+    modRuntimeOnly("maven.modrinth:zpl:1.20.1-1.5.0")
+
+}
+
+afterEvaluate {
+    tasks.named('runClient') {
+        classpath += configurations.clientOnlyMods.incoming.files
+    }
 }
 
 test {
@@ -178,23 +205,6 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 17
-}
-
-// Configure Maven publishing.
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
-    }
 }
 
 sourceSets {

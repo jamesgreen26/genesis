@@ -1,15 +1,5 @@
 package shipwrights.genesis.content.blockentity;
 
-import org.joml.Quaterniond;
-import org.joml.Vector3dc;
-import org.valkyrienskies.core.api.ships.ServerShip;
-import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.content.block.VoidCoreBlock;
-import shipwrights.genesis.networking.GenesisNetworking;
-import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
-import shipwrights.genesis.networking.VoidEngineSoundPacket;
-import shipwrights.genesis.networking.WormholeTravelSoundPacket;
-import shipwrights.genesis.teleportation.TeleportationHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -26,9 +16,20 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.content.block.VoidCoreBlock;
+import shipwrights.genesis.networking.GenesisNetworking;
+import shipwrights.genesis.networking.StopVoidEngineStartSoundPacket;
+import shipwrights.genesis.networking.VoidEngineSoundPacket;
+import shipwrights.genesis.networking.WormholeTravelSoundPacket;
+import shipwrights.genesis.teleportation.DimensionTravelTeleporter;
+import shipwrights.genesis.teleportation.TravelDirection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -129,15 +130,10 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                                 // Get wormhole level
                                 ServerLevel wormholeLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, GenesisMod.WORMHOLE_DIM));
                                 if (wormholeLevel != null) {
-                                    // Use Genesis TeleportationHandler
-                                    TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, wormholeLevel, false);
-
                                     // Teleport ship to wormhole - scale position down
-                                    Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(1 / 32.0, new Vector3d());
-                                    teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
-                                    teleportationHandler.finalizeTeleport();
 
-                                    Vector3d worldPos = ship.getShipToWorld().transformPosition(center.x, center.y, center.z, new Vector3d());
+                                    Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(1 / 32.0, new Vector3d());
+                                    DimensionTravelTeleporter.teleportShip((ServerShip) ship, TravelDirection.PLANET_TO_SPACE, (ServerLevel) level, wormholeLevel, targetPos, new Quaterniond());
 
                                     //sendWormholeTravelPacket
                                     GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
@@ -157,12 +153,9 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                                 // Auto-return to saved dimension when in wormhole
                                 ServerLevel returnLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, voidEngineInterface.returningDim));
                                 if (returnLevel != null) {
-                                    TeleportationHandler teleportationHandler = new TeleportationHandler((ServerLevel) level, returnLevel, true);
-
                                     // Teleport ship back - scale position up
                                     Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(32.0, new Vector3d());
-                                    teleportationHandler.addShip((ServerShip) ship, targetPos, new Quaterniond());
-                                    teleportationHandler.finalizeTeleport();
+                                    DimensionTravelTeleporter.teleportShip((ServerShip) ship, TravelDirection.SPACE_TO_PLANET, (ServerLevel) level, returnLevel, targetPos, new Quaterniond());
 
                                     //sendWormholeTravelPacket
                                     GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));

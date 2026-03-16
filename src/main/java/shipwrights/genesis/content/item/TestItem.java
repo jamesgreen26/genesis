@@ -1,24 +1,18 @@
 package shipwrights.genesis.content.item;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
-import org.valkyrienskies.core.api.ships.ServerShip;
-import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.SpaceLevel;
-import shipwrights.genesis.teleportation.VSUtils;
 
 public class TestItem extends Item {
     public TestItem(Properties arg) {
@@ -31,9 +25,7 @@ public class TestItem extends Item {
     public InteractionResult useOn(UseOnContext arg) {
         if(arg.getLevel() instanceof ServerLevel serverLevel && arg.getHand()==InteractionHand.MAIN_HAND)
         {
-            ServerShip ship = VSGameUtilsKt.getLoadedShipManagingPos(serverLevel,arg.getClickedPos());
 
-            VSUtils.moveShipToDimensionAt(serverLevel,ship,"minecraft:the_nether",new BlockPos(0,200,0).getCenter());
         }
         return super.useOn(arg);
     }

@@ -4,17 +4,16 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.lwjgl.opengl.GL11;
-import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetTextures;
 import shipwrights.genesis.client.ShaderRegistry;
@@ -26,20 +25,22 @@ import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
-import static shipwrights.genesis.client.ShaderRegistry.*;
+import static shipwrights.genesis.client.ShaderRegistry.getPlanetShadowRenderType;
+import static shipwrights.genesis.client.ShaderRegistry.getTexturedPlanetRenderType;
 
 public class PlanetRenderer implements CelestialRenderer {
 
     private static final boolean USE_TEST_SHADOWS = false; // Set to false to use real shadows
 
     @Override
-    public void teardown(@NotNull RenderLevelStageEvent event, @Nullable Celestial vantagePoint) {
+    public void teardown(@NotNull RenderLevelStageEvent event, @NotNull VantagePoint vantagePoint) {
         CelestialRenderer.super.teardown(event, vantagePoint);
 
         RenderSystem.enableDepthTest();
@@ -50,7 +51,7 @@ public class PlanetRenderer implements CelestialRenderer {
     }
 
     @Override
-    public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @Nullable Celestial vantagePoint) {
+    public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @NotNull VantagePoint vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
@@ -69,7 +70,9 @@ public class PlanetRenderer implements CelestialRenderer {
             List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
             List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, partialTick)).toList();
             Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
-            Vector3d lightDir = new Vector3d(position).sub(starPosition);
+
+
+            Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(vantagePoint.getRotation().conjugate(new Quaterniond()));
             ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
             shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
 
@@ -77,7 +80,7 @@ public class PlanetRenderer implements CelestialRenderer {
         }
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
-        if (vantagePoint != null && vantagePoint.equals(toRender)) {
+        if (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender)) {
             var camera = event.getCamera();
             halfExtent = Minecraft.getInstance().gameRenderer.getRenderDistance();
             position = new Vector3d(
@@ -85,7 +88,7 @@ public class PlanetRenderer implements CelestialRenderer {
                 - (camera.getPosition().y / 16) - halfExtent - 64,
                 0
             );
-            rotation = new Quaterniond().rotateX(Math.PI/2);
+            rotation = oc.cameraRotationFromNorthPole();
             int buildHeight = level.getMaxBuildHeight();
             float alphaInterpolateStart = (float) (halfExtent + buildHeight / 3f);
             float alphaInterpolateEnd = (float) (halfExtent + buildHeight);
@@ -93,10 +96,15 @@ public class PlanetRenderer implements CelestialRenderer {
             float cameraY = (float) camera.getPosition().y;
             alpha = Math.max(0f, Math.min(1f, (cameraY - alphaInterpolateStart) / (alphaInterpolateEnd - alphaInterpolateStart)));
         }
-        // Transform by inverse of vantage point if present
-        else if (vantagePoint != null) {
-            Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
-            Quaterniondc vantageRot = vantagePoint.getRotation(ticks, partialTick);
+        // In space: planets are at absolute positions, so subtract camera position
+        else if (vantagePoint instanceof VantagePoint.InSpace) {
+            Vec3 cameraPos = event.getCamera().getPosition();
+            position = new Vector3d(position).sub(cameraPos.x, cameraPos.y, cameraPos.z);
+        }
+        // Transform by inverse of vantage point (OnCelestial)
+        else {
+            Vector3dc vantagePos = vantagePoint.getPosition();
+            Quaterniondc vantageRot = vantagePoint.getRotation();
 
             // Calculate relative position (subtract vantage point position)
             Vector3d relativePos = new Vector3d(
@@ -105,8 +113,7 @@ public class PlanetRenderer implements CelestialRenderer {
                 position.z() - vantagePos.z()
             );
 
-            // Transform the view to the side of the planet
-            Quaterniond planetRotation = new Quaterniond().rotateX(- Math.PI/2);
+            Quaterniond planetRotation = new Quaterniond();
 
             // Apply inverse rotation of vantage point
             Quaterniond inverseVantageRot = planetRotation.premul(vantageRot).conjugate();
@@ -115,8 +122,6 @@ public class PlanetRenderer implements CelestialRenderer {
 
             // Apply inverse rotation to the celestial's own rotation
             rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
-        } else {
-            position = position.sub(VectorConversionsMCKt.toJOML(event.getCamera().getPosition()), new Vector3d());
         }
 
         renderPlanetAt(toRender.getID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);

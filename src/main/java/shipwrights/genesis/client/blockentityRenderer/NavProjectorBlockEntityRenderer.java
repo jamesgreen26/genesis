@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.blockentity.NavProjectorBlockEntity;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -64,7 +65,8 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
-        Celestial currentPlanet = GenesisMod.getCelestialForLevel(level);
+        VantagePoint vp = VantagePoint.get(level, new Vector3d(), ticks, partialTick);
+        Celestial currentPlanet = vp instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
 
         if (currentPlanet != null) {
             poseStack.mulPose(new Quaternionf(currentPlanet.getRotation(ticks, partialTick)).invert());

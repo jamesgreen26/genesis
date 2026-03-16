@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.planet_properties.PlanetProperties;
 
 import java.lang.Math;
@@ -26,25 +27,28 @@ public class FogRendererMixin {
     @WrapOperation(method = "setupColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getSkyColor(Lnet/minecraft/world/phys/Vec3;F)Lnet/minecraft/world/phys/Vec3;"))
     private static Vec3 genesis$getSkyColor(ClientLevel instance, Vec3 pos, float partialTick, Operation<Vec3> original,
                                             @Share("apparentAngle") LocalDoubleRef apparentAngle) {
-        Celestial vantagePoint = GenesisMod.getCelestialForLevel(instance);
-        if (vantagePoint != null) {
-            long gameTime = GenesisMod.getTicks(instance);
-            
+        long gameTime = GenesisMod.getTicks(instance);
+        VantagePoint vp = VantagePoint.get(instance, new Vector3d(pos.x, pos.y, pos.z), gameTime, partialTick);
+        if (vp instanceof VantagePoint.OnCelestial oc) {
+            Celestial vantagePoint = oc.celestial();
+
             Celestial star = vantagePoint.getNearestStar(gameTime, partialTick);
             Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
                     .sub(vantagePoint.getPosition(gameTime, partialTick))
                     .normalize();
-            
+
             Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
             toStar.rotate(rot);
-            
-            double starUpDot = PlanetDimensionEffects.UP.dot(toStar);
-            double starEastDot = PlanetDimensionEffects.EAST.dot(toStar);
-            
+
+            Vector3d up = new Vector3d(PlanetDimensionEffects.UP).rotate(oc.cameraRotationFromNorthPole());
+            Vector3d east = new Vector3d(PlanetDimensionEffects.EAST).rotate(oc.cameraRotationFromNorthPole());
+            double starUpDot = up.dot(toStar);
+            double starEastDot = east.dot(toStar);
+
             double _apparentAngle = PlanetDimensionEffects.getApparentSunAngle(starUpDot, starEastDot);
             apparentAngle.set(_apparentAngle);
             long fakeTime = (long) (_apparentAngle * 24000);
-            
+
             return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.getID()).atmosphere().color());
         }
         
@@ -65,18 +69,19 @@ public class FogRendererMixin {
     @WrapOperation(method = "setupColor", at = @At(value = "INVOKE", target = "Lorg/joml/Vector3f;dot(Lorg/joml/Vector3fc;)F", remap = false))
     private static float wrapViewDirectionDot(Vector3f instance, Vector3fc v, Operation<Float> original, @Local(argsOnly = true, ordinal = 0) float partialTick,
                                               @Local(argsOnly = true) ClientLevel level) {
-        Celestial vantagePoint = GenesisMod.getCelestialForLevel(level);
-        if (vantagePoint != null) {
-            long gameTime = GenesisMod.getTicks(level);
-            
+        long gameTime = GenesisMod.getTicks(level);
+        VantagePoint vp2 = VantagePoint.get(level, new Vector3d(), gameTime, partialTick);
+        if (vp2 instanceof VantagePoint.OnCelestial oc) {
+            Celestial vantagePoint = oc.celestial();
+
             Celestial star = vantagePoint.getNearestStar(gameTime, partialTick);
             Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
                     .sub(vantagePoint.getPosition(gameTime, partialTick))
                     .normalize();
-            
+
             Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
             toStar.rotate(rot);
-            
+
             ((Vector3f) v).set(toStar);
         }
         return original.call(instance, v);
