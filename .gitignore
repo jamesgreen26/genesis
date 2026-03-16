@@ -13,4 +13,5 @@ run-data/
 **/.obsidian/
 /logs
 /local
+/output
 gametest.log
