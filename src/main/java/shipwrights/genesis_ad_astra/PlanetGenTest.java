@@ -51,7 +51,7 @@ public class PlanetGenTest {
                     + " (" + seedImage.getWidth() + "x" + seedImage.getHeight() + ")");
 
             String baseName = stripExtension(inputFile.getName());
-            BufferedImage[] faces = gen.generate(seedImage);
+            BufferedImage[] faces = gen.generate(seedImage, baseName);
 
 
             for (int f = 0; f < 6; f++) {
