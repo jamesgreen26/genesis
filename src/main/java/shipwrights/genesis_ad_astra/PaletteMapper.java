@@ -37,7 +37,7 @@ public class PaletteMapper {
      * Larger = more colour transitions visible at boundaries.
      * Should be roughly half the distance between adjacent palette colours in RGB space.
      */
-    private static final int DITHER_SPREAD = 28;
+    private static final int DITHER_SPREAD = 4;
 
     private final List<PaletteColor> palette;
     private final boolean dither;

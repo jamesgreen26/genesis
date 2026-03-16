@@ -40,19 +40,22 @@ public class TextureSynthesizer {
     private static final int BLOCK_SIZE = 32;
 
     /** Block size variation range (average remains BLOCK_SIZE). */
-    private static final int BLOCK_SIZE_VARIATION = 8;
-
-    /** Noise scale that drives block-size changes (lower = bigger regions). */
-    private static final double BLOCK_SIZE_NOISE_SCALE = 0.9;
-
-    /** Per-block origin jitter to avoid low-res grid alignment. */
-    private static final int BLOCK_JITTER = 8;
-
-    /** Noise scale that drives block jitter. */
-    private static final double BLOCK_JITTER_SCALE = 1.5;
+    private static final int BLOCK_SIZE_VARIATION = 14;
 
     /** How much of the fine noise to mix into the coarse block value. */
     private static final double DETAIL_BLEND = 0.18;
+
+    /** Compress the value range toward mid-tones to keep all palette colors visible. */
+    private static final double VALUE_RANGE = 0.68;
+
+    /** Extra bias toward mid-tones after range compression. */
+    private static final double MID_BIAS = 0.10;
+
+    /** Fraction of the surface that keeps the blocky look. */
+    private static final double BLOCKY_COVERAGE = 0.15;
+
+    /** Scale of the blocky mask (lower = larger regions of blockiness). */
+    private static final double BLOCKY_MASK_SCALE = 0.45;
 
     public TextureSynthesizer(
             CubeMapper    cubeMapper,
@@ -134,40 +137,38 @@ public class TextureSynthesizer {
             }
         }
 
-        // Step 2 – write pixels using a jittered, variable-size block field
+        // Step 2 – write pixels using a variable-size block field
+        AxisBlocks xBlocks = buildAxisBlocks(faceIdx, res, true);
+        AxisBlocks yBlocks = buildAxisBlocks(faceIdx, res, false);
         for (int y = 0; y < res; y++) {
+            int by = yBlocks.start[y];
+            int bH = yBlocks.size[y];
             for (int x = 0; x < res; x++) {
-                int cellX = x / BLOCK_SIZE;
-                int cellY = y / BLOCK_SIZE;
-                int cellOriginX = cellX * BLOCK_SIZE;
-                int cellOriginY = cellY * BLOCK_SIZE;
-                int cellCenterX = clamp(cellOriginX + BLOCK_SIZE / 2, 0, res - 1);
-                int cellCenterY = clamp(cellOriginY + BLOCK_SIZE / 2, 0, res - 1);
-                Vec3 cellDir = cubeMapper.toDirection(faceIdx, cellCenterX, cellCenterY);
-
-                // Vary block size per region but keep average at BLOCK_SIZE
-                double sizeNoise = noiseModel.fractal(cellDir.scale(BLOCK_SIZE_NOISE_SCALE), 1);
-                int size = BLOCK_SIZE - BLOCK_SIZE_VARIATION
-                        + (int) Math.round(sizeNoise * (BLOCK_SIZE_VARIATION * 2.0));
-                if (size < 4) size = 4;
-
-                // Jitter the block origin to avoid low-res grid alignment
-                double jitterA = noiseModel.fractal(cellDir.scale(BLOCK_JITTER_SCALE), 1);
-                double jitterB = noiseModel.fractal(cellDir.scale(BLOCK_JITTER_SCALE + 5.3), 1);
-                int jx = (int) Math.round((jitterA * 2.0 - 1.0) * BLOCK_JITTER);
-                int jy = (int) Math.round((jitterB * 2.0 - 1.0) * BLOCK_JITTER);
-
-                int bx = cellOriginX + jx;
-                int by = cellOriginY + jy;
-
-                int cx = clamp(bx + size / 2, 0, res - 1);
-                int cy = clamp(by + size / 2, 0, res - 1);
-                Vec3 baseDir = cubeMapper.toDirection(faceIdx, cx, cy);
-                double baseVal = noiseModel.sample(generatorType, baseDir);
+                int bx = xBlocks.start[x];
+                int bW = xBlocks.size[x];
 
                 Vec3 dir = cubeMapper.toDirection(faceIdx, x, y);
                 double fineVal = noiseModel.sample(generatorType, dir);
-                double val = baseVal + (fineVal - baseVal) * DETAIL_BLEND;
+
+                // Low-frequency mask to decide whether blockiness applies here
+                double mask = noiseModel.fractal(dir.scale(BLOCKY_MASK_SCALE), 1);
+                boolean useBlocky = mask < BLOCKY_COVERAGE;
+
+                double val;
+                if (useBlocky) {
+                    int cx = clamp(bx + bW / 2, 0, res - 1);
+                    int cy = clamp(by + bH / 2, 0, res - 1);
+                    Vec3 baseDir = cubeMapper.toDirection(faceIdx, cx, cy);
+                    double baseVal = noiseModel.sample(generatorType, baseDir);
+                    val = baseVal + (fineVal - baseVal) * DETAIL_BLEND;
+                } else {
+                    val = fineVal;
+                }
+                // Pull values away from extremes so mid-palette colors remain visible
+                val = 0.5 + (val - 0.5) * VALUE_RANGE;
+                val = val * (1.0 - MID_BIAS) + 0.5 * MID_BIAS;
+                if (val < 0.0) val = 0.0;
+                if (val > 1.0) val = 1.0;
                 int noiseGrey = clamp((int) (val * 255));
 
                 int pr, pg, pb;
@@ -227,5 +228,48 @@ public class TextureSynthesizer {
 
     private int lerp(int a, int b, float t) {
         return clamp(Math.round(a + t * (b - a)));
+    }
+
+    private AxisBlocks buildAxisBlocks(int faceIdx, int res, boolean horizontal) {
+        int[] start = new int[res];
+        int[] size = new int[res];
+        int pos = 0;
+        int blockIndex = 0;
+        while (pos < res) {
+            int s = blockSizeFor(faceIdx, horizontal, blockIndex);
+            if (s < 4) s = 4;
+            int end = Math.min(res, pos + s);
+            for (int i = pos; i < end; i++) {
+                start[i] = pos;
+                size[i] = s;
+            }
+            pos = end;
+            blockIndex++;
+        }
+        return new AxisBlocks(start, size);
+    }
+
+    private int blockSizeFor(int faceIdx, boolean horizontal, int blockIndex) {
+        long seed = ((long) faceIdx << 32)
+                ^ (horizontal ? 0x9e3779b97f4a7c15L : 0xC2B2AE3D27D4EB4FL)
+                ^ (long) blockIndex * 0x165667B19E3779F9L;
+        seed ^= (seed >>> 33);
+        seed *= 0xff51afd7ed558ccdL;
+        seed ^= (seed >>> 33);
+        seed *= 0xc4ceb9fe1a85ec53L;
+        seed ^= (seed >>> 33);
+        double n = (seed & 0xFFFFFFFFL) / (double) 0xFFFFFFFFL; // 0..1
+        int delta = (int) Math.round((n * 2.0 - 1.0) * BLOCK_SIZE_VARIATION);
+        return BLOCK_SIZE + delta;
+    }
+
+    private static final class AxisBlocks {
+        final int[] start;
+        final int[] size;
+
+        private AxisBlocks(int[] start, int[] size) {
+            this.start = start;
+            this.size = size;
+        }
     }
 }
