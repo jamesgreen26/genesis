@@ -42,7 +42,7 @@ public class PlanetTextureGenerator {
      * @param inputTexture a 8–32 px RGB image representing one face of the planet
      * @return array of 6 BufferedImage objects (256×256 each, TYPE_INT_RGB)
      */
-    public BufferedImage[] generate(BufferedImage inputTexture) {
+    public BufferedImage[] generate(BufferedImage inputTexture, int seed) {
         long start = System.currentTimeMillis();
 
         // -----------------------------------------------------------------
@@ -79,7 +79,7 @@ public class PlanetTextureGenerator {
         // -----------------------------------------------------------------
         log("Step 5: Synthesizing " + resolution + "x" + resolution + " faces...");
         CubeMapper   cubeMapper = new CubeMapper(resolution);
-        NoiseModel   noiseModel = new NoiseModel(noiseSeed);
+        NoiseModel   noiseModel = new NoiseModel(seed);
         TextureSynthesizer synth = new TextureSynthesizer(cubeMapper, noiseModel, patchLibrary, genType);
 
         BufferedImage[] faces = synth.synthesize();

@@ -46,12 +46,13 @@ public class PlanetGenTest {
         String[] faceNames = {"+X", "-X", "+Y", "-Y", "+Z", "-Z"};
         new File("output").mkdirs();
         for (File inputFile : inputFiles) {
-            BufferedImage seed = ImageIO.read(inputFile);
+            BufferedImage seedImage = ImageIO.read(inputFile);
             System.out.println("Loaded seed texture: " + inputFile.getPath()
-                    + " (" + seed.getWidth() + "x" + seed.getHeight() + ")");
+                    + " (" + seedImage.getWidth() + "x" + seedImage.getHeight() + ")");
 
-            BufferedImage[] faces = gen.generate(seed);
             String baseName = stripExtension(inputFile.getName());
+            BufferedImage[] faces = gen.generate(seedImage, baseName.hashCode());
+
 
             for (int f = 0; f < 6; f++) {
                 String filename = "output/face_" + f + "_" + faceNames[f].replace("+","pos").replace("-","neg")
