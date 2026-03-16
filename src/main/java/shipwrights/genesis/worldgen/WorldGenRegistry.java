@@ -23,6 +23,10 @@ public class WorldGenRegistry {
                     AsteroidBelt.MAP_CODEC.codec()
             );
             helper.register(
+                    ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "radial_gradient"),
+                    RadialGradientDensity.MAP_CODEC.codec()
+            );
+            helper.register(
                     CraterNoise.resourceLocation,
                     CraterNoise.CODEC.codec()
             );

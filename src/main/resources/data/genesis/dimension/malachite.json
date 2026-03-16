@@ -7,9 +7,9 @@
           "parameters": {
             "erosion": 0.3899,
             "depth": 0,
-            "weirdness": 0.7,
+            "weirdness": 0.0,
             "offset": 0,
-            "temperature": 0.4482,
+            "temperature": 0.0,
             "humidity": 0.94,
             "continentalness": 0.1
           },
@@ -19,9 +19,9 @@
           "parameters": {
             "erosion": 0.3899,
             "depth": 0,
-            "weirdness": 0.25,
+            "weirdness": 0.0,
             "offset": 0,
-            "temperature": 0.5482,
+            "temperature": 0.5,
             "humidity": 0.94,
             "continentalness": 0.5
           },
@@ -31,9 +31,9 @@
           "parameters": {
             "erosion": 0.3899,
             "depth": 0,
-            "weirdness": 0.5,
+            "weirdness": 0.0,
             "offset": 0,
-            "temperature": 0.6482,
+            "temperature": 1.0,
             "humidity": 0.94,
             "continentalness": 0.3
           },
