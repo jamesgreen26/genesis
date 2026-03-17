@@ -69,5 +69,11 @@ public class GenesisNetworking {
                 .decoder(StarPropertiesSyncPacket::decode)
                 .consumerMainThread(StarPropertiesSyncPacket::handle)
                 .add();
+
+        INSTANCE.messageBuilder(EnteringWarpPacket.class, 6)
+                .encoder(EnteringWarpPacket::encode)
+                .decoder(EnteringWarpPacket::decode)
+                .consumerMainThread(EnteringWarpPacket::handle)
+                .add();
     }
 }
