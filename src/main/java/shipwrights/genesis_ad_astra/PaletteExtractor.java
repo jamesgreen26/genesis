@@ -59,6 +59,8 @@ public class PaletteExtractor {
 
         // Sort by weight descending
         palette.sort((a, b2) -> Float.compare(b2.weight, a.weight));
+        palette = interpolatePalette(palette);
+        normalizeWeights(palette);
         return palette;
     }
 
@@ -145,5 +147,31 @@ public class PaletteExtractor {
                 centroids[c][2] = (int)(sums[c][2] / counts[c]);
             }
         }
+    }
+
+    private List<PaletteColor> interpolatePalette(List<PaletteColor> base) {
+        int n = base.size();
+        if (n < 2) return base;
+        List<PaletteColor> expanded = new ArrayList<>(n * 2 - 1);
+        for (int i = 0; i < n - 1; i++) {
+            PaletteColor a = base.get(i);
+            PaletteColor b = base.get(i + 1);
+            expanded.add(a);
+            expanded.add(new PaletteColor(
+                    (a.r + b.r) / 2,
+                    (a.g + b.g) / 2,
+                    (a.b + b.b) / 2,
+                    (a.weight + b.weight) * 0.5f
+            ));
+        }
+        expanded.add(base.get(n - 1));
+        return expanded;
+    }
+
+    private void normalizeWeights(List<PaletteColor> palette) {
+        float total = 0f;
+        for (PaletteColor c : palette) total += c.weight;
+        if (total <= 0f) return;
+        for (PaletteColor c : palette) c.weight /= total;
     }
 }
