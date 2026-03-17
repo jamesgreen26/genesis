@@ -17,6 +17,7 @@ import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
+import shipwrights.genesis.space.star_properties.StarProperties;
 
 import java.lang.Math;
 
@@ -52,13 +53,15 @@ public class StarRenderer implements CelestialRenderer {
         // Apply inverse rotation to the celestial's own rotation
         rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
 
+        StarProperties starProps = StarProperties.get(toRender.ID());
+
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(), position, rotation);
+        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(), position, rotation, starProps);
         bufferSource.endBatch(getSunRenderType());
     }
 
-    private void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation) {
+    private void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, StarProperties starProps) {
 
         Vector3f cameraPos0 = new Vector3f(
             (float) cameraPos.x,
@@ -83,6 +86,24 @@ public class StarRenderer implements CelestialRenderer {
              if (uniform1 != null) {
                  uniform1.set(halfSize);
              }
+
+            Uniform color0 = shader.getUniform("Color0");
+            if (color0 != null) {
+                if (starProps != null) {
+                    color0.set(starProps.r0() / 255f, starProps.g0() / 255f, starProps.b0() / 255f);
+                } else {
+                    color0.set(1.0f, 0.0f, 0.0f);
+                }
+            }
+
+            Uniform color1 = shader.getUniform("Color1");
+            if (color1 != null) {
+                if (starProps != null) {
+                    color1.set(starProps.r1() / 255f, starProps.g1() / 255f, starProps.b1() / 255f);
+                } else {
+                    color1.set(1.0f, 0.8f, 0.15f);
+                }
+            }
         }
 
         Matrix4f matrix;

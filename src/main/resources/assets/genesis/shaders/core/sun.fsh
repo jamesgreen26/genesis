@@ -11,6 +11,10 @@ const vec3 v_cube_center = vec3(0);
 const vec3 cube_rotationXYZ = vec3(0, 0, 0);
 const float euler = 2.718281828459;
 
+uniform vec3 Color0;
+uniform vec3 Color1;
+const vec3 white  = vec3(1.0, 1.0, 1.0);
+
 float smoothNormalize(float it) {
     return -log(1/euler + pow(euler, -4 * (it + 0.11467)));
 }
@@ -26,20 +30,14 @@ float smoothMax3(vec3 p, float roundness) {
 vec3 temperatureToColor(float t) {
     t = clamp(t, 0.0, 1.0);
 
-    const vec3 red    = vec3(1.0, 0.0, 0.0);
-    const vec3 orange = vec3(1.0, 0.0, 0.0);
-    const vec3 yellow = vec3(1.0, 0.8, 0.15);
-    const vec3 white  = vec3(1.0, 1.0, 1.0);
-
     if (t < 0.33) {
-        float k = smoothstep(0.0, 0.33, t);
-        return mix(red, orange, k);
+        return Color0;
     } else if (t < 0.66) {
         float k = smoothstep(0.33, 0.66, t);
-        return mix(orange, yellow, k);
+        return mix(Color0, Color1, k);
     } else {
         float k = smoothstep(0.66, 1.0, t);
-        return mix(yellow, white, k);
+        return mix(Color1, white, k);
     }
 }
 
