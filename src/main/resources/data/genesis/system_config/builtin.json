@@ -43,15 +43,13 @@
     {
       "ID": "genesis:testbh",
       "type": "genesis:blackhole",
-      "size": 5,
+      "size": 2048,
       "gravity": 8,
       "transformProvider": {
-        "type": "genesis:orbiting",
-        "parentID": "genesis:moon",
-        "seed": 97104,
-        "orbitDistance": 100,
-        "orbitTime": 4809,
-        "dayLength": 1090
+        "type": "genesis:static",
+        "x": 0.0,
+        "y": -200000.0,
+        "z": -200000.0
       }
     }
   ]
