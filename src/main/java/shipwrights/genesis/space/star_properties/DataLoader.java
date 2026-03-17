@@ -1,4 +1,4 @@
-package shipwrights.genesis.space.registry;
+package shipwrights.genesis.space.star_properties;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -14,46 +14,36 @@ import shipwrights.genesis.GenesisMod;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DataLoader {
-    private static final List<SystemConfigModel> loadedConfigs = new CopyOnWriteArrayList<>();
-
-    static {
-        GenesisMod.onRegisterCelestialsEvent(event -> {
-            for (SystemConfigModel config : loadedConfigs) {
-                config.celestials().forEach(event::accept);
-            }
-        });
-    }
 
     @SubscribeEvent
     public static void onRegisterReloadListener(AddReloadListenerEvent event) {
         event.addListener((ResourceManagerReloadListener) resourceManager -> {
-            loadedConfigs.clear();
-            Map<ResourceLocation, Resource> resources = resourceManager.listResources("system_config", location ->
-                    !location.getPath().contains("planet_properties/")
-                            && !location.getPath().contains("star_properties/"));
+            StarProperties.reset();
+            Map<ResourceLocation, Resource> resources = resourceManager.listResources(
+                    "system_config/star_properties", location -> location.getPath().endsWith(".json"));
 
             for (Map.Entry<ResourceLocation, Resource> entry : resources.entrySet()) {
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(entry.getValue().open(), StandardCharsets.UTF_8))) {
 
                     JsonElement jsonElement = JsonParser.parseReader(reader);
-                    SystemConfigModel config = SystemConfigModel.CODEC.parse(JsonOps.INSTANCE, jsonElement)
-                            .getOrThrow(false, SpaceRegistry.LOGGER::error);
+                    StarPropertiesModel model = StarPropertiesModel.CODEC.parse(JsonOps.INSTANCE, jsonElement)
+                            .getOrThrow(false, GenesisMod.LOGGER::error);
 
-                    loadedConfigs.add(config);
+                    for (StarProperties props : model.stars()) {
+                        StarProperties.register(props.id(), props);
+                    }
 
                 } catch (Exception e) {
-                    SpaceRegistry.LOGGER.error("Failed to load system_config data from: {}", entry.getKey(), e);
+                    GenesisMod.LOGGER.error("Failed to load star_properties from: {}", entry.getKey(), e);
                 }
             }
 
-            GenesisMod.SPACE_REGISTRY.bake();
+            StarPropertiesSyncPacket.sendToAllClients();
         });
     }
 }
