@@ -20,17 +20,6 @@ public abstract class MinecraftMixin {
     @Shadow
     static Minecraft instance;
 
-    @Shadow
-    public Screen screen;
-
-    /**
-     * Note: this is not up to date on actual dimension changes.
-     * We only update this from the dimension transfer screen, and
-     * only use it for the dimension transfer screen
-     */
-    @Unique
-    private ResourceLocation previousDim;
-
     // This is called twice.
     // Once on leaving the current level
     // And once when in the new level
