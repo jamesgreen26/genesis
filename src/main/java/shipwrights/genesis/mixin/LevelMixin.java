@@ -2,6 +2,7 @@ package shipwrights.genesis.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
@@ -22,22 +23,21 @@ public abstract class LevelMixin {
         VantagePoint vp = VantagePoint.get(thisAsLevel, new Vector3d(), gameTime, 0f);
 
         if (vp instanceof VantagePoint.OnCelestial oc) {
-            Celestial celestial = oc.celestial();
-            Celestial star = celestial.getNearestStar(gameTime, 0f);
-
-            Vector3d toStar = new Vector3d(star.getPosition(gameTime, 0f))
-                    .sub(celestial.getPosition(gameTime, 0f))
-                    .normalize();
-
-            Quaterniondc rot = new Quaterniond(oc.getRotation()).conjugate();
-            toStar.rotate(rot);
-
-            double apparentAngle = GenesisMod.getApparentSunAngle(
-                    GenesisMod.UP.dot(toStar),
-                    GenesisMod.EAST.dot(toStar));
-            return (long)(apparentAngle * 24000);
+            return (long)(genesis$getApparentAngle(oc, gameTime, 0f) * 24000);
         }
         return original.call();
+    }
+
+    @WrapMethod(method = "getSunAngle")
+    public float getSunAngleWrap(float partialTick, Operation<Float> original) {
+        Level thisAsLevel = (Level)(Object)this;
+        long gameTime = GenesisMod.getTicks(thisAsLevel);
+        VantagePoint vp = VantagePoint.get(thisAsLevel, new Vector3d(), gameTime, partialTick);
+
+        if (vp instanceof VantagePoint.OnCelestial oc) {
+            return (float)(genesis$getApparentAngle(oc, gameTime, partialTick) * Mth.TWO_PI);
+        }
+        return original.call(partialTick);
     }
 
     @WrapMethod(method = "isDay")
@@ -62,6 +62,23 @@ public abstract class LevelMixin {
             return genesis$getStarUpDot(oc, gameTime) < 0;
         }
         return original.call();
+    }
+
+    @Unique
+    private static double genesis$getApparentAngle(VantagePoint.OnCelestial oc, long gameTime, float partialTick) {
+        Celestial celestial = oc.celestial();
+        Celestial star = celestial.getNearestStar(gameTime, partialTick);
+
+        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
+                .sub(celestial.getPosition(gameTime, partialTick))
+                .normalize();
+
+        Quaterniondc rot = new Quaterniond(oc.getRotation()).conjugate();
+        toStar.rotate(rot);
+
+        return GenesisMod.getApparentSunAngle(
+                GenesisMod.UP.dot(toStar),
+                GenesisMod.EAST.dot(toStar));
     }
 
     @Unique

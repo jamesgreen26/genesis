@@ -35,6 +35,7 @@
     "FogRendererAccessor",
     "LevelChunkMixin",
     "LevelMixin",
+    "LevelTimeAccessMixin",
     "LevelRendererAccessor",
     "LivingEntityMixin",
     "MinecraftServerMixin",
