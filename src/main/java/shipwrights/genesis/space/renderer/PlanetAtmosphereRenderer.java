@@ -152,11 +152,16 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         float outOverexposureCancel = 1.0f;
 
-        if(
-        Math.abs(testPos.x) < halfSize * relativeAtmosphereSize &&
-        Math.abs(testPos.y) < halfSize * relativeAtmosphereSize &&
-        Math.abs(testPos.z) < halfSize * relativeAtmosphereSize
-        ) {
+        // When the player is standing on this planet, they are always inside the atmosphere
+        // cube by definition. Using the testPos boundary check here causes flickering as the
+        // camera oscillates around the threshold (e.g. at higher altitudes or lower render
+        // distances), so we skip it and force the inside-atmosphere rendering mode instead.
+        boolean cameraInsideAtmosphere = (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender))
+                || (Math.abs(testPos.x) < halfSize * relativeAtmosphereSize
+                    && Math.abs(testPos.y) < halfSize * relativeAtmosphereSize
+                    && Math.abs(testPos.z) < halfSize * relativeAtmosphereSize);
+
+        if (cameraInsideAtmosphere) {
             correctionDist = 1.001f;
         } else {
             outOverexposureCancel = 0.000000001f;
