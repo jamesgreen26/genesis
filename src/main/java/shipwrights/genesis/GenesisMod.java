@@ -4,7 +4,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,17 +19,17 @@ import org.slf4j.LoggerFactory;
 import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
+import shipwrights.genesis.commands.GenesisCommandArguments;
 import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.fluid.GenesisFluids;
-import shipwrights.genesis.networking.GenesisNetworking;
-import shipwrights.genesis.commands.GenesisCommandArguments;
-import shipwrights.genesis.space.Celestial;
-import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
 import shipwrights.genesis.content.particle.GenesisParticles;
-import shipwrights.genesis.space.type.BuiltinCelestialTypes;
+import shipwrights.genesis.networking.GenesisNetworking;
+import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.registry.SpaceRegistry;
-import shipwrights.genesis.teleportation.integration.PlanetToSpaceTeleporter;
+import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
+import shipwrights.genesis.space.type.BuiltinCelestialTypes;
 import shipwrights.genesis.teleportation.impl.ShipCollector;
+import shipwrights.genesis.teleportation.integration.PlanetToSpaceTeleporter;
 import shipwrights.genesis.teleportation.integration.SpaceToPlanetTeleporter;
 import shipwrights.genesis.tests.commands.GameTestCommands;
 import virtuoel.pehkui.api.ScaleData;
@@ -112,17 +111,11 @@ public final class GenesisMod {
     }
 
     public static long getTicks(Level level) {
-        boolean doDayLight = level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).get();
-        if (doDayLight) {
-            return level.getGameTime();
-        } else return level.dayTime();
+        return level.getGameTime();
     }
 
     public static float getPartialTick(Level level, RenderLevelStageEvent event) {
-        boolean doDayLight = level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).get();
-        if (doDayLight) {
-            return event.getPartialTick();
-        } else return 0;
+        return event.getPartialTick();
     }
 
     @Deprecated
