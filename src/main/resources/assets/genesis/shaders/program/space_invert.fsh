@@ -8,6 +8,7 @@ uniform sampler2D PlanetDepthSampler;
 uniform mat4 invProjMat;
 uniform mat4 invViewMat;
 uniform vec3 cameraPos;
+uniform vec3 starPos;
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -83,7 +84,7 @@ void main() {
             vec3 normalWorld = normalize(mat3(invViewMat) * normalView);
 
             vec3 P_world = (invViewMat * vec4(P_view3, 1.0)).xyz;
-            vec3 light_vec = normalize(P_world + cameraPos);
+            vec3 light_vec = normalize((P_world + cameraPos) - starPos);
 
             float brightness = clamp(1.0 - (2 * dot(light_vec, normalWorld)), 1, 2);
             // Lerp brightness toward 1.0 (no effect) as fade decreases
