@@ -3,9 +3,7 @@ package shipwrights.genesis.content.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
+import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -79,6 +77,20 @@ public class TulciteCatalyzerBlock extends Block implements EntityBlock {
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity blockentity = level.getBlockEntity(pos);
+            if (blockentity instanceof Container) {
+                Containers.dropContents(level, pos, (Container)blockentity);
+                level.updateNeighbourForOutputSignal(pos, this);
+            }
+
+            super.onRemove(state, level, pos, newState, moved);
+        }
+
     }
 
     @Nullable

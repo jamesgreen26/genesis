@@ -3,6 +3,8 @@ package shipwrights.genesis.content.blockentity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,7 +22,7 @@ import shipwrights.genesis.content.item.GenesisItems;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TulciteCatalyzerBlockEntity extends BlockEntity {
+public class TulciteCatalyzerBlockEntity extends BlockEntity implements Container {
 
     public static final String ITEMS_TAG = "Inventory";
     public static final String ENERGY_TAG = "Energy";
@@ -161,5 +163,45 @@ public class TulciteCatalyzerBlockEntity extends BlockEntity {
         } else {
             return super.getCapability(cap, side);
         }
+    }
+
+    @Override
+    public int getContainerSize() {
+        return SLOT_COUNT;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return items.getStackInSlot(SLOT).isEmpty();
+    }
+
+    @Override
+    public ItemStack getItem(int i) {
+        return items.getStackInSlot(SLOT);
+    }
+
+    @Override
+    public ItemStack removeItem(int i, int i1) {
+        return items.extractItem(SLOT, i1, true);
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int i) {
+        return items.extractItem(SLOT, i, false);
+    }
+
+    @Override
+    public void setItem(int i, ItemStack itemStack) {
+
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return Container.stillValidBlockEntity(this, player);
+    }
+
+    @Override
+    public void clearContent() {
+        items.setStackInSlot(SLOT, ItemStack.EMPTY);
     }
 }
