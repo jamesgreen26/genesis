@@ -5,6 +5,8 @@ in vec4 vertexColor;
 in vec3 vNormal;
 in vec3 lightDir;
 
+in float skyOpacity;
+
 in vec3 v_entry_position;
 
 uniform sampler2D Sampler0;
@@ -30,5 +32,5 @@ void main() {
     vec3 finalColor = mix(vertexColor.rgb, litTexColor, vertexColor.a);
 
     // Planets are always fully opaque
-    frag_color = vec4(finalColor, 1.0);
+    frag_color = vec4(finalColor,0.3);
 }

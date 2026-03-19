@@ -61,6 +61,8 @@ public class PlanetRenderer implements CelestialRenderer {
         double halfExtent = toRender.getActualSize() / 2;
         float alpha = 1f;
 
+        ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
+
         List<FaceShadow> shadows;
         if (USE_TEST_SHADOWS) {
             shadows = createTestShadows(halfExtent);
@@ -73,11 +75,27 @@ public class PlanetRenderer implements CelestialRenderer {
 
 
             Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(vantagePoint.getRotation().conjugate(new Quaterniond()));
-            ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
             shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
 
             shadows = ShadowProjection.computeShadows(selfOBB, otherOBBs, starPosition);
         }
+
+        Vector3dc planetPosition = toRender.getPosition(ticks, partialTick);
+
+        double surfaceDaySkyFactor = 0.5;
+        if(vantagePoint instanceof VantagePoint.OnCelestial onCelestial && !onCelestial.celestial().equals(toRender)) {
+            double skyObjectDistance = new Vector3d(planetPosition).sub(vantagePoint.getPosition()).length();
+            double skyObjectSize = toRender.getActualSize();
+            double skyObjectAngle = skyObjectSize / skyObjectDistance;
+            double fadeOutFactor = 0.014 / skyObjectAngle;
+            fadeOutFactor = 0.7;
+            //double dayFactor = new Vector3d(onCelestial.celestial().getNearestStar(ticks,partialTick).getPosition(ticks,partialTick)).sub(vantagePoint.getPosition()).dot(new Vector3d(0,1,0).rotate(onCelestial.cameraRotationFromNorthPole()));
+            //dayFactor = Math.min(Math.max(dayFactor * 4.0 + 0.3,0.0),1.0);
+            //fadeOutFactor *= dayFactor;
+            surfaceDaySkyFactor *= Math.min(Math.max(1.0 - fadeOutFactor,0.0),1.0);
+        }
+
+        shader.safeGetUniform("SkyOpacity").set((float) surfaceDaySkyFactor);
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
         if (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender)) {

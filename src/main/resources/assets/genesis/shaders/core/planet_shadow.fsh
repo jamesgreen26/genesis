@@ -63,5 +63,5 @@ void main() {
     float edgeT = clamp(minEdgeDist / edgeWidth, 0.0, 1.0);
     float falloff = smoothstep(0.0, 1.0, edgeT);
 
-    fragColor = vec4(vertexColor.rgb, vertexColor.a * falloff);
+    fragColor = vec4(vertexColor.rgb, vertexColor.a * falloff * 0.0);
 }

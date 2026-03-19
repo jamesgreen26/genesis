@@ -23,7 +23,7 @@
         "seed": 12345,
         "orbitDistance": 15000,
         "orbitTime": 4608000,
-        "dayLength" : 24000
+        "dayLength" : 1200
       }
     },
     {
@@ -41,7 +41,7 @@
       }
     },
     {
-      "ID": "genesis:testbh",
+      "ID": "genesis:eastereggbh",
       "type": "genesis:blackhole",
       "size": 2048,
       "gravity": 8,
@@ -50,6 +50,76 @@
         "x": 0.0,
         "y": -200000.0,
         "z": -200000.0
+      }
+    },
+    {
+      "ID": "genesis:testskyobject1",
+      "type": "genesis:body",
+      "size": 0.01,
+      "gravity": 0,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:sun",
+        "seed": 12345,
+        "orbitDistance": 20000,
+        "orbitTime": 4608000,
+        "dayLength": 0
+      }
+    },
+    {
+      "ID": "genesis:testskyobject2",
+      "type": "genesis:body",
+      "size": 30,
+      "gravity": 0,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:testskyobject1",
+        "seed": 256,
+        "orbitDistance": 6000,
+        "orbitTime": 300,
+        "dayLength": 0
+      }
+    },
+    {
+      "ID": "genesis:testskyobject3",
+      "type": "genesis:body",
+      "size": 40,
+      "gravity": 0,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:testskyobject1",
+        "seed": 65536,
+        "orbitDistance": 6500,
+        "orbitTime": 350,
+        "dayLength": 0
+      }
+    },
+    {
+      "ID": "genesis:testskyobject4",
+      "type": "genesis:body",
+      "size": 20,
+      "gravity": 0,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:testskyobject1",
+        "seed": 16,
+        "orbitDistance": 7000,
+        "orbitTime": 400,
+        "dayLength": 0
+      }
+    },
+    {
+      "ID": "genesis:testskyobject5",
+      "type": "genesis:body",
+      "size": 80,
+      "gravity": 0,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:sun",
+        "seed": 12345,
+        "orbitDistance": 24000,
+        "orbitTime": 4608000,
+        "dayLength": 0
       }
     }
   ]

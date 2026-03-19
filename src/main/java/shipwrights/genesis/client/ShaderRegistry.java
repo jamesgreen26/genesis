@@ -155,7 +155,7 @@ public class ShaderRegistry {
                 VertexFormat.Mode.QUADS,
                 LodestoneRenderTypeRegistry.builder()
                     .setShaderState(PLANET_TEXTURED_SHADER)
-                    .setTransparencyState(new RenderStateShard.TransparencyStateShard("no_transparency", RenderSystem::disableBlend, () -> {}))
+                    .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
