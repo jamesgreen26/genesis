@@ -3,16 +3,16 @@
   "category": "functional",
   "key": {
     "E": {
-      "item": "minecraft:ender_pearl"
+      "item": "genesis:dead_moon_coral_block"
     },
     "O": {
-      "item": "minecraft:crying_obsidian"
+      "item": "genesis:void_shard"
     }
   },
   "pattern": [
-    " O ",
+    "OOO",
     "OEO",
-    " O "
+    "OOO"
   ],
   "result": {
     "item": "genesis:void_core",

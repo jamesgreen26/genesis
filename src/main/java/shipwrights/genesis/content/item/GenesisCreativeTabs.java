@@ -33,9 +33,13 @@ public class GenesisCreativeTabs {
                 output.accept(GenesisItems.RADAR_DISPLAY.get());
                 output.accept(GenesisItems.TULCITE_CATALYZER_BLOCK_ITEM.get());
                 output.accept(GenesisItems.TULCITE_CHUNK.get());
+                output.accept(GenesisItems.VOID_SHARD.get());
+                output.accept(GenesisItems.ANORTHITE_CRYSTAL.get());
                 output.accept(GenesisItems.VOID_ENGINE_INTERFACE.get());
-                output.accept(GenesisItems.VOID_ENGINE_FRAME.get());
+                output.accept(GenesisItems.VOID_CORE_REFLECTOR_PANEL.get());
+                output.accept(GenesisItems.VOID_FOCUS.get());
                 output.accept(GenesisItems.VOID_ENGINE_VIEWPORT.get());
+                output.accept(GenesisItems.VOID_ENGINE_FRAME.get());
                 output.accept(GenesisItems.VOID_CORE.get());
                 output.accept(GenesisItems.SPACE_HELMET.get());
                 output.accept(GenesisItems.SPACE_CHESTPLATE.get());
@@ -55,6 +59,8 @@ public class GenesisCreativeTabs {
                         addItemGroup(output, GenesisItems.WARPSTONE);
                         addItemGroup(output, GenesisItems.TULCITE_ORE);
                         addItemGroup(output, GenesisItems.VERDITE_ORE);
+                        addItemGroup(output, GenesisItems.VOID_CORE_ORE);
+                        addItemGroup(output, GenesisItems.ANORTHITE);
                         addItemGroup(output, GenesisItems.NULLSTONE);
                         addItemGroup(output, GenesisItems.VOIDSTONE);
                         addItemGroup(output, GenesisItems.RIFTROCK);

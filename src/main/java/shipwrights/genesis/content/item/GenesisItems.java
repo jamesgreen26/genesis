@@ -63,6 +63,12 @@ public class GenesisItems {
     public static final RegistryObject<Item> VERDITE_ORE = ITEMS.register("verdite_ore",
         () -> new BlockItem(GenesisBlocks.VERDITE_ORE.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> VOID_CORE_ORE = ITEMS.register("void_core_ore",
+            () -> new BlockItem(GenesisBlocks.VOID_CORE_ORE.get(), new Item.Properties()));
+
+    public static final RegistryObject<Item> ANORTHITE = ITEMS.register("anorthite",
+            () -> new BlockItem(GenesisBlocks.ANORTHITE.get(), new Item.Properties()));
+
     // Alien sands
     public static final RegistryObject<Item> LUNAR_DUST = ITEMS.register("lunar_dust",
         () -> new BlockItem(GenesisBlocks.LUNAR_DUST.get(), new Item.Properties()));
@@ -300,6 +306,12 @@ public class GenesisItems {
 
 
     public static final RegistryObject<Item> TULCITE_CHUNK = ITEMS.register("tulcite_chunk",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> VOID_SHARD = ITEMS.register("void_shard",
+            () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> ANORTHITE_CRYSTAL = ITEMS.register("anorthite_crystal",
             () -> new Item(new Item.Properties()));
 
     public static final RegistryObject<Item> TULCITE_CATALYZER_BLOCK_ITEM = ITEMS.register("tulcite_catalyzer_block",

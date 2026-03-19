@@ -85,7 +85,7 @@ public class PlanetRenderer implements CelestialRenderer {
             halfExtent = Minecraft.getInstance().gameRenderer.getRenderDistance();
             position = new Vector3d(
                 0,
-                - (camera.getPosition().y / 16) - halfExtent - 64,
+                - (camera.getPosition().y / 16) - halfExtent - 32,
                 0
             );
             rotation = oc.cameraRotationFromNorthPole();

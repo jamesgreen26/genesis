@@ -15,6 +15,7 @@
     "genesis:void_engine_frame",
     "genesis:void_core",
     "genesis:void_engine_viewport",
-    "genesis:tulcite_catalyzer_block"
+    "genesis:tulcite_catalyzer_block",
+    "genesis:anorthite"
   ]
 }

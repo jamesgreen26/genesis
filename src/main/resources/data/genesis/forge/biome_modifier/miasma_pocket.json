@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "features": "genesis:miasma_pocket",
+  "biomes": "#genesis:is_moon",
+  "step": "underground_ores"
+}

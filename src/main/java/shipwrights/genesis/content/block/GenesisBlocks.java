@@ -145,6 +145,20 @@ public class GenesisBlocks {
         )
     );
 
+    public static final RegistryObject<DropExperienceBlock> VOID_CORE_ORE = BLOCKS.register("void_core_ore",
+            () -> new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.DIAMOND_ORE)
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(6.0F, 12.0F)
+                    .sound(SoundType.AMETHYST)
+            )
+    );
+
+    public static final RegistryObject<DropExperienceBlock> ANORTHITE = BLOCKS.register("anorthite",
+            () -> new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.COPPER_ORE)
+                    .mapColor(MapColor.COLOR_GRAY)
+            )
+    );
+
     // Alien sands
     public static final RegistryObject<Block> LUNAR_DUST = BLOCKS.register("lunar_dust", () ->
         new Block(BlockBehaviour.Properties.of()
