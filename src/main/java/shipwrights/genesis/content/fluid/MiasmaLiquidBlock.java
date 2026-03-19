@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
+import shipwrights.genesis.content.sound.GenesisSounds;
 
 import java.util.function.Supplier;
 
@@ -61,7 +62,7 @@ public class MiasmaLiquidBlock extends LiquidBlock {
         BlockPos abovePos = pos.above();
         if (level.getBlockState(abovePos).isAir() && level.getFluidState(abovePos).isEmpty()) {
             if (!level.isClientSide()) {
-                level.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                level.playSound(null, pos, GenesisSounds.MIASMA_HISS.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
             }
             // Dissipate - replace this fluid block with air
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);

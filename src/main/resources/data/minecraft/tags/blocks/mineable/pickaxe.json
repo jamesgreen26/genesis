@@ -17,6 +17,7 @@
     "genesis:void_engine_viewport",
     "genesis:tulcite_catalyzer_block",
     "genesis:void_core_ore",
-    "genesis:anorthite"
+    "genesis:anorthite",
+    "genesis:dead_moon_coral_block"
   ]
 }

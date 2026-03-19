@@ -156,12 +156,13 @@ public class GenesisBlocks {
     public static final RegistryObject<DropExperienceBlock> ANORTHITE = BLOCKS.register("anorthite",
             () -> new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.COPPER_ORE)
                     .mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.DEEPSLATE)
             )
     );
 
     // Alien sands
     public static final RegistryObject<Block> LUNAR_DUST = BLOCKS.register("lunar_dust", () ->
-        new Block(BlockBehaviour.Properties.of()
+        new FallingBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.SAND)
             .strength(0.5F)
             .sound(SoundType.SAND)
@@ -169,7 +170,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> STELLAR_SAND = BLOCKS.register("stellar_sand", () ->
-        new Block(BlockBehaviour.Properties.of()
+        new FallingBlock(BlockBehaviour.Properties.of()
             .mapColor(MapColor.TERRACOTTA_WHITE)
             .strength(0.5F)
             .sound(SoundType.SAND)
@@ -177,7 +178,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> RED_SALT = BLOCKS.register("red_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_RED)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -185,7 +186,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> PALE_RED_SALT = BLOCKS.register("pale_red_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.TERRACOTTA_RED)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -193,7 +194,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> CRACKED_RED_SALT = BLOCKS.register("cracked_red_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_RED)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -201,7 +202,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> CRACKED_PALE_RED_SALT = BLOCKS.register("cracked_pale_red_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.TERRACOTTA_RED)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -209,7 +210,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> CYAN_SALT = BLOCKS.register("cyan_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_CYAN)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -217,7 +218,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> TURQUOISE_SALT = BLOCKS.register("turquoise_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WARPED_NYLIUM)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -225,7 +226,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> CRACKED_CYAN_SALT = BLOCKS.register("cracked_cyan_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_CYAN)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -233,7 +234,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> CRACKED_TURQUOISE_SALT = BLOCKS.register("cracked_turquoise_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WARPED_NYLIUM)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -241,7 +242,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> SALT = BLOCKS.register("salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.SNOW)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -249,7 +250,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> CRACKED_SALT = BLOCKS.register("cracked_salt", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.TERRACOTTA_WHITE)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -257,7 +258,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> MOON_SAND = BLOCKS.register("moon_sand", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_LIGHT_GRAY)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -265,7 +266,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> WAVY_MOON_SAND = BLOCKS.register("wavy_moon_sand", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_LIGHT_GRAY)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -273,7 +274,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> DARK_MOON_SAND = BLOCKS.register("dark_moon_sand", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -281,7 +282,7 @@ public class GenesisBlocks {
     );
 
     public static final RegistryObject<Block> DARK_WAVY_MOON_SAND = BLOCKS.register("dark_wavy_moon_sand", () ->
-            new Block(BlockBehaviour.Properties.of()
+            new FallingBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
                     .sound(SoundType.SAND)
@@ -292,7 +293,7 @@ public class GenesisBlocks {
             new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
-                    .sound(SoundType.STONE)
+                    .sound(SoundType.DEEPSLATE)
             )
     );
 
@@ -300,7 +301,7 @@ public class GenesisBlocks {
             new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5F)
-                    .sound(SoundType.STONE)
+                    .sound(SoundType.BASALT)
             )
     );
 

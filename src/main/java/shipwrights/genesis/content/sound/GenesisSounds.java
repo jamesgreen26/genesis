@@ -22,4 +22,7 @@ public class GenesisSounds {
 
     public static final RegistryObject<SoundEvent> WORMHOLE_AMBIANCE = SOUND_EVENTS.register("wormhole_ambiance",
         () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole_ambiance")));
+
+    public static final RegistryObject<SoundEvent> MIASMA_HISS = SOUND_EVENTS.register("miasma_hiss",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "miasma_hiss")));
 }

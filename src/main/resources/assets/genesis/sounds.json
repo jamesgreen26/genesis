@@ -22,5 +22,11 @@
     "sounds": [
       "genesis:wormhole_ambiance"
     ]
+  },
+  "miasma_hiss": {
+    "subtitle": "subtitles.genesis.miasma_hiss",
+    "sounds": [
+      "genesis:miasma_hiss"
+    ]
   }
 }
