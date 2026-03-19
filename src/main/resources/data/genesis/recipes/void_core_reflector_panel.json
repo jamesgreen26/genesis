@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "E": {
+      "item": "zps:space_metal_mesh"
+    },
+    "O": {
+      "item": "zps:void_caution_block"
+    },
+    "I": {
+      "tag": "forge:ingots/space_metal"
+    }
+  },
+  "pattern": [
+    "III",
+    "EEE",
+    "OOO"
+  ],
+  "result": {
+    "item": "genesis:void_core_reflector_panel",
+    "count": 1
+  },
+  "show_notification": true
+}

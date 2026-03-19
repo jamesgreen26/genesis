@@ -9,7 +9,7 @@
       "item": "genesis:void_engine_viewport"
     },
     "I": {
-      "item": "minecraft:iron_ingot"
+      "tag": "forge:ingots/space_metal"
     },
     "E": {
       "item": "minecraft:ender_pearl"

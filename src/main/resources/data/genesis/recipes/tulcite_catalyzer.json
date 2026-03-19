@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "E": {
+      "item": "zps:space_metal_mesh"
+    },
+    "O": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "I": {
+      "tag": "forge:ingots/space_metal"
+    }
+  },
+  "pattern": [
+    "III",
+    "EOE",
+    "III"
+  ],
+  "result": {
+    "item": "genesis:tulcite_catalyzer_block",
+    "count": 1
+  },
+  "show_notification": true
+}

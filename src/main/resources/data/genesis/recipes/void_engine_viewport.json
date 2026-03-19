@@ -6,13 +6,13 @@
       "item": "minecraft:tinted_glass"
     },
     "E": {
-      "item": "minecraft:ender_pearl"
+      "item": "zps:space_metal_mesh"
     }
   },
   "pattern": [
-    " T ",
-    "TET",
-    " T "
+    "ETE",
+    "T T",
+    "ETE"
   ],
   "result": {
     "item": "genesis:void_engine_viewport",

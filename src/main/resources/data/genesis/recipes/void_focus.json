@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "functional",
+  "key": {
+    "E": {
+      "item": "minecraft:glass"
+    },
+    "O": {
+      "item": "zps:space_metal_mesh"
+    },
+    "I": {
+      "tag": "forge:ingots/space_metal"
+    },
+    "V": {
+      "item": "genesis:verdite_cluster"
+    }
+  },
+  "pattern": [
+    "OEO",
+    "IVI",
+    "III"
+  ],
+  "result": {
+    "item": "genesis:void_focus",
+    "count": 1
+  },
+  "show_notification": true
+}
