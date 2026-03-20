@@ -26,3 +26,31 @@ mandatory = true
 versionRange = "[1.20.1,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "vlib"
+mandatory = true
+versionRange = "[1.20.1-0.1.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "zps"
+mandatory = true
+versionRange = "[1.20.1-2.0.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "valkyrienskies"
+mandatory = true
+versionRange = "[2.4.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "lodestone"
+mandatory = true
+versionRange = "[1.20.1-1.6.4,)"
+ordering = "NONE"
+side = "CLIENT"
