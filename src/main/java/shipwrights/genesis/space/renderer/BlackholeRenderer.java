@@ -46,7 +46,8 @@ public class BlackholeRenderer implements CelestialRenderer {
 
         float opacity = 1f;
         if (vantagePoint instanceof VantagePoint.OnCelestial) {
-            opacity = (float) PlanetDimensionEffects.cachedStarBrightness;
+            double distance = vantagePoint.getPosition().distance(toRender.getPosition(ticks, partialTick));
+            opacity = (float) Math.min(1.0, PlanetDimensionEffects.cachedStarBrightness + 1440 / Math.max(distance, 0.00000001));
         }
 
         if (opacity < 0.01) {
