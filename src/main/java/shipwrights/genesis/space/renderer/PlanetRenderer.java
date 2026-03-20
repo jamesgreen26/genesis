@@ -118,6 +118,11 @@ public class PlanetRenderer implements CelestialRenderer {
                 position.z() - vantagePos.z()
             );
 
+            double starBrightness = PlanetDimensionEffects.cachedStarBrightness;
+
+            // Make random planets not visible during daytime
+            if (starBrightness < 0.05 && relativePos.length() > 4096) return; //TODO improve
+
             Quaterniond planetRotation = new Quaterniond();
 
             // Apply inverse rotation of vantage point
