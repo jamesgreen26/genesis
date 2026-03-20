@@ -10,9 +10,9 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
@@ -36,6 +36,17 @@ public class StarRenderer implements CelestialRenderer {
         Vector3dc vantagePos = vantagePoint.getPosition();
         Quaterniondc vantageRot = vantagePoint.getRotation();
 
+        float opacity = 1f;
+        double distanceSquared = vantagePos.distanceSquared(position);
+
+        if (vantagePoint instanceof VantagePoint.OnCelestial) {
+            opacity = (float) Math.min(1.0, PlanetDimensionEffects.cachedStarBrightness + 20_000 * 20_000 / Math.max(distanceSquared, 0.00000001));
+        }
+
+        if (opacity < 0.01) {
+            return;
+        }
+
         // Calculate relative position (subtract vantage point position)
         Vector3d relativePos = new Vector3d(
             position.x() - vantagePos.x(),
@@ -57,11 +68,11 @@ public class StarRenderer implements CelestialRenderer {
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());
-        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(), position, rotation, starProps);
+        renderSun(event.getCamera().getPosition(), event.getPoseStack(), sunBuffer, toRender.getActualSize(), position, rotation, starProps, opacity);
         bufferSource.endBatch(getSunRenderType());
     }
 
-    private void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, StarProperties starProps) {
+    private void renderSun(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, StarProperties starProps, float opacity) {
 
         Vector3f cameraPos0 = new Vector3f(
             (float) cameraPos.x,
@@ -103,6 +114,11 @@ public class StarRenderer implements CelestialRenderer {
                 } else {
                     color1.set(1.0f, 0.8f, 0.15f);
                 }
+            }
+
+            Uniform uniform2 = shader.getUniform("Opacity");
+            if (uniform2 != null) {
+                uniform2.set(opacity);
             }
         }
 

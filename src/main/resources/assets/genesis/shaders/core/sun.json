@@ -20,6 +20,7 @@
     { "name": "CameraPosition", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
     { "name": "HalfSize", "type": "float", "count": 1, "values": [ 0.0 ] },
     { "name": "Color0", "type": "float", "count": 3, "values": [ 1.0, 0.0, 0.0 ] },
-    { "name": "Color1", "type": "float", "count": 3, "values": [ 1.0, 0.8, 0.15 ] }
+    { "name": "Color1", "type": "float", "count": 3, "values": [ 1.0, 0.8, 0.15 ] },
+    { "name": "Opacity", "type": "float", "count": 1, "values": [ 0.0 ] }
   ]
 }
