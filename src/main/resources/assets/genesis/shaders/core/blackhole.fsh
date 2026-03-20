@@ -6,6 +6,8 @@ in float v_half_size;
 
 out vec4 frag_color;
 
+uniform float Opacity;
+
 const vec3 v_cube_center = vec3(0);
 
 const vec3 cube_rotationXYZ = vec3(0, 0, 0);
@@ -204,4 +206,5 @@ void main() {
     frag_color = vec4(0);
     frag_color = mix(frag_color,vec4(col2.xyz,1),col2.a);
     frag_color = mix(frag_color,vec4(col1.xyz,1),col1.a);
+    frag_color.a *= Opacity;
 }
