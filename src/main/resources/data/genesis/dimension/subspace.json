@@ -1,12 +1,12 @@
 {
-  "type": "genesis:wormhole",
+  "type": "genesis:subspace",
   "generator": {
     "type": "minecraft:noise",
     "seed": 0,
-    "settings": "genesis:wormhole",
+    "settings": "genesis:subspace",
     "biome_source": {
       "type": "minecraft:fixed",
-      "biome": "genesis:wormhole"
+      "biome": "genesis:subspace"
     }
   }
 }
