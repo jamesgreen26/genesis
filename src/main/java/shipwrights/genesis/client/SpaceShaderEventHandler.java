@@ -7,6 +7,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisClientConfig;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = GenesisMod.MOD_ID)
 public class SpaceShaderEventHandler {
@@ -22,7 +23,7 @@ public class SpaceShaderEventHandler {
         Level level = mc.level;
 
         if (level != null) {
-            boolean shouldBeActive = GenesisMod.isSpaceDimension(level);
+            boolean shouldBeActive = GenesisMod.isSpaceDimension(level) && GenesisClientConfig.enableSpaceLighting();
             SpaceInvertPostProcessor.INSTANCE.setActive(shouldBeActive);
         }
     }
