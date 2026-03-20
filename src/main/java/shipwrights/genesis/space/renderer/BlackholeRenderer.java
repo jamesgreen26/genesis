@@ -10,9 +10,9 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
@@ -44,6 +44,16 @@ public class BlackholeRenderer implements CelestialRenderer {
 
         Quaterniond starRotation = new Quaterniond();
 
+        float opacity = 1f;
+        if (vantagePoint instanceof VantagePoint.OnCelestial) {
+            double distance = vantagePoint.getPosition().distance(toRender.getPosition(ticks, partialTick));
+            opacity = (float) Math.min(1.0, PlanetDimensionEffects.cachedStarBrightness + 1440 / Math.max(distance, 0.00000001));
+        }
+
+        if (opacity < 0.01) {
+            return;
+        }
+
         // Apply inverse rotation of vantage point
         Quaterniond inverseVantageRot = starRotation.premul(vantageRot).conjugate();
         inverseVantageRot.transform(relativePos);
@@ -54,11 +64,11 @@ public class BlackholeRenderer implements CelestialRenderer {
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer blackholeBuffer = bufferSource.getBuffer(getBlackholeRenderType());
-        renderBlackhole(event.getCamera().getPosition(), event.getPoseStack(), blackholeBuffer, toRender.getActualSize(), position, rotation);
+        renderBlackhole(event.getCamera().getPosition(), event.getPoseStack(), blackholeBuffer, toRender.getActualSize(), position, rotation, opacity);
         bufferSource.endBatch(getBlackholeRenderType());
     }
 
-    private void renderBlackhole(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation) {
+    private void renderBlackhole(Vec3 cameraPos, PoseStack poseStack, VertexConsumer buffer, double size, Vector3dc center, Quaterniondc localRotation, float opacity) {
 
         Vector3f cameraPos0 = new Vector3f(
             (float) cameraPos.x,
@@ -82,6 +92,11 @@ public class BlackholeRenderer implements CelestialRenderer {
             Uniform uniform1 = shader.getUniform("HalfSize");
              if (uniform1 != null) {
                  uniform1.set(halfSize);
+             }
+
+             Uniform uniform2 = shader.getUniform("Opacity");
+             if (uniform2 != null) {
+                 uniform2.set(opacity);
              }
         }
 

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.lwjgl.opengl.GL11;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.PlanetTextures;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.client.shading.FaceShadow;
@@ -61,6 +62,9 @@ public class PlanetRenderer implements CelestialRenderer {
         double halfExtent = toRender.getActualSize() / 2;
         float alpha = 1f;
 
+        Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
+
+
         List<FaceShadow> shadows;
         if (USE_TEST_SHADOWS) {
             shadows = createTestShadows(halfExtent);
@@ -69,15 +73,14 @@ public class PlanetRenderer implements CelestialRenderer {
             OBB selfOBB = toRender.getOBB(ticks, partialTick);
             List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
             List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, partialTick)).toList();
-            Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
-
-
-            Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(vantagePoint.getRotation().conjugate(new Quaterniond()));
-            ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
-            shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
 
             shadows = ShadowProjection.computeShadows(selfOBB, otherOBBs, starPosition);
         }
+
+        Vector3d lightDir = new Vector3d(position).sub(starPosition).rotate(vantagePoint.getRotation().conjugate(new Quaterniond()));
+        ShaderInstance shader = ShaderRegistry.PLANET_TEXTURED_SHADER.getInstance().get();
+        shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);
+        Vec3 skyColor = Vec3.ZERO;
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
         if (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender)) {
@@ -103,6 +106,8 @@ public class PlanetRenderer implements CelestialRenderer {
         }
         // Transform by inverse of vantage point (OnCelestial)
         else {
+            skyColor = PlanetDimensionEffects.cachedSkyColor;
+
             Vector3dc vantagePos = vantagePoint.getPosition();
             Quaterniondc vantageRot = vantagePoint.getRotation();
 
@@ -112,6 +117,11 @@ public class PlanetRenderer implements CelestialRenderer {
                 position.y() - vantagePos.y(),
                 position.z() - vantagePos.z()
             );
+
+            double starBrightness = PlanetDimensionEffects.cachedStarBrightness;
+
+            // Make random planets not visible during daytime
+            if (starBrightness < 0.05 && relativePos.length() > 4096) return; //TODO improve
 
             Quaterniond planetRotation = new Quaterniond();
 
@@ -123,6 +133,8 @@ public class PlanetRenderer implements CelestialRenderer {
             // Apply inverse rotation to the celestial's own rotation
             rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
         }
+
+        shader.safeGetUniform("SkyColor").set((float) skyColor.x, (float) skyColor.y, (float) skyColor.z);
 
         renderPlanetAt(toRender.ID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
 

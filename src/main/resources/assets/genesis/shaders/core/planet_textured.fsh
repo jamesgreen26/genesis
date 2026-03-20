@@ -8,6 +8,7 @@ in vec3 lightDir;
 in vec3 v_entry_position;
 
 uniform sampler2D Sampler0;
+uniform vec3 SkyColor;
 
 out vec4 frag_color;
 
@@ -25,6 +26,8 @@ void main() {
     float lighting = clamp(ambient + ndotl, 0.0, 1.0);
 
     vec3 litTexColor = texColor.rgb * lighting;
+
+    litTexColor += SkyColor * clamp(1 - lighting, 0, 1);
 
     // Interpolate between fog color and texture color based on alpha
     vec3 finalColor = mix(vertexColor.rgb, litTexColor, vertexColor.a);
