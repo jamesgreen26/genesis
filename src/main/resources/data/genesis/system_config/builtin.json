@@ -23,7 +23,7 @@
         "seed": 12345,
         "orbitDistance": 15000,
         "orbitTime": 4600000,
-        "dayLength" : 2400
+        "dayLength" : 24000
       }
     },
     {
