@@ -38,6 +38,8 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
     private static double cachedClampedDensity = 1.0;
     private static double cachedRawDensity = 1.0;
+    public static Vec3 cachedSkyColor = Vec3.ZERO;
+    public static double cachedStarBrightness = 1.0;
 
     private final int starBufferCount = 3;
 
@@ -129,12 +131,13 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         float rainLevel = hasPrecipitation(level) ? level.getRainLevel(partialTick) : 0f;
         double rawStarBrightness = 2 * Math.min(Math.max(-starUpDot, 0), 0.5d) * (1f - rainLevel);
-        double starBrightness = Mth.lerp(density, 1.0, rawStarBrightness);
+        cachedStarBrightness = Mth.lerp(density, 1.0, rawStarBrightness);
         double apparentSunAngle = getApparentSunAngle(starUpDot, starEastDot);
         // apparent world time
         long fakeTime = (long) (apparentSunAngle * 24000);
 
         Vec3 skyColor = getSkyColor(camera.getPosition(), partialTick, fakeTime, level, palette);
+        cachedSkyColor = skyColor;
         float skyR = (float)skyColor.x;
         float skyG = (float)skyColor.y;
         float skyB = (float)skyColor.z;
@@ -171,7 +174,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
             float r = acolor[0];
             float g = acolor[1];
             float b = acolor[2];
-            float a = (float) (acolor[3] * (1 - starBrightness));
+            float a = (float) (acolor[3] * (1 - cachedStarBrightness));
             poseStack.mulPose(fullRot);
             Matrix4f pose = poseStack.last().pose();
             
@@ -198,7 +201,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);
-            RenderSystem.setShaderColor(color.x(), color.y(), color.z(), (float) (color.w() * starBrightness));
+            RenderSystem.setShaderColor(color.x(), color.y(), color.z(), (float) (color.w() * cachedStarBrightness));
             VertexBuffer starBuffer = starBuffers.get(i);
             starBuffer.bind();
             assert GameRenderer.getPositionShader() != null;
