@@ -31,7 +31,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
 
     public PlanetDimensionEffects(SpaceRegistry spaceRegistry) {
-        super(Float.NaN, false, SkyType.NORMAL, false, false);
+        super(192f, false, SkyType.NORMAL, false, false);
         this.spaceRegistry = spaceRegistry;
         createStars();
     }
@@ -83,6 +83,13 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         PlanetProperties props = getPlanetProperties(level);
         if (props == null) return true;
         return props.atmosphere().precipitation();
+    }
+
+    @Override
+    public boolean renderClouds(ClientLevel level, int ticks, float partialTick, PoseStack poseStack, double camX, double camY, double camZ, Matrix4f projectionMatrix) {
+        PlanetProperties planetProps = getPlanetProperties(level);
+        double density = planetProps != null ? planetProps.atmosphere().density() : 1.0;
+        return camY > 500 || density <= 0.7;
     }
 
     @Override
