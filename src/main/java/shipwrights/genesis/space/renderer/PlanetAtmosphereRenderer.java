@@ -12,6 +12,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
@@ -97,6 +98,12 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         double densityFade = (vantagePoint instanceof VantagePoint.InSpace)
                 ? 1.0
                 : Mth.clamp((event.getCamera().getPosition().y - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+
+        double starBrightness = PlanetDimensionEffects.cachedStarBrightness;
+
+        if (vantagePoint instanceof VantagePoint.OnCelestial oc && !oc.celestial().equals(toRender)) {
+            densityFade = starBrightness;
+        }
 
         if (props.atmosphere().density() * densityFade < 0.01) return;
 
