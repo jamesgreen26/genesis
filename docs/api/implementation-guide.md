@@ -75,7 +75,7 @@ Let's create a star at the center of your solar system. Stars are celestial bodi
     {
       "ID": "mymod:sun",
       "type": "genesis:star",
-      "size": 15.0,
+      "size": 1400.0,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:static",
@@ -105,8 +105,8 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
         sunTransform,
         ResourceLocation.parse("mymod:sun"),
         CelestialType.get(ResourceLocation.parse("genesis:star")),
-        15.0,   // Large size
-        1.0    // Standard gravity
+        1400.0,  // Size in blocks
+        1.0      // Standard gravity
     );
 
     // Register it
@@ -118,7 +118,7 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
 
 - **ID**: Unique identifier for this celestial (`mymod:sun`)
 - **Type**: Using the built-in `genesis:star` type (emits light, not visitable)
-- **Size**: 15x the base size (96 blocks), making it 1,440 blocks diameter
+- **Size**: 1,400 blocks diameter
 - **Gravity**: Standard gravity value (1.0)
 - **Transform Provider**: Static position at coordinates (0, 0, 0) - the celestial never moves
 
@@ -136,7 +136,7 @@ Now let's add a planet that orbits around your sun. Planets use the orbiting tra
     {
       "ID": "mymod:sun",
       "type": "genesis:star",
-      "size": 15.0,
+      "size": 1400.0,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:static",
@@ -148,14 +148,14 @@ Now let's add a planet that orbits around your sun. Planets use the orbiting tra
     {
       "ID": "mymod:earth",
       "type": "genesis:body",
-      "size": 1.0,
+      "size": 100.0,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "mymod:sun",
         "seed": 12345,
-        "orbitDistance": 1.0,
-        "orbitTime": 1.0
+        "orbitDistance": 15000.0,
+        "orbitTime": 4608000.0
       }
     }
   ]
@@ -172,24 +172,24 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
         sunTransform,
         ResourceLocation.parse("mymod:sun"),
         CelestialType.get(ResourceLocation.parse("genesis:star")),
-        15.0, 1.0
+        1400.0, 1.0
     );
     event.accept(sun);
 
     // Create an orbiting planet
     OrbitingTransformProvider planetTransform = new OrbitingTransformProvider(
         ResourceLocation.parse("mymod:sun"),  // parentID
-        12345,      // seed
-        1.0,        // orbitDistance multiplier
-        1.0,        // orbitTime multiplier
-        1.0         // dayLength multiplier
+        12345,        // seed
+        15000.0,      // orbitDistance in blocks
+        4608000.0,    // orbitTime in ticks (≈ 64 hours)
+        24000.0       // dayLength in ticks (20 minutes)
     );
 
     Celestial planet = new Celestial(
         planetTransform,
         ResourceLocation.parse("mymod:earth"),
         CelestialType.get(ResourceLocation.parse("genesis:body")),
-        1.0,    // Earth-sized
+        100.0,  // Size in blocks
         1.0     // Earth gravity
     );
     event.accept(planet);
@@ -202,8 +202,8 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
 - **Transform Provider**: Now uses `orbiting` type instead of `static`
 - **parentID**: References the sun - the planet will orbit around it
 - **seed**: Determines the random orbital angles (same seed = same orbit)
-- **orbitDistance**: 1.0x the base distance (15,000 blocks from parent)
-- **orbitTime**: 1.0x the base orbital period (4,608,000 ticks ≈ 64 hours)
+- **orbitDistance**: 15,000 blocks from parent
+- **orbitTime**: 4,608,000 ticks per orbit (≈ 64 hours)
 
 ---
 
@@ -219,7 +219,7 @@ Moons orbit planets, not the sun. This creates a hierarchical orbital system whe
     {
       "ID": "mymod:sun",
       "type": "genesis:star",
-      "size": 15.0,
+      "size": 1400.0,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:static",
@@ -231,28 +231,28 @@ Moons orbit planets, not the sun. This creates a hierarchical orbital system whe
     {
       "ID": "mymod:earth",
       "type": "genesis:body",
-      "size": 1.0,
+      "size": 100.0,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "mymod:sun",
         "seed": 12345,
-        "orbitDistance": 1.0,
-        "orbitTime": 1.0
+        "orbitDistance": 15000.0,
+        "orbitTime": 4608000.0
       }
     },
     {
       "ID": "mymod:moon",
       "type": "genesis:body",
-      "size": 0.3,
+      "size": 27.0,
       "gravity": 0.1622,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "mymod:earth",
         "seed": 67890,
-        "orbitDistance": 0.05,
-        "orbitTime": 0.005,
-        "dayLength": 0.75
+        "orbitDistance": 750.0,
+        "orbitTime": 23040.0,
+        "dayLength": 18000.0
       }
     }
   ]
@@ -273,17 +273,17 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
     OrbitingTransformProvider moonTransform = new OrbitingTransformProvider(
         ResourceLocation.parse("mymod:earth"),  // Orbit the planet, not the sun!
         67890,      // Different seed for different orbit
-        0.05,       // Much closer orbit
-        0.005,      // Much faster orbit
-        0.75        // Slower day length
+        750.0,      // 750 blocks from planet
+        23040.0,    // ≈ 19.2 minutes per orbit
+        18000.0     // 15-minute day
     );
 
     Celestial moon = new Celestial(
         moonTransform,
         ResourceLocation.parse("mymod:moon"),
         CelestialType.get(ResourceLocation.parse("genesis:body")),
-        0.3,        // Smaller size
-        0.1622      // Moon gravity (about 1/6 Earth)
+        27.0,   // Size in blocks
+        0.1622  // Moon gravity (about 1/6 Earth)
     );
     event.accept(moon);
 }
@@ -292,11 +292,11 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
 ### Explanation
 
 - **Parent Reference**: Moon orbits the planet (`parentID: "mymod:earth"`) not the sun
-- **Size**: Smaller at 0.3 (28.8 blocks diameter)
+- **Size**: 27 blocks diameter
 - **Gravity**: Lower at 0.1622 (approximately real moon gravity)
-- **Orbit Distance**: Much closer at 0.05x base distance (750 blocks from planet)
-- **Orbit Time**: Much faster at 0.005x base time (23,040 ticks ≈ 19.2 minutes)
-- **Day Length**: Custom rotation speed at 0.75x (18,000 ticks ≈ 15 minutes)
+- **Orbit Distance**: 750 blocks from planet
+- **Orbit Time**: 23,040 ticks (≈ 19.2 minutes per orbit)
+- **Day Length**: 18,000 ticks (≈ 15 minutes per rotation)
 
 ---
 
@@ -371,9 +371,9 @@ StaticTransformProvider transform2 = new StaticTransformProvider(
   "type": "genesis:orbiting",
   "parentID": "namespace:parent_celestial",
   "seed": 12345,
-  "orbitDistance": 1.0,
-  "orbitTime": 1.0,
-  "dayLength": 1.0
+  "orbitDistance": 15000.0,
+  "orbitTime": 4608000.0,
+  "dayLength": 24000.0
 }
 ```
 
@@ -385,9 +385,9 @@ import shipwrights.genesis.space.transformProvider.OrbitingTransformProvider;
 OrbitingTransformProvider transform = new OrbitingTransformProvider(
     parentID,          // ResourceLocation - ID of parent celestial
     seed,              // int - deterministic random seed
-    orbitDistance,     // double - multiplier (base: 15,000 blocks)
-    orbitTime,         // double - multiplier (base: 4,608,000 ticks)
-    dayLength          // double - multiplier (base: 24,000 ticks)
+    orbitDistance,     // double - orbit radius in blocks
+    orbitTime,         // double - orbital period in ticks
+    dayLength          // double - axial rotation period in ticks (0 = tidally locked)
 );
 ```
 
@@ -397,44 +397,28 @@ OrbitingTransformProvider transform = new OrbitingTransformProvider(
 |-----------------|------|----------|---------|-------------|
 | `type` | String | Yes | - | Must be `"genesis:orbiting"` |
 | `parentID` / first param | String/ResourceLocation | Yes | - | ID of the celestial to orbit around |
-| `seed` / second param | Integer/int | Yes | - | Random seed for orbital angles and rotation |
-| `orbitDistance` / third param | Number/double | Yes | - | Orbit distance multiplier (base: 15,000 blocks) |
-| `orbitTime` / fourth param | Number/double | Yes | - | Orbital period multiplier (base: 4,608,000 ticks) |
-| `dayLength` / fifth param | Number/double | No | 1.0 | Day length multiplier (base: 24,000 ticks) |
+| `seed` / second param | Integer/int | Yes | - | Random seed for deterministic orbital angles |
+| `orbitDistance` / third param | Number/double | Yes | - | Orbit radius in blocks |
+| `orbitTime` / fourth param | Number/double | Yes | - | Orbital period in ticks |
+| `dayLength` / fifth param | Number/double | No | 1.0 | Day length in ticks (0 = tidally locked) |
 
-#### Understanding the Multipliers
+#### Understanding the Parameters
 
-The orbiting transform provider uses base constants that are multiplied by your values:
+`orbitDistance`, `orbitTime`, and `dayLength` are **absolute values**, not multipliers:
 
-- **orbitDistance**
-  - Base: 15,000 blocks
-  - `1.0` = 15,000 blocks from parent
-  - `0.5` = 7,500 blocks from parent
-  - `2.0` = 30,000 blocks from parent
-
-- **orbitTime**
-  - Base: 4,608,000 ticks (64 hours)
-  - `1.0` = 4,608,000 ticks per orbit
-  - `0.5` = 2,304,000 ticks (32 hours) per orbit
-  - `2.0` = 9,216,000 ticks (128 hours) per orbit
-
-- **dayLength**
-  - Base: 24,000 ticks (20 minutes)
-  - `1.0` = 24,000 ticks per rotation
-  - `0.5` = 12,000 ticks (10 minutes) per rotation
-  - `2.0` = 48,000 ticks (40 minutes) per rotation
-
-These base values are defined in the `Celestial` class as `BASE_ORBIT_DISTANCE`, `BASE_ORBIT_TIME`, and `BASE_DAY_LENGTH`.
+- **orbitDistance** — radius of the orbit in blocks (e.g., `15000.0` = 15,000 blocks from parent)
+- **orbitTime** — time for one full orbit in ticks (e.g., `4608000` ≈ 64 hours)
+- **dayLength** — time for one full axial rotation in ticks (e.g., `24000` = 20 minutes); set to `0` for tidal locking (one face always points toward parent)
 
 ---
 
 ## Celestial Types
 
-Celestial types define the behavioral properties and rendering of celestials. They determine whether a celestial emits light, casts shadows, and whether players can visit it.
+Celestial types define the behavioral properties and rendering of celestials. They determine whether a celestial emits light, casts shadows, and whether players can visit it. Addon mods can register additional types with custom rendering and behavior.
 
 ### Built-in Types
 
-Genesis provides two built-in celestial types:
+Genesis provides three built-in celestial types:
 
 #### `genesis:star`
 - **Emits Light**: Yes (casts light on other celestials)
@@ -449,6 +433,13 @@ Genesis provides two built-in celestial types:
 - **Visitable**: Yes (players can land on these)
 - **Rendering**: Surface textures
 - **Use For**: Planets, moons, large asteroids
+
+#### `genesis:blackhole`
+- **Emits Light**: No
+- **Casts Shadow**: No
+- **Visitable**: No
+- **Rendering**: Blackhole shader effect
+- **Use For**: Black holes
 
 ### In Datapacks
 
@@ -502,13 +493,13 @@ Every celestial has physical properties that define its size, gravity, and appea
 **Description:** Size multiplier on the base diameter of 96 blocks.
 
 **Examples:**
-- `size: 1.0` = 96 blocks diameter (Earth-sized)
-- `size: 15.0` = 1,440 blocks diameter (typical sun)
-- `size: 0.3` = 28.8 blocks diameter (typical moon)
+- `size: 100.0` = 100 blocks (Earth-sized planet)
+- `size: 1400.0` = 1,400 blocks (typical sun)
+- `size: 27.0` = 27 blocks (typical moon)
 
 **Usage:**
-- Datapacks: `"size": 1.0`
-- Code: `1.0` (as parameter)
+- Datapacks: `"size": 100.0`
+- Code: `100.0` (as parameter)
 
 ### Gravity
 
@@ -526,7 +517,7 @@ Every celestial has physical properties that define its size, gravity, and appea
 
 ### Color (RGB)
 
-**Description:** Color components ranging from 0.0 to 1.0. Currently has limited use but will have future applications for rendering and effects.
+**Description:** Color components ranging from 0.0 to 1.0. Not currently used by the renderer, but reserved for future features such as map tinting.
 
 **Examples:**
 - Sun: `(1.0, 0.95, 0.8)` - warm yellow
@@ -535,7 +526,7 @@ Every celestial has physical properties that define its size, gravity, and appea
 - Moon: `(0.7, 0.7, 0.7)` - gray
 
 **Usage:**
-- Datapacks: Optional fields `"r"`, `"g"`, `"b"` (default: 0.8 each)
+- Datapacks: Optional fields `"r"`, `"g"`, `"b"` (default: 0.5 each)
   ```json
   {
     ...
@@ -554,24 +545,15 @@ Every celestial has physical properties that define its size, gravity, and appea
   );
   ```
 
-### Base Constants
+### Typical Reference Values
 
-Genesis defines several base constants used as multipliers throughout the system:
+These are the values used by the default Genesis solar system as a reference point:
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| `BASE_SIZE` | 96 blocks | Base celestial diameter |
-| `BASE_ORBIT_DISTANCE` | 15,000 blocks | Base orbital distance |
-| `BASE_ORBIT_TIME` | 4,608,000 ticks | Base orbital period (≈ 64 hours) |
-| `BASE_DAY_LENGTH` | 24,000 ticks | Base rotation period (20 minutes) |
-
-**In Code:** These are accessible as static fields on the `Celestial` class:
-```java
-import shipwrights.genesis.space.Celestial;
-
-double actualSize = sizeMultiplier * Celestial.BASE_SIZE;
-double actualDistance = distanceMultiplier * Celestial.BASE_ORBIT_DISTANCE;
-```
+| Parameter | Default system value | Description |
+|-----------|---------------------|-------------|
+| `orbitDistance` | 15,000 blocks | Earth-sun distance |
+| `orbitTime` | 4,608,000 ticks | Earth year (≈ 64 hours) |
+| `dayLength` | 24,000 ticks | Earth day (20 minutes) |
 
 ---
 
@@ -585,24 +567,26 @@ Custom textures can be added for celestial bodies using the `genesis:body` type 
 
 **Important:** Textures are client-side assets and must be added via a **resource pack** or **mod** (not a datapack). Your datapack provides the celestial configuration (JSON), while textures are provided separately through client-side resources.
 
-Place PNG texture files in a resource pack or mod:
+Textures must be placed under the **`genesis` namespace**, regardless of which mod or datapack defines the celestial:
 
 ```
-assets/<namespace>/textures/planets/<namespace>/<body_name>.png
+assets/genesis/textures/planets/<planet_namespace>/<planet_name>.png
 ```
 
-**Examples (in a resource pack or mod):**
-- `assets/genesis/textures/planets/minecraft/overworld.png`
-- `assets/genesis/textures/planets/genesis/moon.png`
-- `assets/mymod/textures/planets/mymod/custom_planet.png`
+> **Important:** The root namespace is always `genesis`. Using `assets/mymod/...` will not work — the renderer only looks in `assets/genesis/textures/planets/`.
 
-The texture path is automatically derived from the body's ID. For a celestial with ID `mymod:custom_planet`, the renderer looks for:
+**Examples:**
+- `assets/genesis/textures/planets/minecraft/overworld.png` — for celestial ID `minecraft:overworld`
+- `assets/genesis/textures/planets/genesis/moon.png` — for celestial ID `genesis:moon`
+- `assets/genesis/textures/planets/mymod/custom_planet.png` — for celestial ID `mymod:custom_planet`
+
+The texture path is automatically derived from the celestial's ID. For a celestial with ID `mymod:custom_planet`, the renderer looks for:
 
 ```
 assets/genesis/textures/planets/mymod/custom_planet.png
 ```
 
-**Workflow:** Define your celestial in a datapack JSON (server-side), then add matching textures in a resource pack (client-side). If no texture is found, the body will be rendered using the RGB color values specified in the configuration.
+**Workflow:** Define your celestial in a datapack JSON (server-side), then add matching textures in a resource pack (client-side).
 
 ### Texture Layout
 
@@ -646,12 +630,12 @@ Once celestials are registered, you can retrieve and query them using the `Space
 ### Getting a Specific Celestial
 
 ```java
-import shipwrights.genesis.space.registry.SpaceRegistry;
+import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import net.minecraft.resources.ResourceLocation;
 
 // Get a specific celestial by ID
-Celestial sun = SpaceRegistry.get(ResourceLocation.parse("genesis:sun"));
+Celestial sun = GenesisMod.SPACE_REGISTRY.get(ResourceLocation.parse("genesis:sun"));
 ```
 
 ### Getting All Celestials
@@ -660,24 +644,24 @@ Celestial sun = SpaceRegistry.get(ResourceLocation.parse("genesis:sun"));
 import java.util.List;
 
 // Get all registered celestials
-List<Celestial> allCelestials = SpaceRegistry.getAll();
+List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getAll();
 ```
 
 ### Filtering Celestials by Type
 
 ```java
 // Get all stars
-List<Celestial> stars = SpaceRegistry.getWhere(type ->
+Collection<Celestial> stars = GenesisMod.SPACE_REGISTRY.getWhere(type ->
     type.castsLight()
 );
 
 // Get all visitable bodies (planets and moons)
-List<Celestial> planets = SpaceRegistry.getWhere(type ->
+Collection<Celestial> planets = GenesisMod.SPACE_REGISTRY.getWhere(type ->
     type.isVisitable()
 );
 
 // Get celestials of a specific type
-List<Celestial> bodies = SpaceRegistry.getWhere(type ->
+Collection<Celestial> bodies = GenesisMod.SPACE_REGISTRY.getWhere(type ->
     type.getID().equals(ResourceLocation.parse("genesis:body"))
 );
 ```
@@ -698,40 +682,56 @@ From `builtin.json`:
     {
       "ID": "genesis:sun",
       "type": "genesis:star",
-      "size": 15.0,
-      "gravity": 1.0,
+      "size": 1440,
+      "gravity": 2.0,
       "transformProvider": {
         "type": "genesis:static",
         "x": 0.0,
         "y": 0.0,
-        "z": 0.0
+        "z": 0.0,
+        "xRot": 15,
+        "yRot": 45,
+        "zRot": 5
       }
     },
     {
       "ID": "minecraft:overworld",
       "type": "genesis:body",
-      "size": 1.0,
+      "size": 96,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "genesis:sun",
         "seed": 12345,
-        "orbitDistance": 1.0,
-        "orbitTime": 1.0
+        "orbitDistance": 15000,
+        "orbitTime": 4600000,
+        "dayLength" : 24000
       }
     },
     {
       "ID": "genesis:moon",
       "type": "genesis:body",
-      "size": 0.3,
+      "size": 29,
       "gravity": 0.1622,
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "minecraft:overworld",
         "seed": 67890,
-        "orbitDistance": 0.05,
-        "orbitTime": 0.005,
-        "dayLength": 0.75
+        "orbitDistance": 750,
+        "orbitTime": 184329,
+        "dayLength": 0
+      }
+    },
+    {
+      "ID": "genesis:testbh",
+      "type": "genesis:blackhole",
+      "size": 2048,
+      "gravity": 8,
+      "transformProvider": {
+        "type": "genesis:static",
+        "x": 0.0,
+        "y": -200000.0,
+        "z": -200000.0
       }
     }
   ]
@@ -742,6 +742,7 @@ This creates:
 - A large sun at the origin
 - The Minecraft Overworld orbiting the sun at standard distance and period
 - A small moon orbiting the Overworld with lower gravity
+- A large black hole very far away
 
 ### In Code (Equivalent)
 
@@ -753,7 +754,7 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
         sunTransform,
         ResourceLocation.parse("genesis:sun"),
         CelestialType.get(ResourceLocation.parse("genesis:star")),
-        15.0, 1.0,
+        1400.0, 1.0,
         1.0f, 1.0f, 1.0f
     );
     event.accept(sun);
@@ -761,13 +762,13 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
     // Overworld
     OrbitingTransformProvider overworldTransform = new OrbitingTransformProvider(
         ResourceLocation.parse("genesis:sun"),
-        12345, 1.0, 1.0, 1.0
+        12345, 15000.0, 4608000.0, 24000.0
     );
     Celestial overworld = new Celestial(
         overworldTransform,
         ResourceLocation.parse("minecraft:overworld"),
         CelestialType.get(ResourceLocation.parse("genesis:body")),
-        1.0, 1.0,
+        100.0, 1.0,
         0.8f, 0.8f, 0.8f
     );
     event.accept(overworld);
@@ -775,16 +776,26 @@ private static void registerCelestials(SpaceRegistry.RegisterCelestialsEvent eve
     // Moon
     OrbitingTransformProvider moonTransform = new OrbitingTransformProvider(
         ResourceLocation.parse("minecraft:overworld"),
-        67890, 0.05, 0.005, 0.75
+        67890, 750.0, 23040.0, 18000.0
     );
     Celestial moon = new Celestial(
         moonTransform,
         ResourceLocation.parse("genesis:moon"),
         CelestialType.get(ResourceLocation.parse("genesis:body")),
-        0.3, 0.1622,
+        27.0, 0.1622,
         0.7f, 0.7f, 0.7f
     );
     event.accept(moon);
+
+    // Black hole
+    StaticTransformProvider blackholeTransform = new StaticTransformProvider(0, -200000, -200000);
+    Celestial blackhole = new Celestial(
+        blackholeTransform,
+        ResourceLocation.parse("genesis:testbh"),
+        CelestialType.get(ResourceLocation.parse("genesis:blackhole")),
+        2048.0, 8.0
+    );
+    event.accept(blackhole);
 }
 ```
 

@@ -227,6 +227,13 @@ public class PlanetRenderer implements CelestialRenderer {
             return;
         }
 
+        // Use a single edgeWidth across all face shadows so that the soft
+        // falloff scale is consistent across cube edges.
+        float sharedEdgeWidth = 0.0001f;
+        for (FaceShadow shadow : shadows) {
+            sharedEdgeWidth = Math.max(sharedEdgeWidth, ShadowRenderer.computeEdgeWidth(shadow));
+        }
+
         // Render each shadow in its own batch so we can upload
         // per-shadow projection vertices to the shader.
         for (FaceShadow shadow : shadows) {
@@ -259,6 +266,34 @@ public class PlanetRenderer implements CelestialRenderer {
                 Uniform countUniform = shader.getUniform("ShadowVertexCount");
                 if (countUniform != null) {
                     countUniform.set((float) count);
+                }
+
+                // Build a bitmask of edges that lie on cube face clipping boundaries.
+                // These are artifacts of Sutherland-Hodgman clipping, not real shadow
+                // silhouette edges, so they must not contribute to the fade falloff.
+                int boundaryMask = 0;
+                double eps = halfExtent * 1e-4;
+                for (int i = 0; i < count; i++) {
+                    int j = (i + 1) % count;
+                    Vector2dc a = polygon.get(i);
+                    Vector2dc b = polygon.get(j);
+                    boolean onBoundary =
+                        (Math.abs(a.x() - halfExtent) < eps && Math.abs(b.x() - halfExtent) < eps) ||
+                        (Math.abs(a.x() + halfExtent) < eps && Math.abs(b.x() + halfExtent) < eps) ||
+                        (Math.abs(a.y() - halfExtent) < eps && Math.abs(b.y() - halfExtent) < eps) ||
+                        (Math.abs(a.y() + halfExtent) < eps && Math.abs(b.y() + halfExtent) < eps);
+                    if (onBoundary) {
+                        boundaryMask |= (1 << i);
+                    }
+                }
+                Uniform maskUniform = shader.getUniform("ShadowEdgeMask");
+                if (maskUniform != null) {
+                    maskUniform.set((float) boundaryMask);
+                }
+
+                Uniform edgeWidthUniform = shader.getUniform("ShadowEdgeWidth");
+                if (edgeWidthUniform != null) {
+                    edgeWidthUniform.set(sharedEdgeWidth);
                 }
 
                 for (int i = 0; i < 8; i++) {

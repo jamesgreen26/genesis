@@ -76,13 +76,16 @@ public class ShadowProjection {
                 .map(v -> new Vector2d(v.x(), v.y()))
                 .toList();
 
+        // The projected corners arrive in axis-enumeration order (not polygon order).
+        // Sort them into a valid CCW convex polygon before clipping; Sutherland-Hodgman
+        // requires a properly ordered polygon or it will clip the wrong "edges".
+        poly2d = PolygonClipping.angleSort(poly2d);
+
         List<Vector2d> clipped =
                 clipToPlaneBounds(self, plane, poly2d);
 
         if (clipped.size() < 3) return List.of();
 
-        clipped = PolygonClipping.angleSort(clipped);
-        // Note: pruneCollinear was too aggressive even with 1e-6 tolerance, so we skip it
         return clipped;
     }
 
