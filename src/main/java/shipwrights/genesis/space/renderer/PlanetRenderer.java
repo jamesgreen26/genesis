@@ -261,6 +261,29 @@ public class PlanetRenderer implements CelestialRenderer {
                     countUniform.set((float) count);
                 }
 
+                // Build a bitmask of edges that lie on cube face clipping boundaries.
+                // These are artifacts of Sutherland-Hodgman clipping, not real shadow
+                // silhouette edges, so they must not contribute to the fade falloff.
+                int boundaryMask = 0;
+                double eps = halfExtent * 1e-4;
+                for (int i = 0; i < count; i++) {
+                    int j = (i + 1) % count;
+                    Vector2dc a = polygon.get(i);
+                    Vector2dc b = polygon.get(j);
+                    boolean onBoundary =
+                        (Math.abs(a.x() - halfExtent) < eps && Math.abs(b.x() - halfExtent) < eps) ||
+                        (Math.abs(a.x() + halfExtent) < eps && Math.abs(b.x() + halfExtent) < eps) ||
+                        (Math.abs(a.y() - halfExtent) < eps && Math.abs(b.y() - halfExtent) < eps) ||
+                        (Math.abs(a.y() + halfExtent) < eps && Math.abs(b.y() + halfExtent) < eps);
+                    if (onBoundary) {
+                        boundaryMask |= (1 << i);
+                    }
+                }
+                Uniform maskUniform = shader.getUniform("ShadowEdgeMask");
+                if (maskUniform != null) {
+                    maskUniform.set((float) boundaryMask);
+                }
+
                 for (int i = 0; i < 8; i++) {
                     Uniform u = shader.getUniform("ShadowVertex[" + i + "]");
                     if (u != null) {

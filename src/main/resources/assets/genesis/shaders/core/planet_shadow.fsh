@@ -4,6 +4,7 @@ in vec4 vertexColor;
 in vec3 localPos;
 
 uniform float ShadowVertexCount;
+uniform float ShadowEdgeMask;
 uniform vec3 ShadowVertex[8];
 
 out vec4 fragColor;
@@ -40,9 +41,12 @@ void main() {
         radius = max(radius, d);
     }
 
-    // Distance to the NEAREST EDGE of the polygon
+    // Distance to the NEAREST EDGE of the polygon, skipping edges that lie
+    // on cube face clipping boundaries (they are not real shadow silhouette edges).
+    int mask = int(ShadowEdgeMask + 0.5);
     float minEdgeDist = 1e9;
     for (int i = 0; i < count; ++i) {
+        if ((mask & (1 << i)) != 0) continue;
         int j = (i + 1) % count;
         vec3 a = ShadowVertex[i];
         vec3 b = ShadowVertex[j];

@@ -3,6 +3,7 @@ package shipwrights.genesis.client.shading;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import org.joml.Matrix4f;
+import org.joml.Vector2d;
 import org.joml.Vector2dc;
 import org.joml.Vector3d;
 import org.joml.Vector3i;
@@ -113,18 +114,29 @@ public class ShadowRenderer {
 
         LOGGER.info("Triangulation successful: {} triangles ({} indices)", indices.size() / 3, indices.size());
 
-        // Convert 2D vertices to 3D with offset
+        // Convert 2D vertices to 3D with offset.
+        // Vertices that sit on a face boundary (±cubeHalfSize) are extended slightly
+        // beyond the boundary so that adjacent face shadows overlap and close the seam
+        // gap introduced by the z-fighting offset.
+        double seamExt = Z_FIGHTING_EPSILON * cubeHalfSize;
+        double eps = cubeHalfSize * 1e-4;
         Vector3d[] vertices3D = new Vector3d[polygon.size()];
         for (int i = 0; i < polygon.size(); i++) {
-            Vector3d v3d = convertPlaneToLocal3D(polygon.get(i), plane);
+            Vector2dc v2d = polygon.get(i);
+            double vx = v2d.x();
+            double vy = v2d.y();
+            if      (Math.abs(vx - cubeHalfSize) < eps) vx += seamExt;
+            else if (Math.abs(vx + cubeHalfSize) < eps) vx -= seamExt;
+            if      (Math.abs(vy - cubeHalfSize) < eps) vy += seamExt;
+            else if (Math.abs(vy + cubeHalfSize) < eps) vy -= seamExt;
+            Vector3d v3d = convertPlaneToLocal3D(new Vector2d(vx, vy), plane);
             vertices3D[i] = applyZFightingOffset(v3d, plane, cubeHalfSize);
             LOGGER.info("Vertex {}: 2D({}, {}) -> 3D({}, {}, {})",
                     i, polygon.get(i).x(), polygon.get(i).y(),
                     vertices3D[i].x, vertices3D[i].y, vertices3D[i].z);
         }
 
-        // Shadow color: black with 50% transparency
-        int r = 0, g = 0, b = 0, a = 128;
+        int r = 0, g = 0, b = 0, a = 176;
 
         LOGGER.info("Rendering {} triangles with color rgba({}, {}, {}, {})", indices.size() / 3, r, g, b, a);
 
