@@ -335,6 +335,315 @@ class PolygonClippingTest {
         }
     }
 
+    @Test
+    @DisplayName("clipPolygonToRect() - Triangle clipped on left edge only produces correct quad")
+    void testClipTriangleLeftEdgeOnly() {
+        // Triangle straddles only the left edge: two vertices outside left, one inside
+        List<Vector2d> triangle = Arrays.asList(
+                v(-1, 0),  // outside left
+                v(1, 0),   // inside
+                v(1, 2)    // inside
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, 0, -1, 2, 3);
+
+        // Should produce a quad: intersection on left edge (entering), (1,0), (1,2), intersection on left edge (exiting)
+        assertEquals(4, clipped.size(), "Clipping triangle on one edge should produce 4 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON, "X should be >= 0");
+            assertTrue(p.x <= 2 + EPSILON, "X should be <= 2");
+        }
+
+        // Both intersections should have x == 0
+        long onLeftEdge = clipped.stream().filter(p -> Math.abs(p.x) < EPSILON).count();
+        assertEquals(2, onLeftEdge, "Should have exactly 2 points on left clip edge");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Triangle clipped on right edge only produces correct quad")
+    void testClipTriangleRightEdgeOnly() {
+        List<Vector2d> triangle = Arrays.asList(
+                v(0, 0),   // inside
+                v(2, 0),   // outside right
+                v(0, 2)    // inside
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, -1, -1, 1, 3);
+
+        assertEquals(4, clipped.size(), "Clipping triangle on right edge only should produce 4 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x <= 1 + EPSILON, "X should be <= 1");
+        }
+
+        long onRightEdge = clipped.stream().filter(p -> Math.abs(p.x - 1) < EPSILON).count();
+        assertEquals(2, onRightEdge, "Should have exactly 2 points on right clip edge");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Triangle clipped on bottom edge only produces correct quad")
+    void testClipTriangleBottomEdgeOnly() {
+        List<Vector2d> triangle = Arrays.asList(
+                v(0, 0),    // inside
+                v(2, 0),    // inside
+                v(1, -2)    // outside below
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, -1, -1, 3, 3);
+
+        assertEquals(4, clipped.size(), "Clipping triangle on bottom edge only should produce 4 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.y >= -1 - EPSILON, "Y should be >= -1");
+        }
+
+        long onBottomEdge = clipped.stream().filter(p -> Math.abs(p.y - (-1)) < EPSILON).count();
+        assertEquals(2, onBottomEdge, "Should have exactly 2 points on bottom clip edge");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Triangle clipped on top edge only produces correct quad")
+    void testClipTriangleTopEdgeOnly() {
+        List<Vector2d> triangle = Arrays.asList(
+                v(0, 0),    // inside
+                v(2, 0),    // inside
+                v(1, 2)     // outside above
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, -1, -1, 3, 1);
+
+        assertEquals(4, clipped.size(), "Clipping triangle on top edge only should produce 4 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.y <= 1 + EPSILON, "Y should be <= 1");
+        }
+
+        long onTopEdge = clipped.stream().filter(p -> Math.abs(p.y - 1) < EPSILON).count();
+        assertEquals(2, onTopEdge, "Should have exactly 2 points on top clip edge");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Only one vertex inside produces triangle")
+    void testClipOnlyOneVertexInside() {
+        // Large triangle with only one vertex inside the clip rect
+        List<Vector2d> triangle = Arrays.asList(
+                v(0.5, 0.5),  // inside
+                v(5, -5),     // outside
+                v(-5, 5)      // outside
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, 0, 0, 1, 1);
+
+        assertFalse(clipped.isEmpty(), "Should produce non-empty result");
+        assertTrue(clipped.size() >= 3, "Should produce at least a triangle");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 1 + EPSILON, "X out of bounds: " + p.x);
+            assertTrue(p.y >= -EPSILON && p.y <= 1 + EPSILON, "Y out of bounds: " + p.y);
+        }
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Polygon edge lying exactly on clip boundary")
+    void testClipEdgeOnBoundary() {
+        // Square whose left edge lies exactly on xmin=0
+        List<Vector2d> square = Arrays.asList(
+                v(0, 0),
+                v(1, 0),
+                v(1, 1),
+                v(0, 1)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(square, 0, 0, 2, 2);
+
+        assertEquals(4, clipped.size(), "Polygon touching boundary should keep all 4 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 2 + EPSILON);
+            assertTrue(p.y >= -EPSILON && p.y <= 2 + EPSILON);
+        }
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Polygon vertex exactly on corner of clip rect")
+    void testClipVertexAtCorner() {
+        // Triangle with one vertex exactly at a corner of the clip rect
+        List<Vector2d> triangle = Arrays.asList(
+                v(0, 0),    // exactly at corner
+                v(2, 0),    // outside right
+                v(0, 2)     // outside top
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, 0, 0, 1, 1);
+
+        assertFalse(clipped.isEmpty(), "Should produce non-empty result");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 1 + EPSILON, "X out of bounds: " + p.x);
+            assertTrue(p.y >= -EPSILON && p.y <= 1 + EPSILON, "Y out of bounds: " + p.y);
+        }
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - CW-ordered polygon produces correct bounds")
+    void testClipCWOrderedPolygon() {
+        // Same as the large-square-clips-to-rect test but vertices in CW order
+        List<Vector2d> cwSquare = Arrays.asList(
+                v(-2, -2),
+                v(-2, 5),
+                v(5, 5),
+                v(5, -2)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(cwSquare, 0, 0, 3, 3);
+
+        assertEquals(4, clipped.size(), "CW polygon should clip to 4-vertex rectangle");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 3 + EPSILON, "X out of bounds: " + p.x);
+            assertTrue(p.y >= -EPSILON && p.y <= 3 + EPSILON, "Y out of bounds: " + p.y);
+        }
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Concave (non-convex) polygon clipped correctly")
+    void testClipConcavePolygon() {
+        // L-shaped concave polygon, fully inside clip rect
+        List<Vector2d> lShape = Arrays.asList(
+                v(0, 0),
+                v(2, 0),
+                v(2, 1),
+                v(1, 1),
+                v(1, 2),
+                v(0, 2)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(lShape, -1, -1, 3, 3);
+
+        // Fully inside — all 6 vertices must be preserved
+        assertEquals(6, clipped.size(), "Concave polygon fully inside should keep all vertices");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Concave polygon with notch crossing clip boundary")
+    void testClipConcavePolygonNotchCrossesBoundary() {
+        // Arrow/chevron shape: notch points left, body extends right beyond clip
+        // The concave notch vertex (0, 1) is inside; the two rightmost vertices are outside.
+        List<Vector2d> chevron = Arrays.asList(
+                v(0, 0),
+                v(3, 0),   // outside right
+                v(1, 1),   // inside — the concave notch
+                v(3, 2),   // outside right
+                v(0, 2)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(chevron, 0, 0, 2, 2);
+
+        assertFalse(clipped.isEmpty(), "Should produce non-empty result");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 2 + EPSILON, "X out of bounds: " + p.x);
+            assertTrue(p.y >= -EPSILON && p.y <= 2 + EPSILON, "Y out of bounds: " + p.y);
+        }
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Triangle crossing two adjacent edges produces pentagon")
+    void testClipTriangleTwoEdgesPentagon() {
+        // Triangle: one vertex inside, other two outside two different edges
+        List<Vector2d> triangle = Arrays.asList(
+                v(0.5, 0.5),  // inside
+                v(2, -1),     // outside right and below
+                v(-1, 2)      // outside left and above
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, 0, 0, 1, 1);
+
+        assertFalse(clipped.isEmpty());
+        // Each of the 3 edges crosses at most one clip boundary in this config;
+        // result should have more vertices than 3
+        assertTrue(clipped.size() >= 3, "Result should have at least 3 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 1 + EPSILON, "X out of bounds: " + p.x);
+            assertTrue(p.y >= -EPSILON && p.y <= 1 + EPSILON, "Y out of bounds: " + p.y);
+        }
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Intersection point coordinates are exact")
+    void testClipIntersectionCoordinatesExact() {
+        // Triangle: A=(-1,0.5) outside-left, B=(0.5,-1) outside-below, C=(0.5,0.5) inside.
+        // The corner (0,0) of the clip rect is inside this triangle, so Sutherland-Hodgman
+        // correctly produces a quadrilateral: (0,0.5) -> (0,0) -> (0.5,0) -> (0.5,0.5).
+        List<Vector2d> triangle = Arrays.asList(
+                v(-1, 0.5),   // outside left
+                v(0.5, -1),   // outside below
+                v(0.5, 0.5)   // inside
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(triangle, 0, 0, 1, 1);
+
+        // Corner (0,0) is inside the triangle so result is a quad, not a triangle
+        assertEquals(4, clipped.size(), "Should produce a quadrilateral (corner (0,0) is inside the triangle)");
+
+        boolean hasLeftIntersect = clipped.stream()
+                .anyMatch(p -> Math.abs(p.x) < EPSILON && Math.abs(p.y - 0.5) < EPSILON);
+        boolean hasBottomIntersect = clipped.stream()
+                .anyMatch(p -> Math.abs(p.x - 0.5) < EPSILON && Math.abs(p.y) < EPSILON);
+        boolean hasInsideVertex = clipped.stream()
+                .anyMatch(p -> Math.abs(p.x - 0.5) < EPSILON && Math.abs(p.y - 0.5) < EPSILON);
+        boolean hasCorner = clipped.stream()
+                .anyMatch(p -> Math.abs(p.x) < EPSILON && Math.abs(p.y) < EPSILON);
+
+        assertTrue(hasLeftIntersect, "Should have intersection point at (0, 0.5)");
+        assertTrue(hasBottomIntersect, "Should have intersection point at (0.5, 0)");
+        assertTrue(hasInsideVertex, "Should retain inside vertex (0.5, 0.5)");
+        assertTrue(hasCorner, "Should include clip-rect corner (0, 0) since it is inside the triangle");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Polygon entirely to the right returns empty")
+    void testClipPolygonEntirelyRight() {
+        List<Vector2d> polygon = Arrays.asList(
+                v(5, 0), v(6, 0), v(6, 1), v(5, 1)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(polygon, 0, 0, 3, 3);
+
+        assertTrue(clipped.isEmpty(), "Polygon entirely to the right should clip to empty");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Polygon entirely above returns empty")
+    void testClipPolygonEntirelyAbove() {
+        List<Vector2d> polygon = Arrays.asList(
+                v(0, 5), v(1, 5), v(1, 6), v(0, 6)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(polygon, 0, 0, 3, 3);
+
+        assertTrue(clipped.isEmpty(), "Polygon entirely above should clip to empty");
+    }
+
+    @Test
+    @DisplayName("clipPolygonToRect() - Polygon exactly coinciding with clip rect")
+    void testClipPolygonSameAsRect() {
+        List<Vector2d> rect = Arrays.asList(
+                v(0, 0), v(1, 0), v(1, 1), v(0, 1)
+        );
+
+        List<Vector2d> clipped = PolygonClipping.clipPolygonToRect(rect, 0, 0, 1, 1);
+
+        assertEquals(4, clipped.size(), "Polygon exactly matching clip rect should produce 4 vertices");
+
+        for (Vector2d p : clipped) {
+            assertTrue(p.x >= -EPSILON && p.x <= 1 + EPSILON);
+            assertTrue(p.y >= -EPSILON && p.y <= 1 + EPSILON);
+        }
+    }
+
     // ========== Tests for convexHull() ==========
 
     @Test
