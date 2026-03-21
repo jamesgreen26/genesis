@@ -82,11 +82,17 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
 
     @Override
     public Quaterniondc getRotation(long ticks, float subticks) {
-        // Apply daily rotation around Y axis (similar to OrbitingBody)
-        double rotationalPeriod = (this.orbitTime / (this.orbitTime / this.dayLength - 1.0));
-        if(this.dayLength == 0.0) {
-            rotationalPeriod = this.orbitTime;
+        if (this.dayLength == 0.0) {
+            // Tidally locked: -Z side always faces the parent
+            Vector3d myPos = getPosition(ticks, subticks);
+            Vector3d parentPos = new Vector3d(getParent().getPosition(ticks, subticks));
+            Vector3d toParent = parentPos.sub(myPos, new Vector3d()).normalize();
+            // Rotate so that local -Z points toward parent
+            return new Quaterniond().rotateTo(new Vector3d(0, 0.8, -0.5).normalize(), toParent);
         }
+
+        // Normal rotation: daily spin around Y axis (similar to OrbitingBody)
+        double rotationalPeriod = (this.orbitTime / (this.orbitTime / this.dayLength - 1.0));
         return new Quaterniond(baseRotation).rotateY(
             -Math.PI * 2 * (ticks + subticks) / rotationalPeriod
         );
