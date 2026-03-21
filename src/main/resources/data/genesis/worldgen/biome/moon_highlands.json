@@ -12,7 +12,7 @@
   },
   "carvers": {
     "air": [
-      "minecraft:canyon",
+      "genesis:moon_canyon",
       "minecraft:cave",
       "minecraft:cave_extra_underground"
     ]

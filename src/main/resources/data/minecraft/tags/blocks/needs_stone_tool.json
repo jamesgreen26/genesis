@@ -16,6 +16,8 @@
     "genesis:void_core",
     "genesis:void_engine_viewport",
     "genesis:tulcite_catalyzer_block",
-    "genesis:anorthite"
+    "genesis:anorthite",
+    "genesis:moon_stone",
+    "genesis:hallow_moon_stone"
   ]
 }

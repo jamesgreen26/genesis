@@ -145,8 +145,8 @@ public class GenesisBlocks {
         )
     );
 
-    public static final RegistryObject<DropExperienceBlock> VOID_CORE_ORE = BLOCKS.register("void_core_ore",
-            () -> new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.DIAMOND_ORE)
+    public static final RegistryObject<VoidCoreOreBlock> VOID_CORE_ORE = BLOCKS.register("void_core_ore",
+            () -> new VoidCoreOreBlock(BlockBehaviour.Properties.copy(Blocks.DIAMOND_ORE)
                     .mapColor(MapColor.COLOR_BLACK)
                     .strength(6.0F, 12.0F)
                     .sound(SoundType.AMETHYST)
@@ -292,16 +292,18 @@ public class GenesisBlocks {
     public static final RegistryObject<Block> MOON_STONE = BLOCKS.register("moon_stone", () ->
             new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5F)
+                    .strength(4.5F)
                     .sound(SoundType.DEEPSLATE)
+                    .requiresCorrectToolForDrops()
             )
     );
 
     public static final RegistryObject<Block> HALLOW_MOON_STONE = BLOCKS.register("hallow_moon_stone", () ->
             new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5F)
+                    .strength(4.0F)
                     .sound(SoundType.BASALT)
+                    .requiresCorrectToolForDrops()
             )
     );
 

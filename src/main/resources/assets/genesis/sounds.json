@@ -28,5 +28,11 @@
     "sounds": [
       "genesis:miasma_hiss"
     ]
+  },
+  "void_core_ore_sound": {
+    "subtitle": "subtitles.genesis.void_core_ore_sound",
+    "sounds": [
+      "genesis:void_core_ore_sound"
+    ]
   }
 }

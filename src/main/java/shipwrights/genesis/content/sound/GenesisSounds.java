@@ -25,4 +25,7 @@ public class GenesisSounds {
 
     public static final RegistryObject<SoundEvent> MIASMA_HISS = SOUND_EVENTS.register("miasma_hiss",
             () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "miasma_hiss")));
+
+    public static final RegistryObject<SoundEvent> VOID_CORE_ORE_SOUND = SOUND_EVENTS.register("void_core_ore_sound",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "void_core_ore_sound")));
 }

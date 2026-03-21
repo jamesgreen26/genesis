@@ -202,7 +202,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         
         poseStack.pushPose();
 
-        //transform stars view to the side of the planet
+        //transform stars view to the side of the planet fixme todo change this to use the new vantage point system
         poseStack.mulPose(new Quaternionf().rotateX((float) (Math.PI/2)));
         poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTime, partialTick)).invert());
 

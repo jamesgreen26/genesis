@@ -86,10 +86,16 @@
   "item.genesis.space_boots": "Space Boots",
   "creativetab.genesis_tab": "Genesis",
   "creativetab.genesis_natural_tab": "Genesis Worlds",
-  "subtitles.genesis.void_engine_start": "Void Engine starts",
   "painting.genesis.space_0.title": "Orbit Vista",
   "painting.genesis.space_0.author": "rainyatrium",
   "fluid.genesis.miasma": "Miasma",
   "block.genesis.miasma_block": "Miasma",
-  "item.genesis.miasma_bucket": "Miasma Bucket"
+  "item.genesis.miasma_bucket": "Miasma Bucket",
+
+  "subtitles.genesis.wormhole_ambiance": "Subspace rings",
+  "subtitles.genesis.void_engine_start": "Void Engine spools up",
+  "subtitles.genesis.void_engine_travel": "Void Engine teleports",
+  "subtitles.genesis.void_engine_stop": "Void Engine spools down",
+  "subtitles.genesis.miasma_hiss": "Miasma evaporates",
+  "subtitles.genesis.void_core_ore_sound": "The void calls out"
 }
