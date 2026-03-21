@@ -9,9 +9,12 @@ Complete API reference for the Genesis celestial system.
 - [CelestialTransformProvider](#celestialtransformprovider)
 - [StaticTransformProvider](#statictransformprovider)
 - [OrbitingTransformProvider](#orbitingtransformprovider)
+- [VantagePoint](#vantagepoint)
 - [SpaceRegistry](#spaceregistry)
+- [SpaceLevel](#spacelevel)
+- [PlanetProperties](#planetproperties)
+- [StarProperties](#starproperties)
 - [GenesisMod](#genesismod)
-- [Constants](#constants)
 - [JSON Schema](#json-schema)
 
 ---
@@ -21,14 +24,14 @@ Complete API reference for the Genesis celestial system.
 **Package:** `shipwrights.genesis.space`
 **File:** `src/main/java/shipwrights/genesis/space/Celestial.java`
 
-The main class representing a celestial body in the Genesis system.
+`Celestial` is a **record** representing an astronomical body in the Genesis system.
 
-### Constructor
+### Record Components
 
 ```java
-public Celestial(
+public record Celestial(
     CelestialTransformProvider transformProvider,
-    ResourceLocation id,
+    ResourceLocation ID,
     CelestialType type,
     double size,
     double gravity,
@@ -40,103 +43,56 @@ public Celestial(
 
 **Parameters:**
 - `transformProvider` - Provider for position and rotation calculations
-- `id` - Unique identifier (e.g., `minecraft:overworld`)
+- `ID` - Unique identifier (e.g., `minecraft:overworld`)
 - `type` - The celestial type (e.g., star, body)
-- `size` - Size multiplier (1.0 = 96 blocks diameter)
+- `size` - Size of the celestial body
 - `gravity` - Gravity strength (1.0 = Earth gravity)
-- `r` - Red color component (0.0 to 1.0)
-- `g` - Green color component (0.0 to 1.0)
-- `b` - Blue color component (0.0 to 1.0)
+- `r` - Red color component (0.0 to 1.0) — reserved for future use (e.g., map tinting)
+- `g` - Green color component (0.0 to 1.0) — reserved for future use
+- `b` - Blue color component (0.0 to 1.0) — reserved for future use
+
+Record accessor names match the component names: `ID()`, `type()`, `size()`, `gravity()`, `r()`, `g()`, `b()`, `transformProvider()`.
 
 ### Methods
 
-#### getID()
-```java
-public ResourceLocation getID()
-```
-Returns the unique identifier for this celestial.
-
-**Returns:** `ResourceLocation` - The celestial's ID
-
----
-
-#### getType()
-```java
-public CelestialType getType()
-```
-Returns the type of this celestial.
-
-**Returns:** `CelestialType` - The celestial's type
-
----
-
-#### size()
-```java
-public double size()
-```
-Returns the size multiplier of this celestial.
-
-**Returns:** `double` - Size multiplier (actual diameter = size × 96 blocks)
-
----
-
-#### gravity()
-```java
-public double gravity()
-```
-Returns the gravity strength of this celestial.
-
-**Returns:** `double` - Gravity multiplier (1.0 = Earth gravity)
-
----
-
-#### r(), g(), b()
-```java
-public float r()
-public float g()
-public float b()
-```
-Returns the color components of this celestial.
-
-**Returns:** `float` - Color value from 0.0 to 1.0
-
----
-
 #### getPosition()
 ```java
-public Vector3d getPosition(long ticks, float partialTick)
+public Vector3dc getPosition(long ticks, float partialTick)
+public Vector3dc getPosition(long ticks)
 ```
 Calculates the position of this celestial at a specific time.
 
-**Parameters:**
-- `ticks` - Game time in ticks
-- `partialTick` - Fractional tick for interpolation (0.0 to 1.0)
-
-**Returns:** `Vector3d` - Position vector in world space
+**Returns:** `Vector3dc` - Position vector in world space
 
 ---
 
 #### getRotation()
 ```java
 public Quaterniondc getRotation(long ticks, float partialTick)
+public Quaterniondc getRotation(long ticks)
 ```
 Calculates the rotation of this celestial at a specific time.
-
-**Parameters:**
-- `ticks` - Game time in ticks
-- `partialTick` - Fractional tick for interpolation (0.0 to 1.0)
 
 **Returns:** `Quaterniondc` - Rotation quaternion
 
 ---
 
-#### getTransformProvider()
+#### getOBB()
 ```java
-public CelestialTransformProvider getTransformProvider()
+public OBB getOBB(long ticks)
+public OBB getOBB(long ticks, float subticks)
 ```
-Returns the transform provider for this celestial.
+Returns the oriented bounding box for this celestial at the given time.
 
-**Returns:** `CelestialTransformProvider` - The transform provider
+**Returns:** `OBB` - Oriented bounding box
+
+---
+
+#### getActualSize()
+```java
+public double getActualSize()
+```
+Returns the size of this celestial (equivalent to `size()`).
 
 ---
 
@@ -144,43 +100,25 @@ Returns the transform provider for this celestial.
 ```java
 public Celestial getNearestStar(long gameTime, float partialTick)
 ```
-Finds the nearest star-type celestial to this one.
+Finds the nearest star-type celestial to this one. If this celestial is itself a star, returns `this`.
 
 **Parameters:**
 - `gameTime` - Current game time in ticks
 - `partialTick` - Fractional tick
 
-**Returns:** `Celestial` - The nearest star, or null if none exists
+**Returns:** `Celestial` - The nearest star
 
----
-
-#### getDayTime()
-```java
-public long getDayTime(long gameTime)
-```
-Calculates the day time (0-24000) for this celestial based on the nearest star's position.
-
-**Parameters:**
-- `gameTime` - Current game time in ticks
-
-**Returns:** `long` - Day time value (0 = noon, 12000 = midnight)
+**Throws:** `IllegalStateException` if no star exists in the registry
 
 ---
 
 ### Static Fields
 
 ```java
-public static double BASE_SIZE = 96;
-public static double BASE_ORBIT_DISTANCE = 15_000;
-public static double BASE_ORBIT_TIME = 4_608_000;
-public static double BASE_DAY_LENGTH = 24_000;
+public static final Codec<Celestial> CODEC
 ```
 
-**Descriptions:**
-- `BASE_SIZE` - Base diameter in blocks (96)
-- `BASE_ORBIT_DISTANCE` - Base orbital distance in blocks (15,000)
-- `BASE_ORBIT_TIME` - Base orbital period in ticks (4,608,000 ≈ 64 hours)
-- `BASE_DAY_LENGTH` - Base day length in ticks (24,000 = 20 minutes)
+Mojang codec for JSON serialization/deserialization.
 
 ---
 
@@ -199,8 +137,6 @@ boolean castsLight()
 ```
 Whether this type emits light (affects day/night cycles on other celestials).
 
-**Returns:** `boolean` - `true` for stars, `false` for planets/moons
-
 ---
 
 #### castsShadow()
@@ -208,8 +144,6 @@ Whether this type emits light (affects day/night cycles on other celestials).
 boolean castsShadow()
 ```
 Whether this type casts shadows (blocks light from other sources).
-
-**Returns:** `boolean` - `true` for opaque bodies, `false` for stars
 
 ---
 
@@ -219,8 +153,6 @@ boolean isVisitable()
 ```
 Whether players can land on this type of celestial.
 
-**Returns:** `boolean` - `true` for planets/moons, `false` for stars
-
 ---
 
 #### getRenderer()
@@ -229,8 +161,6 @@ Whether players can land on this type of celestial.
 ```
 Returns the renderer used to draw this type of celestial.
 
-**Returns:** `CelestialRenderer` - The renderer instance
-
 ---
 
 #### getID()
@@ -238,8 +168,6 @@ Returns the renderer used to draw this type of celestial.
 @NotNull ResourceLocation getID()
 ```
 Returns the unique identifier for this type.
-
-**Returns:** `ResourceLocation` - The type's ID
 
 ---
 
@@ -251,11 +179,6 @@ static CelestialType get(ResourceLocation ID)
 ```
 Retrieves a registered celestial type by its ID.
 
-**Parameters:**
-- `ID` - The type identifier
-
-**Returns:** `CelestialType` - The type, or throws if not found
-
 ---
 
 #### register()
@@ -263,9 +186,6 @@ Retrieves a registered celestial type by its ID.
 static void register(CelestialType type)
 ```
 Registers a new celestial type.
-
-**Parameters:**
-- `type` - The type to register
 
 ---
 
@@ -275,13 +195,19 @@ Registers a new celestial type.
 - `castsLight()` → `true`
 - `castsShadow()` → `false`
 - `isVisitable()` → `false`
-- Rendered with glowing effects
+- Rendered with glowing star effects
 
 #### genesis:body
 - `castsLight()` → `false`
 - `castsShadow()` → `true`
 - `isVisitable()` → `true`
 - Rendered with surface textures
+
+#### genesis:blackhole
+- `castsLight()` → `false`
+- `castsShadow()` → `false`
+- `isVisitable()` → `false`
+- Rendered with a blackhole shader effect
 
 ---
 
@@ -300,10 +226,6 @@ Vector3d getPosition(long ticks, float subticks)
 ```
 Calculates position at a specific time.
 
-**Parameters:**
-- `ticks` - Game time in ticks
-- `subticks` - Fractional tick (0.0 to 1.0)
-
 **Returns:** `Vector3d` - Position vector
 
 ---
@@ -313,10 +235,6 @@ Calculates position at a specific time.
 Quaterniondc getRotation(long ticks, float subticks)
 ```
 Calculates rotation at a specific time.
-
-**Parameters:**
-- `ticks` - Game time in ticks
-- `subticks` - Fractional tick (0.0 to 1.0)
 
 **Returns:** `Quaterniondc` - Rotation quaternion
 
@@ -328,8 +246,6 @@ ResourceLocation getType()
 ```
 Returns the type identifier for this transform provider.
 
-**Returns:** `ResourceLocation` - The provider type ID
-
 ---
 
 ### Static Methods
@@ -339,10 +255,6 @@ Returns the type identifier for this transform provider.
 static void register(ResourceLocation type, Codec<? extends CelestialTransformProvider> codec)
 ```
 Registers a transform provider type with its codec for JSON deserialization.
-
-**Parameters:**
-- `type` - Type identifier
-- `codec` - Mojang codec for JSON parsing
 
 ---
 
@@ -357,31 +269,14 @@ Transform provider for celestials with fixed positions and rotations.
 
 ### Constructors
 
-#### Position Only
 ```java
 public StaticTransformProvider(double x, double y, double z)
-```
-
-**Parameters:**
-- `x` - X coordinate
-- `y` - Y coordinate
-- `z` - Z coordinate
-
----
-
-#### Position and Rotation
-```java
-public StaticTransformProvider(
-    double x, double y, double z,
-    double xRot, double yRot, double zRot
-)
+public StaticTransformProvider(double x, double y, double z, double xRot, double yRot, double zRot)
 ```
 
 **Parameters:**
 - `x`, `y`, `z` - Position coordinates
-- `xRot`, `yRot`, `zRot` - Rotation in radians
-
----
+- `xRot`, `yRot`, `zRot` - Rotation in radians (optional, default 0.0)
 
 ### JSON Fields
 
@@ -432,12 +327,10 @@ public OrbitingTransformProvider(
 
 **Parameters:**
 - `parentID` - ID of the parent celestial to orbit
-- `seed` - Random seed for orbital angles
-- `orbitDistance` - Distance multiplier (base: 15,000 blocks)
-- `orbitTime` - Period multiplier (base: 4,608,000 ticks)
-- `dayLength` - Rotation period multiplier (base: 24,000 ticks)
-
----
+- `seed` - Random seed for deterministic orbital angles (longitude and latitude)
+- `orbitDistance` - Orbit radius **in blocks**
+- `orbitTime` - Orbital period **in ticks**
+- `dayLength` - Axial rotation period **in ticks** (0 = tidally locked: one face always points toward parent)
 
 ### JSON Fields
 
@@ -446,9 +339,9 @@ public OrbitingTransformProvider(
   "type": "genesis:orbiting",
   "parentID": "namespace:parent",
   "seed": 12345,
-  "orbitDistance": 1.0,
-  "orbitTime": 1.0,
-  "dayLength": 1.0
+  "orbitDistance": 15000.0,
+  "orbitTime": 4608000.0,
+  "dayLength": 24000.0
 }
 ```
 
@@ -456,21 +349,76 @@ public OrbitingTransformProvider(
 |-------|------|----------|---------|-------------|
 | `type` | String | Yes | - | Must be `"genesis:orbiting"` |
 | `parentID` | String | Yes | - | Parent celestial ID |
-| `seed` | Integer | Yes | - | Random seed |
-| `orbitDistance` | Number | Yes | - | Distance multiplier |
-| `orbitTime` | Number | Yes | - | Period multiplier |
-| `dayLength` | Number | No | 1.0 | Day length multiplier |
-
----
+| `seed` | Integer | Yes | - | Random seed for orbital angles |
+| `orbitDistance` | Number | Yes | - | Orbit radius in blocks |
+| `orbitTime` | Number | Yes | - | Orbital period in ticks |
+| `dayLength` | Number | No | 1.0 | Axial rotation period in ticks (0 = tidally locked) |
 
 ### Behavior
 
-- Uses `seed` to generate deterministic random orbital angles in spherical coordinates
+- Uses `seed` to generate deterministic random orbital angles (spherical coordinates)
 - Orbits in a circle around the parent's position
-- Rotates on its axis based on `dayLength`
-- Actual distance = `orbitDistance` × `Celestial.BASE_ORBIT_DISTANCE`
-- Actual period = `orbitTime` × `Celestial.BASE_ORBIT_TIME`
-- Actual day = `dayLength` × `Celestial.BASE_DAY_LENGTH`
+- Rotates on its own axis at the rate given by `dayLength`
+- Setting `dayLength` to `0` enables tidal locking: the body's -Z face always points toward the parent
+
+---
+
+## VantagePoint
+
+**Package:** `shipwrights.genesis.space`
+**File:** `src/main/java/shipwrights/genesis/space/VantagePoint.java`
+
+Interface describing the observer's position and orientation when rendering the sky. Passed to `CelestialRenderer.invoke()` so renderers can compute correct relative positions.
+
+### Methods
+
+#### getPosition()
+```java
+Vector3dc getPosition()
+```
+The observer's world-space position.
+
+---
+
+#### getRotation()
+```java
+Quaterniondc getRotation()
+```
+The observer's orientation (combined celestial and camera rotation when on a surface).
+
+---
+
+### Static Factory
+
+#### get()
+```java
+@Nullable static VantagePoint get(Level level, Vector3dc posInLevel, long ticks, float partialTick)
+```
+Creates the appropriate `VantagePoint` for the current observer position.
+
+**Returns:** `VantagePoint` — or `null` if the level has no space-level association
+
+---
+
+### Implementations
+
+#### VantagePoint.InSpace
+Observer is viewing from space (not standing on any celestial).
+- `getPosition()` — returns zero vector
+- `getRotation()` — returns identity quaternion
+
+#### VantagePoint.OnCelestial
+Observer is standing on a celestial body's surface.
+
+**Fields:**
+- `Celestial celestial` — the planet the observer is on
+- `Quaterniondc cameraRotationFromNorthPole` — camera orientation as lat/lon offset
+- `long ticks`, `float partialTick` — current time
+
+**Methods:**
+- `getPosition()` — returns the celestial's position
+- `getRotation()` — combined celestial rotation and camera rotation
+- `getCelestialRotation()` — the celestial's own rotation
 
 ---
 
@@ -479,51 +427,46 @@ public OrbitingTransformProvider(
 **Package:** `shipwrights.genesis.space.registry`
 **File:** `src/main/java/shipwrights/genesis/space/registry/SpaceRegistry.java`
 
-Central registry for all celestials in the game.
+Central registry for all celestials. Access the live instance via `GenesisMod.SPACE_REGISTRY`.
 
-### Static Methods
+### Instance Methods
 
 #### get()
 ```java
-public static Celestial get(ResourceLocation id)
+public @Nullable Celestial get(ResourceLocation id)
 ```
 Retrieves a celestial by its ID.
 
-**Parameters:**
-- `id` - The celestial's identifier
+**Returns:** `Celestial` — or `null` if not found
 
-**Returns:** `Celestial` - The celestial, or null if not found
+**Example:**
+```java
+Celestial sun = GenesisMod.SPACE_REGISTRY.get(ResourceLocation.parse("genesis:sun"));
+```
 
 ---
 
 #### getAll()
 ```java
-public static List<Celestial> getAll()
+public List<Celestial> getAll()
 ```
 Returns all registered celestials.
-
-**Returns:** `List<Celestial>` - List of all celestials
 
 ---
 
 #### getWhere()
 ```java
-public static List<Celestial> getWhere(Predicate<CelestialType> predicate)
+public Collection<Celestial> getWhere(Predicate<CelestialType> predicate)
 ```
 Filters celestials by type predicate.
-
-**Parameters:**
-- `predicate` - Filter condition on celestial type
-
-**Returns:** `List<Celestial>` - Filtered list of celestials
 
 **Example:**
 ```java
 // Get all stars
-List<Celestial> stars = SpaceRegistry.getWhere(type -> type.castsLight());
+Collection<Celestial> stars = GenesisMod.SPACE_REGISTRY.getWhere(type -> type.castsLight());
 
 // Get all visitable bodies
-List<Celestial> planets = SpaceRegistry.getWhere(type -> type.isVisitable());
+Collection<Celestial> planets = GenesisMod.SPACE_REGISTRY.getWhere(type -> type.isVisitable());
 ```
 
 ---
@@ -532,7 +475,7 @@ List<Celestial> planets = SpaceRegistry.getWhere(type -> type.isVisitable());
 
 **Inner Class:** `SpaceRegistry.RegisterCelestialsEvent`
 
-Event class used during celestial registration.
+Event class used during celestial registration (see [GenesisMod](#genesismod)).
 
 #### accept()
 ```java
@@ -540,8 +483,189 @@ public void accept(Celestial celestial)
 ```
 Registers a celestial to the registry.
 
-**Parameters:**
-- `celestial` - The celestial to register
+---
+
+## SpaceLevel
+
+**Package:** `shipwrights.genesis.space`
+**File:** `src/main/java/shipwrights/genesis/space/SpaceLevel.java`
+
+Static utility class for spatial queries against registered celestials.
+
+### Static Methods
+
+#### nearestCelestialWhere()
+```java
+@Nullable static Pair<Celestial, Double> nearestCelestialWhere(
+    Vector3dc position,
+    long ticks,
+    float partialTick,
+    Predicate<CelestialType> predicate
+)
+```
+Finds the nearest celestial matching the given type predicate, measured from `position`.
+
+**Returns:** `Pair<Celestial, Double>` — the nearest matching celestial and its distance, or `null` if none match
+
+---
+
+#### celestialRaycast()
+```java
+@Nullable static Pair<Celestial, Double> celestialRaycast(
+    long ticks,
+    float partialTick,
+    Vector3d origin,
+    Vector3d direction,
+    Predicate<CelestialType> predicate
+)
+```
+Casts a ray and returns the first celestial (matching the predicate) that it intersects.
+
+**Returns:** `Pair<Celestial, Double>` — the hit celestial and distance along the ray, or `null` if no hit
+
+---
+
+## PlanetProperties
+
+**Package:** `shipwrights.genesis.space.planet_properties`
+**File:** `src/main/java/shipwrights/genesis/space/planet_properties/PlanetProperties.java`
+
+Per-planet configuration loaded from JSON datapacks. Includes atmosphere data. Loaded from `data/<namespace>/system_config/planet_properties/*.json`.
+
+### Record Components
+
+```java
+public record PlanetProperties(ResourceLocation id, Atmosphere atmosphere)
+```
+
+### Static Methods
+
+#### get()
+```java
+static PlanetProperties get(ResourceLocation id)
+```
+Retrieves properties for a planet by ID. Returns `null` if not registered.
+
+---
+
+#### register()
+```java
+static void register(ResourceLocation id, PlanetProperties properties)
+```
+Registers properties for a planet.
+
+---
+
+### Atmosphere
+
+```java
+public record Atmosphere(
+    double density,
+    double thickness,
+    boolean precipitation,
+    boolean isBreathable,
+    PlanetColorPalette color
+)
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `density` | double | Atmosphere density (affects fade when leaving) |
+| `thickness` | double | Visual thickness of the atmosphere shell |
+| `precipitation` | boolean | Whether precipitation occurs |
+| `isBreathable` | boolean | Whether the atmosphere supports breathing |
+| `color` | PlanetColorPalette | Atmosphere color |
+
+### PlanetColorPalette
+
+Interface for atmosphere color. Two implementations:
+
+- **`RGB`** — custom RGB color: `{ "type": "genesis:rgb", "r": 0, "g": 100, "b": 255 }`
+- **`Overworld`** — use Minecraft's built-in sky color: `{ "type": "genesis:overworld" }`
+
+### JSON File Format
+
+```
+data/<namespace>/system_config/planet_properties/<filename>.json
+```
+
+```json
+{
+  "planets": [
+    {
+      "id": "minecraft:overworld",
+      "atmosphere": {
+        "density": 1.0,
+        "thickness": 0.1,
+        "precipitation": true,
+        "isBreathable": true,
+        "color": { "type": "genesis:overworld" }
+      }
+    }
+  ]
+}
+```
+
+---
+
+## StarProperties
+
+**Package:** `shipwrights.genesis.space.star_properties`
+**File:** `src/main/java/shipwrights/genesis/space/star_properties/StarProperties.java`
+
+Per-star color configuration loaded from JSON datapacks. Supports a primary and secondary color for gradient effects. Loaded from `data/<namespace>/system_config/star_properties/*.json`.
+
+### Record Components
+
+```java
+public record StarProperties(
+    ResourceLocation id,
+    int r0, int g0, int b0,
+    int r1, int g1, int b1
+)
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | ResourceLocation | Star celestial ID |
+| `r0`, `g0`, `b0` | int | Primary color (RGB 0–255) |
+| `r1`, `g1`, `b1` | int | Secondary color (RGB 0–255) |
+
+### Static Methods
+
+#### get()
+```java
+static StarProperties get(ResourceLocation id)
+```
+Retrieves star color properties by celestial ID. Returns `null` if not registered.
+
+---
+
+#### register()
+```java
+static void register(ResourceLocation id, StarProperties properties)
+```
+Registers color properties for a star.
+
+---
+
+### JSON File Format
+
+```
+data/<namespace>/system_config/star_properties/<filename>.json
+```
+
+```json
+{
+  "stars": [
+    {
+      "id": "genesis:sun",
+      "r0": 255, "g0": 220, "b0": 150,
+      "r1": 255, "g1": 180, "b1": 80
+    }
+  ]
+}
+```
 
 ---
 
@@ -550,7 +674,15 @@ Registers a celestial to the registry.
 **Package:** `shipwrights.genesis`
 **File:** `src/main/java/shipwrights/genesis/GenesisMod.java`
 
-Main mod class with registration hooks.
+Main mod class. Holds the live `SPACE_REGISTRY` instance and the registration hook.
+
+### Static Fields
+
+```java
+public static SpaceRegistry SPACE_REGISTRY
+```
+
+The active celestial registry. Use this to query celestials at runtime.
 
 ### Static Methods
 
@@ -561,62 +693,21 @@ public static void onRegisterCelestialsEvent(
 )
 ```
 
-**Location:** `src/main/java/shipwrights/genesis/GenesisMod.java:88-90`
-
 Registers a callback to be invoked during celestial registration.
-
-**Parameters:**
-- `callback` - Consumer that receives the registration event
 
 **Example:**
 ```java
 GenesisMod.onRegisterCelestialsEvent(event -> {
-    // Register celestials here
-    Celestial sun = new Celestial(...);
+    Celestial sun = new Celestial(
+        new StaticTransformProvider(0, 0, 0),
+        ResourceLocation.parse("mymod:sun"),
+        CelestialType.get(ResourceLocation.parse("genesis:star")),
+        1400.0, 1.0,
+        1.0f, 0.95f, 0.8f
+    );
     event.accept(sun);
 });
 ```
-
----
-
-## Constants
-
-### Size Constants
-
-```java
-Celestial.BASE_SIZE = 96  // blocks (diameter)
-```
-
-**Usage:**
-- `size: 1.0` → 96 blocks diameter
-- `size: 15.0` → 1,440 blocks diameter
-
----
-
-### Distance Constants
-
-```java
-Celestial.BASE_ORBIT_DISTANCE = 15_000  // blocks
-```
-
-**Usage:**
-- `orbitDistance: 1.0` → 15,000 blocks from parent
-- `orbitDistance: 0.5` → 7,500 blocks from parent
-
----
-
-### Time Constants
-
-```java
-Celestial.BASE_ORBIT_TIME = 4_608_000    // ticks (≈ 64 hours)
-Celestial.BASE_DAY_LENGTH = 24_000       // ticks (20 minutes)
-```
-
-**Usage:**
-- `orbitTime: 1.0` → 4,608,000 ticks per orbit
-- `orbitTime: 0.5` → 2,304,000 ticks per orbit
-- `dayLength: 1.0` → 24,000 ticks per day
-- `dayLength: 2.0` → 48,000 ticks per day
 
 ---
 
@@ -626,20 +717,21 @@ Celestial.BASE_DAY_LENGTH = 24_000       // ticks (20 minutes)
 
 **Location:** `data/<namespace>/system_config/<filename>.json`
 
+All JSON files in this directory are loaded and merged. Files inside `planet_properties/` and `star_properties/` subdirectories are handled by their respective loaders.
+
 ```json
 {
   "celestials": [
     {
       "ID": "string",
       "type": "string",
-      "size": number,
-      "gravity": number,
-      "r": number,
-      "g": number,
-      "b": number,
+      "size": 100.0,
+      "gravity": 1.0,
+      "r": 0.5,
+      "g": 0.5,
+      "b": 0.5,
       "transformProvider": {
-        "type": "string",
-        ...
+        "type": "string"
       }
     }
   ]
@@ -650,18 +742,18 @@ Celestial.BASE_DAY_LENGTH = 24_000       // ticks (20 minutes)
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `ID` | String | Yes | -       | Unique identifier (format: `namespace:name`) |
-| `type` | String | Yes | -       | Celestial type ID |
-| `size` | Number | Yes | -       | Size multiplier |
-| `gravity` | Number | Yes | -       | Gravity multiplier |
-| `r` | Number | No | 0.5     | Red component (0.0-1.0) |
-| `g` | Number | No | 0.5     | Green component (0.0-1.0) |
-| `b` | Number | No | 0.5     | Blue component (0.0-1.0) |
-| `transformProvider` | Object | Yes | -       | Transform configuration |
+| `ID` | String | Yes | - | Unique identifier (`namespace:name`) |
+| `type` | String | Yes | - | Celestial type ID |
+| `size` | Number | Yes | - | Size of the celestial body |
+| `gravity` | Number | Yes | - | Gravity multiplier (1.0 = Earth) |
+| `r` | Number | No | 0.5 | Red component (0.0–1.0) |
+| `g` | Number | No | 0.5 | Green component (0.0–1.0) |
+| `b` | Number | No | 0.5 | Blue component (0.0–1.0) |
+| `transformProvider` | Object | Yes | - | Transform configuration |
 
 ### Transform Provider Types
 
-See [StaticTransformProvider](#statictransformprovider) and [OrbitingTransformProvider](#orbitingtransformprovider) sections above for complete field specifications.
+See [StaticTransformProvider](#statictransformprovider) and [OrbitingTransformProvider](#orbitingtransformprovider) for complete field specifications.
 
 ---
 

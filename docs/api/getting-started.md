@@ -19,7 +19,7 @@ A celestial is any astronomical body in your space system. Each celestial has:
 
 ### Celestial Types
 
-Genesis includes two built-in celestial types:
+Genesis includes three built-in celestial types. Addon mods can register additional types with custom rendering and behavior.
 
 - **`genesis:star`**: Light-emitting bodies like suns
   - Casts light on other celestials
@@ -31,6 +31,12 @@ Genesis includes two built-in celestial types:
   - Cast shadows
   - Visitable (players can land on them)
   - Rendered with surface textures
+
+- **`genesis:blackhole`**: Black holes
+  - Don't emit light
+  - Don't cast shadows
+  - Not visitable
+  - Rendered with a blackhole shader effect
 
 ### Transform Providers
 
@@ -45,7 +51,7 @@ Each celestial has several configurable properties:
 
 - **Size**: Relative size multiplier (1.0 = 96 blocks diameter)
 - **Gravity**: Gravitational pull strength (1.0 = Earth-like gravity)
-- **Color**: RGB values (0.0 to 1.0) that tint the celestial's appearance
+- **Color**: RGB values (0.0 to 1.0) — not currently used by the renderer, reserved for future features such as map tinting
 
 ## Quick Start Example
 
@@ -57,7 +63,7 @@ Here's the simplest possible celestial - a static star at the origin:
     {
       "ID": "mymod:my_sun",
       "type": "genesis:star",
-      "size": 15.0,
+      "size": 1400.0,
       "gravity": 1.0,
       "transformProvider": {
         "type": "genesis:static",
@@ -111,7 +117,7 @@ Both approaches are covered in the [Implementation Guide](implementation-guide.m
 Genesis comes with a default solar system configured in `builtin.json`:
 
 - **Sun** (`genesis:sun`): A large star at the center
-- **Overworld** (`minecraft:overworld`): Earth-like planet orbiting the sun
+- **Overworld** (`minecraft:overworld`): Earth-like planet orbiting the sun at 15,000 blocks
 - **Moon** (`genesis:moon`): Small moon orbiting the Overworld
 
 You can view this configuration as a reference example for building your own celestial systems.

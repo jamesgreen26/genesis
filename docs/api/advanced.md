@@ -4,7 +4,7 @@ This guide covers advanced customization of the Genesis celestial system, includ
 
 ## Custom Celestial Types
 
-Celestial types define the rendering and behavioral properties of celestials. Genesis provides two built-in types (`genesis:star` and `genesis:body`), but you can create your own.
+Celestial types define the rendering and behavioral properties of celestials. Genesis provides three built-in types (`genesis:star`, `genesis:body`, and `genesis:blackhole`), but you can create your own.
 
 ### Implementing CelestialType
 
@@ -106,8 +106,8 @@ Celestial jupiter = new Celestial(
     transform,
     ResourceLocation.parse("yourmod:jupiter"),
     CelestialType.get(ResourceLocation.parse("yourmod:gas_giant")),
-    11.0,  // Large size
-    2.5,   // High gravity
+    1100.0,  // Size in blocks
+    2.5,     // High gravity
     0.9f, 0.8f, 0.7f
 );
 ```
@@ -127,13 +127,13 @@ Custom celestial renderers give you complete control over how celestials appear 
 public interface CelestialRenderer {
     void invoke(@NotNull RenderLevelStageEvent event,
                 @NotNull Celestial toRender,
-                @Nullable Celestial vantagePoint);
+                @NotNull VantagePoint vantagePoint);
 
     default void setup(@NotNull RenderLevelStageEvent event,
-                      @Nullable Celestial vantagePoint) {}
+                      @NotNull VantagePoint vantagePoint) {}
 
     default void teardown(@NotNull RenderLevelStageEvent event,
-                         @Nullable Celestial vantagePoint) {}
+                         @NotNull VantagePoint vantagePoint) {}
 }
 ```
 
@@ -145,11 +145,11 @@ The main rendering method called for each celestial.
 **Parameters:**
 - `event` - Forge's `RenderLevelStageEvent` containing the pose stack, projection matrix, and rendering context
 - `toRender` - The celestial being rendered
-- `vantagePoint` - The celestial from which the rendering is viewed (null if viewing from space)
+- `vantagePoint` - A `VantagePoint` describing from where the scene is observed. Use `vantagePoint instanceof VantagePoint.OnCelestial` to test whether the observer is on a planet surface
 
 **Typical implementation:**
 1. Get the celestial's position and rotation using `toRender.getPosition()` and `toRender.getRotation()`
-2. Calculate relative position if a vantage point exists
+2. Calculate relative position based on the vantage point
 3. Transform the pose stack to the celestial's position
 4. Render geometry (cubes, custom models, billboards, etc.)
 5. Apply textures, colors, and shaders
@@ -165,8 +165,8 @@ Called once after rendering all celestials of this type in a frame. Use for clea
 ```java
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.renderer.CelestialRenderer;
 import org.joml.Vector3dc;
 import org.joml.Quaterniondc;
@@ -176,21 +176,21 @@ public class CustomCelestialRenderer implements CelestialRenderer {
     @Override
     public void invoke(@NotNull RenderLevelStageEvent event,
                       @NotNull Celestial toRender,
-                      @Nullable Celestial vantagePoint) {
+                      @NotNull VantagePoint vantagePoint) {
         // Get current time for animation
-        long ticks = level.getGameTime();
+        long ticks = event.getLevelRenderer().getLevel().getGameTime();
         float partialTick = event.getPartialTick();
 
         // Get celestial's world position and rotation
         Vector3dc position = toRender.getPosition(ticks, partialTick);
         Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
 
-        // Calculate relative position if viewing from another celestial
-        if (vantagePoint != null) {
-            Vector3dc vantagePos = vantagePoint.getPosition(ticks, partialTick);
-            // Subtract vantage point position and apply inverse rotation
-            // (see StarRenderer.java for full implementation)
-        }
+        // VantagePoint describes the observer's position and orientation.
+        // OnCelestial means the player is standing on a celestial body.
+        // InSpace means the player is viewing from space.
+        Vector3dc vpPosition = vantagePoint.getPosition();
+        // Subtract vantage point position and apply inverse rotation
+        // (see StarRenderer.java for full implementation)
 
         // Transform pose stack to celestial position
         PoseStack poseStack = event.getPoseStack();
@@ -200,15 +200,14 @@ public class CustomCelestialRenderer implements CelestialRenderer {
         // Render your celestial geometry here
         // - Use VertexConsumer to build meshes
         // - Apply shaders and textures
-        // - Use toRender.r(), toRender.g(), toRender.b() for color tinting
-        // - Scale by toRender.size() * Celestial.BASE_SIZE
+        // - Scale by toRender.size() (size in blocks)
 
         poseStack.popPose();
     }
 
     @Override
     public void setup(@NotNull RenderLevelStageEvent event,
-                     @Nullable Celestial vantagePoint) {
+                     @NotNull VantagePoint vantagePoint) {
         // Optional: Enable render states like blending
         // RenderSystem.enableBlend();
         // RenderSystem.blendFunc(...);
@@ -216,7 +215,7 @@ public class CustomCelestialRenderer implements CelestialRenderer {
 
     @Override
     public void teardown(@NotNull RenderLevelStageEvent event,
-                        @Nullable Celestial vantagePoint) {
+                        @NotNull VantagePoint vantagePoint) {
         // Optional: Clean up render states
         // RenderSystem.disableBlend();
     }
@@ -225,17 +224,21 @@ public class CustomCelestialRenderer implements CelestialRenderer {
 
 ### Example Implementations
 
-Genesis includes two complete renderer implementations you can reference:
+Genesis includes three complete renderer implementations you can reference:
 
 - **[StarRenderer.java](../../src/main/java/shipwrights/genesis/space/renderer/StarRenderer.java)** - Renders glowing stars with custom shaders
   - Uses custom shader for glowing effects
   - Implements billboarding for constant screen size
   - Handles bloom and atmospheric effects
 
-- **[PlanetRenderer.java](../../src/main/java/shipwrights/genesis/space/renderer/PlanetRenderer.java)** - Renders solid planets with lighting
+- **[PlanetRenderer.java](../../src/main/java/shipwrights/genesis/space/renderer/PlanetRenderer.java)** - Renders solid planets with lighting and atmosphere
   - Renders textured cube geometry
   - Calculates lighting from nearest star
   - Supports shadows and day/night transitions
+
+- **[BlackholeRenderer.java](../../src/main/java/shipwrights/genesis/space/renderer/BlackholeRenderer.java)** - Renders black holes
+  - Uses a blackhole shader for special visual effects
+  - Distance-based opacity calculation
 
 These implementations demonstrate:
 - Position and rotation calculations relative to vantage points
@@ -254,7 +257,7 @@ public class YourMod {
 
         CustomCelestialType myType = new CustomCelestialType(
             ResourceLocation.parse("yourmod:custom_type"),
-            customRenderer  // Your renderer instance
+            customRenderer
         );
 
         CelestialType.register(myType);
@@ -441,7 +444,7 @@ Celestial weirdPlanet = new Celestial(
     new FigureEightTransformProvider(10.0, 100000.0),
     ResourceLocation.parse("yourmod:weird_planet"),
     CelestialType.get(ResourceLocation.parse("genesis:body")),
-    1.0, 1.0,
+    100.0, 1.0,
     0.8f, 0.3f, 0.8f
 );
 event.accept(weirdPlanet);
@@ -453,7 +456,7 @@ Or in JSON:
 {
   "ID": "yourmod:weird_planet",
   "type": "genesis:body",
-  "size": 1.0,
+  "size": 100.0,
   "gravity": 1.0,
   "transformProvider": {
     "type": "yourmod:figure_eight",
@@ -461,28 +464,6 @@ Or in JSON:
     "period": 100000.0
   }
 }
-```
-
-## Understanding Configuration Constants
-
-Genesis defines several base constants that are used as multipliers:
-
-```java
-// From Celestial class
-public static double BASE_SIZE = 96;              // blocks (diameter)
-public static double BASE_ORBIT_DISTANCE = 15_000;  // blocks
-public static double BASE_ORBIT_TIME = 4_608_000;   // ticks (64 hours)
-public static double BASE_DAY_LENGTH = 24_000;      // ticks (20 minutes)
-```
-
-These can be referenced in your custom transform providers to maintain consistency:
-
-```java
-import shipwrights.genesis.space.Celestial;
-
-// Use base constants in your calculations
-double actualDistance = distanceMultiplier * Celestial.BASE_ORBIT_DISTANCE;
-double actualPeriod = periodMultiplier * Celestial.BASE_ORBIT_TIME;
 ```
 
 ## Next Steps
