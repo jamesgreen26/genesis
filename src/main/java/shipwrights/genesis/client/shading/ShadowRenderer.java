@@ -92,6 +92,40 @@ public class ShadowRenderer {
     }
 
     /**
+     * Compute the edge-softness width for a shadow in local space.
+     *
+     * This must be calculated CPU-side so that adjacent faces sharing the same
+     * shadow source use an identical value, avoiding visual discontinuities at
+     * cube edges.  The 2D polygon lives in plane space whose axes map directly
+     * to two of the three world-space axes, so 2D distances equal world-space
+     * distances after the planet matrix (rotation + translation, no scale).
+     *
+     * @param shadow The face shadow
+     * @return Edge width to pass as ShadowEdgeWidth uniform
+     */
+    public static float computeEdgeWidth(FaceShadow shadow) {
+        List<Vector2dc> polygon = shadow.polygon();
+        if (polygon.isEmpty()) return 0.0001f;
+
+        double cx = 0, cy = 0;
+        for (Vector2dc v : polygon) {
+            cx += v.x();
+            cy += v.y();
+        }
+        cx /= polygon.size();
+        cy /= polygon.size();
+
+        double maxDist = 0;
+        for (Vector2dc v : polygon) {
+            double dx = v.x() - cx;
+            double dy = v.y() - cy;
+            maxDist = Math.max(maxDist, Math.sqrt(dx * dx + dy * dy));
+        }
+
+        return (float) Math.max(maxDist * 0.25, 0.0001);
+    }
+
+    /**
      * Render a single shadow onto a vertex buffer.
      *
      * @param shadow The shadow to render

@@ -5,6 +5,7 @@ in vec3 localPos;
 
 uniform float ShadowVertexCount;
 uniform float ShadowEdgeMask;
+uniform float ShadowEdgeWidth;
 uniform vec3 ShadowVertex[8];
 
 out vec4 fragColor;
@@ -18,27 +19,10 @@ void main() {
         return;
     }
 
-    // Compute center of the projected shadow polygon from its vertices
-    vec3 center = vec3(0.0);
-    for (int i = 0; i < 8; ++i) {
-        if (i >= count) break;
-        center += ShadowVertex[i];
-    }
-    center /= float(count);
-
     // Degenerate case: a single point, just mark in red for now
     if (count < 2) {
         fragColor = vec4(1.0, 0.0, 0.0, 1.0);
         return;
-    }
-
-    // Approximate a radius from the furthest vertex (used only for scaling)
-    float radius = 0.0;
-    for (int i = 0; i < 8; ++i) {
-        if (i >= count) break;
-        vec3 v = ShadowVertex[i];
-        float d = length(v - center);
-        radius = max(radius, d);
     }
 
     // Distance to the NEAREST EDGE of the polygon, skipping edges that lie
@@ -62,9 +46,10 @@ void main() {
 
     // Map distance to nearest edge into a soft falloff.
     //  - At the edge (minEdgeDist = 0) alpha is 0.
-    //  - After edgeWidth into the interior alpha reaches 1.
-    float edgeWidth = max(radius * 0.25, 0.0001);
-    float edgeT = clamp(minEdgeDist / edgeWidth, 0.0, 1.0);
+    //  - After ShadowEdgeWidth into the interior alpha reaches 1.
+    // ShadowEdgeWidth is computed CPU-side from the full polygon so all
+    // faces sharing a shadow boundary use the same scale.
+    float edgeT = clamp(minEdgeDist / ShadowEdgeWidth, 0.0, 1.0);
     float falloff = smoothstep(0.0, 1.0, edgeT);
 
     fragColor = vec4(vertexColor.rgb, vertexColor.a * falloff);

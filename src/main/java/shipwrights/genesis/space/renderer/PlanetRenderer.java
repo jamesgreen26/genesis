@@ -227,6 +227,13 @@ public class PlanetRenderer implements CelestialRenderer {
             return;
         }
 
+        // Use a single edgeWidth across all face shadows so that the soft
+        // falloff scale is consistent across cube edges.
+        float sharedEdgeWidth = 0.0001f;
+        for (FaceShadow shadow : shadows) {
+            sharedEdgeWidth = Math.max(sharedEdgeWidth, ShadowRenderer.computeEdgeWidth(shadow));
+        }
+
         // Render each shadow in its own batch so we can upload
         // per-shadow projection vertices to the shader.
         for (FaceShadow shadow : shadows) {
@@ -282,6 +289,11 @@ public class PlanetRenderer implements CelestialRenderer {
                 Uniform maskUniform = shader.getUniform("ShadowEdgeMask");
                 if (maskUniform != null) {
                     maskUniform.set((float) boundaryMask);
+                }
+
+                Uniform edgeWidthUniform = shader.getUniform("ShadowEdgeWidth");
+                if (edgeWidthUniform != null) {
+                    edgeWidthUniform.set(sharedEdgeWidth);
                 }
 
                 for (int i = 0; i < 8; i++) {

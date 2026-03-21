@@ -18,6 +18,7 @@
     { "name": "ShadowVertex[4]", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
     { "name": "ShadowVertex[5]", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
     { "name": "ShadowVertex[6]", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
-    { "name": "ShadowVertex[7]", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] }
+    { "name": "ShadowVertex[7]", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
+    { "name": "ShadowEdgeWidth", "type": "float", "count": 1, "values": [ 0.0001 ] }
   ]
 }
