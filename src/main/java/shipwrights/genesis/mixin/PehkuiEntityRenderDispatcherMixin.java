@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,7 +45,8 @@ public class PehkuiEntityRenderDispatcherMixin {
     private void cancelScaling(PoseStack instance, float xScale, float yScale, float zScale,
                                Operation<Void> original) {
         Entity entity = CURRENT_ENTITY.get();
-        if (entity instanceof LivingEntity && GenesisMod.isMiniScale(entity.level()) && entity.isPassenger()) {
+        if (GenesisMod.isMiniScale(entity.level()) && ((entity instanceof LivingEntity && entity.isPassenger())
+                || entity.getType().builtInRegistryHolder().key().location().equals(ResourceLocation.parse("create:stationary_contraption")))) {
             return;
         }
         original.call(instance, xScale, yScale, zScale);
