@@ -1,31 +1,31 @@
 package shipwrights.genesis.client;
 
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import shipwrights.genesis.content.block.GenesisBlocks;
-import shipwrights.genesis.content.fluid.GenesisFluids;
-import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.content.blockentity.GenesisBlockEntities;
-import shipwrights.genesis.client.blockentityRenderer.NavProjectorBlockEntityRenderer;
-import shipwrights.genesis.client.blockentityRenderer.RadarDisplayBlockEntityRenderer;
-import shipwrights.genesis.client.blockentityRenderer.VoidCoreBlockEntityRenderer;
-import shipwrights.genesis.client.blockentityRenderer.VoidEngineInterfaceBlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.jetbrains.annotations.NotNull;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.client.blockentityRenderer.NavProjectorBlockEntityRenderer;
+import shipwrights.genesis.client.blockentityRenderer.RadarDisplayBlockEntityRenderer;
+import shipwrights.genesis.client.blockentityRenderer.VoidCoreBlockEntityRenderer;
+import shipwrights.genesis.client.blockentityRenderer.VoidEngineInterfaceBlockEntityRenderer;
+import shipwrights.genesis.content.block.GenesisBlocks;
+import shipwrights.genesis.content.blockentity.GenesisBlockEntities;
+import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.content.particle.GenesisParticles;
 import shipwrights.genesis.content.particle.VerditeParticle;
 import shipwrights.genesis.content.particle.ZapBubbleParticle;
 import team.lodestar.lodestone.systems.postprocess.PostProcessHandler;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 
 @SuppressWarnings("removal")
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -96,7 +96,6 @@ public class GenesisClientSetup {
 
             @Override
             protected void apply(@NotNull Void object, @NotNull ResourceManager resourceManager, @NotNull ProfilerFiller profiler) {
-                PlanetTextures.clearCache();
                 ShaderRegistry.clearTexturedPlanetRenderTypes();
                 GenesisMod.LOGGER.debug("Cleared planet texture caches");
             }

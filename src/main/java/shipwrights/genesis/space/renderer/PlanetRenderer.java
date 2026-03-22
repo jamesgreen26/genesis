@@ -16,7 +16,6 @@ import org.joml.*;
 import org.lwjgl.opengl.GL11;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
-import shipwrights.genesis.client.PlanetTextures;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.client.shading.FaceShadow;
 import shipwrights.genesis.client.shading.ShadowProjection;
@@ -143,10 +142,7 @@ public class PlanetRenderer implements CelestialRenderer {
 
     private void renderPlanetAt(ResourceLocation planetID, List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
         // Get the texture for this planet
-        ResourceLocation textureLocation = PlanetTextures.getTexture(planetID);
-        if (textureLocation == null) {
-            return; // No texture available
-        }
+        ResourceLocation textureLocation = ResourceLocation.parse("genesis:planets/" + planetID.getNamespace() + "/" + planetID.getPath());
 
         // Set up buffer source
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
