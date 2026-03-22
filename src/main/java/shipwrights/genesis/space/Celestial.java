@@ -66,7 +66,7 @@ public record Celestial(
 
     public static final Codec<Celestial> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("ID").forGetter(it -> it.ID.toString()),
-            Codec.STRING.fieldOf("type").forGetter(it -> it.type.toString()),
+            Codec.STRING.fieldOf("type").forGetter(it -> it.type.getID().toString()),
             Codec.DOUBLE.fieldOf("size").forGetter(Celestial::size),
             Codec.DOUBLE.fieldOf("gravity").forGetter(Celestial::gravity),
             Codec.FLOAT.optionalFieldOf("r", 0.5f).forGetter(Celestial::r),
