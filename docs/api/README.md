@@ -39,8 +39,8 @@ Complete API documentation:
 
 ## Quick Links
 
-- [Genesis Built-in Configuration](../../src/main/resources/data/genesis/system_config/builtin.json) - Example solar system
-- [Registration Entry Point](../../src/main/java/shipwrights/genesis/GenesisMod.java) - Code registration hook
+- [Genesis Built-in Configuration](https://github.com/jamesgreen26/genesis/tree/1.20.1/src/main/resources/data/genesis/system_config) - Example solar system
+- [Registration Entry Point](https://github.com/jamesgreen26/genesis/blob/7be2f2ddb6d2b93bc7abd8425f14626374a8bc25/src/main/java/shipwrights/genesis/GenesisMod.java#L109) - Code registration hook
 
 ---
 
