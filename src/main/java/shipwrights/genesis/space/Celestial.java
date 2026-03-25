@@ -8,7 +8,6 @@ import kotlin.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniondc;
 import org.joml.Vector3dc;
 import shipwrights.genesis.math.OBB;
@@ -58,27 +57,27 @@ public record Celestial(
         return getRotation(ticks, 0f);
     }
 
-    public Vector3dc getPosition(long ticks, float partialTick, @Nullable Registry<Celestial> registry) {
+    public Vector3dc getPosition(long ticks, float partialTick, Registry<Celestial> registry) {
         return transformProvider.getPosition(ticks, partialTick, registry);
     }
 
-    public Vector3dc getPosition(long ticks, @Nullable Registry<Celestial> registry) {
+    public Vector3dc getPosition(long ticks, Registry<Celestial> registry) {
         return getPosition(ticks, 0f, registry);
     }
 
-    public Quaterniondc getRotation(long ticks, float partialTick, @Nullable Registry<Celestial> registry) {
+    public Quaterniondc getRotation(long ticks, float partialTick, Registry<Celestial> registry) {
         return transformProvider.getRotation(ticks, partialTick, registry);
     }
 
-    public OBB getOBB(long ticks, @Nullable Registry<Celestial> registry) {
+    public OBB getOBB(long ticks, Registry<Celestial> registry) {
         return getOBB(ticks, 0, registry);
     }
 
-    public OBB getOBB(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
+    public OBB getOBB(long ticks, float subticks, Registry<Celestial> registry) {
         return OBB.createCube(getActualSize(), getRotation(ticks, subticks, registry), getPosition(ticks, subticks, registry));
     }
 
-    public Celestial getNearestStar(long gameTime, float partialTick, @Nullable Registry<Celestial> registry) {
+    public Celestial getNearestStar(long gameTime, float partialTick, Registry<Celestial> registry) {
         if (BuiltinCelestialTypes.STAR.equals(type())) {
             return this;
         } else {
@@ -89,12 +88,6 @@ public record Celestial(
                 throw new IllegalStateException("Why are there no stars??");
             }
         }
-    }
-
-    /** @deprecated use {@link #getNearestStar(long, float, Registry)} */
-    @Deprecated
-    public Celestial getNearestStar(long gameTime, float partialTick) {
-        return getNearestStar(gameTime, partialTick, null);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

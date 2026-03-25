@@ -113,13 +113,12 @@ public final class GenesisMod {
         event.dataPackRegistry(CELESTIALS_KEY, Celestial.CODEC, Celestial.CODEC);
     }
 
-    @Nullable public static Registry<Celestial> getCelestialRegistry(Level level) {
-        return level.registryAccess().registry(CELESTIALS_KEY).orElse(null);
+    public static Registry<Celestial> getCelestialRegistry(Level level) {
+        return level.registryAccess().registryOrThrow(CELESTIALS_KEY);
     }
 
     @Nullable public static Celestial getCelestialForLevel(Level level) {
-        Registry<Celestial> reg = getCelestialRegistry(level);
-        return reg != null ? reg.get(level.dimension().location()) : null;
+        return getCelestialRegistry(level).get(level.dimension().location());
     }
 
     public static long getTicks(Level level) {

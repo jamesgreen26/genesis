@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -74,7 +73,6 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
     }
 
     private Celestial getParent(Registry<Celestial> registry) {
-        if (registry == null) throw new IllegalStateException("OrbitingTransformProvider requires a Registry<Celestial>");
         Celestial parent = registry.get(parentID);
         if (parent == null) throw new IllegalStateException("Parent celestial not found in registry: " + parentID);
         return parent;
@@ -95,7 +93,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
+    public Quaterniondc getRotation(long ticks, float subticks, Registry<Celestial> registry) {
         if (this.dayLength == 0.0) {
             // Tidally locked: -Z side always faces the parent
             Vector3d myPos = getPosition(ticks, subticks, registry);
@@ -113,7 +111,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
     }
 
     @Override
-    public Vector3d getPosition(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
+    public Vector3d getPosition(long ticks, float subticks, Registry<Celestial> registry) {
         // Calculate orbital position (similar to OrbitingBody.getCurrentPos)
         Vector3d out = new Vector3d(1, 0, 0);
 
