@@ -29,10 +29,10 @@ public interface LevelTimeAccessMixin extends LevelReader {
 
             if (vp instanceof VantagePoint.OnCelestial oc) {
                 Celestial celestial = oc.celestial();
-                Celestial star = celestial.getNearestStar(gameTime, partialTick);
+                Celestial star = celestial.getNearestStar(gameTime, partialTick, oc.registry());
 
-                Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
-                        .sub(celestial.getPosition(gameTime, partialTick))
+                Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick, oc.registry()))
+                        .sub(celestial.getPosition(gameTime, partialTick, oc.registry()))
                         .normalize();
 
                 Quaterniondc rot = new Quaterniond(oc.getRotation()).conjugate();

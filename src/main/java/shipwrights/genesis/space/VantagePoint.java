@@ -1,6 +1,7 @@
 package shipwrights.genesis.space;
 
 
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniond;
@@ -22,11 +23,12 @@ public interface VantagePoint {
         } else {
             Celestial celestial = GenesisMod.getCelestialForLevel(level);
             if (celestial != null) {
+                Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
                 /// for now, always put the player on the "north" (-z) side of the planet
                 Quaterniond rotation = new Quaterniond()
                         .rotateTo(new Vector3d(0, 1, 0), new Vector3d(0, 0, -1));
 
-                return new VantagePoint.OnCelestial(celestial, rotation, ticks, partialTick);
+                return new VantagePoint.OnCelestial(celestial, rotation, ticks, partialTick, registry);
             } else {
                 return null;
             }
@@ -51,13 +53,14 @@ public interface VantagePoint {
             /// should be treated like as the camera's latitude/longitude on the celestial, but as a quaternion for easier usage
             Quaterniondc cameraRotationFromNorthPole,
             long ticks,
-            float partialTick
+            float partialTick,
+            Registry<Celestial> registry
     ) implements VantagePoint {
 
 
         @Override
         public Vector3dc getPosition() {
-            return celestial.getPosition(ticks, partialTick);
+            return celestial.getPosition(ticks, partialTick, registry);
         }
 
         @Override
@@ -67,7 +70,7 @@ public interface VantagePoint {
         }
 
         public Quaterniondc getCelestialRotation() {
-            return celestial.getRotation(ticks, partialTick);
+            return celestial.getRotation(ticks, partialTick, registry);
         }
     }
 }

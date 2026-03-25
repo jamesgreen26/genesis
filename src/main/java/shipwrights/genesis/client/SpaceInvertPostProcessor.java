@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.SpaceLevel;
@@ -57,15 +58,17 @@ public class SpaceInvertPostProcessor extends PostProcessor {
         Vec3 camPos = localPlayer.getPosition(partialTick);
         Vector3d camPosJoml = new Vector3d(camPos.x, camPos.y, camPos.z);
 
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
         Vector3dc starPos = null;
         Pair<Celestial, Double> result = SpaceLevel.nearestCelestialWhere(
+                registry,
                 camPosJoml,
                 ticks,
                 partialTick,
                 Predicate.isEqual(BuiltinCelestialTypes.STAR)
         );
         if (result != null) {
-            starPos = result.getFirst().getPosition(ticks, partialTick);
+            starPos = result.getFirst().getPosition(ticks, partialTick, registry);
         }
 
         float camX = (float) camPos.x;

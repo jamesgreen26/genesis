@@ -7,11 +7,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.SpaceLevel;
 
 public class TestItem extends Item {
@@ -38,10 +40,11 @@ public class TestItem extends Item {
 
             Vector3d origin = new Vector3d(arg2.position().x,arg2.position().y,arg2.position().z);
             Vector3d direction = new Vector3d(v3d.x,v3d.y,v3d.z);
-            var result = SpaceLevel.celestialRaycast(GenesisMod.getTicks(arg), 0f, origin,direction, celestialType -> true);
+            Registry<Celestial> registry = GenesisMod.getCelestialRegistry(arg);
+            var result = SpaceLevel.celestialRaycast(registry, GenesisMod.getTicks(arg), 0f, origin, direction, celestialType -> true);
             if (result != null) {
                 arg2.sendSystemMessage(Component.literal("BODY FOUND: " + result.getFirst().ID()));
-                Vector3dc pos = result.getFirst().getPosition(GenesisMod.getTicks(arg));
+                Vector3dc pos = result.getFirst().getPosition(GenesisMod.getTicks(arg), registry);
                 arg2.sendSystemMessage(Component.literal("Position: " + (int) pos.x() + " " + (int) pos.y() + " " + (int) pos.z()));
             }
         }

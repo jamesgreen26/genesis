@@ -1,0 +1,28 @@
+{
+  "ID": "genesis:moon",
+  "type": "genesis:body",
+  "size": 29,
+  "gravity": 0.1622,
+  "transformProvider": {
+    "type": "genesis:orbiting",
+    "parentID": "minecraft:overworld",
+    "seed": 67890,
+    "orbitDistance": 750,
+    "orbitTime": 184329,
+    "dayLength": 0
+  },
+  "properties": {
+    "atmosphere": {
+      "density": 0.0,
+      "thickness": 0.0,
+      "precipitation": false,
+      "isBreathable": false,
+      "color": {
+        "type": "genesis:rgb",
+        "r": 5,
+        "g": 5,
+        "b": 10
+      }
+    }
+  }
+}

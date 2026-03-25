@@ -1,0 +1,23 @@
+{
+  "ID": "genesis:sun",
+  "type": "genesis:star",
+  "size": 1440,
+  "gravity": 2.0,
+  "transformProvider": {
+    "type": "genesis:static",
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "xRot": 15,
+    "yRot": 45,
+    "zRot": 5
+  },
+  "properties": {
+    "r0": 255,
+    "g0": 0,
+    "b0": 0,
+    "r1": 255,
+    "g1": 204,
+    "b1": 38
+  }
+}

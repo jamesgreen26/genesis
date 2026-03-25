@@ -18,21 +18,17 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
-import shipwrights.genesis.space.planet_properties.PlanetColorPalette;
-import shipwrights.genesis.space.planet_properties.PlanetProperties;
-import shipwrights.genesis.space.registry.SpaceRegistry;
+import shipwrights.genesis.space.properties.PlanetColorPalette;
+import shipwrights.genesis.space.properties.PlanetProperties;
 
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlanetDimensionEffects extends DimensionSpecialEffects {
-    final SpaceRegistry spaceRegistry;
 
-
-    public PlanetDimensionEffects(SpaceRegistry spaceRegistry) {
+    public PlanetDimensionEffects() {
         super(192f, false, SkyType.NORMAL, false, false);
-        this.spaceRegistry = spaceRegistry;
         createStars();
     }
 
@@ -76,7 +72,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         VantagePoint vp = VantagePoint.get(level, new Vector3d(), 0, 0f);
         Celestial celestial = vp instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
         if (celestial == null) return null;
-        return PlanetProperties.get(celestial.ID());
+        return celestial.properties() instanceof PlanetProperties pp ? pp : null;
     }
 
     private boolean hasPrecipitation(ClientLevel level) {
@@ -112,10 +108,10 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
         }
         final Celestial celestial = vpOc.celestial();
         
-        Celestial star = celestial.getNearestStar(gameTime, partialTick);
-        
-        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
-                .sub(celestial.getPosition(gameTime, partialTick))
+        Celestial star = celestial.getNearestStar(gameTime, partialTick, vpOc.registry());
+
+        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick, vpOc.registry()))
+                .sub(celestial.getPosition(gameTime, partialTick, vpOc.registry()))
                 .normalize();
         
         Quaterniondc rot = new Quaterniond(vp.getRotation()).conjugate();
@@ -204,7 +200,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         //transform stars view to the side of the planet fixme todo change this to use the new vantage point system
         poseStack.mulPose(new Quaternionf().rotateX((float) (Math.PI/2)));
-        poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTime, partialTick)).invert());
+        poseStack.mulPose(new Quaternionf(celestial.getRotation(gameTime, partialTick, vpOc.registry())).invert());
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);

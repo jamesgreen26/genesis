@@ -1,6 +1,7 @@
 package shipwrights.genesis.space.renderer;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -32,6 +33,9 @@ public class CelestialRenderDispatcher {
             return;
         }
 
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
+        if (registry == null) return;
+
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
         Vec3 cameraPos = event.getCamera().getPosition();
@@ -41,8 +45,9 @@ public class CelestialRenderDispatcher {
         Vector3dc cameraForRenderOrder = vantagePoint instanceof VantagePoint.OnCelestial ? vantagePoint.getPosition() : VectorConversionsMCKt.toJOML(cameraPos);
 
         if (vantagePoint != null) {
-            List<Celestial> celestials = GenesisMod.SPACE_REGISTRY.getAll().stream()
-                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick).distanceSquared(cameraForRenderOrder)))
+            final Registry<Celestial> reg = registry;
+            List<Celestial> celestials = registry.stream()
+                .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick, reg).distanceSquared(cameraForRenderOrder)))
                 .toList();
 
             for (Celestial celestial : celestials) {

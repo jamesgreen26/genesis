@@ -1,4 +1,4 @@
-package shipwrights.genesis.space.planet_properties;
+package shipwrights.genesis.space.properties;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;

@@ -1,11 +1,16 @@
 package shipwrights.genesis.space.type;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import shipwrights.genesis.space.properties.CelestialProperties;
+import shipwrights.genesis.space.properties.EmptyProperties;
+import shipwrights.genesis.space.properties.PlanetProperties;
 import shipwrights.genesis.space.renderer.CelestialRenderer;
 import shipwrights.genesis.space.renderer.PlanetRenderer;
 import shipwrights.genesis.space.renderer.StarRenderer;
 import shipwrights.genesis.space.renderer.BlackholeRenderer;
+import shipwrights.genesis.space.properties.StarProperties;
 
 public class BuiltinCelestialTypes {
 
@@ -16,15 +21,16 @@ public class BuiltinCelestialTypes {
 
         private static CelestialRenderer renderer = null;
         public @NotNull CelestialRenderer getRenderer() {
-            CelestialRenderer result = renderer;
-            if (result == null) {
-                renderer = new StarRenderer();
-            }
+            if (renderer == null) renderer = new StarRenderer();
             return renderer;
         }
 
         public @NotNull ResourceLocation getID() {
             return ResourceLocation.parse("genesis:star");
+        }
+
+        public @NotNull Codec<? extends CelestialProperties> propertiesCodec() {
+            return StarProperties.CODEC;
         }
     };
 
@@ -35,15 +41,16 @@ public class BuiltinCelestialTypes {
 
         private static CelestialRenderer renderer = null;
         public @NotNull CelestialRenderer getRenderer() {
-            CelestialRenderer result = renderer;
-            if (result == null) {
-                renderer = new PlanetRenderer();
-            }
+            if (renderer == null) renderer = new PlanetRenderer();
             return renderer;
         }
 
         public @NotNull ResourceLocation getID() {
             return ResourceLocation.parse("genesis:body");
+        }
+
+        public @NotNull Codec<? extends CelestialProperties> propertiesCodec() {
+            return PlanetProperties.CODEC;
         }
     };
 
@@ -54,15 +61,16 @@ public class BuiltinCelestialTypes {
 
         private static CelestialRenderer renderer = null;
         public @NotNull CelestialRenderer getRenderer() {
-            CelestialRenderer result = renderer;
-            if (result == null) {
-                renderer = new BlackholeRenderer();
-            }
+            if (renderer == null) renderer = new BlackholeRenderer();
             return renderer;
         }
 
         public @NotNull ResourceLocation getID() {
             return ResourceLocation.parse("genesis:blackhole");
+        }
+
+        public @NotNull Codec<? extends CelestialProperties> propertiesCodec() {
+            return EmptyProperties.CODEC;
         }
     };
 

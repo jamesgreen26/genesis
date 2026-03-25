@@ -1,5 +1,6 @@
 package shipwrights.genesis.content.radar;
 
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -58,12 +59,15 @@ public class RadarDisplay {
     }
 
     private void scanPlanets(Level level, Vector3dc camera) {
-        GenesisMod.SPACE_REGISTRY.getAll().forEach(body -> {
-            double extent = body.getActualSize() / 2;
-            Vector3dc pos = body.getPosition(GenesisMod.getTicks(level));
-            AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
-            scanBox(box);
-        });
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
+        if (registry != null) {
+            registry.forEach(body -> {
+                double extent = body.getActualSize() / 2;
+                Vector3dc pos = body.getPosition(GenesisMod.getTicks(level), registry);
+                AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
+                scanBox(box);
+            });
+        }
     }
 
     private void scanAsteroidBelt(Level level, Vector3dc camera) {

@@ -1,13 +1,17 @@
 package shipwrights.genesis;
 
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -27,7 +31,6 @@ import shipwrights.genesis.content.fluid.GenesisFluids;
 import shipwrights.genesis.content.particle.GenesisParticles;
 import shipwrights.genesis.networking.GenesisNetworking;
 import shipwrights.genesis.space.Celestial;
-import shipwrights.genesis.space.registry.SpaceRegistry;
 import shipwrights.genesis.space.transformProvider.BuiltinTransformProviders;
 import shipwrights.genesis.space.type.BuiltinCelestialTypes;
 import shipwrights.genesis.teleportation.impl.ShipCollector;
@@ -37,9 +40,6 @@ import shipwrights.genesis.tests.commands.GameTestCommands;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @Mod.EventBusSubscriber
@@ -57,19 +57,22 @@ public final class GenesisMod {
     public static final ResourceLocation ASTEROID_RULE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "asteroid_block_surface_rule");
     public static ResourceLocation GENERIC_PLANET_ID = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet");
 
+    public static final ResourceKey<Registry<Celestial>> CELESTIALS_KEY =
+            ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "celestials"));
+
     private static final Pattern SEAT_REGISTRY_NAME =
             Pattern.compile("(?<![a-z])(seat|chair)(?![a-z])", Pattern.CASE_INSENSITIVE);
 
     public static final int atmosphereExitHeight = 2048;
     public static final int atmosphereEntryHeight = 1440;
 
-    private static final List<Consumer<SpaceRegistry.RegisterCelestialsEvent>> registrationCallbacks = new CopyOnWriteArrayList<>();
-    public static final SpaceRegistry SPACE_REGISTRY = new SpaceRegistry(registrationCallbacks);
-
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
 
         context.registerConfig(ModConfig.Type.CLIENT, GenesisClientConfig.CONFIG_SPEC);
+
+        // Register the celestials datapack registry
+        eventBus.addListener(GenesisMod::registerDataPackRegistries);
 
         // Register packet handlers
         GenesisNetworking.init();
@@ -106,12 +109,17 @@ public final class GenesisMod {
         }
     }
 
-    public static void onRegisterCelestialsEvent(Consumer<SpaceRegistry.RegisterCelestialsEvent> callback) {
-        registrationCallbacks.add(callback);
+    private static void registerDataPackRegistries(DataPackRegistryEvent.NewRegistry event) {
+        event.dataPackRegistry(CELESTIALS_KEY, Celestial.CODEC, Celestial.CODEC);
+    }
+
+    @Nullable public static Registry<Celestial> getCelestialRegistry(Level level) {
+        return level.registryAccess().registry(CELESTIALS_KEY).orElse(null);
     }
 
     @Nullable public static Celestial getCelestialForLevel(Level level) {
-        return SPACE_REGISTRY.get(level.dimension().location());
+        Registry<Celestial> reg = getCelestialRegistry(level);
+        return reg != null ? reg.get(level.dimension().location()) : null;
     }
 
     public static long getTicks(Level level) {

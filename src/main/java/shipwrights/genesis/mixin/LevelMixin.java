@@ -67,10 +67,10 @@ public abstract class LevelMixin {
     @Unique
     private static double genesis$getApparentAngle(VantagePoint.OnCelestial oc, long gameTime, float partialTick) {
         Celestial celestial = oc.celestial();
-        Celestial star = celestial.getNearestStar(gameTime, partialTick);
+        Celestial star = celestial.getNearestStar(gameTime, partialTick, oc.registry());
 
-        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
-                .sub(celestial.getPosition(gameTime, partialTick))
+        Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick, oc.registry()))
+                .sub(celestial.getPosition(gameTime, partialTick, oc.registry()))
                 .normalize();
 
         Quaterniondc rot = new Quaterniond(oc.getRotation()).conjugate();
@@ -84,10 +84,10 @@ public abstract class LevelMixin {
     @Unique
     private static double genesis$getStarUpDot(VantagePoint.OnCelestial oc, long gameTime) {
         Celestial celestial = oc.celestial();
-        Celestial star = celestial.getNearestStar(gameTime, 0f);
+        Celestial star = celestial.getNearestStar(gameTime, 0f, oc.registry());
 
-        Vector3d toStar = new Vector3d(star.getPosition(gameTime, 0f))
-                .sub(celestial.getPosition(gameTime, 0f))
+        Vector3d toStar = new Vector3d(star.getPosition(gameTime, 0f, oc.registry()))
+                .sub(celestial.getPosition(gameTime, 0f, oc.registry()))
                 .normalize();
 
         Quaterniondc rot = new Quaterniond(oc.getRotation()).conjugate();

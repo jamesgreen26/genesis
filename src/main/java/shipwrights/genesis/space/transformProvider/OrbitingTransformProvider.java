@@ -2,11 +2,12 @@ package shipwrights.genesis.space.transformProvider;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
-import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 
 import java.util.Random;
@@ -72,8 +73,11 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         //this.orbitalPhi = (Math.acos(2 * rand.nextDouble() - 1) + Math.PI) / 3; // latitude
     }
 
-    private Celestial getParent() {
-        return GenesisMod.SPACE_REGISTRY.get(parentID);
+    private Celestial getParent(Registry<Celestial> registry) {
+        if (registry == null) throw new IllegalStateException("OrbitingTransformProvider requires a Registry<Celestial>");
+        Celestial parent = registry.get(parentID);
+        if (parent == null) throw new IllegalStateException("Parent celestial not found in registry: " + parentID);
+        return parent;
     }
 
     private int getYearLengthTicks() {
@@ -82,10 +86,20 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
 
     @Override
     public Quaterniondc getRotation(long ticks, float subticks) {
+        throw new UnsupportedOperationException("OrbitingTransformProvider requires a Registry<Celestial>; use getRotation(long, float, Registry) instead");
+    }
+
+    @Override
+    public Vector3d getPosition(long ticks, float subticks) {
+        throw new UnsupportedOperationException("OrbitingTransformProvider requires a Registry<Celestial>; use getPosition(long, float, Registry) instead");
+    }
+
+    @Override
+    public Quaterniondc getRotation(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
         if (this.dayLength == 0.0) {
             // Tidally locked: -Z side always faces the parent
-            Vector3d myPos = getPosition(ticks, subticks);
-            Vector3d parentPos = new Vector3d(getParent().getPosition(ticks, subticks));
+            Vector3d myPos = getPosition(ticks, subticks, registry);
+            Vector3d parentPos = new Vector3d(getParent(registry).getPosition(ticks, subticks, registry));
             Vector3d toParent = parentPos.sub(myPos, new Vector3d()).normalize();
             // Rotate so that local -Z points toward parent
             return new Quaterniond().rotateTo(new Vector3d(0, 0.8, -0.5).normalize(), toParent);
@@ -99,7 +113,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
     }
 
     @Override
-    public Vector3d getPosition(long ticks, float subticks) {
+    public Vector3d getPosition(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
         // Calculate orbital position (similar to OrbitingBody.getCurrentPos)
         Vector3d out = new Vector3d(1, 0, 0);
 
@@ -120,7 +134,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         out.normalize(orbitDistance);
 
         // Add parent's position
-        return out.add(getParent().getPosition(ticks, subticks), new Vector3d()).setComponent(1, 0);
+        return out.add(getParent(registry).getPosition(ticks, subticks, registry), new Vector3d()).setComponent(1, 0);
     }
 
     @Override

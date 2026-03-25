@@ -17,7 +17,7 @@ import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
-import shipwrights.genesis.space.star_properties.StarProperties;
+import shipwrights.genesis.space.properties.StarProperties;
 
 import java.lang.Math;
 
@@ -64,7 +64,7 @@ public class StarRenderer implements CelestialRenderer {
         // Apply inverse rotation to the celestial's own rotation
         rotation = new Quaterniond(inverseVantageRot).mul(new Quaterniond(rotation));
 
-        StarProperties starProps = StarProperties.get(toRender.ID());
+        StarProperties starProps = toRender.properties() instanceof StarProperties sp ? sp : null;
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer sunBuffer = bufferSource.getBuffer(getSunRenderType());

@@ -1,7 +1,9 @@
 package shipwrights.genesis.space.type;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+import shipwrights.genesis.space.properties.CelestialProperties;
 import shipwrights.genesis.space.renderer.CelestialRenderer;
 
 import java.util.HashMap;
@@ -13,6 +15,7 @@ public interface CelestialType {
     boolean isVisitable();
     @NotNull CelestialRenderer getRenderer();
     @NotNull ResourceLocation getID();
+    @NotNull Codec<? extends CelestialProperties> propertiesCodec();
 
     static CelestialType get(ResourceLocation ID) {
         return REGISTRY.get(ID);

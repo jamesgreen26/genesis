@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -153,8 +154,9 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
             String prefix = "@c[";
             String typed = remaining.substring(prefix.length());
             Collection<String> ids = new ArrayList<>();
-            for (Celestial celestial : GenesisMod.SPACE_REGISTRY.getAll()) {
-                ids.add(celestial.ID().toString());
+            if (context.getSource() instanceof CommandSourceStack source) {
+                source.getServer().registryAccess().registry(GenesisMod.CELESTIALS_KEY)
+                        .ifPresent(reg -> reg.forEach(c -> ids.add(c.ID().toString())));
             }
 
             if (typed.isEmpty()) {
@@ -192,8 +194,9 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
         if (remaining.startsWith("@c[id=")) {
             String prefix = "@c[id=";
             Collection<String> options = new ArrayList<>();
-            for (Celestial celestial : GenesisMod.SPACE_REGISTRY.getAll()) {
-                options.add(celestial.ID().toString());
+            if (context.getSource() instanceof CommandSourceStack source) {
+                source.getServer().registryAccess().registry(GenesisMod.CELESTIALS_KEY)
+                        .ifPresent(reg -> reg.forEach(c -> options.add(c.ID().toString())));
             }
             return SharedSuggestionProvider.suggest(options, builder.createOffset(builder.getStart() + prefix.length()));
         }
@@ -213,15 +216,17 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
         }
 
         List<Celestial> find(CommandSourceStack source) {
+            Registry<Celestial> registry = source.getServer().registryAccess()
+                    .registryOrThrow(GenesisMod.CELESTIALS_KEY);
             List<Celestial> matches = new ArrayList<>();
             if (id != null) {
-                Celestial celestial = GenesisMod.SPACE_REGISTRY.get(id);
+                Celestial celestial = registry.get(id);
                 if (celestial != null) {
                     matches.add(celestial);
                 }
                 return matches;
             }
-            matches.addAll(GenesisMod.SPACE_REGISTRY.getAll());
+            registry.forEach(matches::add);
             return matches;
         }
     }

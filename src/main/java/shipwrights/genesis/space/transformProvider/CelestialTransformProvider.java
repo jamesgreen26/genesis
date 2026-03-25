@@ -1,9 +1,12 @@
 package shipwrights.genesis.space.transformProvider;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
+import shipwrights.genesis.space.Celestial;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +23,14 @@ public interface CelestialTransformProvider {
     Vector3d getPosition(long ticks, float subticks);
 
     ResourceLocation getType();
+
+    default Vector3d getPosition(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
+        return getPosition(ticks, subticks);
+    }
+
+    default Quaterniondc getRotation(long ticks, float subticks, @Nullable Registry<Celestial> registry) {
+        return getRotation(ticks, subticks);
+    }
 
     // Registry for CelestialTransformProvider codecs
     Map<ResourceLocation, Codec<? extends CelestialTransformProvider>> REGISTRY = new HashMap<>();

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.blockentity.NavProjectorBlockEntity;
 import shipwrights.genesis.space.Celestial;
@@ -65,18 +66,19 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
 
         poseStack.translate(0.5D, 0.5D, 0.5D);
 
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
         VantagePoint vp = VantagePoint.get(level, new Vector3d(), ticks, partialTick);
         Celestial currentPlanet = vp instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
 
         if (currentPlanet != null) {
-            poseStack.mulPose(new Quaternionf(currentPlanet.getRotation(ticks, partialTick)).invert());
+            poseStack.mulPose(new Quaternionf(currentPlanet.getRotation(ticks, partialTick, registry)).invert());
 
             if (isOnShip) {
                 Quaterniondc rot1 = ship.getTransform().getShipToWorldRotation().invert(new Quaterniond());
                 poseStack.mulPose(new Quaternionf(rot1));
             }
 
-            currentPos = currentPlanet.getPosition(ticks, partialTick);
+            currentPos = currentPlanet.getPosition(ticks, partialTick, registry);
 
             poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
         } else if(!isOnShip) {
@@ -94,15 +96,17 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
         }
 
-        for (Celestial body : GenesisMod.SPACE_REGISTRY.getAll()) {
-            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.type().equals(BuiltinCelestialTypes.STAR));
+        if (registry != null) {
+            for (Celestial body : registry) {
+                renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, registry, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.type().equals(BuiltinCelestialTypes.STAR));
+            }
         }
 
         poseStack.popPose();
     }
 
-    private static void renderCelestialProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Celestial celestial, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick, boolean isStar) {
-        Vector3d celestialPos = new Vector3d(celestial.getPosition(ticks, partialTick));
+    private static void renderCelestialProjection(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, Celestial celestial, Registry<Celestial> registry, boolean isOnShip, Vector3dc shipPos, BlockPos pos, int scale_factor, BlockRenderDispatcher blockRenderer, long ticks, float partialTick, boolean isStar) {
+        Vector3d celestialPos = new Vector3d(celestial.getPosition(ticks, partialTick, registry));
 
         if (isOnShip) {
             if (celestialPos.sub(new Vector3d(shipPos), new Vector3d()).length() > 120000) return;
@@ -116,7 +120,7 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate(celestialPos.x / scale_factor, celestialPos.y / scale_factor, celestialPos.z / scale_factor);
             poseStack.scale(scale, scale, scale);
 
-            Quaternionf rot = new Quaternionf(celestial.getRotation(ticks, partialTick));
+            Quaternionf rot = new Quaternionf(celestial.getRotation(ticks, partialTick, registry));
             poseStack.mulPose(rot);
 
             poseStack.translate(-0.5D, -0.5D, -0.5D);

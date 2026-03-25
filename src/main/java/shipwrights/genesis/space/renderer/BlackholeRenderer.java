@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.ShaderRegistry;
@@ -27,10 +28,11 @@ public class BlackholeRenderer implements CelestialRenderer {
     @Override
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @NotNull VantagePoint vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
-        Vector3dc position = toRender.getPosition(ticks, partialTick);
-        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
+        Vector3dc position = toRender.getPosition(ticks, partialTick, registry);
+        Quaterniondc rotation = toRender.getRotation(ticks, partialTick, registry);
 
         Vector3dc vantagePos = vantagePoint.getPosition();
         Quaterniondc vantageRot = vantagePoint.getRotation();
@@ -46,7 +48,7 @@ public class BlackholeRenderer implements CelestialRenderer {
 
         float opacity = 1f;
         if (vantagePoint instanceof VantagePoint.OnCelestial) {
-            double distance = vantagePoint.getPosition().distance(toRender.getPosition(ticks, partialTick));
+            double distance = vantagePoint.getPosition().distance(toRender.getPosition(ticks, partialTick, registry));
             opacity = (float) Math.min(1.0, PlanetDimensionEffects.cachedStarBrightness + 1440 / Math.max(distance, 0.00000001));
         }
 

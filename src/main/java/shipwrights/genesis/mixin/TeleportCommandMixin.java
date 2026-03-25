@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.commands.CelestialArgument;
 import shipwrights.genesis.space.Celestial;
@@ -126,7 +127,8 @@ public class TeleportCommandMixin {
     @Unique
     private static Vec3 genesis$toVec3(Celestial celestial, ServerLevel spaceLevel) {
         long ticks = GenesisMod.getTicks(spaceLevel);
-        Vector3dc pos = celestial.getPosition(ticks);
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(spaceLevel);
+        Vector3dc pos = celestial.getPosition(ticks, registry);
         return new Vec3(pos.x(), pos.y() + celestial.getActualSize(), pos.z());
     }
 }

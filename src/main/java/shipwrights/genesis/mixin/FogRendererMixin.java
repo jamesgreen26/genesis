@@ -17,7 +17,8 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
-import shipwrights.genesis.space.planet_properties.PlanetProperties;
+import shipwrights.genesis.space.properties.PlanetColorPalette;
+import shipwrights.genesis.space.properties.PlanetProperties;
 
 import java.lang.Math;
 
@@ -32,13 +33,13 @@ public class FogRendererMixin {
         if (vp instanceof VantagePoint.OnCelestial oc) {
             Celestial vantagePoint = oc.celestial();
 
-            Celestial star = vantagePoint.getNearestStar(gameTime, partialTick);
-            Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
-                    .sub(vantagePoint.getPosition(gameTime, partialTick))
+            Celestial star = vantagePoint.getNearestStar(gameTime, partialTick, oc.registry());
+            Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick, oc.registry()))
+                    .sub(vantagePoint.getPosition(gameTime, partialTick, oc.registry()))
                     .normalize();
 
             // TODO get rid of hardcoded rotation
-            Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
+            Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick, oc.registry())).rotateX(-Math.PI/2).conjugate();
             toStar.rotate(rot);
 
             Vector3d up = new Vector3d(GenesisMod.UP).rotate(oc.cameraRotationFromNorthPole());
@@ -50,7 +51,9 @@ public class FogRendererMixin {
             apparentAngle.set(_apparentAngle);
             long fakeTime = (long) (_apparentAngle * 24000);
 
-            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, PlanetProperties.get(vantagePoint.ID()).atmosphere().color());
+            PlanetColorPalette palette = vantagePoint.properties() instanceof PlanetProperties pp
+                    ? pp.atmosphere().color() : new PlanetColorPalette.Overworld();
+            return PlanetDimensionEffects.getSkyColor(pos, partialTick, fakeTime, instance, palette);
         }
         
         apparentAngle.set(instance.getSunAngle(partialTick) / Mth.TWO_PI);
@@ -75,12 +78,12 @@ public class FogRendererMixin {
         if (vp2 instanceof VantagePoint.OnCelestial oc) {
             Celestial vantagePoint = oc.celestial();
 
-            Celestial star = vantagePoint.getNearestStar(gameTime, partialTick);
-            Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick))
-                    .sub(vantagePoint.getPosition(gameTime, partialTick))
+            Celestial star = vantagePoint.getNearestStar(gameTime, partialTick, oc.registry());
+            Vector3d toStar = new Vector3d(star.getPosition(gameTime, partialTick, oc.registry()))
+                    .sub(vantagePoint.getPosition(gameTime, partialTick, oc.registry()))
                     .normalize();
 
-            Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick)).rotateX(-Math.PI/2).conjugate();
+            Quaterniondc rot = new Quaterniond(vantagePoint.getRotation(gameTime, partialTick, oc.registry())).rotateX(-Math.PI/2).conjugate();
             toStar.rotate(rot);
 
             ((Vector3f) v).set(toStar);

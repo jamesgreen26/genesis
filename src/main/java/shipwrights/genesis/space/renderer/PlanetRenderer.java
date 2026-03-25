@@ -24,9 +24,9 @@ import shipwrights.genesis.math.AAPlane;
 import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
-import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.Math;
 import java.util.ArrayList;
@@ -56,12 +56,13 @@ public class PlanetRenderer implements CelestialRenderer {
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
 
-        Vector3dc position = toRender.getPosition(ticks, partialTick);
-        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
+        Vector3dc position = toRender.getPosition(ticks, partialTick, registry);
+        Quaterniondc rotation = toRender.getRotation(ticks, partialTick, registry);
         double halfExtent = toRender.getActualSize() / 2;
         float alpha = 1f;
 
-        Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
+        Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick, registry).getPosition(ticks, partialTick, registry);
 
 
         List<FaceShadow> shadows;
@@ -69,9 +70,9 @@ public class PlanetRenderer implements CelestialRenderer {
             shadows = createTestShadows(halfExtent);
         } else {
             // Get all the data needed for shadow computation
-            OBB selfOBB = toRender.getOBB(ticks, partialTick);
-            List<Celestial> allCelestials = GenesisMod.SPACE_REGISTRY.getWhere(CelestialType::castsShadow).stream().filter(it -> !it.equals(toRender)).toList();
-            List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, partialTick)).toList();
+            OBB selfOBB = toRender.getOBB(ticks, partialTick, registry);
+            List<Celestial> allCelestials = registry.stream().filter(it -> it.type().castsShadow() && !it.equals(toRender)).toList();
+            List<OBB> otherOBBs = allCelestials.stream().map(it -> it.getOBB(ticks, partialTick, registry)).toList();
 
             shadows = ShadowProjection.computeShadows(selfOBB, otherOBBs, starPosition);
         }

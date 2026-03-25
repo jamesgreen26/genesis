@@ -11,13 +11,14 @@ import net.minecraft.util.Mth;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.ShaderRegistry;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
-import shipwrights.genesis.space.planet_properties.PlanetProperties;
+import shipwrights.genesis.space.properties.PlanetProperties;
 
 import java.lang.Math;
 
@@ -28,10 +29,11 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
     @Override
     public void invoke(@NotNull RenderLevelStageEvent event, @NotNull Celestial toRender, @NotNull VantagePoint vantagePoint) {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
-        Vector3dc position = toRender.getPosition(ticks, partialTick);
-        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
+        Vector3dc position = toRender.getPosition(ticks, partialTick, registry);
+        Quaterniondc rotation = toRender.getRotation(ticks, partialTick, registry);
         double size = toRender.getActualSize();
 
         // Special case: if rendering the vantage point itself, lock it at a fixed position in world space
@@ -90,8 +92,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
 
         float halfSize = (float) size / 2;
 
-        PlanetProperties props = PlanetProperties.get(toRender.ID());
-        if (props == null) return;
+        if (!(toRender.properties() instanceof PlanetProperties props)) return;
 
         // densityFade only applies when leaving a planet's atmosphere (y-based fade in planet dimension).
         // When viewing from space, use full density.
@@ -110,15 +111,16 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         float relativeAtmosphereSize = 1.0f + 0.3f * (float) props.atmosphere().thickness();
 
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
+        Registry<Celestial> reg = GenesisMod.getCelestialRegistry(level);
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
 
-        Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick).getPosition(ticks, partialTick);
-        Vector3dc planetPosition = toRender.getPosition(ticks, partialTick);
+        Vector3dc starPosition = toRender.getNearestStar(ticks, partialTick, reg).getPosition(ticks, partialTick, reg);
+        Vector3dc planetPosition = toRender.getPosition(ticks, partialTick, reg);
 
         Quaterniondc lightRot = (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial().equals(toRender))
                 ? vantagePoint.getRotation().mul(oc.cameraRotationFromNorthPole(), new Quaterniond())
-                : toRender.getRotation(ticks, partialTick);
+                : toRender.getRotation(ticks, partialTick, reg);
         Vector3d lightDir = new Vector3d(planetPosition).sub(starPosition).rotate(new Quaterniond(lightRot).conjugate());
         ShaderInstance shader = ShaderRegistry.PLANET_ATMOSPHERE_SHADER.getInstance().get();
         shader.safeGetUniform("LightDirection").set((float) lightDir.x, (float) lightDir.y, (float) lightDir.z);

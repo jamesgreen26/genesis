@@ -1,0 +1,12 @@
+{
+  "ID": "genesis:testbh",
+  "type": "genesis:blackhole",
+  "size": 2048,
+  "gravity": 8,
+  "transformProvider": {
+    "type": "genesis:static",
+    "x": 0.0,
+    "y": -200000.0,
+    "z": -200000.0
+  }
+}

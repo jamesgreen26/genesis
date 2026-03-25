@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.assembly.ShipAssembler;
+import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 
@@ -81,13 +82,14 @@ public class TestShipHelper {
      * no-op.
      */
     public static void moveShipNearPlanet(ServerLevel spaceLevel, ServerShip ship, ResourceLocation celestialId) {
-        Celestial celestial = GenesisMod.SPACE_REGISTRY.get(celestialId);
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(spaceLevel);
+        Celestial celestial = registry.get(celestialId);
         if (celestial == null) {
             GenesisMod.LOGGER.warn("[TestShipHelper] Celestial '{}' not found in registry; cannot position ship for planet entry test", celestialId);
             return;
         }
         long ticks = GenesisMod.getTicks(spaceLevel);
-        Vector3dc celestialPos = celestial.getPosition(ticks);
+        Vector3dc celestialPos = celestial.getPosition(ticks, registry);
         // Place ship just inside the celestial's collision radius
         double targetDist = celestial.getActualSize() * 0.5;
         Vec3 targetPos = new Vec3(
