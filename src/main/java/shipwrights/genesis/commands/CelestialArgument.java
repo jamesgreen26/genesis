@@ -154,9 +154,9 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
             String prefix = "@c[";
             String typed = remaining.substring(prefix.length());
             Collection<String> ids = new ArrayList<>();
-            if (context.getSource() instanceof CommandSourceStack source) {
-                source.getServer().registryAccess().registry(GenesisMod.CELESTIALS_KEY)
-                        .ifPresent(reg -> reg.forEach(c -> ids.add(c.ID().toString())));
+            if (context.getSource() instanceof SharedSuggestionProvider source) {
+                source.registryAccess().registry(GenesisMod.CELESTIALS_KEY)
+                        .ifPresent(reg -> reg.keySet().forEach(id -> ids.add(id.toString())));
             }
 
             if (typed.isEmpty()) {
@@ -194,9 +194,9 @@ public class CelestialArgument implements ArgumentType<CelestialArgument.Celesti
         if (remaining.startsWith("@c[id=")) {
             String prefix = "@c[id=";
             Collection<String> options = new ArrayList<>();
-            if (context.getSource() instanceof CommandSourceStack source) {
-                source.getServer().registryAccess().registry(GenesisMod.CELESTIALS_KEY)
-                        .ifPresent(reg -> reg.forEach(c -> options.add(c.ID().toString())));
+            if (context.getSource() instanceof SharedSuggestionProvider source) {
+                source.registryAccess().registry(GenesisMod.CELESTIALS_KEY)
+                        .ifPresent(reg -> reg.keySet().forEach(id -> options.add(id.toString())));
             }
             return SharedSuggestionProvider.suggest(options, builder.createOffset(builder.getStart() + prefix.length()));
         }

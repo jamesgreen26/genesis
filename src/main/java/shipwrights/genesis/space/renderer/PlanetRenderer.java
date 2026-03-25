@@ -136,7 +136,7 @@ public class PlanetRenderer implements CelestialRenderer {
 
         shader.safeGetUniform("SkyColor").set((float) skyColor.x, (float) skyColor.y, (float) skyColor.z);
 
-        renderPlanetAt(toRender.ID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
+        renderPlanetAt(registry.getResourceKey(toRender).orElseThrow().location(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
 
         new PlanetAtmosphereRenderer().invoke(event, toRender, vantagePoint);
     }

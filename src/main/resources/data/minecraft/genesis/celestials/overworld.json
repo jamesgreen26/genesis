@@ -1,5 +1,4 @@
 {
-  "ID": "minecraft:overworld",
   "type": "genesis:body",
   "size": 96,
   "gravity": 1.0,

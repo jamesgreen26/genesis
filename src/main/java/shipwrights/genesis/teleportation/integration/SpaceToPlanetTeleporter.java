@@ -59,7 +59,7 @@ public class SpaceToPlanetTeleporter {
 			Celestial nearest = getNearestPlanet(ship, ticks, registry);
 			if (ship.isStatic() || nearest == null || shipAABB == null) continue;
 
-			PlayerTeam team = level.getScoreboard().getPlayerTeam(nearest.ID().getPath());
+			PlayerTeam team = level.getScoreboard().getPlayerTeam(registry.getResourceKey(nearest).orElseThrow().location().getPath());
 			if(team!=null)
 			{
 				Collection<String> teamShips = team.getPlayers();
@@ -71,7 +71,7 @@ public class SpaceToPlanetTeleporter {
 
 			if (!shipOverlapsCelestial(ship, shipAABB, nearest, ticks, registry)) continue;
 
-			ServerLevel targetLevel = getTargetLevel(level, nearest);
+			ServerLevel targetLevel = getTargetLevel(level, nearest, registry);
 			if (targetLevel == null) continue;
 
 			Vector3d newPos = computePlanetTarget(level);
@@ -85,10 +85,10 @@ public class SpaceToPlanetTeleporter {
 		return OBB.fromShip(shipAABB, ship.getShipToWorld()).overlapsWith(nearest.getOBB(ticks, registry));
 	}
 
-	private static @Nullable ServerLevel getTargetLevel(ServerLevel level, Celestial nearest) {
+	private static @Nullable ServerLevel getTargetLevel(ServerLevel level, Celestial nearest, Registry<Celestial> registry) {
 		ResourceKey<Level> targetDimension = ResourceKey.create(
 			net.minecraft.core.registries.Registries.DIMENSION,
-			nearest.ID()
+			registry.getResourceKey(nearest).orElseThrow().location()
 		);
         return level.getServer().getLevel(targetDimension);
 	}

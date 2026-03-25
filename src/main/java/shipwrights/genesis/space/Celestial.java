@@ -22,7 +22,6 @@ import java.util.function.Predicate;
 
 public record Celestial(
         CelestialTransformProvider transformProvider,
-        ResourceLocation ID,
         CelestialType type,
         double size,
         double gravity,
@@ -103,7 +102,6 @@ public record Celestial(
         @Override
         public <T> DataResult<com.mojang.datafixers.util.Pair<Celestial, T>> decode(DynamicOps<T> ops, T input) {
             return ops.getMap(input).flatMap(map -> {
-                DataResult<String> idResult = field(ops, map, "ID", Codec.STRING);
                 DataResult<CelestialType> typeResult = field(ops, map, "type", Codec.STRING).flatMap(s -> {
                     CelestialType t = CelestialType.get(ResourceLocation.parse(s));
                     return t != null ? DataResult.success(t) : DataResult.error(() -> "Unknown celestial type: " + s);
@@ -119,15 +117,13 @@ public record Celestial(
                     T propsRaw = Optional.ofNullable(map.get("properties")).orElseGet(ops::emptyMap);
                     DataResult<? extends CelestialProperties> propsResult = type.propertiesCodec().parse(ops, propsRaw);
 
-                    return idResult.flatMap(id ->
-                        sizeResult.flatMap(size ->
-                            gravityResult.flatMap(gravity ->
-                                tpResult.flatMap(tp ->
-                                    propsResult.map(props ->
-                                        com.mojang.datafixers.util.Pair.of(
-                                            new Celestial(tp, ResourceLocation.parse(id), type, size, gravity, r, g, b, props),
-                                            input
-                                        )
+                    return sizeResult.flatMap(size ->
+                        gravityResult.flatMap(gravity ->
+                            tpResult.flatMap(tp ->
+                                propsResult.map(props ->
+                                    com.mojang.datafixers.util.Pair.of(
+                                        new Celestial(tp, type, size, gravity, r, g, b, props),
+                                        input
                                     )
                                 )
                             )
@@ -141,7 +137,6 @@ public record Celestial(
         public <T> DataResult<T> encode(Celestial input, DynamicOps<T> ops, T prefix) {
             Codec propsCodec = input.type().propertiesCodec();
             return ops.mapBuilder()
-                    .add("ID", ops.createString(input.ID().toString()))
                     .add("type", ops.createString(input.type().getID().toString()))
                     .add("size", ops.createDouble(input.size()))
                     .add("gravity", ops.createDouble(input.gravity()))

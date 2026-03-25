@@ -43,7 +43,7 @@ public class TestItem extends Item {
             Registry<Celestial> registry = GenesisMod.getCelestialRegistry(arg);
             var result = SpaceLevel.celestialRaycast(registry, GenesisMod.getTicks(arg), 0f, origin, direction, celestialType -> true);
             if (result != null) {
-                arg2.sendSystemMessage(Component.literal("BODY FOUND: " + result.getFirst().ID()));
+                arg2.sendSystemMessage(Component.literal("BODY FOUND: " + registry.getResourceKey(result.getFirst()).orElseThrow().location()));
                 Vector3dc pos = result.getFirst().getPosition(GenesisMod.getTicks(arg), registry);
                 arg2.sendSystemMessage(Component.literal("Position: " + (int) pos.x() + " " + (int) pos.y() + " " + (int) pos.z()));
             }

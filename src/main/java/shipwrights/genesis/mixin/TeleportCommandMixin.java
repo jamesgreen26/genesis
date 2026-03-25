@@ -100,14 +100,17 @@ public class TeleportCommandMixin {
             EntityTeleporter.teleportEntityAndPassengers(entity, spaceLevel, pos);
         }
 
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(spaceLevel);
+        String celestialId = registry.getResourceKey(celestial).orElseThrow().location().toString();
+
         if (targets.size() == 1) {
             Entity target = targets.iterator().next();
             source.sendSuccess(() -> Component.literal(
-                    "Teleported " + target.getName().getString() + " to celestial " + celestial.ID()
+                    "Teleported " + target.getName().getString() + " to celestial " + celestialId
             ), true);
         } else {
             source.sendSuccess(() -> Component.literal(
-                    "Teleported " + targets.size() + " entities to celestial " + celestial.ID()
+                    "Teleported " + targets.size() + " entities to celestial " + celestialId
             ), true);
         }
 

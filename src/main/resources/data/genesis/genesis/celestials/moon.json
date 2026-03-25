@@ -1,5 +1,4 @@
 {
-  "ID": "genesis:moon",
   "type": "genesis:body",
   "size": 29,
   "gravity": 0.1622,

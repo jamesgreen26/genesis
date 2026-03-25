@@ -1,5 +1,4 @@
 {
-  "ID": "genesis:testbh",
   "type": "genesis:blackhole",
   "size": 2048,
   "gravity": 8,
