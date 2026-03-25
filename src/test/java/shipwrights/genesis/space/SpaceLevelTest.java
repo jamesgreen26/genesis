@@ -50,7 +50,6 @@ class SpaceLevelTest {
     void testRaycastHitsOneStar() {
         Celestial testStar = new Celestial(
             new StaticTransformProvider(100, 0, 0),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -74,7 +73,6 @@ class SpaceLevelTest {
     void testRaycastHitsOneOrbitingBody() {
         Celestial testBody = new Celestial(
             new StaticTransformProvider(50, 0, 0),
-            ResourceLocation.parse("test:body1"),
             BuiltinCelestialTypes.BODY,
             0.5, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -97,14 +95,12 @@ class SpaceLevelTest {
     void testRaycastHitsMultipleCelestials() {
         Celestial farStar = new Celestial(
             new StaticTransformProvider(1000, 0, 0),
-            ResourceLocation.parse("test:far_star"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
         );
         Celestial closeStar = new Celestial(
             new StaticTransformProvider(100, 0, 0),
-            ResourceLocation.parse("test:close_star"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -129,7 +125,6 @@ class SpaceLevelTest {
     void testRaycastMissesAllCelestials() {
         Celestial testStar = new Celestial(
             new StaticTransformProvider(100, 0, 0),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -151,7 +146,6 @@ class SpaceLevelTest {
     void testRaycastStartingInsideCelestial() {
         Celestial largeStar = new Celestial(
             new StaticTransformProvider(50, 50, 50),
-            ResourceLocation.parse("test:large_star"),
             BuiltinCelestialTypes.STAR,
             5.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -173,7 +167,6 @@ class SpaceLevelTest {
     void testRaycastWithNormalizedDirection() {
         Celestial testStar = new Celestial(
             new StaticTransformProvider(100, 100, 0),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -195,7 +188,6 @@ class SpaceLevelTest {
     void testRaycastWithNegativeCoordinates() {
         Celestial testStar = new Celestial(
             new StaticTransformProvider(-100, -100, -100),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -217,7 +209,6 @@ class SpaceLevelTest {
     void testDistanceSquaredCalculation() {
         Celestial testStar = new Celestial(
             new StaticTransformProvider(100, 0, 0),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             0.1, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -242,21 +233,18 @@ class SpaceLevelTest {
     void testRaycastWithMultipleStarsOnRay() {
         Celestial star1 = new Celestial(
             new StaticTransformProvider(200, 0, 0),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
         );
         Celestial star2 = new Celestial(
             new StaticTransformProvider(500, 0, 0),
-            ResourceLocation.parse("test:star2"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
         );
         Celestial star3 = new Celestial(
             new StaticTransformProvider(1000, 0, 0),
-            ResourceLocation.parse("test:star3"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -300,7 +288,6 @@ class SpaceLevelTest {
 
         Celestial testBody = new Celestial(
             tickDependentProvider,
-            ResourceLocation.parse("test:body1"),
             BuiltinCelestialTypes.BODY,
             0.5, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -326,7 +313,6 @@ class SpaceLevelTest {
     void testRaycastPerpendicular() {
         Celestial testStar = new Celestial(
             new StaticTransformProvider(0, 0, 100),
-            ResourceLocation.parse("test:star1"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
@@ -348,14 +334,12 @@ class SpaceLevelTest {
     void testRaycastPrioritizesCloserBody() {
         Celestial farStar = new Celestial(
             new StaticTransformProvider(500, 0, 0),
-            ResourceLocation.parse("test:far_star"),
             BuiltinCelestialTypes.STAR,
             1.0, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
         );
         Celestial closeBody = new Celestial(
             new StaticTransformProvider(200, 0, 0),
-            ResourceLocation.parse("test:close_body"),
             BuiltinCelestialTypes.BODY,
             0.5, 1.0, 1f, 1f, 1f,
             EmptyProperties.INSTANCE
