@@ -59,95 +59,57 @@
   },
   "noise_router": {
     "final_density": {
+      "type": "minecraft:add",
       "argument1": {
+        "type": "minecraft:y_clamped_gradient",
         "from_y": -64,
         "to_y": 320,
         "from_value": 1.0,
-        "to_value": -1.0,
-        "type": "minecraft:y_clamped_gradient"
+        "to_value": -1.0
       },
       "argument2": {
+        "type": "minecraft:add",
         "argument1": {
+          "type": "minecraft:add",
           "argument1": {
-            "argument1": 0.132,
+            "type": "minecraft:mul",
+            "argument1": 0.22,
             "argument2": {
+              "type": "minecraft:noise",
               "noise": "minecraft:continentalness",
-              "xz_scale": 0.244,
-              "y_scale": 0.122,
-              "type": "minecraft:noise"
-            },
-            "type": "minecraft:mul"
+              "xz_scale": 0.12,
+              "y_scale": 0.0
+            }
           },
           "argument2": {
-            "argument1": {
-              "argument1": {
-                "argument1": 0.0495,
-                "argument2": {
-                  "noise": "minecraft:gravel",
-                  "xz_scale": 1.22,
-                  "y_scale": 0.61,
-                  "type": "minecraft:noise"
-                },
-                "type": "minecraft:mul"
-              },
-              "argument2": {
-                "argument1": 0.22000000000000003,
-                "argument2": {
-                  "noise": "minecraft:continentalness",
-                  "xz_scale": 0.08,
-                  "y_scale": 0.04,
-                  "type": "minecraft:noise"
-                },
-                "type": "minecraft:mul"
-              },
-              "type": "minecraft:add"
-            },
-            "argument2": {
-              "argument1": {
-                "argument1": {
-                  "argument1": {
-                    "scale": 24.0,
-                    "type": "genesis:crater"
-                  },
-                  "argument2": {
-                    "scale": 64.0,
-                    "type": "genesis:crater"
-                  },
-                  "type": "minecraft:add"
-                },
-                "argument2": {
-                  "scale": 192.0,
-                  "type": "genesis:crater"
-                },
-                "type": "minecraft:add"
-              },
-              "argument2": {
-                "scale": 456.0,
-                "type": "genesis:crater"
-              },
-              "type": "minecraft:add"
-            },
-            "type": "minecraft:add"
-          },
-          "type": "minecraft:add"
+            "type": "genesis:multi_crater",
+            "scales": [24.0, 64.0, 192.0, 456.0]
+          }
         },
         "argument2": {
-          "argument1": 0.096,
-          "argument2": {
-            "argument1": 0.24,
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:mul",
+            "argument1": 0.28,
             "argument2": {
+              "type": "minecraft:noise",
               "noise": "minecraft:erosion",
-              "xz_scale": 0.15,
-              "y_scale": 0.08,
-              "type": "minecraft:noise"
-            },
-            "type": "minecraft:mul"
+              "xz_scale": 0.18,
+              "y_scale": 0.0
+            }
           },
-          "type": "minecraft:add"
-        },
-        "type": "minecraft:add"
-      },
-      "type": "minecraft:add"
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": 0.12,
+            "argument2": {
+              "type": "minecraft:noise",
+              "noise": "minecraft:ridge",
+              "xz_scale": 0.35,
+              "y_scale": 0.0
+            }
+          }
+        }
+      }
     },
     "vein_toggle": {
       "noise": "minecraft:ore_veininess",
@@ -265,11 +227,11 @@
       "type": "minecraft:mul"
     },
     "continents": {
-      "argument1": 0.22000000000000003,
+      "argument1": 0.22,
       "argument2": {
         "noise": "minecraft:continentalness",
-        "xz_scale": 0.08,
-        "y_scale": 0.04,
+        "xz_scale": 0.18,
+        "y_scale": 0.0,
         "type": "minecraft:noise"
       },
       "type": "minecraft:mul"

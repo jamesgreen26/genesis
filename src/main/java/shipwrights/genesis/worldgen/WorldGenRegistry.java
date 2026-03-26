@@ -30,6 +30,11 @@ public class WorldGenRegistry {
                     CraterNoise.resourceLocation,
                     CraterNoise.CODEC.codec()
             );
+
+            helper.register(
+                    MultiCraterNoise.resourceLocation,
+                    MultiCraterNoise.CODEC.codec()
+            );
         });
 
         event.register(Registries.MATERIAL_RULE, helper -> {
