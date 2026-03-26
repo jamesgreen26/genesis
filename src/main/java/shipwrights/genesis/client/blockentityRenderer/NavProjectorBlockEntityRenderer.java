@@ -96,10 +96,8 @@ public class NavProjectorBlockEntityRenderer implements BlockEntityRenderer<NavP
             poseStack.translate((float) -currentPos.x() / scale_factor, (float) -currentPos.y() / scale_factor, (float) -currentPos.z() / scale_factor);
         }
 
-        if (registry != null) {
-            for (Celestial body : registry) {
-                renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, registry, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.type().equals(BuiltinCelestialTypes.STAR));
-            }
+        for (Celestial body : registry) {
+            renderCelestialProjection(poseStack, bufferSource, packedLight, packedOverlay, body, registry, isOnShip, currentPos, pos, scale_factor, blockRenderer, ticks, partialTick, body.type().equals(BuiltinCelestialTypes.STAR));
         }
 
         poseStack.popPose();

@@ -60,14 +60,12 @@ public class RadarDisplay {
 
     private void scanPlanets(Level level, Vector3dc camera) {
         Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
-        if (registry != null) {
-            registry.forEach(body -> {
-                double extent = body.getActualSize() / 2;
-                Vector3dc pos = body.getPosition(GenesisMod.getTicks(level), registry);
-                AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
-                scanBox(box);
-            });
-        }
+        registry.forEach(body -> {
+            double extent = body.getActualSize() / 2;
+            Vector3dc pos = body.getPosition(GenesisMod.getTicks(level), registry);
+            AABBdc box = new AABBd(pos.x() - extent, pos.y() - extent, pos.z() - extent, pos.x() + extent, pos.y() + extent, pos.z() + extent);
+            scanBox(box);
+        });
     }
 
     private void scanAsteroidBelt(Level level, Vector3dc camera) {

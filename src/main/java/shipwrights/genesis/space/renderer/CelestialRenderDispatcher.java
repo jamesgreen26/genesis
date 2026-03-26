@@ -34,7 +34,6 @@ public class CelestialRenderDispatcher {
         }
 
         Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
-        if (registry == null) return;
 
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
