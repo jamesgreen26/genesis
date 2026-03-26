@@ -5,7 +5,7 @@
   "transformProvider": {
     "type": "genesis:orbiting",
     "parentID": "genesis:sun",
-    "seed": 12345,
+    "seed": 2,
     "orbitDistance": 15000,
     "orbitTime": 4600000,
     "dayLength": 24000
