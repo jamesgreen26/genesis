@@ -2,10 +2,12 @@ package shipwrights.genesis.space.transformProvider;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
+import shipwrights.genesis.space.Celestial;
 
 public class StaticTransformProvider implements CelestialTransformProvider {
 
@@ -52,12 +54,12 @@ public class StaticTransformProvider implements CelestialTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation(long ticks, float subticks) {
+    public Quaterniondc getRotation(long ticks, float subticks, Registry<Celestial> registry) {
         return rotation;
     }
 
     @Override
-    public Vector3d getPosition(long ticks, float subticks) {
+    public Vector3d getPosition(long ticks, float subticks, Registry<Celestial> registry) {
         return new Vector3d(x, y, z);
     }
 

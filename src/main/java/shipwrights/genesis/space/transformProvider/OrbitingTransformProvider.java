@@ -83,16 +83,6 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
     }
 
     @Override
-    public Quaterniondc getRotation(long ticks, float subticks) {
-        throw new UnsupportedOperationException("OrbitingTransformProvider requires a Registry<Celestial>; use getRotation(long, float, Registry) instead");
-    }
-
-    @Override
-    public Vector3d getPosition(long ticks, float subticks) {
-        throw new UnsupportedOperationException("OrbitingTransformProvider requires a Registry<Celestial>; use getPosition(long, float, Registry) instead");
-    }
-
-    @Override
     public Quaterniondc getRotation(long ticks, float subticks, Registry<Celestial> registry) {
         if (this.dayLength == 0.0) {
             // Tidally locked: -Z side always faces the parent

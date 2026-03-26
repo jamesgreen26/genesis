@@ -29,32 +29,8 @@ public record Celestial(
         float b,
         @NotNull CelestialProperties properties
 ) {
-    public Vector3dc getPosition(long ticks, float partialTick) {
-        return transformProvider.getPosition(ticks, partialTick);
-    }
-
-    public Vector3dc getPosition(long ticks) {
-        return getPosition(ticks, 0f);
-    }
-
     public double getActualSize() {
         return this.size();
-    }
-
-    public OBB getOBB(long ticks) {
-        return getOBB(ticks, 0);
-    }
-
-    public OBB getOBB(long ticks, float subticks) {
-        return OBB.createCube(getActualSize(), getRotation(ticks, subticks), getPosition(ticks, subticks));
-    }
-
-    public Quaterniondc getRotation(long ticks, float partialTick) {
-        return transformProvider.getRotation(ticks, partialTick);
-    }
-
-    public Quaterniondc getRotation(long ticks) {
-        return getRotation(ticks, 0f);
     }
 
     public Vector3dc getPosition(long ticks, float partialTick, Registry<Celestial> registry) {

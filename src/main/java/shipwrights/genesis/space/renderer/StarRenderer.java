@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.core.Registry;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +31,9 @@ public class StarRenderer implements CelestialRenderer {
         ClientLevel level = ((LevelRendererAccessor)event.getLevelRenderer()).getLevel();
         long ticks = GenesisMod.getTicks(level);
         float partialTick = GenesisMod.getPartialTick(level, event);
-        Vector3dc position = toRender.getPosition(ticks, partialTick);
-        Quaterniondc rotation = toRender.getRotation(ticks, partialTick);
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
+        Vector3dc position = toRender.getPosition(ticks, partialTick, registry);
+        Quaterniondc rotation = toRender.getRotation(ticks, partialTick, registry);
 
         Vector3dc vantagePos = vantagePoint.getPosition();
         Quaterniondc vantageRot = vantagePoint.getRotation();

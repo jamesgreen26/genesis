@@ -3,6 +3,7 @@ package shipwrights.genesis.tests;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
@@ -108,8 +109,9 @@ public class TeleportGameTests {
                 Celestial celestial = GenesisMod.getCelestialForLevel(level);
                 if (celestial != null) {
                     long ticks = GenesisMod.getTicks(spaceLevel);
+                    Registry<Celestial> registry = GenesisMod.getCelestialRegistry(spaceLevel);
                     OBB shipOBB = OBB.fromShip(shipAABB, found.getShipToWorld());
-                    if (shipOBB.overlapsWith(celestial.getOBB(ticks))) {
+                    if (shipOBB.overlapsWith(celestial.getOBB(ticks, registry))) {
                         throw new GameTestAssertException(
                                 "Ship OBB overlaps celestial OBB after atmosphere exit (ping-pong risk)");
                     }

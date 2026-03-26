@@ -36,11 +36,11 @@ public class SpaceLevel {
                 body -> body.getRotation(ticks, partialTick, registry));
     }
 
-    /// Package-private overload for tests: takes an Iterable of candidates (no registry needed for StaticTransformProvider)
-    static @Nullable Pair<Celestial, Double> celestialRaycast(Iterable<Celestial> candidates, long ticks, float partialTick, Vector3d origin, Vector3d direction, Predicate<CelestialType> predicate) {
+    /// Package-private overload for tests: takes an Iterable of candidates and an optional registry (may be null for StaticTransformProvider)
+    static @Nullable Pair<Celestial, Double> celestialRaycast(Iterable<Celestial> candidates, long ticks, float partialTick, Registry<Celestial> registry, Vector3d origin, Vector3d direction, Predicate<CelestialType> predicate) {
         return raycastBodies(candidates, ticks, partialTick, origin, direction, predicate,
-                body -> body.getPosition(ticks, partialTick),
-                body -> body.getRotation(ticks, partialTick));
+                body -> body.getPosition(ticks, partialTick, registry),
+                body -> body.getRotation(ticks, partialTick, registry));
     }
 
     private @Nullable static Pair<Celestial, Double> raycastBodies(Iterable<Celestial> candidates, long ticks, float partialTick, Vector3d origin, Vector3d direction, Predicate<CelestialType> predicate, Function<Celestial, Vector3dc> posFn, Function<Celestial, Quaterniondc> rotFn) {

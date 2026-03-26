@@ -1,6 +1,7 @@
 package shipwrights.genesis.space;
 
 import kotlin.Pair;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
@@ -40,7 +41,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNull(result, "Should return null when no celestials exist");
     }
@@ -61,7 +62,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should find the star");
         assertEquals(testStar, result.getFirst(), "Should return the star");
@@ -84,7 +85,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should find the orbiting body");
         assertEquals(testBody, result.getFirst(), "Should return the orbiting body");
@@ -114,7 +115,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should find a celestial");
         assertEquals(closeStar, result.getFirst(), "Should return the closer star");
@@ -136,7 +137,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNull(result, "Should return null when ray misses all celestials");
     }
@@ -157,7 +158,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should detect celestial even when starting inside");
     }
@@ -178,7 +179,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should handle normalized direction vectors");
     }
@@ -199,7 +200,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should handle negative coordinates");
     }
@@ -220,7 +221,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should find the star");
         double distanceSq = result.getSecond();
@@ -259,7 +260,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should find a celestial");
         assertEquals(star1, result.getFirst(), "Should return the closest celestial (star at 200)");
@@ -270,12 +271,12 @@ class SpaceLevelTest {
     void testRaycastWithDifferentTicksForOrbitingBody() {
         CelestialTransformProvider tickDependentProvider = new CelestialTransformProvider() {
             @Override
-            public Quaterniondc getRotation(long ticks, float subticks) {
+            public Quaterniondc getRotation(long ticks, float subticks, Registry<Celestial> registry) {
                 return new Quaterniond();
             }
 
             @Override
-            public Vector3d getPosition(long ticks, float subticks) {
+            public Vector3d getPosition(long ticks, float subticks, Registry<Celestial> registry) {
                 double x = 100 + (ticks / 10.0);
                 return new Vector3d(x, 0, 0);
             }
@@ -298,9 +299,9 @@ class SpaceLevelTest {
         Vector3d direction = new Vector3d(1, 0, 0);
 
         Pair<Celestial, Double> result1 =
-            SpaceLevel.celestialRaycast(candidates, 0L, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, 0L, 0f, null, origin, direction, type -> true);
         Pair<Celestial, Double> result2 =
-            SpaceLevel.celestialRaycast(candidates, 1000L, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, 1000L, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result1, "Should find body at tick 0");
         assertNotNull(result2, "Should find body at tick 1000");
@@ -324,7 +325,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNull(result, "Should miss star when ray is perpendicular");
     }
@@ -353,7 +354,7 @@ class SpaceLevelTest {
         long ticks = 0L;
 
         Pair<Celestial, Double> result =
-            SpaceLevel.celestialRaycast(candidates, ticks, 0f, origin, direction, type -> true);
+            SpaceLevel.celestialRaycast(candidates, ticks, 0f, null, origin, direction, type -> true);
 
         assertNotNull(result, "Should find a celestial");
         assertEquals(closeBody, result.getFirst(),

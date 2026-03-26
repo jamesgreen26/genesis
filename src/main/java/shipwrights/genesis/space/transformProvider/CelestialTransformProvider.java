@@ -17,19 +17,11 @@ import java.util.Map;
  */
 public interface CelestialTransformProvider {
 
-    Quaterniondc getRotation(long ticks, float subticks);
+    Vector3d getPosition(long ticks, float subticks, Registry<Celestial> registry);
 
-    Vector3d getPosition(long ticks, float subticks);
+    Quaterniondc getRotation(long ticks, float subticks, Registry<Celestial> registry);
 
     ResourceLocation getType();
-
-    default Vector3d getPosition(long ticks, float subticks, Registry<Celestial> registry) {
-        return getPosition(ticks, subticks);
-    }
-
-    default Quaterniondc getRotation(long ticks, float subticks, Registry<Celestial> registry) {
-        return getRotation(ticks, subticks);
-    }
 
     // Registry for CelestialTransformProvider codecs
     Map<ResourceLocation, Codec<? extends CelestialTransformProvider>> REGISTRY = new HashMap<>();
