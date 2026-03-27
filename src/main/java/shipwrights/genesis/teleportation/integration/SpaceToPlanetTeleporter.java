@@ -8,6 +8,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -59,17 +60,18 @@ public class SpaceToPlanetTeleporter {
 			Celestial nearest = getNearestPlanet(ship, ticks, registry);
 			if (ship.isStatic() || nearest == null || shipAABB == null) continue;
 
+			if (!shipOverlapsCelestial(ship, shipAABB, nearest, ticks, registry)) continue;
+
 			PlayerTeam team = level.getScoreboard().getPlayerTeam(registry.getResourceKey(nearest).orElseThrow().location().getPath());
 			if(team!=null)
 			{
 				Collection<String> teamShips = team.getPlayers();
 				if(!teamShips.contains(ship.getSlug()))
 				{
+					MinecraftForge.EVENT_BUS.post(new TeleportDisallowedEvent(ship, nearest));
 					continue;
 				}
 			}
-
-			if (!shipOverlapsCelestial(ship, shipAABB, nearest, ticks, registry)) continue;
 
 			ServerLevel targetLevel = getTargetLevel(level, nearest, registry);
 			if (targetLevel == null) continue;
