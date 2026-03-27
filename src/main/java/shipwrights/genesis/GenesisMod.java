@@ -9,12 +9,11 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -163,6 +162,10 @@ public final class GenesisMod {
 
     public static boolean isSpaceDimension(Level level) {
         return isSpaceDimension(level.dimension().location());
+    }
+
+    public static boolean isSubSpaceDimension(Level level) {
+        return level.dimension().location().equals(WORMHOLE_DIM);
     }
 
     public static double getApparentSunAngle(double starUpDot, double starEastDot) {
