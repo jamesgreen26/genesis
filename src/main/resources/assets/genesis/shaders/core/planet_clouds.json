@@ -1,0 +1,27 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "genesis:planet_clouds",
+  "fragment": "genesis:planet_clouds",
+  "attributes": [
+    "Position",
+    "Color"
+  ],
+  "samplers": [
+  ],
+  "uniforms": [
+    { "name": "GameTime", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+    { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+    { "name": "ColorModulator", "type": "float", "count": 4, "values": [ 1.0, 1.0, 1.0, 1.0 ] },
+    { "name": "CameraPosition", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
+    { "name": "HalfSize", "type": "float", "count": 1, "values": [ 0.0 ] },
+    { "name": "LightDirection", "type": "float", "count": 3, "values": [ 0.0, 0.0, 0.0 ] },
+    { "name": "CloudThickness", "type": "float", "count": 1, "values": [1.05] },
+    { "name": "Density", "type": "float", "count": 1, "values": [ 1.0 ] },
+    { "name": "DensityFade", "type": "float", "count": 1, "values": [ 1.0 ] }
+  ]
+}

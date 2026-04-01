@@ -27,6 +27,7 @@ public class ShaderRegistry {
     public static final ShaderHolder BLACKHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "blackhole"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet"), DefaultVertexFormat.POSITION_COLOR_TEX);
     public static final ShaderHolder PLANET_ATMOSPHERE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_atmosphere"), DefaultVertexFormat.POSITION_COLOR);
+    public static final ShaderHolder PLANET_CLOUDS_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_clouds"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_TEXTURED_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_textured"), DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
     public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_SHADOW_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_shadow"), DefaultVertexFormat.POSITION_COLOR);
@@ -38,6 +39,7 @@ public class ShaderRegistry {
         registerShader(event, BLACKHOLE_SHADER);
         registerShader(event, PLANET_SHADER);
         registerShader(event, PLANET_ATMOSPHERE_SHADER);
+        registerShader(event, PLANET_CLOUDS_SHADER);
         registerShader(event, PLANET_TEXTURED_SHADER);
         registerShader(event, PLANET_MASK_SHADER);
         registerShader(event, PLANET_SHADOW_SHADER);
@@ -48,6 +50,7 @@ public class ShaderRegistry {
     private static LodestoneRenderType BLACKHOLE_RENDER_TYPE;
     private static LodestoneRenderType PLANET_RENDER_TYPE;
     private static LodestoneRenderType PLANET_ATMOSPHERE_RENDER_TYPE;
+    private static LodestoneRenderType PLANET_CLOUDS_RENDER_TYPE;
     private static LodestoneRenderType PLANET_MASK_RENDER_TYPE;
     private static final ConcurrentHashMap<ResourceLocation, LodestoneRenderType> TEXTURED_PLANET_RENDER_TYPES = new ConcurrentHashMap<>();
 
@@ -101,6 +104,19 @@ public class ShaderRegistry {
             );
         }
         return PLANET_ATMOSPHERE_RENDER_TYPE;
+    }
+
+    public static LodestoneRenderType getPlanetCloudsRenderType() {
+        if (PLANET_CLOUDS_RENDER_TYPE == null) {
+            PLANET_CLOUDS_RENDER_TYPE = LodestoneRenderTypeRegistry.createGenericRenderType("planet_clouds_render_type", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, LodestoneRenderTypeRegistry.builder()
+                    .setShaderState(PLANET_CLOUDS_SHADER)
+                    .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
+                    .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
+                    .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
+                    .setCullState(LodestoneRenderTypeRegistry.CULL)
+            );
+        }
+        return PLANET_CLOUDS_RENDER_TYPE;
     }
 
     public static LodestoneRenderType getPlanetMaskRenderType() {

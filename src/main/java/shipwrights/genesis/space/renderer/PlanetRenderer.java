@@ -26,6 +26,7 @@ import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
+import shipwrights.genesis.space.planet_properties.PlanetProperties;
 import shipwrights.genesis.space.type.CelestialType;
 
 import java.lang.Math;
@@ -138,6 +139,9 @@ public class PlanetRenderer implements CelestialRenderer {
         renderPlanetAt(toRender.ID(), shadows, event.getPoseStack(), position.x(), position.y(), position.z(), halfExtent, rotation, alpha);
 
         new PlanetAtmosphereRenderer().invoke(event, toRender, vantagePoint);
+        if(PlanetProperties.get(toRender.ID()).atmosphere().density() > 0.3f) {
+            new PlanetCloudsRenderer().invoke(event, toRender, vantagePoint);
+        }
     }
 
     private void renderPlanetAt(ResourceLocation planetID, List<FaceShadow> shadows, PoseStack poseStack, double x, double y, double z, double halfExtent, Quaterniondc localRotation, float alpha) {
