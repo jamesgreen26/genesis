@@ -118,7 +118,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         double meanAnomaly = Math.PI * 2.0 * ((ticks + subticks) / this.orbitTime) + this.initialOrbitProgress;
         double eccentricAnomaly = meanAnomaly;
         if(this.eccentricity > 0.8) {eccentricAnomaly = Math.PI;}
-        for(int n = 0; n < 32; n++) {
+        for(int n = 0; n < 64; n++) {
             eccentricAnomaly -= (eccentricAnomaly - this.eccentricity * Math.sin(eccentricAnomaly - this.eccentricArgument) - meanAnomaly) / (1.0 - this.eccentricity * Math.cos(eccentricAnomaly - this.eccentricArgument));
         }
         double trueAnomaly = Math.atan(Math.sqrt((1.0 + this.eccentricity) / (1.0 - this.eccentricity)) * Math.tan(eccentricAnomaly / 2.0)) * 2.0;
