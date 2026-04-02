@@ -54,5 +54,11 @@ public class GenesisNetworking {
                 .decoder(EnteringWarpPacket::decode)
                 .consumerMainThread(EnteringWarpPacket::handle)
                 .add();
+
+        INSTANCE.messageBuilder(SyncTimeOffsetPacket.class, 7)
+                .encoder(SyncTimeOffsetPacket::encode)
+                .decoder(SyncTimeOffsetPacket::decode)
+                .consumerMainThread(SyncTimeOffsetPacket::handle)
+                .add();
     }
 }

@@ -4,8 +4,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,6 +26,8 @@ import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.commands.GenesisCommandArguments;
+import shipwrights.genesis.time.GenesisTimeData;
+import shipwrights.genesis.time.TimeTracker;
 import shipwrights.genesis.config.GenesisClientConfig;
 import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.fluid.GenesisFluids;
@@ -50,6 +54,7 @@ public final class GenesisMod {
     public static final Vector3dc UP = new Vector3d(0.0, 1.0, 0.0);
     public static final Vector3dc EAST = new Vector3d(1.0, 0.0, 0.0);
 
+    public static long clientTimeOffset = 0;
 
     public static final ResourceLocation SPACE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "great_unknown");
     public static final ResourceLocation WORMHOLE_DIM = ResourceLocation.fromNamespaceAndPath(MOD_ID, "subspace");
@@ -102,6 +107,7 @@ public final class GenesisMod {
         boolean isGameTest = System.getProperty("forge.enabledGameTestNamespaces") != null;
         MinecraftForge.EVENT_BUS.register(new PlanetToSpaceTeleporter(isGameTest));
         MinecraftForge.EVENT_BUS.register(new SpaceToPlanetTeleporter(isGameTest));
+        MinecraftForge.EVENT_BUS.register(TimeTracker.class);
 
         if (isGameTest) {
             MinecraftForge.EVENT_BUS.addListener(GameTestCommands::onRegisterCommandsEvent);
@@ -120,8 +126,14 @@ public final class GenesisMod {
         return getCelestialRegistry(level).get(level.dimension().location());
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static long getTicks(Level level) {
-        return level.getGameTime();
+        if (level instanceof ServerLevel serverLevel) {
+            MinecraftServer server = serverLevel.getServer();
+            if (server == null || server.overworld() == null) return level.getGameTime();
+            return level.getGameTime() + GenesisTimeData.getOrCreate(server).getTimeOffset();
+        }
+        return level.getGameTime() + clientTimeOffset;
     }
 
     public static float getPartialTick(Level level, RenderLevelStageEvent event) {
