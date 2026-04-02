@@ -8,6 +8,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -137,6 +138,7 @@ public final class GenesisMod {
     }
 
     public static float getPartialTick(Level level, RenderLevelStageEvent event) {
+        if (!level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) return 0f;
         return event.getPartialTick();
     }
 

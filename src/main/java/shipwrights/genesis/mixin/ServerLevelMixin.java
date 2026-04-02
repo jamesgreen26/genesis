@@ -38,7 +38,7 @@ public abstract class ServerLevelMixin {
         ServerLevel self = getLevel();
         if (!self.dimension().equals(Level.OVERWORLD)) return;
 
-        long oldDayTime = serverLevelData.getDayTime();
+        long oldDayTime = GenesisMod.getTicks(self);
         long delta = newDayTime - oldDayTime;
         if (delta == 0) return;
 
