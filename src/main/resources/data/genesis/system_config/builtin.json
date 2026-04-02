@@ -23,9 +23,8 @@
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "genesis:sun",
-        "seed": 12345,
         "orbitDistance": 15000,
-        "orbitTime": 4600000,
+        "orbitTime": 4608000,
         "dayLength" : 24000
       }
     },
@@ -37,7 +36,6 @@
       "transformProvider": {
         "type": "genesis:orbiting",
         "parentID": "minecraft:overworld",
-        "seed": 67890,
         "orbitDistance": 750,
         "orbitTime": 184329,
         "dayLength": 0
@@ -53,6 +51,75 @@
         "x": 0.0,
         "y": -200000.0,
         "z": -200000.0
+      }
+    },
+    {
+      "ID" : "genesis:orbittest1",
+      "type": "genesis:star",
+      "size": 64,
+      "gravity": 8,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:testbh",
+        "orbitDistance": 3000,
+        "orbitTime": 254,
+        "eccentricity": 0.6,
+        "eccentricArgument" : 0.3,
+        "inclination": 0.5,
+        "inclinedArgument": 5.4,
+        "initialOrbitProgress": 0.7,
+        "baseRotationX": 0.7,
+        "baseRotationY": 0.5,
+        "baseRotationZ": 0.0,
+        "dayLength": 30,
+        "axialTilt": 0.1,
+        "tiltArgument": 1.4
+      }
+    },
+    {
+      "ID" : "genesis:orbittest2",
+      "type": "genesis:star",
+      "size": 64,
+      "gravity": 8,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:testbh",
+        "orbitDistance": 5200,
+        "orbitTime": 738,
+        "eccentricity": 0.1,
+        "eccentricArgument" : 2.5,
+        "inclination": 0.1,
+        "inclinedArgument": 2.4,
+        "initialOrbitProgress": 4.1,
+        "baseRotationX": 0.0,
+        "baseRotationY": 0.0,
+        "baseRotationZ": 0.0,
+        "dayLength": 30,
+        "axialTilt": 1.4,
+        "tiltArgument": 1.4
+      }
+    },
+    {
+      "ID" : "genesis:orbittest3",
+      "type": "genesis:star",
+      "size": 12,
+      "gravity": 4,
+      "transformProvider": {
+        "type": "genesis:orbiting",
+        "parentID": "genesis:orbittest2",
+        "orbitDistance": 100,
+        "orbitTime": 24,
+        "eccentricity": 0.2,
+        "eccentricArgument" : 0.7,
+        "inclination": 0.1,
+        "inclinedArgument": 2.3,
+        "initialOrbitProgress": 1.9,
+        "baseRotationX": 0.7,
+        "baseRotationY": 0.5,
+        "baseRotationZ": 0.0,
+        "dayLength": 20,
+        "axialTilt": 0.1,
+        "tiltArgument": 3.4
       }
     }
   ]
