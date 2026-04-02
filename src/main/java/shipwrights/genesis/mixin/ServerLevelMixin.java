@@ -9,8 +9,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.storage.ServerLevelData;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,10 +27,6 @@ public abstract class ServerLevelMixin {
 
     @Shadow public abstract ServerLevel getLevel();
 
-    @Final
-    @Shadow
-    private ServerLevelData serverLevelData;
-
     @Inject(method = "setDayTime", at = @At("HEAD"))
     private void genesis$onSetDayTime(long newDayTime, CallbackInfo ci) {
         ServerLevel self = getLevel();
@@ -45,6 +39,11 @@ public abstract class ServerLevelMixin {
         GenesisTimeData data = GenesisTimeData.getOrCreate(self.getServer());
         data.addOffset(delta);
         GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new SyncTimeOffsetPacket(data.getTimeOffset()));
+    }
+
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getDayTime()J"))
+    private static long useGenesisDayTime(ServerLevel instance, Operation<Long> original) {
+        return GenesisMod.getTicks(instance);
     }
 
     @Inject(method = "addEntity", at = @At("HEAD"))
