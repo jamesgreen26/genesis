@@ -1,0 +1,6 @@
+{
+  "type": "forge:add_features",
+  "features": "genesis:ore_moon_lithium",
+  "biomes": "#genesis:is_moon",
+  "step": "underground_ores"
+}
