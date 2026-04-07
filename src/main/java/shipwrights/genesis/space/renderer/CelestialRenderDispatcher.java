@@ -7,11 +7,13 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisClientConfig;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.type.CelestialType;
@@ -21,6 +23,13 @@ import java.util.List;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class CelestialRenderDispatcher {
+
+    private static Boolean oculusLoaded = null;
+
+    private static boolean isOculusLoaded() {
+        if (oculusLoaded == null) oculusLoaded = ModList.get().isLoaded("oculus");
+        return oculusLoaded;
+    }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
@@ -49,7 +58,13 @@ public class CelestialRenderDispatcher {
                 .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick, reg).distanceSquared(cameraForRenderOrder)))
                 .toList();
 
+            boolean shouldSkipCurrentPlanet = !GenesisClientConfig.shouldRenderCurrentPlanet() || isOculusLoaded();
+
             for (Celestial celestial : celestials) {
+                if (shouldSkipCurrentPlanet && vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial() == celestial) {
+                    continue;
+                }
+
                 CelestialType type = celestial.type();
                 type.getRenderer().setup(event, vantagePoint);
                 type.getRenderer().invoke(event, celestial, vantagePoint);
