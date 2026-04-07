@@ -65,6 +65,7 @@ public class SpaceDimensionEffects extends DimensionSpecialEffects {
     @Override
     public boolean renderSky(ClientLevel level, int ticks, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
         FogRenderer.setupNoFog();
+        RenderSystem.depthMask(false);
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);
@@ -75,6 +76,7 @@ public class SpaceDimensionEffects extends DimensionSpecialEffects {
             VertexBuffer.unbind();
         }
 
+        RenderSystem.depthMask(true);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         return true;
