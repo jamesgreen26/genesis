@@ -1,7 +1,7 @@
 {
-  "has_precipitation": true,
+  "has_precipitation": false,
   "temperature": 0.5482456,
-  "downfall": 0.94,
+  "downfall": 0.0,
   "effects": {
     "sky_color": 0,
     "foliage_color": 6988322,

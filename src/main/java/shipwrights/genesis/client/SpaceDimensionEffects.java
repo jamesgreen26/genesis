@@ -1,6 +1,7 @@
 package shipwrights.genesis.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -19,10 +20,23 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.ShaderInstance;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Registry;
+import kotlin.Pair;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.SpaceLevel;
+import shipwrights.genesis.space.properties.StarProperties;
+import shipwrights.genesis.space.type.BuiltinCelestialTypes;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class SpaceDimensionEffects extends DimensionSpecialEffects {
     public SpaceDimensionEffects() {
@@ -65,6 +79,9 @@ public class SpaceDimensionEffects extends DimensionSpecialEffects {
     @Override
     public boolean renderSky(ClientLevel level, int ticks, float partialTick, PoseStack poseStack, Camera camera, Matrix4f projectionMatrix, boolean isFoggy, Runnable setupFog) {
         FogRenderer.setupNoFog();
+        RenderSystem.depthMask(false);
+
+        renderNearestStarGlow(level, partialTick, poseStack, camera);
 
         for (int i = 0; i < starBufferCount; i++) {
             Vector4fc color = starColors.get(i);
@@ -75,9 +92,110 @@ public class SpaceDimensionEffects extends DimensionSpecialEffects {
             VertexBuffer.unbind();
         }
 
+        RenderSystem.depthMask(true);
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         return true;
+    }
+
+    private void renderNearestStarGlow(ClientLevel level, float partialTick, PoseStack poseStack, Camera camera) {
+        Registry<Celestial> registry = GenesisMod.getCelestialRegistry(level);
+        Vec3 camPos = camera.getPosition();
+        Vector3d camPosJoml = new Vector3d(camPos.x, camPos.y, camPos.z);
+        long gameTicks = GenesisMod.getTicks(level);
+
+        Pair<Celestial, Double> nearestStar = SpaceLevel.nearestCelestialWhere(
+                registry,
+                camPosJoml,
+                gameTicks,
+                partialTick,
+                Predicate.isEqual(BuiltinCelestialTypes.STAR)
+        );
+
+        if (nearestStar == null) {
+            return;
+        }
+
+        Celestial star = nearestStar.getFirst();
+        Vector3dc starPos = star.getPosition(gameTicks, partialTick, registry);
+        double distance = Math.sqrt(nearestStar.getSecond());
+        float fade = (float) Mth.clamp(distance / 3000.0, 0.0, 1.0);
+        if (fade <= 0.001f) {
+            return;
+        }
+
+        Vector3d toStar = new Vector3d(starPos.x(), starPos.y(), starPos.z())
+                .sub(camPosJoml)
+                .normalize();
+
+        Vector3d up = new Vector3d(0.0, 1.0, 0.0);
+        if (Math.abs(toStar.dot(up)) > 0.98) {
+            up.set(1.0, 0.0, 0.0);
+        }
+
+        Vector3d right = new Vector3d();
+        toStar.cross(up, right).normalize();
+        Vector3d upPerp = new Vector3d();
+        right.cross(toStar, upPerp).normalize();
+
+        float glowDistance = 100.0f;
+        float outerRadius = (float) (36.0 * (10000.0 / Math.max(distance, 1.0)));
+        float innerAlpha = 0.3f * fade;
+
+        float r = 1.0f;
+        float g = 1.0f;
+        float b = 1.0f;
+        if (star.properties() instanceof StarProperties starProps) {
+            r = starProps.r1() / 255f;
+            g = starProps.g1() / 255f;
+            b = starProps.b1() / 255f;
+        }
+
+        // brighten toward white
+        float brighten = 0.25f;
+        r += (1f - r) * brighten;
+        g += (1f - g) * brighten;
+        b += (1f - b) * brighten;
+
+        // desaturate slightly
+        float lum = 0.299f * r + 0.587f * g + 0.114f * b;
+        float desat = 0.3f;
+
+        r += (lum - r) * desat;
+        g += (lum - g) * desat;
+        b += (lum - b) * desat;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        ShaderInstance shader = ShaderRegistry.STAR_GLOW_SHADER.getInstance().get();
+        if (shader == null) {
+            RenderSystem.disableBlend();
+            return;
+        }
+        RenderSystem.setShader(() -> shader);
+        Uniform baseAlpha = shader.getUniform("BaseAlpha");
+        if (baseAlpha != null) {
+            baseAlpha.set(innerAlpha);
+        }
+
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        Matrix4f pose = poseStack.last().pose();
+        Vector3d center = new Vector3d(toStar).mul(glowDistance);
+        bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+        bufferbuilder.vertex(pose, (float) center.x, (float) center.y, (float) center.z).color(r, g, b, 0.0f).endVertex();
+
+        int steps = 32;
+        for (int i = 0; i <= steps; i++) {
+            double angle = i * (Math.PI * 2.0) / steps;
+            double cos = Math.cos(angle);
+            double sin = Math.sin(angle);
+            Vector3d offset = new Vector3d(right).mul(cos * outerRadius).add(new Vector3d(upPerp).mul(sin * outerRadius));
+            Vector3d pos = new Vector3d(center).add(offset);
+            bufferbuilder.vertex(pose, (float) pos.x, (float) pos.y, (float) pos.z).color(r, g, b, 1.0f).endVertex();
+        }
+
+        BufferUploader.drawWithShader(bufferbuilder.end());
+        RenderSystem.disableBlend();
     }
 
     private void createStars() {

@@ -31,6 +31,7 @@ public class ShaderRegistry {
     public static final ShaderHolder PLANET_MASK_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_mask"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder PLANET_SHADOW_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "planet_shadow"), DefaultVertexFormat.POSITION_COLOR);
     public static final ShaderHolder WORMHOLE_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "wormhole"), DefaultVertexFormat.POSITION_COLOR_TEX);
+    public static final ShaderHolder STAR_GLOW_SHADER = new ShaderHolder(ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "star_glow"), DefaultVertexFormat.POSITION_COLOR);
 
     @SubscribeEvent
     public static void shaderRegistry(RegisterShadersEvent event) {
@@ -42,6 +43,7 @@ public class ShaderRegistry {
         registerShader(event, PLANET_MASK_SHADER);
         registerShader(event, PLANET_SHADOW_SHADER);
         registerShader(event, WORMHOLE_SHADER);
+        registerShader(event, STAR_GLOW_SHADER);
     }
 
     private static LodestoneRenderType SUN_RENDER_TYPE;
