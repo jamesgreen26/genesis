@@ -21,13 +21,11 @@ public class TestItem extends Item {
         super(arg);
     }
 
-
-
     @Override
     public InteractionResult useOn(UseOnContext arg) {
         if(arg.getLevel() instanceof ServerLevel serverLevel && arg.getHand()==InteractionHand.MAIN_HAND)
         {
-
+            ray(serverLevel,arg.getPlayer(),arg.getHand());
         }
         return super.useOn(arg);
     }

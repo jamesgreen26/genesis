@@ -15,6 +15,7 @@ import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.client.PlanetDimensionEffects;
 import shipwrights.genesis.client.ShaderRegistry;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
@@ -98,7 +99,7 @@ public class PlanetAtmosphereRenderer implements CelestialRenderer {
         // When viewing from space, use full density.
         double densityFade = (vantagePoint instanceof VantagePoint.InSpace)
                 ? 1.0
-                : Mth.clamp((event.getCamera().getPosition().y - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+                : Mth.clamp((event.getCamera().getPosition().y - 320.0) / (GenesisCommonConfig.getAtmosphereEntryHeight() - 320.0), 0.0, 1.0);
 
         double starBrightness = PlanetDimensionEffects.cachedStarBrightness;
 

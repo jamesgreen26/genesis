@@ -21,6 +21,7 @@ import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.teleportation.DimensionTravelTeleporter;
@@ -102,7 +103,7 @@ public class SpaceToPlanetTeleporter {
 		);
 		return new Vector3d(
 			SectionPos.sectionToBlockCoord(landingChunkPos.x),
-			GenesisMod.atmosphereEntryHeight,
+				GenesisCommonConfig.getAtmosphereEntryHeight(),
 			SectionPos.sectionToBlockCoord(landingChunkPos.z)
 		);
 	}

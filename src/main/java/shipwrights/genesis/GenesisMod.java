@@ -27,6 +27,7 @@ import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.entity.handling.DefaultShipyardEntityHandler;
 import org.valkyrienskies.mod.common.entity.handling.VSEntityManager;
 import shipwrights.genesis.commands.GenesisCommandArguments;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.time.GenesisTimeData;
 import shipwrights.genesis.time.TimeTracker;
 import shipwrights.genesis.config.GenesisClientConfig;
@@ -68,13 +69,12 @@ public final class GenesisMod {
     private static final Pattern SEAT_REGISTRY_NAME =
             Pattern.compile("(?<![a-z])(seat|chair)(?![a-z])", Pattern.CASE_INSENSITIVE);
 
-    public static final int atmosphereExitHeight = 2048;
-    public static final int atmosphereEntryHeight = 1440;
 
     public GenesisMod(FMLJavaModLoadingContext context) {
         IEventBus eventBus = context.getModEventBus();
 
         context.registerConfig(ModConfig.Type.CLIENT, GenesisClientConfig.CONFIG_SPEC);
+        context.registerConfig(ModConfig.Type.COMMON, GenesisCommonConfig.CONFIG_SPEC);
 
         // Register the celestials datapack registry
         eventBus.addListener(GenesisMod::registerDataPackRegistries);

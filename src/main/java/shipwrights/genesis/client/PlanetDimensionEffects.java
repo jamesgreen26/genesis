@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.mixin.LevelRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
@@ -125,7 +126,7 @@ public class PlanetDimensionEffects extends DimensionSpecialEffects {
 
         // fade out density with camera y level, from y=320 to y=GenesisMod.atmosphereEntryHeight
         double cameraY = camera.getPosition().y;
-        double densityFade = 1.0 - Mth.clamp((cameraY - 320.0) / (GenesisMod.atmosphereEntryHeight - 320.0), 0.0, 1.0);
+        double densityFade = 1.0 - Mth.clamp((cameraY - 320.0) / (GenesisCommonConfig.getAtmosphereEntryHeight() - 320.0), 0.0, 1.0);
         density *= densityFade;
         cachedRawDensity *= densityFade;
 

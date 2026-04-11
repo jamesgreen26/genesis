@@ -12,6 +12,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.LoadedServerShip;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.teleportation.DimensionTravelTeleporter;
@@ -47,7 +48,7 @@ public class PlanetToSpaceTeleporter {
 
 		for (LoadedServerShip ship : getSortedShips(level)) {
 			Vector3dc shipPos = ship.getTransform().getPositionInWorld();
-			if (!ship.isStatic() && shipPos.y() > GenesisMod.atmosphereExitHeight) {
+			if (!ship.isStatic() && shipPos.y() > GenesisCommonConfig.getAtmosphereExitHeight()) {
 
 
 				if (VantagePoint.get(level, shipPos, ticks, 0f) instanceof VantagePoint.OnCelestial vantagePoint) {

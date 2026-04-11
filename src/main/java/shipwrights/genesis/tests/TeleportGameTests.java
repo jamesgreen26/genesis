@@ -28,6 +28,7 @@ import org.valkyrienskies.mod.common.block.TestHingeBlock;
 import org.valkyrienskies.mod.common.blockentity.TestHingeBlockEntity;
 import org.joml.primitives.AABBic;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.math.OBB;
 import shipwrights.genesis.space.Celestial;
 import java.util.UUID;
@@ -90,7 +91,7 @@ public class TeleportGameTests {
         long shipId = ship.getId();
 
         GenesisMod.LOGGER.info("[atmosphereExit] Ship id={} moved above atmosphere ({}); polling for teleport to '{}'",
-                shipId, GenesisMod.atmosphereExitHeight + 20, expectedSpaceDim);
+                shipId, GenesisCommonConfig.getAtmosphereExitHeight() + 20, expectedSpaceDim);
 
         helper.succeedWhen(() -> {
             ServerShip found = VSGameUtilsKt.getShipObjectWorld(level).getAllShips().getById(shipId);

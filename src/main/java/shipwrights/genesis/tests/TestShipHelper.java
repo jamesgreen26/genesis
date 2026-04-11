@@ -13,6 +13,7 @@ import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.assembly.ShipAssembler;
 import net.minecraft.core.Registry;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.space.Celestial;
 
 import java.util.ArrayDeque;
@@ -65,7 +66,7 @@ public class TestShipHelper {
      */
     public static void moveShipAboveAtmosphere(ServerLevel level, ServerShip ship) {
         Vector3dc pos = ship.getTransform().getPositionInWorld();
-        double targetY = GenesisMod.atmosphereExitHeight + 20.0;
+        double targetY = GenesisCommonConfig.getAtmosphereExitHeight() + 20.0;
         String dimId = level.dimension().location().toString();
         String cmd = String.format("execute in %s run vs teleport %s %f %f %f",
                 dimId, ship.getSlug(), pos.x(), targetY, pos.z());
