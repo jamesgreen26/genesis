@@ -1,6 +1,7 @@
 package shipwrights.genesis.space.renderer;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -58,7 +59,8 @@ public class CelestialRenderDispatcher {
                 .sorted(Comparator.comparingDouble(a -> -a.getPosition(ticks, partialTick, reg).distanceSquared(cameraForRenderOrder)))
                 .toList();
 
-            boolean shouldSkipCurrentPlanet = !GenesisClientConfig.shouldRenderCurrentPlanet() || isOculusLoaded();
+            boolean shouldSkipCurrentPlanet = !GenesisClientConfig.shouldRenderCurrentPlanet();
+            MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
 
             for (Celestial celestial : celestials) {
                 if (shouldSkipCurrentPlanet && vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial() == celestial) {
@@ -66,9 +68,16 @@ public class CelestialRenderDispatcher {
                 }
 
                 CelestialType type = celestial.type();
-                type.getRenderer().setup(event, vantagePoint);
-                type.getRenderer().invoke(event, celestial, vantagePoint);
-                type.getRenderer().teardown(event, vantagePoint);
+                CelestialRenderer renderer = type.getRenderer();
+
+                renderer.setup(event, vantagePoint);
+                renderer.invoke(event, celestial, vantagePoint);
+                renderer.teardown(event, vantagePoint);
+
+                // Celestial shaders rely on per-object uniforms. Flush any
+                // leftover batched geometry before the next celestial mutates
+                // shared shader state.
+                bufferSource.endBatch();
             }
         }
     }

@@ -34,4 +34,5 @@ void main() {
 
     // Planets are always fully opaque
     frag_color = vec4(finalColor, 1.0);
+    gl_FragDepth = 1.0;
 }

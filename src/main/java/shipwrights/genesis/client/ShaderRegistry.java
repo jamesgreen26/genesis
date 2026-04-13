@@ -130,7 +130,7 @@ public class ShaderRegistry {
                     .setShaderState(PLANET_SHADOW_SHADER)
                     .setTransparencyState(StateShards.NORMAL_TRANSPARENCY)
                         .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
-                        .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
+                        .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, false))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
             );
         }

@@ -183,8 +183,11 @@ public class PlanetRenderer implements CelestialRenderer {
         // End batch to flush planet rendering
         bufferSource.endBatch(renderType);
 
+        MultiBufferSource.BufferSource bufferSource1 = Minecraft.getInstance().renderBuffers().bufferSource();
+        bufferSource1.endBatch();
         // Render shadows on planet faces
         renderShadows(shadows, poseStack, x, y, z, halfExtent, localRotation);
+        bufferSource1.endBatch();
     }
 
     private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, float halfSize,
@@ -325,6 +328,9 @@ public class PlanetRenderer implements CelestialRenderer {
 
             // Flush this shadow's batch so its uniforms apply only to it
             bufferSource.endBatch(getPlanetShadowRenderType());
+
+            MultiBufferSource.BufferSource bufferSource1 = Minecraft.getInstance().renderBuffers().bufferSource();
+            bufferSource1.endBatch();
         }
     }
 

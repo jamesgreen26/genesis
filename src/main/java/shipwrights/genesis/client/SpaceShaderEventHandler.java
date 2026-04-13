@@ -13,13 +13,6 @@ import shipwrights.genesis.config.GenesisClientConfig;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = GenesisMod.MOD_ID)
 public class SpaceShaderEventHandler {
 
-    private static Boolean oculusLoaded = null;
-
-    private static boolean isOculusLoaded() {
-        if (oculusLoaded == null) oculusLoaded = ModList.get().isLoaded("oculus");
-        return oculusLoaded;
-    }
-
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         // Update shader state at the start of each frame
@@ -31,7 +24,7 @@ public class SpaceShaderEventHandler {
         Level level = mc.level;
 
         if (level != null) {
-            boolean shouldBeActive = GenesisMod.isSpaceDimension(level) && GenesisClientConfig.enableSpaceLighting() && !isOculusLoaded();
+            boolean shouldBeActive = GenesisMod.isSpaceDimension(level) && GenesisClientConfig.enableSpaceLighting();
             SpaceInvertPostProcessor.INSTANCE.setActive(shouldBeActive);
         }
     }
