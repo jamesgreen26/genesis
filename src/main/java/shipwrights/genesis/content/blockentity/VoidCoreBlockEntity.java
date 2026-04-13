@@ -1,5 +1,13 @@
 package shipwrights.genesis.content.blockentity;
 
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.valkyrienskies.core.api.ships.Ship;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.block.GenesisBlocks;
 import shipwrights.genesis.content.block.VoidCoreBlock;
 import net.minecraft.core.BlockPos;
@@ -11,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 
 public class VoidCoreBlockEntity extends BlockEntity {
+
     public VoidCoreBlockEntity(BlockPos pos, BlockState state) {
         super(GenesisBlockEntities.VOID_CORE.get(), pos, state);
     }
@@ -31,7 +40,7 @@ public class VoidCoreBlockEntity extends BlockEntity {
                 for (int z = -1; z < 2; z++) {
                     BlockEntity blockEntity = level.getBlockEntity(framePos.offset(x, y, z));
                     if (blockEntity instanceof VoidCoreBlockEntity) {
-                        ((VoidCoreBlockEntity) blockEntity).updateDormancy();
+                        ((VoidCoreBlockEntity) blockEntity).updateDormancy(framePos);
                         return;
                     }
                 }
@@ -39,7 +48,7 @@ public class VoidCoreBlockEntity extends BlockEntity {
         }
     }
 
-    private void updateDormancy() {
+    private void updateDormancy(BlockPos pos) {
         if (level == null) return;
         int frames = 0;
         int interfaces = 0;
@@ -72,6 +81,13 @@ public class VoidCoreBlockEntity extends BlockEntity {
             level.setBlock(this.getBlockPos(), GenesisBlocks.VOID_CORE.get().defaultBlockState().setValue(VoidCoreBlock.DORMANT, false), Block.UPDATE_CLIENTS);
         } else {
             level.setBlock(this.getBlockPos(), GenesisBlocks.VOID_CORE.get().defaultBlockState().setValue(VoidCoreBlock.DORMANT, true), Block.UPDATE_CLIENTS);
+            if (level.dimension().location().equals(GenesisMod.WORMHOLE_DIM)) {
+                Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
+                if (ship != null) {
+                    ServerLevel returnLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath("genesis", "great_unknown")));
+                    VoidEngineInterfaceBlockEntity.returnFromWormhole(level, pos, returnLevel, ship, true);
+                }
+            }
         }
     }
 }

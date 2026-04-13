@@ -116,7 +116,7 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
 
                         // Check if we should teleport to wormhole dimension
                         if (voidEngineInterface.chargeUpTicks == 244) {
-                            if (ship == null) {
+                            if (ship == null || !level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath("genesis", "great_unknown"))) {
                                 if (level.getBlockState(pos).hasProperty(BlockStateProperties.POWERED) && level.getBlockState(pos).getValue(BlockStateProperties.POWERED)) {
                                     explode(level, center);
                                 }
@@ -149,6 +149,7 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                         voidEngineInterface.chargeUpTicks = 32;
                     }
                 } else {
+                    GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new StopVoidEngineStartSoundPacket());
                     if (voidEngineInterface.chargeUpTicks > 0) {
                         voidEngineInterface.chargeUpTicks--;
                     }
@@ -157,22 +158,7 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                             voidEngineInterface.chargeUpTicks = -64;
                             // Auto-return to saved dimension when in wormhole
                             ServerLevel returnLevel = level.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, voidEngineInterface.returningDim));
-                            if (ship != null && returnLevel != null) {
-                                // Teleport ship back - scale position up
-                                Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(32.0, new Vector3d());
-
-                                GenesisNetworking.INSTANCE.send(
-                                        PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
-                                        new EnteringWarpPacket()
-                                );
-
-                                GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
-
-                                DimensionTravelTeleporter.teleportShip((ServerShip) ship, TravelDirection.SPACE_TO_PLANET, (ServerLevel) level, returnLevel, targetPos, new Quaterniond());
-
-                                //sendWormholeTravelPacket
-                                GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
-                            }
+                            returnFromWormhole(level, pos, returnLevel, ship, false);
                         }
                     } else {
                         if (voidEngineInterface.chargeUpTicks > 0) {
@@ -189,6 +175,26 @@ public class VoidEngineInterfaceBlockEntity extends BlockEntity {
                  if (voidEngineInterface.chargeUpTicks == 0) {
                     voidEngineInterface.active = false;
                 }
+            }
+        }
+    }
+
+    public static void returnFromWormhole(Level level, BlockPos pos, ServerLevel returnLevel, Ship ship, boolean unstable) {
+        if (ship != null && returnLevel != null) {
+            // Teleport ship back - scale position up
+            Vector3dc targetPos = ship.getTransform().getPositionInWorld().mul(32.0, new Vector3d());
+
+            GenesisNetworking.INSTANCE.send(
+                    PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(pos)),
+                    new EnteringWarpPacket()
+            );
+
+            GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
+            DimensionTravelTeleporter.teleportShip((ServerShip) ship, TravelDirection.SPACE_TO_PLANET, (ServerLevel) level, returnLevel, targetPos, new Quaterniond());
+            GenesisNetworking.sendToAll(GenesisNetworking.INSTANCE, new WormholeTravelSoundPacket(pos));
+            if (unstable) {
+                Vec3 center = new Vec3(targetPos.x(), targetPos.y(), targetPos.z());
+                explode(returnLevel, center);
             }
         }
     }
