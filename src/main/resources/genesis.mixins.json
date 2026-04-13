@@ -44,7 +44,9 @@
     "TimeCommandMixin",
     "VSBlockItemMixin",
     "VSExplosionForceMixin",
-    "VSMountedCameraMixin"
+    "VSMountedCameraMixin",
+    "compat.mekanism.AdvancedSolarGeneratorMixin",
+    "compat.mekanism.WorldUtilsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
