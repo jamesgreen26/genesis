@@ -12,6 +12,7 @@ Documentation for adding and customizing celestials in the Genesis mod.
 ## Quick Links
 
 - [Genesis Built-in Celestials](https://github.com/jamesgreen26/genesis/tree/1.20.1/src/main/resources/data/genesis/genesis/celestials) — Example JSON files
+- [Misode Data Generator](https://cosmic-mod-generator.github.io/genesis/celestials/) - Gui-based datapack generator by ```@Brickyboy```
 
 ---
 
