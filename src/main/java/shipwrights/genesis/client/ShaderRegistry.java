@@ -3,6 +3,7 @@ package shipwrights.genesis.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -137,8 +138,14 @@ public class ShaderRegistry {
         return PLANET_SHADOW_RENDER_TYPE;
     }
 
+    // Bound in place of the emissive texture when a planet doesn't have one, so it emits nothing
+    private static final ResourceLocation NO_EMISSIVE_TEXTURE = ResourceLocation.fromNamespaceAndPath(GenesisMod.MOD_ID, "textures/planets/no_emissive.png");
+
     /**
      * Gets a render type for a textured planet.
+     * <p>
+     * If a texture with the {@code _emissive} suffix exists next to the planet texture, it is bound
+     * to Sampler1 and rendered unaffected by lighting.
      *
      * @param textureLocation The texture location (without textures/ prefix or .png extension)
      * @return A render type that uses the textured planet shader with the specified texture
@@ -150,6 +157,14 @@ public class ShaderRegistry {
                 loc.getNamespace(),
                 "textures/" + loc.getPath() + ".png"
             );
+            ResourceLocation emissiveTexturePath = ResourceLocation.fromNamespaceAndPath(
+                loc.getNamespace(),
+                "textures/" + loc.getPath() + "_emissive.png"
+            );
+            // Cache is cleared on resource reload, so this check is re-run when resource packs change
+            if (Minecraft.getInstance().getResourceManager().getResource(emissiveTexturePath).isEmpty()) {
+                emissiveTexturePath = NO_EMISSIVE_TEXTURE;
+            }
 
             return LodestoneRenderTypeRegistry.createGenericRenderType(
                 "planet_textured_" + loc.getNamespace() + "_" + loc.getPath().replace("/", "_"),
@@ -161,7 +176,10 @@ public class ShaderRegistry {
                     .setDepthTestState(new RenderStateShard.DepthTestStateShard("<=", 515))
                     .setWriteMaskState(new RenderStateShard.WriteMaskStateShard(true, true))
                     .setCullState(LodestoneRenderTypeRegistry.CULL)
-                    .setTextureState(new RenderStateShard.TextureStateShard(fullTexturePath, false, false))
+                    .setTextureState(RenderStateShard.MultiTextureStateShard.builder()
+                        .add(fullTexturePath, false, false)
+                        .add(emissiveTexturePath, false, false)
+                        .build())
             );
         });
     }
