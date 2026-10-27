@@ -72,6 +72,8 @@ repositories {
     maven {
         name = "Valkyrien Skies Internal"
         url = 'https://maven.valkyrienskies.org'
+        // Mirrors the KFF pom but not the -all jar, so resolve KFF from its own maven
+        content { excludeGroup 'thedarkcolour' }
     }
 
     maven {

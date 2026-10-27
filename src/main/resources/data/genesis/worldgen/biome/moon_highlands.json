@@ -26,10 +26,7 @@
     [],
     [],
     [],
-    [
-      "genesis:constant_hallow_moon_stone_disk",
-      "genesis:hallow_moon_stone_pillar_cluster"
-    ],
+    ["genesis:hallow_moon_stone_pillar_cluster"],
     []
   ],
   "spawners": {
