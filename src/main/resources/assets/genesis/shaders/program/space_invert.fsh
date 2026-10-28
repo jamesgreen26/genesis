@@ -58,6 +58,11 @@ vec3 computeSmoothNormal(vec2 uv)
 
 void main() {
     vec4 color = texture(DiffuseSampler, texCoord);
+    // Output opaque alpha: this pass and vanilla's blit share a BlendMode, so BlendMode's
+    // lastApplied cache means neither sets GL blend state, and they inherit whatever was
+    // left enabled. With blending on, the main target's alpha (low on stars, star glow and
+    // atmosphere halos drawn over the alpha-0 sky) would otherwise darken those pixels.
+    color.a = 1.0;
     float depth = texture(MainDepthSampler, texCoord).r;
     vec4 planetMask = texture(PlanetMaskSampler, texCoord);
     float planetDepth = texture(PlanetDepthSampler, texCoord).r;
