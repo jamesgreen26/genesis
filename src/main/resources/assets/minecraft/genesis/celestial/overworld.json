@@ -1,0 +1,5 @@
+{
+  "components": [
+    { "type": "genesis:shaded_cube", "drawShadows": true }
+  ]
+}

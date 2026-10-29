@@ -1,0 +1,14 @@
+{
+  "castsLight": false,
+  "castsShadows": true,
+  "size": 29,
+  "mass": 0.007255386832017773,
+  "transformProvider": {
+    "type": "genesis:orbiting",
+    "parent": "minecraft:overworld",
+    "initialRelativePosition": [750.0, 0.0, 0.0],
+    "initialLinearVelocity": [0.0, 0.0, 0.025565098168951656],
+    "initialRotation": [0.0, 1.5707963267948966, 0.0],
+    "rotationalVelocity": [0.0, -0.00003408679755860221, 0.0]
+  }
+}

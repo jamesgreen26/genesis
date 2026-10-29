@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "genesis:block/phaserock",
-    "top": "genesis:block/phaserock",
-    "side": "genesis:block/phaserock"
-  }
-}

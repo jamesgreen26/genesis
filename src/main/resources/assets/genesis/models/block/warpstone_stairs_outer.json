@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "genesis:block/warpstone",
-    "top": "genesis:block/warpstone",
-    "side": "genesis:block/warpstone"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/outer_stairs",
-  "textures": {
-    "bottom": "genesis:block/nullstone",
-    "top": "genesis:block/nullstone",
-    "side": "genesis:block/nullstone"
-  }
-}

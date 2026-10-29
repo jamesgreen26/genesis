@@ -1,0 +1,11 @@
+{
+  "castsLight": true,
+  "castsShadows": false,
+  "size": 1440,
+  "mass": 6.2967702937006775,
+  "transformProvider": {
+    "type": "genesis:static",
+    "position": [0.0, 0.0, 0.0],
+    "rotation": [15.0, 45.0, 5.0]
+  }
+}

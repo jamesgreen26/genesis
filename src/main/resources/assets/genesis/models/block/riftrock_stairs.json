@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/stairs",
-  "textures": {
-    "bottom": "genesis:block/riftrock",
-    "top": "genesis:block/riftrock",
-    "side": "genesis:block/riftrock"
-  }
-}

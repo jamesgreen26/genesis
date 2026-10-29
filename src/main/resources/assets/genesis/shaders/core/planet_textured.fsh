@@ -10,7 +10,6 @@ in vec3 v_entry_position;
 uniform sampler2D Sampler0;
 // Emissive texture (1x1 transparent black if the planet has none)
 uniform sampler2D Sampler1;
-uniform vec3 SkyColor;
 
 out vec4 frag_color;
 
@@ -29,8 +28,6 @@ void main() {
 
     vec3 litTexColor = texColor.rgb * lighting;
 
-    litTexColor += SkyColor * clamp(1 - lighting, 0, 1);
-
     // Emissive light is unaffected by lighting; alpha controls its strength
     vec4 emissive = texture(Sampler1, texCoord);
     litTexColor += emissive.rgb * emissive.a;
@@ -40,5 +37,5 @@ void main() {
 
     // Planets are always fully opaque
     frag_color = vec4(finalColor, 1.0);
-    gl_FragDepth = 1.0;
+    // Depth is set by the depth range the celestial is drawn with
 }

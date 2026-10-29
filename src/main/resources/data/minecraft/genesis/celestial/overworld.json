@@ -1,0 +1,14 @@
+{
+  "castsLight": false,
+  "castsShadows": true,
+  "size": 96,
+  "mass": 0.4901806832911014,
+  "transformProvider": {
+    "type": "genesis:orbiting",
+    "parent": "genesis:sun",
+    "initialRelativePosition": [15000.0, 0.0, 0.0],
+    "initialLinearVelocity": [0.0, 0.0, 0.020488647740802998],
+    "initialRotation": [0.0, 0.0, 0.0],
+    "rotationalVelocity": [0.0, -0.0002604334779497625, 0.0]
+  }
+}

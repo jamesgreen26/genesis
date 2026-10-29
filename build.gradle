@@ -103,13 +103,6 @@ repositories {
 dependencies {
     annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 
-    jarJar(modImplementation("com.tterrag.registrate:Registrate:${registrate_version}")) {
-        version {
-            strictly "[${registrate_version},)"
-            prefer "${registrate_version}"
-        }
-    }
-
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0"))
     implementation("io.github.llamalad7:mixinextras-forge:0.5.0")
 
@@ -147,13 +140,7 @@ dependencies {
     modApi("thedarkcolour:kotlinforforge:4.11.0")
     // endregion
 
-    modImplementation("maven.modrinth:vlib:1.20.1-0.1.0+forge")
-
-    // For VLib
-    modRuntimeOnly("maven.modrinth:architectury-api:9.2.14+forge")
-
     modImplementation("maven.modrinth:curios:5.14.1+1.20.1")
-    modImplementation("maven.modrinth:lodestonelib:1.20.1-1.6.4.1")
 
     jarJar(modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge"))
 
@@ -176,9 +163,9 @@ dependencies {
     testImplementation("org.joml:joml-primitives:1.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
-    modImplementation("maven.modrinth:zps:1.20.1-2.0.0")
-    clientOnlyMods("maven.modrinth:fusion-connected-textures:1.2.12-forge-mc1.20.1")
-    modRuntimeOnly("maven.modrinth:zpl:1.20.1-1.5.0")
+    modImplementation("g_mungus:zps:1.20.1-2.7.0-pre1") // libs/zps-1.20.1-2.7.0-pre1.jar
+    // Optional, but needed in dev: ZPS gametests reference Create classes, and Forge loads every gametest class in dev
+    modRuntimeOnly("maven.modrinth:create:mc1.20.1-6.0.8")
 
     modRuntimeOnly("maven.modrinth:spark:1.10.53-forge")
     modRuntimeOnly("mezz.jei:jei-1.20.1-forge:15.20.0.129")
@@ -187,10 +174,6 @@ dependencies {
 
 
 
-    // compat --------------------------
-
-    modCompileOnly("maven.modrinth:mekanism-generators:Th4Czz4N")
-    modCompileOnly("maven.modrinth:mekanism:10.4.16.80")
 }
 
 afterEvaluate {

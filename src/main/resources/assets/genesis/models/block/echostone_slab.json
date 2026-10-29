@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "genesis:block/echostone",
-    "top": "genesis:block/echostone",
-    "side": "genesis:block/echostone"
-  }
-}
