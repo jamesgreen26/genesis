@@ -1,9 +1,12 @@
 package shipwrights.genesis.space;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -11,52 +14,101 @@ import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.util.MoreCodecs;
 
+import java.util.Optional;
+
 /**
- * Places a celestial on a two-body Keplerian orbit around its parent, defined by its position and velocity
- * relative to the parent at tick 0. Rotation starts at {@code initialRotation} (XYZ euler angles, radians) and
- * spins at a constant {@code rotationalVelocity} (axis-angle vector, radians per tick).
+ * Places a celestial on an elliptical orbit around its parent, described by classical orbital elements.
  * <p>
- * Distances are in blocks, time in ticks, and velocities in blocks per tick.
+ * An uninclined orbit lies in the XZ plane and, for a positive period, moves from +X towards +Z.
+ * All angles are in degrees, distances in blocks and times in ticks.
+ *
+ * @param parent               celestial to orbit
+ * @param distance             semi-major axis; the radius for circular orbits
+ * @param period               ticks per orbit, negative for retrograde. Derived from the parent's mass via Kepler's
+ *                             third law when absent
+ * @param eccentricity         0 for a circle, approaching 1 for increasingly stretched ellipses
+ * @param inclination          tilt of the orbital plane
+ * @param inclinationDirection direction, around Y from +X, of the line the orbital plane tilts about
+ *                             (longitude of the ascending node)
+ * @param periapsisAngle       angle within the orbital plane from the ascending node to the closest approach
+ * @param startAngle           angle past periapsis at tick 0 (true anomaly)
+ * @param rotation             spin of the celestial
  */
 public record OrbitingTransformProvider(
         ResourceLocation parent,
-        Vector3dc initialRelativePosition,
-        Vector3dc initialLinearVelocity,
-        Vector3dc initialRotation,
-        Vector3dc rotationalVelocity
-) implements Celestial.TransformProvider{
+        double distance,
+        Optional<Double> period,
+        double eccentricity,
+        double inclination,
+        double inclinationDirection,
+        double periapsisAngle,
+        double startAngle,
+        Rotation rotation
+) implements Celestial.TransformProvider {
 
     static ResourceLocation TYPE = GenesisMod.id("orbiting");
 
-    private static final int MAX_ITERATIONS = 64;
-    private static final double TOLERANCE = 1e-10;
+    private static final int MAX_ITERATIONS = 32;
+    private static final double TOLERANCE = 1e-12;
+
+    /**
+     * @param dayLength  ticks between the parent returning to the same place in the sky, negative for retrograde
+     *                   spin. Empty when tidally locked
+     * @param axialTilt  tilt of the spin axis away from the orbit normal, about the ascending node
+     * @param startAngle spin at tick 0, measured from the -Z face pointing at the parent
+     */
+    public record Rotation(Optional<Double> dayLength, double axialTilt, double startAngle) {
+        public static final Rotation TIDALLY_LOCKED = new Rotation(Optional.empty(), 0.0, 0.0);
+
+        private static final String TIDALLY_LOCKED_NAME = "tidally_locked";
+
+        private static final Codec<Optional<Double>> DAY_LENGTH_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(
+                either -> either.map(
+                        dayLength -> DataResult.success(Optional.of(dayLength)),
+                        name -> name.equals(TIDALLY_LOCKED_NAME)
+                                ? DataResult.success(Optional.empty())
+                                : DataResult.error(() -> "Expected a day length or \"" + TIDALLY_LOCKED_NAME + "\", got \"" + name + "\"")
+                ),
+                dayLength -> dayLength.<Either<Double, String>>map(Either::left).orElseGet(() -> Either.right(TIDALLY_LOCKED_NAME))
+        );
+
+        public static final Codec<Rotation> CODEC = RecordCodecBuilder.create(instance ->
+                instance.group(
+                        DAY_LENGTH_CODEC.fieldOf("dayLength").forGetter(Rotation::dayLength),
+                        MoreCodecs.strictOptionalField(Codec.DOUBLE, "axialTilt", 0.0).forGetter(Rotation::axialTilt),
+                        MoreCodecs.strictOptionalField(Codec.DOUBLE, "startAngle", 0.0).forGetter(Rotation::startAngle)
+                ).apply(instance, Rotation::new)
+        );
+    }
 
     @Override
     public Vector3dc getPosition(Registry<Celestial> celestials, Time time) {
         Celestial parentCelestial = getParent(celestials);
         Vector3dc parentPosition = parentCelestial.transformProvider().getPosition(celestials, time);
 
-        return getRelativePosition(parentCelestial.mass(), time.simple()).add(parentPosition);
+        double eccentricAnomaly = solveKepler(getMeanAnomaly(parentCelestial, time), eccentricity);
+        Vector3d position = new Vector3d(
+                distance * (Math.cos(eccentricAnomaly) - eccentricity),
+                0.0,
+                distance * Math.sqrt(1.0 - eccentricity * eccentricity) * Math.sin(eccentricAnomaly)
+        );
+
+        return getOrbitalPlane().rotateY(-Math.toRadians(periapsisAngle)).transform(position).add(parentPosition);
     }
 
     @Override
     public Quaterniondc getRotation(Registry<Celestial> celestials, Time time) {
-        Quaterniond rotation = new Quaterniond().rotateXYZ(initialRotation.x(), initialRotation.y(), initialRotation.z());
-
-        double speed = rotationalVelocity.length();
-        if (speed == 0.0) {
-            return rotation;
+        // Tidally locked bodies spin once per orbit, following the mean longitude so the same face points at the parent
+        double spin = Math.toRadians(periapsisAngle + rotation.startAngle()) + getMeanAnomaly(getParent(celestials), time);
+        if (rotation.dayLength().isPresent()) {
+            double dayLength = rotation.dayLength().get();
+            spin += 2.0 * Math.PI * (time.simple() % dayLength) / dayLength;
         }
 
-        double angle = (speed * time.simple()) % (2.0 * Math.PI);
-        return new Quaterniond()
-                .fromAxisAngleRad(
-                        rotationalVelocity.x() / speed,
-                        rotationalVelocity.y() / speed,
-                        rotationalVelocity.z() / speed,
-                        angle
-                )
-                .mul(rotation);
+        // Spin is in the same sense as the orbit; the extra quarter turn points -Z at the parent rather than +X away from it
+        return getOrbitalPlane()
+                .rotateX(-Math.toRadians(rotation.axialTilt()))
+                .rotateY(Math.PI / 2.0 - spin);
     }
 
     @Override
@@ -73,109 +125,82 @@ public record OrbitingTransformProvider(
     }
 
     /**
-     * Propagates the initial state vector forward by {@code dt} using the universal variable formulation,
-     * which handles elliptical, parabolic and hyperbolic orbits alike.
+     * Rotates the XZ plane onto the orbital plane, with the ascending node along +X.
      */
-    private Vector3d getRelativePosition(double mu, double dt) {
-        Vector3dc r0Vec = initialRelativePosition;
-        Vector3dc v0Vec = initialLinearVelocity;
-
-        double r0 = r0Vec.length();
-        if (mu <= 0.0 || r0 == 0.0) {
-            // No gravity (or degenerate start): straight-line motion
-            return new Vector3d(v0Vec).mul(dt).add(r0Vec);
-        }
-
-        double sqrtMu = Math.sqrt(mu);
-        double vr0 = r0Vec.dot(v0Vec) / r0;
-        double alpha = 2.0 / r0 - v0Vec.lengthSquared() / mu; // reciprocal of the semi-major axis
-
-        // Bound orbits are periodic; wrap time so the solver stays well conditioned for large game times
-        if (alpha > 0.0) {
-            double period = 2.0 * Math.PI / (sqrtMu * Math.pow(alpha, 1.5));
-            dt %= period;
-        }
-
-        double chi = solveUniversalAnomaly(dt, r0, vr0, alpha, sqrtMu);
-        double chi2 = chi * chi;
-        double z = alpha * chi2;
-
-        double f = 1.0 - chi2 / r0 * stumpffC(z);
-        double g = dt - chi2 * chi / sqrtMu * stumpffS(z);
-
-        return new Vector3d(r0Vec).mul(f).fma(g, v0Vec);
+    private Quaterniond getOrbitalPlane() {
+        return new Quaterniond()
+                .rotateY(-Math.toRadians(inclinationDirection))
+                .rotateX(-Math.toRadians(inclination));
     }
 
-    private static double solveUniversalAnomaly(double dt, double r0, double vr0, double alpha, double sqrtMu) {
-        if (dt == 0.0) {
-            return 0.0;
+    private double getPeriod(Celestial parentCelestial) {
+        return period.orElseGet(() -> 2.0 * Math.PI * Math.sqrt(distance * distance * distance / parentCelestial.mass()));
+    }
+
+    private double getMeanAnomaly(Celestial parentCelestial, Time time) {
+        double period = getPeriod(parentCelestial);
+        // Wrap before dividing so precision holds for large game times
+        double meanMotion = 2.0 * Math.PI * (time.simple() % period) / period;
+        return getStartMeanAnomaly() + meanMotion;
+    }
+
+    private double getStartMeanAnomaly() {
+        double trueAnomaly = Math.toRadians(startAngle);
+        double eccentricAnomaly = 2.0 * Math.atan2(
+                Math.sqrt(1.0 - eccentricity) * Math.sin(trueAnomaly / 2.0),
+                Math.sqrt(1.0 + eccentricity) * Math.cos(trueAnomaly / 2.0)
+        );
+        return eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly);
+    }
+
+    /**
+     * Solves Kepler's equation {@code M = E - e sin E} for the eccentric anomaly {@code E} using Newton's method.
+     */
+    private static double solveKepler(double meanAnomaly, double eccentricity) {
+        double m = Math.IEEEremainder(meanAnomaly, 2.0 * Math.PI);
+        if (eccentricity == 0.0) {
+            return m;
         }
 
-        // Initial guesses from Vallado, "Fundamentals of Astrodynamics and Applications"
-        double chi;
-        if (alpha > 1e-12) {
-            chi = sqrtMu * alpha * dt;
-        } else if (alpha < -1e-12) {
-            double semiMajorAxis = 1.0 / alpha;
-            double sign = Math.signum(dt);
-            chi = sign * Math.sqrt(-semiMajorAxis) * Math.log(
-                    (-2.0 * sqrtMu * sqrtMu * alpha * dt)
-                            / (r0 * vr0 + sign * Math.sqrt(-sqrtMu * sqrtMu * semiMajorAxis) * (1.0 - r0 * alpha))
-            );
-        } else {
-            chi = sqrtMu * dt / r0;
-        }
-
-        double a = r0 * vr0 / sqrtMu;
-        double b = 1.0 - alpha * r0;
-
+        // Starting guess from Danby, "Fundamentals of Celestial Mechanics", converges for all elliptical orbits
+        double e = m + 0.85 * eccentricity * Math.signum(Math.sin(m));
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-            double chi2 = chi * chi;
-            double z = alpha * chi2;
-            double c = stumpffC(z);
-            double s = stumpffS(z);
-
-            double value = a * chi2 * c + b * chi2 * chi * s + r0 * chi - sqrtMu * dt;
-            double derivative = a * chi * (1.0 - z * s) + b * chi2 * c + r0;
-
-            double step = value / derivative;
-            chi -= step;
-            if (Math.abs(step) <= TOLERANCE * Math.max(1.0, Math.abs(chi))) {
+            double step = (e - eccentricity * Math.sin(e) - m) / (1.0 - eccentricity * Math.cos(e));
+            e -= step;
+            if (Math.abs(step) <= TOLERANCE) {
                 break;
             }
         }
-        return chi;
+        return e;
     }
 
-    private static double stumpffS(double z) {
-        if (Math.abs(z) < 1e-6) {
-            return 1.0 / 6.0 - z / 120.0;
+    private static DataResult<OrbitingTransformProvider> validate(OrbitingTransformProvider provider) {
+        if (!(provider.distance > 0.0)) {
+            return DataResult.error(() -> "Orbit distance must be positive, got " + provider.distance);
         }
-        if (z > 0.0) {
-            double sz = Math.sqrt(z);
-            return (sz - Math.sin(sz)) / (sz * sz * sz);
+        if (!(provider.eccentricity >= 0.0 && provider.eccentricity < 1.0)) {
+            return DataResult.error(() -> "Orbit eccentricity must be at least 0 and less than 1, got " + provider.eccentricity);
         }
-        double sz = Math.sqrt(-z);
-        return (Math.sinh(sz) - sz) / (sz * sz * sz);
+        if (provider.period.filter(period -> period == 0.0).isPresent()) {
+            return DataResult.error(() -> "Orbit period must not be 0");
+        }
+        if (provider.rotation.dayLength().filter(dayLength -> dayLength == 0.0).isPresent()) {
+            return DataResult.error(() -> "Day length must not be 0");
+        }
+        return DataResult.success(provider);
     }
 
-    private static double stumpffC(double z) {
-        if (Math.abs(z) < 1e-6) {
-            return 0.5 - z / 24.0;
-        }
-        if (z > 0.0) {
-            return (1.0 - Math.cos(Math.sqrt(z))) / z;
-        }
-        return (Math.cosh(Math.sqrt(-z)) - 1.0) / -z;
-    }
-
-    public static final Codec<OrbitingTransformProvider> CODEC = RecordCodecBuilder.create(instance ->
+    public static final Codec<OrbitingTransformProvider> CODEC = ExtraCodecs.validate(RecordCodecBuilder.create(instance ->
             instance.group(
                     ResourceLocation.CODEC.fieldOf("parent").forGetter(OrbitingTransformProvider::parent),
-                    MoreCodecs.VECTOR3DC.fieldOf("initialRelativePosition").forGetter(OrbitingTransformProvider::initialRelativePosition),
-                    MoreCodecs.VECTOR3DC.fieldOf("initialLinearVelocity").forGetter(OrbitingTransformProvider::initialLinearVelocity),
-                    MoreCodecs.VECTOR3DC.fieldOf("initialRotation").forGetter(OrbitingTransformProvider::initialRotation),
-                    MoreCodecs.VECTOR3DC.fieldOf("rotationalVelocity").forGetter(OrbitingTransformProvider::rotationalVelocity)
+                    Codec.DOUBLE.fieldOf("distance").forGetter(OrbitingTransformProvider::distance),
+                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "period").forGetter(OrbitingTransformProvider::period),
+                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "eccentricity", 0.0).forGetter(OrbitingTransformProvider::eccentricity),
+                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "inclination", 0.0).forGetter(OrbitingTransformProvider::inclination),
+                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "inclinationDirection", 0.0).forGetter(OrbitingTransformProvider::inclinationDirection),
+                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "periapsisAngle", 0.0).forGetter(OrbitingTransformProvider::periapsisAngle),
+                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "startAngle", 0.0).forGetter(OrbitingTransformProvider::startAngle),
+                    MoreCodecs.strictOptionalField(Rotation.CODEC, "rotation", Rotation.TIDALLY_LOCKED).forGetter(OrbitingTransformProvider::rotation)
             ).apply(instance, OrbitingTransformProvider::new)
-    );
+    ), OrbitingTransformProvider::validate);
 }
