@@ -78,7 +78,17 @@ public abstract class LevelRendererMixin {
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
     }
 
-    // After the sunrise glow, before the sun, moon and stars: those are depth tested, so celestials hide them
+    // Vanilla's sun and moon; celestials replace them. The first call draws the sunrise glow, which we keep.
+    @WrapOperation(method = "renderSky", at = {
+            @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;drawWithShader(Lcom/mojang/blaze3d/vertex/BufferBuilder$RenderedBuffer;)V", ordinal = 1),
+            @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;drawWithShader(Lcom/mojang/blaze3d/vertex/BufferBuilder$RenderedBuffer;)V", ordinal = 2)
+    })
+    private void genesis$skipSunAndMoon(BufferBuilder.RenderedBuffer buffer, Operation<Void> original) {
+        // Drawing would release the buffer; the builder can't be reused until it is
+        buffer.release();
+    }
+
+    // After the sunrise glow, before the stars: those are depth tested, so celestials hide them
     @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFuncSeparate(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V", ordinal = 0))
     private void genesis$depthTestSunMoonAndStars(PoseStack poseStack, Matrix4f projectionMatrix, float partialTick, Camera camera,
                                                   boolean isFoggy, Runnable skyFogSetup, CallbackInfo ci) {
