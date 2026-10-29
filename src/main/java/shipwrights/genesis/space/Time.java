@@ -10,7 +10,7 @@ public record Time(long ticks, float partialTick) {
 
     public static Time get(Level level, float partialTick) {
         // TODO: fix sleeping, time set commands, etc
-        return new Time(level.getGameTime(), partialTick);
+        return new Time(level.dayTime() + 8000, partialTick);
     }
 
     public double simple() {

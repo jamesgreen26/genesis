@@ -18,6 +18,7 @@ import shipwrights.genesis.util.ResourcePackRegistry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /// How a celestial looks, loaded from {@code assets/<namespace>/genesis/celestial/<path>.json}. Shares its id with
 /// the {@link shipwrights.genesis.space.Celestial} it depicts.
@@ -36,11 +37,16 @@ public record CelestialVisualizer(List<Component> components) {
         ResourceLocation getType();
 
         void render(CelestialRenderContext context);
+
+        /// Whether this is drawn over the sky rather than behind it, so the sky brightens it instead of hiding it
+        default boolean shinesThroughSky() {
+            return false;
+        }
     }
 
-    public void render(CelestialRenderContext context) {
+    public void render(CelestialRenderContext context, Predicate<Component> filter) {
         for (var component : components()) {
-            component.render(context);
+            if (filter.test(component)) component.render(context);
         }
     }
 
