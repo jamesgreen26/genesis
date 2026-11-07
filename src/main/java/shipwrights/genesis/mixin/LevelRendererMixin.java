@@ -1,5 +1,7 @@
 package shipwrights.genesis.mixin;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -95,10 +97,17 @@ public abstract class LevelRendererMixin {
         buffer.release();
     }
 
-    // Vanilla only draws its stars when they have some brightness. Starfield replaces them wherever celestials are drawn.
-    @WrapOperation(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getStarBrightness(F)F"))
-    private float genesis$hideVanillaStars(ClientLevel level, float partialTick, Operation<Float> original) {
-        return GenesisMod.celestial(level).isPresent() ? 0f : original.call(level, partialTick);
+    // Starfield replaces vanilla's stars wherever celestials are drawn. Skips drawing them rather than zeroing their
+    // brightness, which other mods raise afterwards: ZPS brings the stars out as the air thins.
+    @Definition(id = "starBuffer", field = "Lnet/minecraft/client/renderer/LevelRenderer;starBuffer:Lcom/mojang/blaze3d/vertex/VertexBuffer;")
+    @Definition(id = "drawWithShader", method = "Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V")
+    @Expression("this.starBuffer.drawWithShader(?, ?, ?)")
+    @WrapOperation(method = "renderSky", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private void genesis$hideVanillaStars(VertexBuffer starBuffer, Matrix4f pose, Matrix4f projection, ShaderInstance shader,
+                                          Operation<Void> original) {
+        if (GenesisMod.celestial(level).isEmpty()) {
+            original.call(starBuffer, pose, projection, shader);
+        }
     }
 
     // After the sunrise glow, before the stars: those are depth tested, so celestials hide them

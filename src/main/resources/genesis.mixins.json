@@ -4,6 +4,9 @@
   "refmap": "mixins.shipwrights.genesis.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
   "client": [
     "FogRendererAccessor",
     "GameRendererMixin",
