@@ -62,6 +62,25 @@ public record AtmosphereComponent(
                 DefaultVertexFormat.POSITION_COLOR), shader -> atmosphereShader = shader);
     }
 
+    /// How far the camera at {@code cameraY} has climbed out of the atmosphere underfoot, from 0 near the surface to 1
+    /// above it
+    private static float altitudeFade(double cameraY) {
+        return (float) Mth.clamp((cameraY - FADE_START_Y) / (FADE_END_Y - FADE_START_Y), 0.0, 1.0);
+    }
+
+    /// How dense the air around the camera is, standing on the celestial {@code celestialId} at {@code cameraY}: its
+    /// atmosphere's density, capped at 1, near the surface, thinning to none as the camera climbs out of it. None if the
+    /// celestial has no atmosphere.
+    public static float airDensity(ResourceLocation celestialId, double cameraY) {
+        float density = CelestialVisualizer.REGISTRY.registry().getOptional(celestialId).stream()
+                .flatMap(visualizer -> visualizer.components().stream())
+                .filter(AtmosphereComponent.class::isInstance)
+                .map(component -> (float) ((AtmosphereComponent) component).density())
+                .findFirst()
+                .orElse(0f);
+        return Mth.clamp(density, 0f, 1f) * (1f - altitudeFade(cameraY));
+    }
+
     @Override
     public ResourceLocation getType() {
         return TYPE;
@@ -74,9 +93,7 @@ public record AtmosphereComponent(
 
         // The atmosphere underfoot fades in as the camera climbs away from the surface. Elsewhere it's always at full
         // density; from a planet's surface the sky is blended over it, hiding it by day.
-        float fade = underfoot
-                ? (float) Mth.clamp((context.camera().getPosition().y - FADE_START_Y) / (FADE_END_Y - FADE_START_Y), 0.0, 1.0)
-                : 1f;
+        float fade = underfoot ? altitudeFade(context.camera().getPosition().y) : 1f;
         float effectiveDensity = (float) density * fade;
         if (effectiveDensity < 0.01f) return;
 

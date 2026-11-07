@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -27,12 +28,13 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.VantagePoint;
+import shipwrights.genesis.space.client.components.AtmosphereComponent;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
-/// Draws the {@link Starfield}, then every celestial that has a {@link CelestialVisualizer}, furthest from the observer
+/// Draws the {@link Skybox} and {@link Starfield}, then every celestial that has a {@link CelestialVisualizer}, furthest from the observer
 /// first.
 ///
 /// Celestials in the sky are drawn just before the sky itself (see
@@ -136,7 +138,8 @@ public class CelestialRenderDispatcher {
         render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), true, component -> true, 1, 0);
     }
 
-    /// Stars are hidden by daylight; in space, they're always fully bright
+    /// The skybox and stars behind every celestial. Hidden by daylight, and the skybox by the air too, showing as the
+    /// camera climbs out of the atmosphere. In space, they're always fully bright.
     private static void renderStars(PoseStack poseStack, Camera camera, float partialTick) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) return;
@@ -146,9 +149,15 @@ public class CelestialRenderDispatcher {
                 new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z));
         if (!vantagePoint.isReal()) return;
 
-        float brightness = vantagePoint instanceof VantagePoint.OnCelestial
-                ? 1f - CelestialPlacement.skyBrightness(level, cameraPos, partialTick)
-                : 1f;
+        float brightness = 1f;
+        float skyboxBrightness = 1f;
+        if (vantagePoint instanceof VantagePoint.OnCelestial oc) {
+            brightness = 1f - CelestialPlacement.skyBrightness(level, cameraPos, partialTick);
+            ResourceLocation id = oc.celestials().getKey(oc.celestial());
+            float airDensity = id == null ? 0f : AtmosphereComponent.airDensity(id, cameraPos.y);
+            skyboxBrightness = brightness * (1f - airDensity);
+        }
+        Skybox.render(poseStack, vantagePoint, skyboxBrightness);
         Starfield.render(poseStack, vantagePoint, brightness);
     }
 
