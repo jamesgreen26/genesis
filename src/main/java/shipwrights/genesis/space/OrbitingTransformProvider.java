@@ -6,7 +6,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -190,7 +189,9 @@ public record OrbitingTransformProvider(
         return DataResult.success(provider);
     }
 
-    public static final Codec<OrbitingTransformProvider> CODEC = ExtraCodecs.validate(RecordCodecBuilder.create(instance ->
+    // Validated as a MapCodec so it stays a MapCodecCodec: the type dispatch codec only inlines fields alongside "type" for
+    // MapCodecCodecs, and otherwise looks for them under a separate "value" key
+    public static final Codec<OrbitingTransformProvider> CODEC = RecordCodecBuilder.<OrbitingTransformProvider>mapCodec(instance ->
             instance.group(
                     ResourceLocation.CODEC.fieldOf("parent").forGetter(OrbitingTransformProvider::parent),
                     Codec.DOUBLE.fieldOf("distance").forGetter(OrbitingTransformProvider::distance),
@@ -202,5 +203,5 @@ public record OrbitingTransformProvider(
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "startAngle", 0.0).forGetter(OrbitingTransformProvider::startAngle),
                     MoreCodecs.strictOptionalField(Rotation.CODEC, "rotation", Rotation.TIDALLY_LOCKED).forGetter(OrbitingTransformProvider::rotation)
             ).apply(instance, OrbitingTransformProvider::new)
-    ), OrbitingTransformProvider::validate);
+    ).flatXmap(OrbitingTransformProvider::validate, OrbitingTransformProvider::validate).codec();
 }

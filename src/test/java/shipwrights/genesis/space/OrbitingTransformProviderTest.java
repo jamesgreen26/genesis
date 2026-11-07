@@ -183,6 +183,20 @@ class OrbitingTransformProviderTest {
                 {"parent": "genesis:star", "distance": 750, "rotation": {"dayLength": "spinning"}}""").error().isPresent());
     }
 
+    @Test
+    void decodesThroughTypeDispatch() {
+        Celestial.TransformProvider.register(OrbitingTransformProvider.TYPE, OrbitingTransformProvider.CODEC);
+        Celestial celestial = Celestial.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+                {"castsLight": false, "castsShadows": true, "size": 29, "mass": 1,
+                 "transformProvider": {"type": "genesis:orbiting", "parent": "genesis:star", "distance": 750,
+                                       "period": 184329, "rotation": {"dayLength": "tidally_locked"}}}"""))
+                .getOrThrow(false, error -> {
+                    throw new AssertionError(error);
+                });
+        assertEquals(new OrbitingTransformProvider(STAR, 750, Optional.of(184329.0), 0, 0, 0, 0, 0,
+                OrbitingTransformProvider.Rotation.TIDALLY_LOCKED), celestial.transformProvider());
+    }
+
     private void register(ResourceLocation id, Celestial celestial) {
         celestials.register(ResourceKey.create(Celestial.REGISTRY_KEY, id), celestial, Lifecycle.stable());
     }
