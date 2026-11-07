@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "genesis:dead_moon_coral_block",
+    "genesis:moon_stone",
+    "genesis:hallow_moon_stone"
+  ]
+}

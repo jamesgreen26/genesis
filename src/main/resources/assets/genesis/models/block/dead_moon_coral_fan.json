@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/coral_fan",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "fan": "genesis:block/dead_moon_coral_fan"
+  }
+}

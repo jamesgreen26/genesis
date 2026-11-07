@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.0,
+  "group": "moon_stone",
+  "ingredient": {
+    "item": "genesis:hallow_moon_stone"
+  },
+  "result": "genesis:moon_stone"
+}

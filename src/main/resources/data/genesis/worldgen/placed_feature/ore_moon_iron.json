@@ -1,0 +1,27 @@
+{
+  "feature": "genesis:ore_moon_iron",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 8
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "max_inclusive": {
+          "absolute": 128
+        },
+        "min_inclusive": {
+          "absolute": -192
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

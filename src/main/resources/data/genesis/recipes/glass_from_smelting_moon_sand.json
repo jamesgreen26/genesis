@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.0,
+  "group": "moon_sand",
+  "ingredient": {
+    "item": "genesis:moon_sand"
+  },
+  "result": "minecraft:glass"
+}
