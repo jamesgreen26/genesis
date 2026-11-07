@@ -2,7 +2,9 @@ package shipwrights.genesis.space.client;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Registry;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
@@ -17,6 +19,16 @@ import shipwrights.genesis.space.VantagePoint;
 /// @param alpha how much of the celestial is drawn, as opposed to fog
 public record CelestialPlacement(Vector3dc position, Quaterniondc rotation, double halfExtent, float alpha) {
 
+    /// How much the celestial underfoot shows as itself rather than as fog, seen from {@code cameraY}: 0 near the
+    /// ground, rising to 1 once high enough above the terrain to see it from afar. Clouds fade out inversely.
+    public static float surfaceVisibility(ClientLevel level, double cameraY) {
+        double renderDistance = Minecraft.getInstance().gameRenderer.getRenderDistance();
+        int buildHeight = level.getMaxBuildHeight();
+        double start = renderDistance + buildHeight / 3.0;
+        double end = renderDistance + buildHeight;
+        return (float) Mth.clamp((cameraY - start) / (end - start), 0.0, 1.0);
+    }
+
     public static CelestialPlacement of(CelestialRenderContext context) {
         Celestial toRender = context.toRender();
         VantagePoint vantagePoint = context.vantagePoint();
@@ -29,12 +41,7 @@ public record CelestialPlacement(Vector3dc position, Quaterniondc rotation, doub
         // Special case: the celestial underfoot is locked at a fixed position in world space, below the terrain
         if (vantagePoint instanceof VantagePoint.OnCelestial oc && oc.celestial() == toRender) {
             double halfExtent = Minecraft.getInstance().gameRenderer.getRenderDistance();
-            int buildHeight = context.clientLevel().getMaxBuildHeight();
-            float alphaInterpolateStart = (float) (halfExtent + buildHeight / 3f);
-            float alphaInterpolateEnd = (float) (halfExtent + buildHeight);
-
-            float cameraY = (float) camera.getPosition().y;
-            float alpha = Math.max(0f, Math.min(1f, (cameraY - alphaInterpolateStart) / (alphaInterpolateEnd - alphaInterpolateStart)));
+            float alpha = surfaceVisibility(context.clientLevel(), camera.getPosition().y);
 
             return new CelestialPlacement(
                     new Vector3d(0, - (camera.getPosition().y / 16) - halfExtent - 32, 0),

@@ -12,16 +12,20 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderDispatcher;
 
 /// Draws celestials behind the sky, then screen blends the sky over them ({@code sky + celestial * (1 - sky)}), like an
@@ -29,6 +33,9 @@ import shipwrights.genesis.space.client.CelestialRenderDispatcher;
 /// hides them.
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
+
+    @Shadow
+    private ClientLevel level;
 
     @Unique
     private static VertexBuffer genesis$belowSkyDisc;
@@ -93,6 +100,37 @@ public abstract class LevelRendererMixin {
     private void genesis$depthTestSunMoonAndStars(PoseStack poseStack, Matrix4f projectionMatrix, float partialTick, Camera camera,
                                                   boolean isFoggy, Runnable skyFogSetup, CallbackInfo ci) {
         RenderSystem.enableDepthTest();
+    }
+
+    // Fully faded clouds would still write depth, hiding rain and anything else drawn behind them later
+    @Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
+    private void genesis$skipFadedClouds(PoseStack poseStack, Matrix4f projectionMatrix, float partialTick,
+                                         double camX, double camY, double camZ, CallbackInfo ci) {
+        if (genesis$cloudVisibility(camY) <= 0f) {
+            ci.cancel();
+        }
+    }
+
+    // Clouds fade out as the celestial underfoot fades in from fog, so flying up, the world below gives way to the
+    // planet. Vanilla's shader discards anything under 0.1 alpha, so they disappear just before fully fading.
+    @WrapOperation(method = "renderClouds", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V"))
+    private void genesis$fadeClouds(VertexBuffer cloudBuffer, Matrix4f pose, Matrix4f projection, ShaderInstance shader,
+                                    Operation<Void> original, PoseStack poseStack, Matrix4f projectionMatrix, float partialTick,
+                                    double camX, double camY, double camZ) {
+        float[] color = RenderSystem.getShaderColor().clone();
+        RenderSystem.setShaderColor(color[0], color[1], color[2], color[3] * genesis$cloudVisibility(camY));
+        original.call(cloudBuffer, pose, projection, shader);
+        RenderSystem.setShaderColor(color[0], color[1], color[2], color[3]);
+    }
+
+    @Unique
+    private float genesis$cloudVisibility(double cameraY) {
+        if (GenesisMod.celestial(level).isEmpty()) {
+            return 1f;
+        }
+
+        float a = 1f - CelestialPlacement.surfaceVisibility(level, cameraY);
+        return a * a;
     }
 
     /// A cone from far below the camera up to the edge of vanilla's sky disc, sharing its edge vertices so the two
