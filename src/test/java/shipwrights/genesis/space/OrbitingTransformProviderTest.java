@@ -38,7 +38,7 @@ class OrbitingTransformProviderTest {
     @BeforeEach
     void setUp() {
         celestials = new MappedRegistry<>(Celestial.REGISTRY_KEY, Lifecycle.stable());
-        register(STAR, new Celestial(false, false, 10, STAR_MASS, new StaticTransformProvider(STAR_POSITION, new Vector3d())));
+        register(STAR, new Celestial(false, false, 10, STAR_MASS, 0, new StaticTransformProvider(STAR_POSITION, new Vector3d())));
     }
 
     @Test
@@ -112,7 +112,7 @@ class OrbitingTransformProviderTest {
     @Test
     void missingPeriodFollowsPhysics() {
         double semiMajorAxis = 10000, eccentricity = 0.3;
-        register(PLANET, new Celestial(false, false, 5, 1e3, new OrbitingTransformProvider(
+        register(PLANET, new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(
                 STAR, semiMajorAxis, Optional.empty(), eccentricity, 0, 0, 0, 0, OrbitingTransformProvider.Rotation.TIDALLY_LOCKED)));
 
         // Start at periapsis with the vis-viva speed and integrate the two-body problem
@@ -138,7 +138,7 @@ class OrbitingTransformProviderTest {
     @Test
     void dayLengthIsMeasuredRelativeToParent() {
         double dayLength = 2400;
-        register(PLANET, new Celestial(false, false, 5, 1e3, new OrbitingTransformProvider(
+        register(PLANET, new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(
                 STAR, 10000, Optional.of(50000.0), 0, 0, 0, 0, 0,
                 new OrbitingTransformProvider.Rotation(Optional.of(dayLength), 0, 0))));
 
@@ -151,7 +151,7 @@ class OrbitingTransformProviderTest {
     void nestedOrbitsFollowTheirParents() {
         double planetRadius = 10000, moonRadius = 100;
         register(PLANET, orbit(STAR, planetRadius, 50000, 0, 0, 0, 0, 0));
-        register(MOON, new Celestial(false, false, 1, 1, new OrbitingTransformProvider(
+        register(MOON, new Celestial(false, false, 1, 1, 0, new OrbitingTransformProvider(
                 PLANET, moonRadius, Optional.of(3000.0), 0, 10, 0, 0, 0, OrbitingTransformProvider.Rotation.TIDALLY_LOCKED)));
 
         for (double t : new double[]{0, 750, 12500, 1e7}) {
@@ -224,7 +224,7 @@ class OrbitingTransformProviderTest {
 
     private static Celestial orbit(ResourceLocation parent, double distance, double period, double eccentricity,
                                    double inclination, double inclinationDirection, double periapsisAngle, double startAngle) {
-        return new Celestial(false, false, 5, 1e3, new OrbitingTransformProvider(parent, distance, Optional.of(period),
+        return new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(parent, distance, Optional.of(period),
                 eccentricity, inclination, inclinationDirection, periapsisAngle, startAngle,
                 OrbitingTransformProvider.Rotation.TIDALLY_LOCKED));
     }

@@ -99,7 +99,7 @@ class VantagePointTest {
     }
 
     private VantagePoint.OnCelestial onPlanet(Vector3dc rotation, double latitude, double longitude) {
-        var planet = new Celestial(false, false, SIZE, 1e3, new StaticTransformProvider(PLANET_POSITION, rotation));
+        var planet = new Celestial(false, false, SIZE, 1e3, 0, new StaticTransformProvider(PLANET_POSITION, rotation));
         celestials.register(ResourceKey.create(Celestial.REGISTRY_KEY, GenesisMod.id("planet")), planet, Lifecycle.stable());
         return new VantagePoint.OnCelestial(celestials, planet, new Time(0, 0), latitude, longitude);
     }

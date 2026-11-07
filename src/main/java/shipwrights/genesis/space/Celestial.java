@@ -12,18 +12,22 @@ import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.joml.Quaterniondc;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.util.MoreCodecs;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /// @param size diameter in blocks
 /// @param mass mass measured in blocks
+/// @param surfaceTemperature temperature of open space at its surface in kelvin, which it heats space around it to
+///                           (see {@link StarHeat}); 0 if it gives off no heat
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public record Celestial(
         boolean castsLight,
         boolean castsShadows,
         double size,
         double mass,
+        double surfaceTemperature,
         TransformProvider transformProvider
 ) {
     public static final ResourceKey<Registry<Celestial>> REGISTRY_KEY
@@ -59,6 +63,7 @@ public record Celestial(
                 Codec.BOOL.fieldOf("castsShadows").forGetter(Celestial::castsShadows),
                 Codec.DOUBLE.fieldOf("size").forGetter(Celestial::size),
                 Codec.DOUBLE.fieldOf("mass").forGetter(Celestial::mass),
+                MoreCodecs.strictOptionalField(Codec.DOUBLE, "surfaceTemperature", 0.0).forGetter(Celestial::surfaceTemperature),
                 TransformProvider.DISPATCH_CODEC.fieldOf("transformProvider").forGetter(Celestial::transformProvider)
         ).apply(instance, Celestial::new)
     );

@@ -1,0 +1,19 @@
+{
+  "has_precipitation": false,
+  "temperature": -3,
+  "temperature_modifier": "zps:space",
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 0,
+    "fog_color": 0,
+    "water_color": 4159204,
+    "water_fog_color": 329011
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": [],
+  "zps:atmospheric_composition": {
+    "*": { "zps:vacuum": 1.0 }
+  }
+}
