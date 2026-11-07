@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "thickness=tip_merge": {
+      "model": "genesis:block/icicle_tip"
+    },
+    "thickness=tip": {
+      "model": "genesis:block/icicle_tip"
+    },
+    "thickness=frustum": {
+      "model": "genesis:block/icicle_frustum"
+    },
+    "thickness=middle": {
+      "model": "genesis:block/icicle_middle"
+    },
+    "thickness=base": {
+      "model": "genesis:block/icicle_base"
+    }
+  }
+}

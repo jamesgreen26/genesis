@@ -10,6 +10,7 @@ import shipwrights.genesis.content.GenesisCreativeTabs;
 import shipwrights.genesis.content.GenesisItems;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.worldgen.GenesisDensityFunctions;
+import shipwrights.genesis.worldgen.GenesisFeatures;
 
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ public class GenesisMod {
         GenesisItems.ITEMS.register(modBus);
         GenesisCreativeTabs.CREATIVE_MODE_TABS.register(modBus);
         GenesisDensityFunctions.DENSITY_FUNCTION_TYPES.register(modBus);
+        GenesisFeatures.FEATURES.register(modBus);
     }
 
     public static ResourceLocation id(String location) {

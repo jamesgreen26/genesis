@@ -27,6 +27,9 @@ public final class GenesisCreativeTabs {
                         output.accept(GenesisItems.DEAD_MOON_CORAL_BLOCK.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL_FAN.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL.get());
+                        output.accept(GenesisItems.ICICLE.get());
+                        output.accept(GenesisItems.ICE_CRYSTAL.get());
+                        output.accept(GenesisItems.BRITTLE_ICE.get());
                     })
                     .build());
 

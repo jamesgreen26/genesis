@@ -1,5 +1,6 @@
 package shipwrights.genesis.content;
 
+import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.BaseCoralPlantBlock;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
@@ -8,6 +9,7 @@ import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -45,6 +47,42 @@ public final class GenesisBlocks {
             new BaseCoralFanBlock(moonCoral().noCollission()));
     public static final RegistryObject<Block> DEAD_MOON_CORAL = BLOCKS.register("dead_moon_coral", () ->
             new BaseCoralPlantBlock(moonCoral().noCollission()));
+
+    // The moon's ice caverns
+
+    public static final RegistryObject<Block> ICICLE = BLOCKS.register("icicle", () ->
+            new IcicleBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.ICE)
+                    .strength(0.5F)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .pushReaction(PushReaction.DESTROY)
+                    .isRedstoneConductor((state, level, pos) -> false)));
+
+    // A cluster pointing out from the surface it grows on, as vanilla's amethyst clusters do. Drops nothing, so it can't
+    // be had in survival
+    public static final RegistryObject<Block> ICE_CRYSTAL = BLOCKS.register("ice_crystal", () ->
+            new AmethystClusterBlock(7, 3, BlockBehaviour.Properties.of()
+                    .noLootTable()
+                    .mapColor(MapColor.ICE)
+                    .forceSolidOn()
+                    .noOcclusion()
+                    .strength(0.3F)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(state -> 5)
+                    .pushReaction(PushReaction.DESTROY)));
+
+    public static final RegistryObject<Block> BRITTLE_ICE = BLOCKS.register("brittle_ice", () ->
+            new BrittleIceBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.ICE)
+                    .friction(0.98F)
+                    .strength(0.3F)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .isValidSpawn((state, level, pos, entity) -> false)
+                    .isRedstoneConductor((state, level, pos) -> false)
+                    .isSuffocating((state, level, pos) -> false)
+                    .isViewBlocking((state, level, pos) -> false)));
 
     private GenesisBlocks() {
     }

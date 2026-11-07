@@ -3,6 +3,8 @@
   "values": [
     "genesis:dead_moon_coral_block",
     "genesis:moon_stone",
-    "genesis:hallow_moon_stone"
+    "genesis:hallow_moon_stone",
+    "genesis:brittle_ice",
+    "genesis:ice_crystal"
   ]
 }

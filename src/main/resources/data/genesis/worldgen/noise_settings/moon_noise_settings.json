@@ -61,54 +61,27 @@
     "final_density": {
       "type": "minecraft:interpolated",
       "argument": {
-        "type": "minecraft:add",
-        "argument1": {
-          "type": "minecraft:y_clamped_gradient",
-          "from_y": -64,
-          "to_y": 320,
-          "from_value": 1.0,
-          "to_value": -1.0
-        },
+        "type": "minecraft:min",
+        "argument1": "genesis:moon/terrain",
         "argument2": {
-          "type": "minecraft:add",
+          "type": "minecraft:max",
           "argument1": {
             "type": "minecraft:add",
-            "argument1": {
-              "type": "minecraft:mul",
-              "argument1": 0.22,
-              "argument2": {
-                "type": "minecraft:noise",
-                "noise": "minecraft:continentalness",
-                "xz_scale": 0.12,
-                "y_scale": 0.0
-              }
-            },
+            "argument1": 0.36,
             "argument2": {
-              "type": "genesis:multi_crater",
-              "scales": [24.0, 64.0, 192.0, 456.0]
+              "type": "minecraft:noise",
+              "noise": "minecraft:cave_cheese",
+              "xz_scale": 3.5,
+              "y_scale": 3.0
             }
           },
           "argument2": {
             "type": "minecraft:add",
-            "argument1": {
-              "type": "minecraft:mul",
-              "argument1": 0.28,
-              "argument2": {
-                "type": "minecraft:noise",
-                "noise": "minecraft:erosion",
-                "xz_scale": 0.18,
-                "y_scale": 0.0
-              }
-            },
+            "argument1": 0.25,
             "argument2": {
               "type": "minecraft:mul",
-              "argument1": 0.12,
-              "argument2": {
-                "type": "minecraft:noise",
-                "noise": "minecraft:ridge",
-                "xz_scale": 0.35,
-                "y_scale": 0.0
-              }
+              "argument1": -1.0,
+              "argument2": "genesis:moon/terrain"
             }
           }
         }
@@ -152,14 +125,9 @@
       "type": "minecraft:mul"
     },
     "depth": {
-      "argument1": 0.24,
-      "argument2": {
-        "noise": "minecraft:erosion",
-        "xz_scale": 0.15,
-        "y_scale": 0.08,
-        "type": "minecraft:noise"
-      },
-      "type": "minecraft:mul"
+      "type": "minecraft:mul",
+      "argument1": 4.8,
+      "argument2": "genesis:moon/terrain"
     },
     "ridges": {
       "argument1": 0.488,
@@ -278,6 +246,72 @@
       {
         "type": "minecraft:condition",
         "if_true": {
+          "type": "minecraft:biome",
+          "biome_is": [
+            "genesis:moon_ice_caverns"
+          ]
+        },
+        "then_run": {
+          "type": "minecraft:sequence",
+          "sequence": [
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:stone_depth",
+                "offset": 1,
+                "surface_type": "ceiling",
+                "add_surface_depth": false,
+                "secondary_depth_range": 0
+              },
+              "then_run": {
+                "type": "minecraft:block",
+                "result_state": {
+                  "Name": "minecraft:packed_ice"
+                }
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:stone_depth",
+                "offset": 2,
+                "surface_type": "floor",
+                "add_surface_depth": false,
+                "secondary_depth_range": 0
+              },
+              "then_run": {
+                "type": "minecraft:sequence",
+                "sequence": [
+                  {
+                    "type": "minecraft:condition",
+                    "if_true": {
+                      "type": "minecraft:noise_threshold",
+                      "noise": "genesis:moon_ice_cavern_calcite",
+                      "min_threshold": 0.15,
+                      "max_threshold": 10.0
+                    },
+                    "then_run": {
+                      "type": "minecraft:block",
+                      "result_state": {
+                        "Name": "minecraft:calcite"
+                      }
+                    }
+                  },
+                  {
+                    "type": "minecraft:block",
+                    "result_state": {
+                      "Name": "minecraft:packed_ice"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "minecraft:condition",
+        "if_true": {
           "type": "minecraft:stone_depth",
           "offset": 2,
           "surface_type": "floor",
@@ -296,7 +330,9 @@
             "type": "minecraft:condition",
             "if_true": {
               "type": "minecraft:biome",
-              "biome_is": ["genesis:moon_highlands"]
+              "biome_is": [
+                "genesis:moon_highlands"
+              ]
             },
             "then_run": {
               "type": "minecraft:block",
@@ -320,7 +356,10 @@
           "type": "minecraft:condition",
           "if_true": {
             "type": "minecraft:biome",
-            "biome_is": ["genesis:moon_lowlands", "genesis:moon_barrens"]
+            "biome_is": [
+              "genesis:moon_lowlands",
+              "genesis:moon_barrens"
+            ]
           },
           "then_run": {
             "type": "minecraft:sequence",
@@ -374,7 +413,9 @@
                 "type": "minecraft:condition",
                 "if_true": {
                   "type": "minecraft:biome",
-                  "biome_is": ["genesis:moon_lowlands"]
+                  "biome_is": [
+                    "genesis:moon_lowlands"
+                  ]
                 },
                 "then_run": {
                   "type": "minecraft:condition",

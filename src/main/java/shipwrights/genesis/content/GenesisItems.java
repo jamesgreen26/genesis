@@ -27,6 +27,12 @@ public final class GenesisItems {
             new StandingAndWallBlockItem(GenesisBlocks.DEAD_MOON_CORAL_FAN.get(), GenesisBlocks.DEAD_MOON_CORAL_WALL_FAN.get(),
                     new Item.Properties(), Direction.DOWN));
 
+    // The moon's ice caverns
+
+    public static final RegistryObject<Item> ICICLE = blockItem("icicle", GenesisBlocks.ICICLE);
+    public static final RegistryObject<Item> ICE_CRYSTAL = blockItem("ice_crystal", GenesisBlocks.ICE_CRYSTAL);
+    public static final RegistryObject<Item> BRITTLE_ICE = blockItem("brittle_ice", GenesisBlocks.BRITTLE_ICE);
+
     private GenesisItems() {
     }
 

@@ -38,6 +38,27 @@
             "continentalness": 0.3
           },
           "biome": "genesis:moon_highlands"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 2.0,
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "offset": 0,
+            "temperature": [
+              -2.0,
+              2.0
+            ],
+            "humidity": 0.94,
+            "continentalness": [
+              -2.0,
+              2.0
+            ]
+          },
+          "biome": "genesis:moon_ice_caverns"
         }
       ],
       "type": "minecraft:multi_noise"

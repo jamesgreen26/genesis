@@ -14,5 +14,11 @@
   "biome.genesis.moon_barrens": "Moon Barrens",
   "biome.genesis.moon_highlands": "Moon Highlands",
   "biome.genesis.moon_lowlands": "Moon Lowlands",
-  "creativetab.genesis_natural_tab": "Genesis Worlds"
+  "creativetab.genesis_natural_tab": "Genesis Worlds",
+  "biome.genesis.moon_ice_caverns": "Moon Ice Caverns",
+  "block.genesis.icicle": "Icicle",
+  "block.genesis.ice_crystal": "Ice Crystal",
+  "block.genesis.brittle_ice": "Brittle Ice",
+  "death.attack.genesis.fallingIcicle": "%1$s was skewered by a falling icicle",
+  "death.attack.genesis.fallingIcicle.player": "%1$s was skewered by a falling icicle whilst fighting %2$s"
 }
