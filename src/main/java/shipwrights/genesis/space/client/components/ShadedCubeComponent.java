@@ -126,7 +126,9 @@ public record ShadedCubeComponent(
         renderCubeAt(id, shadows, context.poseStack(), placement.position(), placement.halfExtent(), placement.rotation(), placement.alpha());
     }
 
-    private static Optional<Vector3dc> nearestLightSource(Registry<Celestial> registry, Celestial toRender, Vector3dc position, Time time) {
+    /// Where the light falling on a celestial at {@code position} comes from: itself if it casts light, otherwise the
+    /// nearest celestial that does
+    static Optional<Vector3dc> nearestLightSource(Registry<Celestial> registry, Celestial toRender, Vector3dc position, Time time) {
         if (toRender.castsLight()) return Optional.of(position);
 
         return registry.stream()

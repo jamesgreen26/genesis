@@ -1,5 +1,6 @@
 {
   "components": [
-    { "type": "genesis:shaded_cube", "drawShadows": true }
+    { "type": "genesis:shaded_cube", "drawShadows": true },
+    { "type": "genesis:atmosphere", "density": 1.0, "thickness": 1.0, "color": 5092326 }
   ]
 }
