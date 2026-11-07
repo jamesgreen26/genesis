@@ -32,7 +32,7 @@ import java.io.IOException;
 ///
 /// Drawn additively as a disc facing the camera, like vanilla's sun, so against a daytime sky it brightens towards a
 /// white disc around the star. Seen from a planet, it blends from its look in space under a dark sky to its own colour
-/// and opacity under a bright one, strong enough to show against it; that part fades with rain like vanilla's sun.
+/// and opacity under a bright one, strong enough to show against it. Fades with the weather like other celestials.
 /// List it before the star's own component so the star is drawn over it.
 ///
 /// @param color        packed {@code 0xRRGGBB}, in space and under a dark sky
@@ -91,12 +91,12 @@ public record StarGlowComponent(
 
         float skyBrightness = onPlanet ? skyBrightness(context) : 0f;
         if (skyBrightness > 0f) {
-            float skyAlpha = (float) skyOpacity * (1f - context.clientLevel().getRainLevel(context.time().partialTick()));
-            alpha = Mth.lerp(skyBrightness, alpha, skyAlpha);
+            alpha = Mth.lerp(skyBrightness, alpha, (float) skyOpacity);
             r = Mth.lerp(skyBrightness, r, red(skyColor));
             g = Mth.lerp(skyBrightness, g, green(skyColor));
             b = Mth.lerp(skyBrightness, b, blue(skyColor));
         }
+        alpha *= context.weatherVisibility();
         if (alpha <= 0.001f) return;
 
         // A disc around the direction of the star, scaled to cover the glow's radius at the star's distance

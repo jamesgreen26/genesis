@@ -29,6 +29,16 @@ public record CelestialPlacement(Vector3dc position, Quaterniondc rotation, doub
         return (float) Mth.clamp((cameraY - start) / (end - start), 0.0, 1.0);
     }
 
+    /// How much celestials in the sky show through the weather, seen from {@code cameraY}: rain and thunder hide them
+    /// near the ground, less so the higher up the camera is, until it's above the weather where the celestial underfoot
+    /// is fully visible. Always 1 away from a celestial's surface.
+    public static float weatherVisibility(ClientLevel level, VantagePoint vantagePoint, double cameraY, float partialTick) {
+        if (!(vantagePoint instanceof VantagePoint.OnCelestial)) return 1f;
+        // Thunder only happens while it's raining, so the rain level covers both
+        float rain = level.getRainLevel(partialTick);
+        return 1f - rain * (1f - surfaceVisibility(level, cameraY));
+    }
+
     public static CelestialPlacement of(CelestialRenderContext context) {
         Celestial toRender = context.toRender();
         VantagePoint vantagePoint = context.vantagePoint();

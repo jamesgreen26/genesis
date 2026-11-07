@@ -1,16 +1,25 @@
 package shipwrights.genesis.space.client;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.lwjgl.opengl.GL11;
@@ -44,9 +53,61 @@ public class CelestialRenderDispatcher {
     /// Celestials are drawn at the nearest depths, so the sun, moon and stars drawn with the sky are hidden behind them.
     /// The sky itself is drawn without depth testing, so it still covers them. Each is a little nearer than those behind
     /// it, so what's drawn over the sky is still hidden by the celestials in front of it.
+    ///
+    /// They're drawn on black, so fading them out for the weather all at once only needs that darkened; the sky then
+    /// blended over them shows through instead. Celestials have no other way to fade, being opaque.
     public static void renderBehindSky(PoseStack poseStack, Camera camera, float partialTick) {
         render(poseStack, camera, partialTick, false, component -> !component.shinesThroughSky(), 0, DEPTH_STEP);
         renderedBehindSky = true;
+
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+        Vec3 cameraPos = camera.getPosition();
+        VantagePoint vantagePoint = VantagePoint.get(level, Time.get(level, partialTick),
+                new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z));
+        float visibility = CelestialPlacement.weatherVisibility(level, vantagePoint, cameraPos.y, partialTick);
+        if (visibility < 1f) {
+            darkenScreen(1f - visibility);
+        }
+    }
+
+    /// Scales everything drawn so far towards black by {@code amount}, from 0 for unchanged to 1 for black
+    private static void darkenScreen(float amount) {
+        RenderSystem.setShader(GameRenderer::getPositionShader);
+        // Applying a shader applies its blend mode, unless that mode was the last one applied, and the position shader
+        // asks for none. Apply it now, so applying it again to draw changes nothing and leaves our blending be.
+        RenderSystem.getShader().apply();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.disableCull();
+        RenderSystem.setShaderColor(0, 0, 0, amount);
+
+        // A quad covering the screen, drawn directly in clip space
+        RenderSystem.backupProjectionMatrix();
+        RenderSystem.setProjectionMatrix(new Matrix4f(), VertexSorting.ORTHOGRAPHIC_Z);
+        PoseStack modelView = RenderSystem.getModelViewStack();
+        modelView.pushPose();
+        modelView.setIdentity();
+        RenderSystem.applyModelViewMatrix();
+
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        builder.vertex(-1, -1, 0).endVertex();
+        builder.vertex(1, -1, 0).endVertex();
+        builder.vertex(1, 1, 0).endVertex();
+        builder.vertex(-1, 1, 0).endVertex();
+        BufferUploader.drawWithShader(builder.end());
+
+        modelView.popPose();
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.restoreProjectionMatrix();
+
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        RenderSystem.enableCull();
+        RenderSystem.enableDepthTest();
+        RenderSystem.defaultBlendFunc();
     }
 
     @SubscribeEvent

@@ -57,7 +57,8 @@ public record StarComponent(
     @Override
     public void render(CelestialRenderContext context) {
         CelestialPlacement placement = CelestialPlacement.of(context);
-        if (placement.alpha() < 0.01f) return;
+        float opacity = placement.alpha() * context.weatherVisibility();
+        if (opacity < 0.01f) return;
 
         Quaternionf rotation = new Quaternionf(placement.rotation());
         Vector3f position = new Vector3f((float) placement.position().x(), (float) placement.position().y(),
@@ -72,7 +73,7 @@ public record StarComponent(
         shader.safeGetUniform("HalfSize").set(halfSize);
         shader.safeGetUniform("Color0").set(red(color0), green(color0), blue(color0));
         shader.safeGetUniform("Color1").set(red(color1), green(color1), blue(color1));
-        shader.safeGetUniform("Opacity").set(placement.alpha());
+        shader.safeGetUniform("Opacity").set(opacity);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(RenderTypes.STAR);

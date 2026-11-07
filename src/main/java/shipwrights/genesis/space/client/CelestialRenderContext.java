@@ -15,4 +15,8 @@ public record CelestialRenderContext(
         Camera camera,
         ClientLevel clientLevel
 ) {
+    /// How much celestials in the sky show through the weather; see {@link CelestialPlacement#weatherVisibility}
+    public float weatherVisibility() {
+        return CelestialPlacement.weatherVisibility(clientLevel, vantagePoint, camera.getPosition().y, time.partialTick());
+    }
 }
