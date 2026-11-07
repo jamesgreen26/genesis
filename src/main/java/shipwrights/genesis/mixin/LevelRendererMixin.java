@@ -95,6 +95,12 @@ public abstract class LevelRendererMixin {
         buffer.release();
     }
 
+    // Vanilla only draws its stars when they have some brightness. Starfield replaces them wherever celestials are drawn.
+    @WrapOperation(method = "renderSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getStarBrightness(F)F"))
+    private float genesis$hideVanillaStars(ClientLevel level, float partialTick, Operation<Float> original) {
+        return GenesisMod.celestial(level).isPresent() ? 0f : original.call(level, partialTick);
+    }
+
     // After the sunrise glow, before the stars: those are depth tested, so celestials hide them
     @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFuncSeparate(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V", ordinal = 0))
     private void genesis$depthTestSunMoonAndStars(PoseStack poseStack, Matrix4f projectionMatrix, float partialTick, Camera camera,

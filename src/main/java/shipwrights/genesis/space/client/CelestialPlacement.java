@@ -39,6 +39,13 @@ public record CelestialPlacement(Vector3dc position, Quaterniondc rotation, doub
         return 1f - rain * (1f - surfaceVisibility(level, cameraY));
     }
 
+    /// How bright the sky is, from 0 when it's dark, as at night, to 1 in full daylight. The brightest channel of the
+    /// sky colour, which vanilla scales by daylight and darkens with rain and thunder.
+    public static float skyBrightness(ClientLevel level, Vec3 cameraPosition, float partialTick) {
+        Vec3 sky = level.getSkyColor(cameraPosition, partialTick);
+        return (float) Mth.clamp(Math.max(sky.x, Math.max(sky.y, sky.z)), 0.0, 1.0);
+    }
+
     public static CelestialPlacement of(CelestialRenderContext context) {
         Celestial toRender = context.toRender();
         VantagePoint vantagePoint = context.vantagePoint();

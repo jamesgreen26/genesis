@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -89,7 +88,9 @@ public record StarGlowComponent(
         float alpha = (float) (opacity * Mth.clamp(distance / fadeDistance, 0.0, 1.0));
         float r = red(color), g = green(color), b = blue(color);
 
-        float skyBrightness = onPlanet ? skyBrightness(context) : 0f;
+        float skyBrightness = onPlanet
+                ? CelestialPlacement.skyBrightness(context.clientLevel(), context.camera().getPosition(), context.time().partialTick())
+                : 0f;
         if (skyBrightness > 0f) {
             alpha = Mth.lerp(skyBrightness, alpha, (float) skyOpacity);
             r = Mth.lerp(skyBrightness, r, red(skyColor));
@@ -125,13 +126,6 @@ public record StarGlowComponent(
 
         // Flush now, while the uniforms are still this star's
         bufferSource.endBatch(RenderTypes.GLOW);
-    }
-
-    /// How bright the sky is, from 0 when it's dark, as at night, to 1 in full daylight. The brightest channel of the
-    /// sky colour, which vanilla scales by daylight and darkens with rain and thunder.
-    private static float skyBrightness(CelestialRenderContext context) {
-        Vec3 sky = context.clientLevel().getSkyColor(context.camera().getPosition(), context.time().partialTick());
-        return (float) Mth.clamp(Math.max(sky.x, Math.max(sky.y, sky.z)), 0.0, 1.0);
     }
 
     private static float red(int color) {

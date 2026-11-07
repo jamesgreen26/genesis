@@ -32,7 +32,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
-/// Draws every celestial that has a {@link CelestialVisualizer}, furthest from the observer first.
+/// Draws the {@link Starfield}, then every celestial that has a {@link CelestialVisualizer}, furthest from the observer
+/// first.
 ///
 /// Celestials in the sky are drawn just before the sky itself (see
 /// {@link shipwrights.genesis.mixin.LevelRendererMixin}), which is then blended over them, except for what shines
@@ -46,7 +47,7 @@ public class CelestialRenderDispatcher {
     /// The depth between one celestial and the next nearest, when drawn around the sky
     private static final double DEPTH_STEP = 1e-5;
 
-    /// Draws every celestial except the one underfoot, and except what {@linkplain
+    /// Draws the stars and every celestial except the one underfoot, and except what {@linkplain
     /// CelestialVisualizer.Component#shinesThroughSky() shines through the sky}. Called from the sky renderer, before
     /// the sky is drawn.
     ///
@@ -57,6 +58,7 @@ public class CelestialRenderDispatcher {
     /// They're drawn on black, so fading them out for the weather all at once only needs that darkened; the sky then
     /// blended over them shows through instead. Celestials have no other way to fade, being opaque.
     public static void renderBehindSky(PoseStack poseStack, Camera camera, float partialTick) {
+        renderStars(poseStack, camera, partialTick);
         render(poseStack, camera, partialTick, false, component -> !component.shinesThroughSky(), 0, DEPTH_STEP);
         renderedBehindSky = true;
 
@@ -126,11 +128,28 @@ public class CelestialRenderDispatcher {
         } else {
             // The sky isn't drawn when fog, blindness etc. obscure it, or in dimensions without a normal sky. Drawn
             // furthest first, nearer celestials already cover the ones behind them.
+            renderStars(event.getPoseStack(), event.getCamera(), event.getPartialTick());
             render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), false, component -> true, 1, 0);
         }
         renderedBehindSky = false;
 
         render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), true, component -> true, 1, 0);
+    }
+
+    /// Stars are hidden by daylight; in space, they're always fully bright
+    private static void renderStars(PoseStack poseStack, Camera camera, float partialTick) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return;
+
+        Vec3 cameraPos = camera.getPosition();
+        VantagePoint vantagePoint = VantagePoint.get(level, Time.get(level, partialTick),
+                new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z));
+        if (!vantagePoint.isReal()) return;
+
+        float brightness = vantagePoint instanceof VantagePoint.OnCelestial
+                ? 1f - CelestialPlacement.skyBrightness(level, cameraPos, partialTick)
+                : 1f;
+        Starfield.render(poseStack, vantagePoint, brightness);
     }
 
     /// @param nearestDepth the depth the nearest celestial is drawn at; at 1 they're behind everything else in the level
