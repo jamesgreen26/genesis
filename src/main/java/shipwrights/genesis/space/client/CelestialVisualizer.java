@@ -13,6 +13,7 @@ import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.client.components.AtmosphereComponent;
 import shipwrights.genesis.space.client.components.ShadedCubeComponent;
 import shipwrights.genesis.space.client.components.StarComponent;
+import shipwrights.genesis.space.client.components.StarGlowComponent;
 import shipwrights.genesis.util.ResourcePackRegistry;
 
 import java.util.HashMap;
@@ -67,6 +68,7 @@ public record CelestialVisualizer(List<Component> components) {
         Component.register(AtmosphereComponent.TYPE, AtmosphereComponent.CODEC);
         Component.register(ShadedCubeComponent.TYPE, ShadedCubeComponent.CODEC);
         Component.register(StarComponent.TYPE, StarComponent.CODEC);
+        Component.register(StarGlowComponent.TYPE, StarGlowComponent.CODEC);
 
         event.registerReloadListener(REGISTRY);
     }
