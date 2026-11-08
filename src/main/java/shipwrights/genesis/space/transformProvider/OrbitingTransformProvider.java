@@ -94,7 +94,7 @@ public class OrbitingTransformProvider implements CelestialTransformProvider {
         }
 
         // Normal rotation: daily spin around Y axis (similar to OrbitingBody)
-        double rotationalPeriod = (this.orbitTime / (this.orbitTime / this.dayLength - 1.0));
+        double rotationalPeriod = 1 / (1 / this.dayLength - 1 / this.orbitTime);
         return new Quaterniond(baseRotation).rotateY(
             -Math.PI * 2 * (ticks + subticks) / rotationalPeriod
         );
