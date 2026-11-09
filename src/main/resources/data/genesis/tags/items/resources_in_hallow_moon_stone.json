@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "zps:aluminum_nugget",
+    "zps:lithium_nugget",
+    "minecraft:iron_nugget"
+  ]
+}
