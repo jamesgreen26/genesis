@@ -5,6 +5,9 @@
     "genesis:moon_stone",
     "genesis:hallow_moon_stone",
     "genesis:brittle_ice",
-    "genesis:ice_crystal"
+    "genesis:ice_crystal",
+    "genesis:moon_iron_ore",
+    "genesis:moon_redstone_ore",
+    "genesis:moon_lithium_ore"
   ]
 }

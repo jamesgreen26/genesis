@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "genesis:moon_stone",
-    "genesis:hallow_moon_stone"
+    "genesis:hallow_moon_stone",
+    "genesis:moon_iron_ore"
   ]
 }

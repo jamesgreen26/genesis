@@ -20,6 +20,9 @@ public final class GenesisCreativeTabs {
                     .displayItems((parameters, output) -> {
                         output.accept(GenesisItems.HALLOW_MOON_STONE.get());
                         output.accept(GenesisItems.MOON_STONE.get());
+                        output.accept(GenesisItems.MOON_IRON_ORE.get());
+                        output.accept(GenesisItems.MOON_REDSTONE_ORE.get());
+                        output.accept(GenesisItems.MOON_LITHIUM_ORE.get());
                         output.accept(GenesisItems.MOON_SAND.get());
                         output.accept(GenesisItems.WAVY_MOON_SAND.get());
                         output.accept(GenesisItems.DARK_MOON_SAND.get());

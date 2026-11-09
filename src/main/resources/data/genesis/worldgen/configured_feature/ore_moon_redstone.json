@@ -6,7 +6,7 @@
     "targets": [
       {
         "state": {
-          "Name": "minecraft:deepslate_redstone_ore"
+          "Name": "genesis:moon_redstone_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",

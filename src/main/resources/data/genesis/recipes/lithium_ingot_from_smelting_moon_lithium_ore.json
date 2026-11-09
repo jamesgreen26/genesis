@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 1.0,
+  "group": "lithium_ingot",
+  "ingredient": {
+    "item": "genesis:moon_lithium_ore"
+  },
+  "result": "zps:lithium_ingot"
+}

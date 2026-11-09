@@ -6,7 +6,7 @@
     "targets": [
       {
         "state": {
-          "Name": "zps:deepslate_lithium_ore"
+          "Name": "genesis:moon_lithium_ore"
         },
         "target": {
           "predicate_type": "minecraft:tag_match",

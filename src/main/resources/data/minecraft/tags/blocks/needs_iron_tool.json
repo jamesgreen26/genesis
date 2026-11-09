@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "genesis:moon_redstone_ore",
+    "genesis:moon_lithium_ore"
+  ]
+}

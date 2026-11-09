@@ -7,9 +7,13 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BrushableBlock;
+import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.RedStoneOreBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.registries.DeferredRegister;
@@ -41,6 +45,17 @@ public final class GenesisBlocks {
                     .strength(4.5F)
                     .sound(SoundType.DEEPSLATE)
                     .requiresCorrectToolForDrops()));
+
+    // Moon stone variants of the deepslate ores, with the same hardness, drops and behaviour
+
+    public static final RegistryObject<Block> MOON_IRON_ORE = BLOCKS.register("moon_iron_ore", () ->
+            new DropExperienceBlock(moonOre()));
+    public static final RegistryObject<Block> MOON_REDSTONE_ORE = BLOCKS.register("moon_redstone_ore", () ->
+            new RedStoneOreBlock(moonOre()
+                    .randomTicks()
+                    .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 9 : 0)));
+    public static final RegistryObject<Block> MOON_LITHIUM_ORE = BLOCKS.register("moon_lithium_ore", () ->
+            new DropExperienceBlock(moonOre()));
 
     public static final RegistryObject<Block> HALLOW_MOON_STONE = BLOCKS.register("hallow_moon_stone", () ->
             new Block(BlockBehaviour.Properties.of()
@@ -101,6 +116,15 @@ public final class GenesisBlocks {
                 .mapColor(color)
                 .strength(0.5F)
                 .sound(SoundType.SAND));
+    }
+
+    private static BlockBehaviour.Properties moonOre() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_GRAY)
+                .instrument(NoteBlockInstrument.BASEDRUM)
+                .strength(4.5F, 3.0F)
+                .sound(SoundType.DEEPSLATE)
+                .requiresCorrectToolForDrops();
     }
 
     private static BlockBehaviour.Properties moonCoral() {
