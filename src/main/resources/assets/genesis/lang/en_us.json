@@ -19,6 +19,7 @@
   "block.genesis.icicle": "Icicle",
   "block.genesis.ice_crystal": "Ice Crystal",
   "block.genesis.brittle_ice": "Brittle Ice",
+  "item.genesis.ice_shard": "Ice Shard",
   "entity.genesis.moon_crawler": "Moon Crawler",
   "item.genesis.moon_crawler_spawn_egg": "Moon Crawler Spawn Egg",
   "effect.genesis.webbed": "Webbed",
