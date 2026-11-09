@@ -1,0 +1,51 @@
+{
+  "feature": "genesis:moon_geothermal_basalt",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 8
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "above_bottom": 4
+        },
+        "max_inclusive": {
+          "absolute": -46
+        }
+      }
+    },
+    {
+      "type": "minecraft:environment_scan",
+      "direction_of_search": "down",
+      "max_steps": 12,
+      "target_condition": {
+        "type": "minecraft:all_of",
+        "predicates": [
+          {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:water"
+          },
+          {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:magma_block",
+            "offset": [
+              0,
+              -1,
+              0
+            ]
+          }
+        ]
+      },
+      "allowed_search_condition": {
+        "type": "minecraft:matching_blocks",
+        "blocks": "minecraft:water"
+      }
+    }
+  ]
+}

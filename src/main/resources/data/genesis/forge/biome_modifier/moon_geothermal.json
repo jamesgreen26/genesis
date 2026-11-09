@@ -1,6 +1,9 @@
 {
   "type": "forge:add_features",
-  "features": "genesis:moon_geothermal",
+  "features": [
+    "genesis:moon_geothermal",
+    "genesis:moon_geothermal_basalt"
+  ],
   "biomes": "#genesis:is_moon",
   "step": "top_layer_modification"
 }

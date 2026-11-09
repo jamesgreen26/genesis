@@ -23,6 +23,9 @@ public final class GenesisFeatures {
     public static final RegistryObject<Feature<NoneFeatureConfiguration>> GEOTHERMAL =
             FEATURES.register("geothermal", () -> new GeothermalFeature(NoneFeatureConfiguration.CODEC));
 
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> BASALT_FORMATION =
+            FEATURES.register("basalt_formation", () -> new BasaltFormationFeature(NoneFeatureConfiguration.CODEC));
+
     private GenesisFeatures() {
     }
 }

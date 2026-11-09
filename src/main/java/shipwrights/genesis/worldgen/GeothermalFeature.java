@@ -23,7 +23,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 /// the gap. Ice features keep above {@link #ICE_MIN_Y}, either through their placed feature height ranges or by
 /// checking it themselves.
 ///
-/// Runs once per chunk (placed with no placement modifiers), after carvers and every other feature in the chunk.
+/// Runs once per chunk (placed with no placement modifiers), after carvers and every other feature in the chunk except
+/// {@code genesis:moon_geothermal_basalt} ({@link BasaltFormationFeature}), which grows basalt formations in and
+/// around the pools.
 public class GeothermalFeature extends Feature<NoneFeatureConfiguration> {
     /// The highest block that's flooded
     public static final int WATER_LEVEL = -46;
