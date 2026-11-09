@@ -43,6 +43,10 @@ public class IcePillarFeature extends Feature<NoneFeatureConfiguration> {
         WorldGenLevel level = context.level();
         RandomSource random = context.random();
         BlockPos bottom = context.origin();
+        // Its base sinks into the floor; keep all of it above the geothermal zone's stone gap
+        if (!GeothermalFeature.allowsIce(bottom.getY() - FOLLOW_THROUGH)) {
+            return false;
+        }
 
         BlockState floor = level.getBlockState(bottom.below());
         if (!level.getBlockState(bottom).isAir() || !floor.isSolidRender(level, bottom.below())

@@ -20,6 +20,9 @@ public final class GenesisFeatures {
     public static final RegistryObject<Feature<NoneFeatureConfiguration>> ICE_CRYSTAL =
             FEATURES.register("ice_crystal", () -> new IceCrystalFeature(NoneFeatureConfiguration.CODEC));
 
+    public static final RegistryObject<Feature<NoneFeatureConfiguration>> GEOTHERMAL =
+            FEATURES.register("geothermal", () -> new GeothermalFeature(NoneFeatureConfiguration.CODEC));
+
     private GenesisFeatures() {
     }
 }

@@ -62,6 +62,8 @@ public class CrevasseFeature extends Feature<NoneFeatureConfiguration> {
             }
             // Deepest in the middle, tapering towards the ends
             int stepDepth = Math.max(2, Math.round(depth * (float) Math.sin(Math.PI * (i + 0.5) / plannedLength)));
+            // Keep the brittle ice, and the pit under it, out of the geothermal zone's stone gap
+            if (!GeothermalFeature.allowsIce(floor.getY() - stepDepth)) break;
 
             List<BlockPos> stepSurface = new ArrayList<>();
             List<BlockPos> stepHollow = new ArrayList<>();

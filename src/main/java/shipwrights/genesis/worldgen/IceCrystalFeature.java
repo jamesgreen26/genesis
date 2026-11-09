@@ -43,7 +43,7 @@ public class IceCrystalFeature extends Feature<NoneFeatureConfiguration> {
                     random.nextInt(2 * XZ_SPREAD + 1) - XZ_SPREAD,
                     random.nextInt(2 * Y_SPREAD + 1) - Y_SPREAD,
                     random.nextInt(2 * XZ_SPREAD + 1) - XZ_SPREAD);
-            if (!level.getBlockState(pos).isAir()) continue;
+            if (!level.getBlockState(pos).isAir() || !GeothermalFeature.allowsIce(pos.getY())) continue;
 
             for (Direction facing : Util.shuffledCopy(Direction.values(), random)) {
                 BlockPos support = pos.relative(facing.getOpposite());
