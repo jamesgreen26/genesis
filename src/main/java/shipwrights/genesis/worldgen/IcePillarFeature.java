@@ -50,7 +50,7 @@ public class IcePillarFeature extends Feature<NoneFeatureConfiguration> {
 
         BlockState floor = level.getBlockState(bottom.below());
         if (!level.getBlockState(bottom).isAir() || !floor.isSolidRender(level, bottom.below())
-                || floor.is(GenesisBlocks.BRITTLE_ICE.get())) {
+                || floor.is(GenesisBlocks.THIN_ICE.get())) {
             return false;
         }
 

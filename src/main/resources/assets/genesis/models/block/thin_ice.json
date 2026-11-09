@@ -2,6 +2,6 @@
   "parent": "minecraft:block/cube_all",
   "render_type": "minecraft:translucent",
   "textures": {
-    "all": "genesis:block/brittle_ice_3"
+    "all": "genesis:block/thin_ice"
   }
 }

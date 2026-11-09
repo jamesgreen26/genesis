@@ -96,8 +96,8 @@ public final class GenesisBlocks {
                     .lightLevel(state -> 5)
                     .pushReaction(PushReaction.DESTROY)));
 
-    public static final RegistryObject<Block> BRITTLE_ICE = BLOCKS.register("brittle_ice", () ->
-            new BrittleIceBlock(BlockBehaviour.Properties.of()
+    public static final RegistryObject<Block> THIN_ICE = BLOCKS.register("thin_ice", () ->
+            new ThinIceBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.ICE)
                     .friction(0.98F)
                     .strength(0.3F)

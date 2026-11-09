@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "genesis:brittle_ice"
+          "name": "genesis:thin_ice"
         }
       ],
       "conditions": [

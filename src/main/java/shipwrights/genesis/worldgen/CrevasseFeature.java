@@ -6,7 +6,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -19,12 +18,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/// A long, narrow crack in a cave floor, hidden under brittle ice: a hollow drop that opens a couple of seconds after
-/// something steps on it. Placed on a floor block, it runs along a random axis, following the floor as it rises and
-/// falls, deepest in the middle. It ends early where the floor does.
+/// A long, narrow crack in a cave floor, frozen over with thin ice all the way down: a drop that opens when something
+/// jumps or falls onto it, breaking through every layer to the bottom. Placed on a floor block, it runs along a random
+/// axis, following the floor as it rises and falls, deepest in the middle. It ends early where the floor does.
 ///
-/// The hollow is only cut into solid ground, so the brittle ice never covers an opening that can be seen into. Hollow
-/// rather than filled with water, as the moon is far too cold for liquid water.
+/// It's only cut into solid ground, so once broken through, it never opens out into anything else. Ice rather than
+/// water, as the moon is far too cold for liquid water.
 public class CrevasseFeature extends Feature<NoneFeatureConfiguration> {
     private static final int MIN_LENGTH = 6;
     private static final int MAX_LENGTH = 20;
@@ -50,7 +49,7 @@ public class CrevasseFeature extends Feature<NoneFeatureConfiguration> {
         int width = 1 + random.nextInt(2);
         int depth = MIN_DEPTH + random.nextInt(MAX_DEPTH - MIN_DEPTH + 1);
 
-        // The surface cells, which become brittle ice, and the hollow under them
+        // The surface cells and the hollow under them, all of which become thin ice
         Set<BlockPos> surface = new HashSet<>();
         Set<BlockPos> hollow = new HashSet<>();
         BlockPos floor = origin;
@@ -62,7 +61,7 @@ public class CrevasseFeature extends Feature<NoneFeatureConfiguration> {
             }
             // Deepest in the middle, tapering towards the ends
             int stepDepth = Math.max(2, Math.round(depth * (float) Math.sin(Math.PI * (i + 0.5) / plannedLength)));
-            // Keep the brittle ice, and the pit under it, out of the geothermal zone's stone gap
+            // Keep the thin ice, and the pit under it, out of the geothermal zone's stone gap
             if (!GeothermalFeature.allowsIce(floor.getY() - stepDepth)) break;
 
             List<BlockPos> stepSurface = new ArrayList<>();
@@ -90,12 +89,12 @@ public class CrevasseFeature extends Feature<NoneFeatureConfiguration> {
         }
         if (length < MIN_LENGTH) return false;
 
+        BlockState thinIce = GenesisBlocks.THIN_ICE.get().defaultBlockState();
         for (BlockPos pos : hollow) {
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
+            level.setBlock(pos, thinIce, 2);
         }
-        BlockState brittleIce = GenesisBlocks.BRITTLE_ICE.get().defaultBlockState();
         for (BlockPos pos : surface) {
-            level.setBlock(pos, brittleIce, 2);
+            level.setBlock(pos, thinIce, 2);
         }
         return true;
     }
@@ -115,7 +114,7 @@ public class CrevasseFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     /// Whether every one of {@code cells} can be hollowed and is closed in by solid ground or the crevasse itself, so
-    /// that no opening shows anywhere but through the brittle ice
+    /// that it opens nowhere but at the top
     private static boolean enclosed(WorldGenLevel level, List<BlockPos> cells, Set<BlockPos> surface, Set<BlockPos> hollow) {
         for (BlockPos pos : cells) {
             if (!replaceable(level, pos)) return false;
