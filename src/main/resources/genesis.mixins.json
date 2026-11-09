@@ -12,7 +12,9 @@
     "GameRendererMixin",
     "LevelRendererMixin"
   ],
-  "mixins": [],
+  "mixins": [
+    "LivingEntityMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

@@ -7,7 +7,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import shipwrights.genesis.content.GenesisBlocks;
 import shipwrights.genesis.content.GenesisCreativeTabs;
+import shipwrights.genesis.content.GenesisEntityTypes;
 import shipwrights.genesis.content.GenesisItems;
+import shipwrights.genesis.content.GenesisMobEffects;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.worldgen.GenesisDensityFunctions;
 import shipwrights.genesis.worldgen.GenesisFeatures;
@@ -22,6 +24,8 @@ public class GenesisMod {
     public GenesisMod() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         GenesisBlocks.BLOCKS.register(modBus);
+        GenesisEntityTypes.ENTITY_TYPES.register(modBus);
+        GenesisMobEffects.MOB_EFFECTS.register(modBus);
         GenesisItems.ITEMS.register(modBus);
         GenesisCreativeTabs.CREATIVE_MODE_TABS.register(modBus);
         GenesisDensityFunctions.DENSITY_FUNCTION_TYPES.register(modBus);

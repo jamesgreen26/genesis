@@ -30,6 +30,7 @@ public final class GenesisCreativeTabs {
                         output.accept(GenesisItems.ICICLE.get());
                         output.accept(GenesisItems.ICE_CRYSTAL.get());
                         output.accept(GenesisItems.BRITTLE_ICE.get());
+                        output.accept(GenesisItems.MOON_CRAWLER_SPAWN_EGG.get());
                     })
                     .build());
 

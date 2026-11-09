@@ -39,7 +39,14 @@
     []
   ],
   "spawners": {
-    "monster": [],
+    "monster": [
+      {
+        "type": "genesis:moon_crawler",
+        "weight": 100,
+        "minCount": 1,
+        "maxCount": 3
+      }
+    ],
     "creature": [],
     "ambient": [],
     "axolotls": [],

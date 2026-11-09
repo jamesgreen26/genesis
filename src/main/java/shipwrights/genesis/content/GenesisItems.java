@@ -5,6 +5,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -32,6 +33,8 @@ public final class GenesisItems {
     public static final RegistryObject<Item> ICICLE = blockItem("icicle", GenesisBlocks.ICICLE);
     public static final RegistryObject<Item> ICE_CRYSTAL = blockItem("ice_crystal", GenesisBlocks.ICE_CRYSTAL);
     public static final RegistryObject<Item> BRITTLE_ICE = blockItem("brittle_ice", GenesisBlocks.BRITTLE_ICE);
+    public static final RegistryObject<Item> MOON_CRAWLER_SPAWN_EGG = ITEMS.register("moon_crawler_spawn_egg", () ->
+            new ForgeSpawnEggItem(GenesisEntityTypes.MOON_CRAWLER, 0xCFE8F2, 0x3D6A8A, new Item.Properties()));
 
     private GenesisItems() {
     }
