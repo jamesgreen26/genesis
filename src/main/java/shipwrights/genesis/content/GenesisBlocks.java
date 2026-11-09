@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.BaseCoralPlantBlock;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.FallingBlock;
@@ -56,6 +57,11 @@ public final class GenesisBlocks {
                     .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 9 : 0)));
     public static final RegistryObject<Block> MOON_LITHIUM_ORE = BLOCKS.register("moon_lithium_ore", () ->
             new DropExperienceBlock(moonOre()));
+    /// Smelts into aluminum, as do the crystals it drops
+    public static final RegistryObject<Block> ANORTHITE = BLOCKS.register("anorthite", () ->
+            new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.COPPER_ORE)
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .sound(SoundType.DEEPSLATE)));
 
     public static final RegistryObject<Block> HALLOW_MOON_STONE = BLOCKS.register("hallow_moon_stone", () ->
             new Block(BlockBehaviour.Properties.of()

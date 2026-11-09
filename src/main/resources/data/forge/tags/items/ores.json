@@ -3,6 +3,7 @@
   "values": [
     "genesis:moon_iron_ore",
     "genesis:moon_redstone_ore",
-    "genesis:moon_lithium_ore"
+    "genesis:moon_lithium_ore",
+    "genesis:anorthite"
   ]
 }

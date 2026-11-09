@@ -3,6 +3,7 @@
   "values": [
     "minecraft:raw_iron",
     "minecraft:redstone",
-    "zps:raw_lithium"
+    "zps:raw_lithium",
+    "genesis:anorthite_crystal"
   ]
 }

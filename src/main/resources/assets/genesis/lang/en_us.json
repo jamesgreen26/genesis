@@ -9,6 +9,8 @@
   "block.genesis.moon_iron_ore": "Moon Iron Ore",
   "block.genesis.moon_redstone_ore": "Moon Redstone Ore",
   "block.genesis.moon_lithium_ore": "Moon Lithium Ore",
+  "block.genesis.anorthite": "Anorthite",
+  "item.genesis.anorthite_crystal": "Anorthite Crystal",
   "block.genesis.hallow_moon_stone": "Hallow Moon Stone",
   "block.genesis.dead_moon_coral": "Dead Moon Coral",
   "block.genesis.dead_moon_coral_block": "Dead Moon Coral Block",
