@@ -189,23 +189,33 @@
       "type": "minecraft:mul"
     },
     "vegetation": {
-      "argument1": 0.13,
-      "argument2": {
-        "xz_scale": 0.25,
-        "y_scale": 0.0,
-        "noise": "minecraft:vegetation",
-        "shift_x": {
-          "argument": "minecraft:offset",
-          "type": "minecraft:shift_a"
+      "type": "minecraft:add",
+      "argument1": {
+        "argument1": 0.13,
+        "argument2": {
+          "xz_scale": 0.25,
+          "y_scale": 0.0,
+          "noise": "minecraft:vegetation",
+          "shift_x": {
+            "argument": "minecraft:offset",
+            "type": "minecraft:shift_a"
+          },
+          "shift_y": 0.0,
+          "shift_z": {
+            "argument": "minecraft:offset",
+            "type": "minecraft:shift_b"
+          },
+          "type": "minecraft:shifted_noise"
         },
-        "shift_y": 0.0,
-        "shift_z": {
-          "argument": "minecraft:offset",
-          "type": "minecraft:shift_b"
-        },
-        "type": "minecraft:shifted_noise"
+        "type": "minecraft:mul"
       },
-      "type": "minecraft:mul"
+      "argument2": {
+        "type": "minecraft:y_clamped_gradient",
+        "from_y": -39,
+        "to_y": -35,
+        "from_value": 1.2,
+        "to_value": 0.0
+      }
     },
     "continents": {
       "argument1": 0.22,

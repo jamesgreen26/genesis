@@ -59,6 +59,30 @@
             ]
           },
           "biome": "genesis:moon_ice_caverns"
+        },
+        {
+          "parameters": {
+            "erosion": 0.3899,
+            "depth": 2.0,
+            "weirdness": [
+              -2.0,
+              2.0
+            ],
+            "offset": 0,
+            "temperature": [
+              -2.0,
+              2.0
+            ],
+            "humidity": [
+              1.0,
+              2.0
+            ],
+            "continentalness": [
+              -2.0,
+              2.0
+            ]
+          },
+          "biome": "genesis:moon_geothermal_depths"
         }
       ],
       "type": "minecraft:multi_noise"
