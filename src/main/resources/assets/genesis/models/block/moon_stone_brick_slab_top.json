@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "genesis:block/moon_stone_bricks",
+    "side": "genesis:block/moon_stone_bricks",
+    "top": "genesis:block/moon_stone_bricks"
+  }
+}

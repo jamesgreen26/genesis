@@ -11,6 +11,9 @@ import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.RedStoneOreBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -46,6 +49,14 @@ public final class GenesisBlocks {
                     .strength(4.5F)
                     .sound(SoundType.DEEPSLATE)
                     .requiresCorrectToolForDrops()));
+    public static final RegistryObject<Block> MOON_STONE_BRICKS = BLOCKS.register("moon_stone_bricks", () ->
+            new Block(BlockBehaviour.Properties.copy(MOON_STONE.get())));
+    public static final RegistryObject<Block> MOON_STONE_BRICK_SLAB = BLOCKS.register("moon_stone_brick_slab", () ->
+            new SlabBlock(BlockBehaviour.Properties.copy(MOON_STONE_BRICKS.get())));
+    public static final RegistryObject<Block> MOON_STONE_BRICK_STAIRS = BLOCKS.register("moon_stone_brick_stairs", () ->
+            new StairBlock(() -> MOON_STONE_BRICKS.get().defaultBlockState(), BlockBehaviour.Properties.copy(MOON_STONE_BRICKS.get())));
+    public static final RegistryObject<Block> MOON_STONE_BRICK_WALL = BLOCKS.register("moon_stone_brick_wall", () ->
+            new WallBlock(BlockBehaviour.Properties.copy(MOON_STONE_BRICKS.get()).forceSolidOn()));
 
     // Moon stone variants of the deepslate ores, with the same hardness, drops and behaviour
 

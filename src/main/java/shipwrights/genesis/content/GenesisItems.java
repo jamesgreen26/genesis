@@ -17,6 +17,10 @@ public final class GenesisItems {
     // The moon
 
     public static final RegistryObject<Item> MOON_STONE = blockItem("moon_stone", GenesisBlocks.MOON_STONE);
+    public static final RegistryObject<Item> MOON_STONE_BRICKS = blockItem("moon_stone_bricks", GenesisBlocks.MOON_STONE_BRICKS);
+    public static final RegistryObject<Item> MOON_STONE_BRICK_SLAB = blockItem("moon_stone_brick_slab", GenesisBlocks.MOON_STONE_BRICK_SLAB);
+    public static final RegistryObject<Item> MOON_STONE_BRICK_STAIRS = blockItem("moon_stone_brick_stairs", GenesisBlocks.MOON_STONE_BRICK_STAIRS);
+    public static final RegistryObject<Item> MOON_STONE_BRICK_WALL = blockItem("moon_stone_brick_wall", GenesisBlocks.MOON_STONE_BRICK_WALL);
     public static final RegistryObject<Item> HALLOW_MOON_STONE = blockItem("hallow_moon_stone", GenesisBlocks.HALLOW_MOON_STONE);
     public static final RegistryObject<Item> MOON_IRON_ORE = blockItem("moon_iron_ore", GenesisBlocks.MOON_IRON_ORE);
     public static final RegistryObject<Item> MOON_REDSTONE_ORE = blockItem("moon_redstone_ore", GenesisBlocks.MOON_REDSTONE_ORE);

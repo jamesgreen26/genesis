@@ -9,6 +9,10 @@
     "genesis:moon_iron_ore",
     "genesis:moon_redstone_ore",
     "genesis:moon_lithium_ore",
-    "genesis:anorthite"
+    "genesis:anorthite",
+    "genesis:moon_stone_bricks",
+    "genesis:moon_stone_brick_slab",
+    "genesis:moon_stone_brick_stairs",
+    "genesis:moon_stone_brick_wall"
   ]
 }

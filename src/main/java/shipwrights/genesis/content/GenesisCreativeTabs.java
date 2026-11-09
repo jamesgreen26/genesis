@@ -12,14 +12,18 @@ public final class GenesisCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GenesisMod.MOD_ID);
 
-    /// Blocks found on Genesis's worlds
-    public static final RegistryObject<CreativeModeTab> GENESIS_NATURAL_TAB = CREATIVE_MODE_TABS.register("genesis_natural_tab", () ->
+    /// Everything Genesis adds
+    public static final RegistryObject<CreativeModeTab> GENESIS_TAB = CREATIVE_MODE_TABS.register("genesis", () ->
             CreativeModeTab.builder()
-                    .title(Component.translatable("creativetab.genesis_natural_tab"))
+                    .title(Component.translatable("creativetab.genesis"))
                     .icon(() -> new ItemStack(GenesisItems.MOON_STONE.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(GenesisItems.HALLOW_MOON_STONE.get());
                         output.accept(GenesisItems.MOON_STONE.get());
+                        output.accept(GenesisItems.MOON_STONE_BRICKS.get());
+                        output.accept(GenesisItems.MOON_STONE_BRICK_STAIRS.get());
+                        output.accept(GenesisItems.MOON_STONE_BRICK_SLAB.get());
+                        output.accept(GenesisItems.MOON_STONE_BRICK_WALL.get());
                         output.accept(GenesisItems.MOON_IRON_ORE.get());
                         output.accept(GenesisItems.MOON_REDSTONE_ORE.get());
                         output.accept(GenesisItems.MOON_LITHIUM_ORE.get());
