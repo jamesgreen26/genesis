@@ -2,7 +2,7 @@
   "castsLight": false,
   "castsShadows": true,
   "size": 29,
-  "mass": 0.007255386832017773,
+  "mass": 0.25,
   "transformProvider": {
     "type": "genesis:orbiting",
     "parent": "minecraft:overworld",

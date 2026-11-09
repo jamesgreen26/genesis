@@ -2,7 +2,7 @@
   "castsLight": false,
   "castsShadows": true,
   "size": 96,
-  "mass": 0.4901806832911014,
+  "mass": 1,
   "transformProvider": {
     "type": "genesis:orbiting",
     "parent": "genesis:sun",
