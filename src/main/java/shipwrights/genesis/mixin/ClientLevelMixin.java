@@ -3,6 +3,7 @@ package shipwrights.genesis.mixin;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +17,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.worldgen.FallbackBiome;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin {
@@ -46,5 +49,14 @@ public abstract class ClientLevelMixin {
         level.addParticle(steam,
                 pos.getX() + random.nextDouble(), pos.getY() + 0.95, pos.getZ() + random.nextDouble(),
                 0.0, 0.02 + random.nextDouble() * 0.02, 0.0);
+    }
+
+    /// Where it hasn't loaded the chunks, the client takes the biome to be plains, tinting the fog and sky there plains'
+    /// blue. Take it to be the dimension's {@link FallbackBiome} instead, where it has one
+    @Inject(method = "getUncachedNoiseBiome", at = @At("HEAD"), cancellable = true)
+    private void genesis$fallBackToDimensionBiome(int x, int y, int z, CallbackInfoReturnable<Holder<Biome>> cir) {
+        ClientLevel level = (ClientLevel) (Object) this;
+        FallbackBiome.of(level).flatMap(fallback -> level.registryAccess().registryOrThrow(Registries.BIOME)
+                .getHolder(fallback.biome())).ifPresent(cir::setReturnValue);
     }
 }
