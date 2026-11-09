@@ -11,10 +11,22 @@
     "ClientLevelMixin",
     "FogRendererAccessor",
     "GameRendererMixin",
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "ParticleAccessor",
+    "ParticleEngineMixin"
   ],
   "mixins": [
-    "LivingEntityMixin"
+    "AbstractArrowGravityMixin",
+    "AbstractMinecartGravityMixin",
+    "BoatGravityMixin",
+    "ExperienceOrbGravityMixin",
+    "FallingBlockEntityGravityMixin",
+    "FishingHookGravityMixin",
+    "ItemEntityGravityMixin",
+    "LivingEntityMixin",
+    "LlamaSpitGravityMixin",
+    "PrimedTntGravityMixin",
+    "ThrowableProjectileGravityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

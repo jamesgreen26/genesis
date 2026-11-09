@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /// @param size diameter in blocks
-/// @param mass mass measured in blocks
+/// @param mass multiplier on vanilla gravity in its dimension, relative to the overworld's 1 (see {@link Gravity})
 /// @param surfaceTemperature temperature of open space at its surface in kelvin, which it heats space around it to
 ///                           (see {@link StarHeat}); 0 if it gives off no heat
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
