@@ -22,6 +22,7 @@ public final class GenesisItems {
     public static final RegistryObject<Item> WAVY_MOON_SAND = blockItem("wavy_moon_sand", GenesisBlocks.WAVY_MOON_SAND);
     public static final RegistryObject<Item> DARK_MOON_SAND = blockItem("dark_moon_sand", GenesisBlocks.DARK_MOON_SAND);
     public static final RegistryObject<Item> DARK_WAVY_MOON_SAND = blockItem("dark_wavy_moon_sand", GenesisBlocks.DARK_WAVY_MOON_SAND);
+    public static final RegistryObject<Item> SUSPICIOUS_DARK_MOON_SAND = blockItem("suspicious_dark_moon_sand", GenesisBlocks.SUSPICIOUS_DARK_MOON_SAND);
     public static final RegistryObject<Item> DEAD_MOON_CORAL_BLOCK = blockItem("dead_moon_coral_block", GenesisBlocks.DEAD_MOON_CORAL_BLOCK);
     public static final RegistryObject<Item> DEAD_MOON_CORAL = blockItem("dead_moon_coral", GenesisBlocks.DEAD_MOON_CORAL);
     public static final RegistryObject<Item> DEAD_MOON_CORAL_FAN = ITEMS.register("dead_moon_coral_fan", () ->

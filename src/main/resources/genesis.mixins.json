@@ -18,6 +18,7 @@
   "mixins": [
     "AbstractArrowGravityMixin",
     "AbstractMinecartGravityMixin",
+    "BlockEntityTypeMixin",
     "BoatGravityMixin",
     "ExperienceOrbGravityMixin",
     "FallingBlockEntityGravityMixin",

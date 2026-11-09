@@ -24,6 +24,7 @@ public final class GenesisCreativeTabs {
                         output.accept(GenesisItems.WAVY_MOON_SAND.get());
                         output.accept(GenesisItems.DARK_MOON_SAND.get());
                         output.accept(GenesisItems.DARK_WAVY_MOON_SAND.get());
+                        output.accept(GenesisItems.SUSPICIOUS_DARK_MOON_SAND.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL_BLOCK.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL_FAN.get());
                         output.accept(GenesisItems.DEAD_MOON_CORAL.get());

@@ -3,8 +3,10 @@ package shipwrights.genesis.content;
 import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.BaseCoralPlantBlock;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -24,6 +26,14 @@ public final class GenesisBlocks {
     public static final RegistryObject<Block> WAVY_MOON_SAND = BLOCKS.register("wavy_moon_sand", () -> moonSand(MapColor.COLOR_LIGHT_GRAY));
     public static final RegistryObject<Block> DARK_MOON_SAND = BLOCKS.register("dark_moon_sand", () -> moonSand(MapColor.COLOR_GRAY));
     public static final RegistryObject<Block> DARK_WAVY_MOON_SAND = BLOCKS.register("dark_wavy_moon_sand", () -> moonSand(MapColor.COLOR_GRAY));
+    // Brushable, as vanilla's suspicious sand, revealing its loot table's item and turning into dark moon sand
+    public static final RegistryObject<Block> SUSPICIOUS_DARK_MOON_SAND = BLOCKS.register("suspicious_dark_moon_sand", () ->
+            new BrushableBlock(DARK_MOON_SAND.get(), BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.25F)
+                    .sound(SoundType.SUSPICIOUS_SAND)
+                    .pushReaction(PushReaction.DESTROY),
+                    SoundEvents.BRUSH_SAND, SoundEvents.BRUSH_SAND_COMPLETED));
 
     public static final RegistryObject<Block> MOON_STONE = BLOCKS.register("moon_stone", () ->
             new Block(BlockBehaviour.Properties.of()

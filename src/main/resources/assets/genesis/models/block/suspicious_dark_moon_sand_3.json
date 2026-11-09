@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "genesis:block/suspicious_dark_moon_sand_3"
+  }
+}
