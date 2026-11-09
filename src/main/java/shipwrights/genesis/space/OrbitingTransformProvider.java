@@ -23,8 +23,7 @@ import java.util.Optional;
  *
  * @param parent               celestial to orbit
  * @param distance             semi-major axis; the radius for circular orbits
- * @param period               ticks per orbit, negative for retrograde. Derived from the parent's mass via Kepler's
- *                             third law when absent
+ * @param period               ticks per orbit, negative for retrograde
  * @param eccentricity         0 for a circle, approaching 1 for increasingly stretched ellipses
  * @param inclination          tilt of the orbital plane
  * @param inclinationDirection direction, around Y from +X, of the line the orbital plane tilts about
@@ -36,7 +35,7 @@ import java.util.Optional;
 public record OrbitingTransformProvider(
         ResourceLocation parent,
         double distance,
-        Optional<Double> period,
+        double period,
         double eccentricity,
         double inclination,
         double inclinationDirection,
@@ -85,7 +84,7 @@ public record OrbitingTransformProvider(
         Celestial parentCelestial = getParent(celestials);
         Vector3dc parentPosition = parentCelestial.transformProvider().getPosition(celestials, time);
 
-        double eccentricAnomaly = solveKepler(getMeanAnomaly(parentCelestial, time), eccentricity);
+        double eccentricAnomaly = solveKepler(getMeanAnomaly(time), eccentricity);
         Vector3d position = new Vector3d(
                 distance * (Math.cos(eccentricAnomaly) - eccentricity),
                 0.0,
@@ -98,7 +97,7 @@ public record OrbitingTransformProvider(
     @Override
     public Quaterniondc getRotation(Registry<Celestial> celestials, Time time) {
         // Tidally locked bodies spin once per orbit, following the mean longitude so the same face points at the parent
-        double spin = Math.toRadians(periapsisAngle + rotation.startAngle()) + getMeanAnomaly(getParent(celestials), time);
+        double spin = Math.toRadians(periapsisAngle + rotation.startAngle()) + getMeanAnomaly(time);
         if (rotation.dayLength().isPresent()) {
             double dayLength = rotation.dayLength().get();
             spin += 2.0 * Math.PI * (time.simple() % dayLength) / dayLength;
@@ -132,12 +131,7 @@ public record OrbitingTransformProvider(
                 .rotateX(-Math.toRadians(inclination));
     }
 
-    private double getPeriod(Celestial parentCelestial) {
-        return period.orElseGet(() -> 2.0 * Math.PI * Math.sqrt(distance * distance * distance / parentCelestial.mass()));
-    }
-
-    private double getMeanAnomaly(Celestial parentCelestial, Time time) {
-        double period = getPeriod(parentCelestial);
+    private double getMeanAnomaly(Time time) {
         // Wrap before dividing so precision holds for large game times
         double meanMotion = 2.0 * Math.PI * (time.simple() % period) / period;
         return getStartMeanAnomaly() + meanMotion;
@@ -180,7 +174,7 @@ public record OrbitingTransformProvider(
         if (!(provider.eccentricity >= 0.0 && provider.eccentricity < 1.0)) {
             return DataResult.error(() -> "Orbit eccentricity must be at least 0 and less than 1, got " + provider.eccentricity);
         }
-        if (provider.period.filter(period -> period == 0.0).isPresent()) {
+        if (provider.period == 0.0) {
             return DataResult.error(() -> "Orbit period must not be 0");
         }
         if (provider.rotation.dayLength().filter(dayLength -> dayLength == 0.0).isPresent()) {
@@ -195,7 +189,7 @@ public record OrbitingTransformProvider(
             instance.group(
                     ResourceLocation.CODEC.fieldOf("parent").forGetter(OrbitingTransformProvider::parent),
                     Codec.DOUBLE.fieldOf("distance").forGetter(OrbitingTransformProvider::distance),
-                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "period").forGetter(OrbitingTransformProvider::period),
+                    Codec.DOUBLE.fieldOf("period").forGetter(OrbitingTransformProvider::period),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "eccentricity", 0.0).forGetter(OrbitingTransformProvider::eccentricity),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "inclination", 0.0).forGetter(OrbitingTransformProvider::inclination),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "inclinationDirection", 0.0).forGetter(OrbitingTransformProvider::inclinationDirection),

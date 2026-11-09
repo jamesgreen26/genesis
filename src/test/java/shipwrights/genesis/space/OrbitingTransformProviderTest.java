@@ -26,7 +26,6 @@ class OrbitingTransformProviderTest {
     private static final ResourceLocation PLANET = GenesisMod.id("planet");
     private static final ResourceLocation MOON = GenesisMod.id("moon");
     private static final Vector3dc STAR_POSITION = new Vector3d(5, 6, 7);
-    private static final double STAR_MASS = 1e6;
 
     private MappedRegistry<Celestial> celestials;
 
@@ -38,7 +37,7 @@ class OrbitingTransformProviderTest {
     @BeforeEach
     void setUp() {
         celestials = new MappedRegistry<>(Celestial.REGISTRY_KEY, Lifecycle.stable());
-        register(STAR, new Celestial(false, false, 10, STAR_MASS, 0, new StaticTransformProvider(STAR_POSITION, new Vector3d())));
+        register(STAR, new Celestial(false, false, 10, 1e6, 0, new StaticTransformProvider(STAR_POSITION, new Vector3d())));
     }
 
     @Test
@@ -110,22 +109,6 @@ class OrbitingTransformProviderTest {
     }
 
     @Test
-    void missingPeriodFollowsPhysics() {
-        double semiMajorAxis = 10000, eccentricity = 0.3;
-        register(PLANET, new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(
-                STAR, semiMajorAxis, Optional.empty(), eccentricity, 0, 0, 0, 0, OrbitingTransformProvider.Rotation.TIDALLY_LOCKED)));
-
-        // Start at periapsis with the vis-viva speed and integrate the two-body problem
-        double periapsis = semiMajorAxis * (1 - eccentricity);
-        Vector3d r0 = new Vector3d(periapsis, 0, 0);
-        Vector3d v0 = new Vector3d(0, 0, Math.sqrt(STAR_MASS * (2 / periapsis - 1 / semiMajorAxis)));
-
-        double dt = 50000;
-        Vector3d expected = integrate(r0, v0, STAR_MASS, dt).add(STAR_POSITION);
-        assertEquals(0, expected.distance(position(PLANET, at(dt))), 1e-6 * expected.length());
-    }
-
-    @Test
     void tidallyLockedFacesParent() {
         double radius = 10000, period = 50000;
         register(PLANET, orbit(STAR, radius, period, 0, 20, 45, 0, 0));
@@ -139,7 +122,7 @@ class OrbitingTransformProviderTest {
     void dayLengthIsMeasuredRelativeToParent() {
         double dayLength = 2400;
         register(PLANET, new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(
-                STAR, 10000, Optional.of(50000.0), 0, 0, 0, 0, 0,
+                STAR, 10000, 50000, 0, 0, 0, 0, 0,
                 new OrbitingTransformProvider.Rotation(Optional.of(dayLength), 0, 0))));
 
         assertEquals(0, localDirectionToParent(PLANET, STAR, at(0)).distance(0, 0, -1), 1e-9);
@@ -152,7 +135,7 @@ class OrbitingTransformProviderTest {
         double planetRadius = 10000, moonRadius = 100;
         register(PLANET, orbit(STAR, planetRadius, 50000, 0, 0, 0, 0, 0));
         register(MOON, new Celestial(false, false, 1, 1, 0, new OrbitingTransformProvider(
-                PLANET, moonRadius, Optional.of(3000.0), 0, 10, 0, 0, 0, OrbitingTransformProvider.Rotation.TIDALLY_LOCKED)));
+                PLANET, moonRadius, 3000, 0, 10, 0, 0, 0, OrbitingTransformProvider.Rotation.TIDALLY_LOCKED)));
 
         for (double t : new double[]{0, 750, 12500, 1e7}) {
             Time time = at(t);
@@ -164,8 +147,8 @@ class OrbitingTransformProviderTest {
     @Test
     void decodesWithDefaults() {
         OrbitingTransformProvider provider = decode("""
-                {"parent": "genesis:star", "distance": 750, "rotation": {"dayLength": "tidally_locked"}}""");
-        assertEquals(new OrbitingTransformProvider(STAR, 750, Optional.empty(), 0, 0, 0, 0, 0,
+                {"parent": "genesis:star", "distance": 750, "period": 1000, "rotation": {"dayLength": "tidally_locked"}}""");
+        assertEquals(new OrbitingTransformProvider(STAR, 750, 1000, 0, 0, 0, 0, 0,
                 OrbitingTransformProvider.Rotation.TIDALLY_LOCKED), provider);
 
         provider = decode("""
@@ -176,11 +159,15 @@ class OrbitingTransformProviderTest {
     @Test
     void rejectsInvalidOrbits() {
         assertTrue(decodeResult("""
-                {"parent": "genesis:star", "distance": 750, "eccentricity": 1}""").error().isPresent());
+                {"parent": "genesis:star", "distance": 750, "period": 1000, "eccentricity": 1}""").error().isPresent());
         assertTrue(decodeResult("""
-                {"parent": "genesis:star", "distance": 0}""").error().isPresent());
+                {"parent": "genesis:star", "distance": 0, "period": 1000}""").error().isPresent());
         assertTrue(decodeResult("""
-                {"parent": "genesis:star", "distance": 750, "rotation": {"dayLength": "spinning"}}""").error().isPresent());
+                {"parent": "genesis:star", "distance": 750}""").error().isPresent());
+        assertTrue(decodeResult("""
+                {"parent": "genesis:star", "distance": 750, "period": 0}""").error().isPresent());
+        assertTrue(decodeResult("""
+                {"parent": "genesis:star", "distance": 750, "period": 1000, "rotation": {"dayLength": "spinning"}}""").error().isPresent());
     }
 
     @Test
@@ -193,7 +180,7 @@ class OrbitingTransformProviderTest {
                 .getOrThrow(false, error -> {
                     throw new AssertionError(error);
                 });
-        assertEquals(new OrbitingTransformProvider(STAR, 750, Optional.of(184329.0), 0, 0, 0, 0, 0,
+        assertEquals(new OrbitingTransformProvider(STAR, 750, 184329, 0, 0, 0, 0, 0,
                 OrbitingTransformProvider.Rotation.TIDALLY_LOCKED), celestial.transformProvider());
     }
 
@@ -224,7 +211,7 @@ class OrbitingTransformProviderTest {
 
     private static Celestial orbit(ResourceLocation parent, double distance, double period, double eccentricity,
                                    double inclination, double inclinationDirection, double periapsisAngle, double startAngle) {
-        return new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(parent, distance, Optional.of(period),
+        return new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(parent, distance, period,
                 eccentricity, inclination, inclinationDirection, periapsisAngle, startAngle,
                 OrbitingTransformProvider.Rotation.TIDALLY_LOCKED));
     }
@@ -242,26 +229,5 @@ class OrbitingTransformProviderTest {
     private static Time at(double t) {
         long ticks = (long) t;
         return new Time(ticks, (float) (t - ticks));
-    }
-
-    // RK4 reference solution for the two-body problem
-    private static Vector3d integrate(Vector3dc r0, Vector3dc v0, double mu, double duration) {
-        Vector3d r = new Vector3d(r0), v = new Vector3d(v0);
-        int steps = 100000;
-        double h = duration / steps;
-        for (int i = 0; i < steps; i++) {
-            Vector3d k1r = new Vector3d(v), k1v = gravity(r, mu);
-            Vector3d k2r = new Vector3d(v).fma(h / 2, k1v), k2v = gravity(new Vector3d(r).fma(h / 2, k1r), mu);
-            Vector3d k3r = new Vector3d(v).fma(h / 2, k2v), k3v = gravity(new Vector3d(r).fma(h / 2, k2r), mu);
-            Vector3d k4r = new Vector3d(v).fma(h, k3v), k4v = gravity(new Vector3d(r).fma(h, k3r), mu);
-            r.fma(h / 6, k1r).fma(h / 3, k2r).fma(h / 3, k3r).fma(h / 6, k4r);
-            v.fma(h / 6, k1v).fma(h / 3, k2v).fma(h / 3, k3v).fma(h / 6, k4v);
-        }
-        return r;
-    }
-
-    private static Vector3d gravity(Vector3dc r, double mu) {
-        double length = r.length();
-        return new Vector3d(r).mul(-mu / (length * length * length));
     }
 }
