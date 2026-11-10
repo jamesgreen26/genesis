@@ -163,7 +163,7 @@ dependencies {
     testImplementation("org.joml:joml-primitives:1.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
-    modImplementation("g_mungus:zps:1.20.1-2.7.0-pre3") // libs/zps-1.20.1-2.7.0-pre3.jar
+    modImplementation("g_mungus:zps:1.20.1-2.7.0-pre4") // libs/zps-1.20.1-2.7.0-pre4.jar
     // Optional, but needed in dev: ZPS gametests reference Create classes, and Forge loads every gametest class in dev
     modRuntimeOnly("maven.modrinth:create:mc1.20.1-6.0.8")
 
