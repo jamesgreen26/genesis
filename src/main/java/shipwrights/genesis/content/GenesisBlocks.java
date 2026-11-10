@@ -113,8 +113,8 @@ public final class GenesisBlocks {
                     .pushReaction(PushReaction.DESTROY)
                     .isRedstoneConductor((state, level, pos) -> false)));
 
-    // A cluster pointing out from the surface it grows on, as vanilla's amethyst clusters do. Drops ice shards but never
-    // itself (not even with silk touch), so it can't be had in survival
+    // A cluster pointing out from the surface it grows on, as vanilla's amethyst clusters do. Drops nothing (not even
+    // itself with silk touch), so it can't be had in survival
     public static final RegistryObject<Block> ICE_CRYSTAL = BLOCKS.register("ice_crystal", () ->
             new AmethystClusterBlock(7, 3, BlockBehaviour.Properties.of()
                     .mapColor(MapColor.ICE)
@@ -123,7 +123,8 @@ public final class GenesisBlocks {
                     .strength(0.3F)
                     .sound(SoundType.GLASS)
                     .lightLevel(state -> 5)
-                    .pushReaction(PushReaction.DESTROY)));
+                    .pushReaction(PushReaction.DESTROY)
+                    .noLootTable()));
 
     public static final RegistryObject<Block> THIN_ICE = BLOCKS.register("thin_ice", () ->
             new ThinIceBlock(BlockBehaviour.Properties.of()

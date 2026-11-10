@@ -40,7 +40,6 @@ public final class GenesisCreativeTabs {
                         output.accept(GenesisItems.DEAD_MOON_CORAL.get());
                         output.accept(GenesisItems.ICICLE.get());
                         output.accept(GenesisItems.ICE_CRYSTAL.get());
-                        output.accept(GenesisItems.ICE_SHARD.get());
                         output.accept(GenesisItems.ANORTHITE_CRYSTAL.get());
                         output.accept(GenesisItems.ZIRCON.get());
                         output.accept(GenesisItems.MOON_CRAWLER_SPAWN_EGG.get());
