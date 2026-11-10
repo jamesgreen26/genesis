@@ -30,6 +30,7 @@ public class GenesisMod {
         GenesisCreativeTabs.CREATIVE_MODE_TABS.register(modBus);
         GenesisDensityFunctions.DENSITY_FUNCTION_TYPES.register(modBus);
         GenesisFeatures.FEATURES.register(modBus);
+        modBus.addListener(GenesisOverridesPack::addPackFinders);
     }
 
     public static ResourceLocation id(String location) {
