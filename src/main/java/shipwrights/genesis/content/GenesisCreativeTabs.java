@@ -28,6 +28,7 @@ public final class GenesisCreativeTabs {
                         output.accept(GenesisItems.MOON_REDSTONE_ORE.get());
                         output.accept(GenesisItems.MOON_LITHIUM_ORE.get());
                         output.accept(GenesisItems.ANORTHITE.get());
+                        output.accept(GenesisItems.CRYSTALLINE_BASALT.get());
                         output.accept(GenesisItems.MOON_SAND.get());
                         output.accept(GenesisItems.WAVY_MOON_SAND.get());
                         output.accept(GenesisItems.DARK_MOON_SAND.get());
@@ -41,6 +42,7 @@ public final class GenesisCreativeTabs {
                         output.accept(GenesisItems.ICE_CRYSTAL.get());
                         output.accept(GenesisItems.ICE_SHARD.get());
                         output.accept(GenesisItems.ANORTHITE_CRYSTAL.get());
+                        output.accept(GenesisItems.ZIRCON.get());
                         output.accept(GenesisItems.MOON_CRAWLER_SPAWN_EGG.get());
                     })
                     .build());

@@ -12,17 +12,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import shipwrights.genesis.content.GenesisBlocks;
 
 /// A cluster of basalt columns rising from a geothermal pool, tallest in the middle and some breaking the surface, with
-/// a crust of basalt and smooth basalt on the dry floor around it. Placed at a water block on a pool's floor, after
-/// {@link GeothermalFeature}. The magma under the water is left alone, and columns stop short of
-/// {@link GeothermalFeature#ICE_MIN_Y} so they stay in the stone gap.
+/// a crust of basalt and smooth basalt on the dry floor around it. Some of the column blocks are crystalline basalt.
+/// Placed at a water block on a pool's floor, after {@link GeothermalFeature}. The magma under the water is left alone,
+/// and columns stop short of {@link GeothermalFeature#ICE_MIN_Y} so they stay in the stone gap.
 public class BasaltFormationFeature extends Feature<NoneFeatureConfiguration> {
     private static final int MIN_RADIUS = 2;
     private static final int MAX_RADIUS = 4;
     private static final int MIN_PEAK = 3;
     private static final int MAX_PEAK = 8;
     private static final float COLUMN_CHANCE = 0.7F;
+    /// The chance each column block is crystalline basalt instead of basalt
+    private static final float ORE_CHANCE = 0.08F;
     /// How far past the columns the crust spreads
     private static final int CRUST_SPREAD = 2;
     private static final float CRUST_CHANCE = 0.6F;
@@ -47,6 +50,7 @@ public class BasaltFormationFeature extends Feature<NoneFeatureConfiguration> {
         int radius = Mth.nextInt(random, MIN_RADIUS, MAX_RADIUS);
         int peak = Mth.nextInt(random, MIN_PEAK, MAX_PEAK);
         BlockState basalt = Blocks.BASALT.defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+        BlockState ore = GenesisBlocks.CRYSTALLINE_BASALT.get().defaultBlockState();
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         boolean placed = false;
 
@@ -71,7 +75,7 @@ public class BasaltFormationFeature extends Feature<NoneFeatureConfiguration> {
                         if (pos.getY() >= GeothermalFeature.ICE_MIN_Y || !(state.isAir() || state.is(Blocks.WATER))) {
                             break;
                         }
-                        level.setBlock(pos, basalt, 2);
+                        level.setBlock(pos, random.nextFloat() < ORE_CHANCE ? ore : basalt, 2);
                         placed = true;
                     }
                 }

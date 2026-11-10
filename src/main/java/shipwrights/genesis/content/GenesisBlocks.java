@@ -4,6 +4,7 @@ import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.BaseCoralPlantBlock;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -73,6 +74,17 @@ public final class GenesisBlocks {
             new DropExperienceBlock(BlockBehaviour.Properties.copy(Blocks.COPPER_ORE)
                     .mapColor(MapColor.COLOR_GRAY)
                     .sound(SoundType.DEEPSLATE)));
+
+    /// Basalt with energy crystals growing through it, found in the basalt formations of the moon's geothermal depths
+    /// ({@link shipwrights.genesis.worldgen.BasaltFormationFeature})
+    public static final RegistryObject<Block> CRYSTALLINE_BASALT = BLOCKS.register("crystalline_basalt", () ->
+            new DropExperienceBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .instrument(NoteBlockInstrument.BASEDRUM)
+                    .strength(3.0F, 4.2F)
+                    .sound(SoundType.BASALT)
+                    .requiresCorrectToolForDrops(),
+                    UniformInt.of(3, 7)));
 
     public static final RegistryObject<Block> HALLOW_MOON_STONE = BLOCKS.register("hallow_moon_stone", () ->
             new Block(BlockBehaviour.Properties.of()

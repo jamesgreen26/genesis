@@ -27,6 +27,8 @@ public final class GenesisItems {
     public static final RegistryObject<Item> MOON_LITHIUM_ORE = blockItem("moon_lithium_ore", GenesisBlocks.MOON_LITHIUM_ORE);
     public static final RegistryObject<Item> ANORTHITE = blockItem("anorthite", GenesisBlocks.ANORTHITE);
     public static final RegistryObject<Item> ANORTHITE_CRYSTAL = ITEMS.register("anorthite_crystal", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> CRYSTALLINE_BASALT = blockItem("crystalline_basalt", GenesisBlocks.CRYSTALLINE_BASALT);
+    public static final RegistryObject<Item> ZIRCON = ITEMS.register("zircon", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> MOON_SAND = blockItem("moon_sand", GenesisBlocks.MOON_SAND);
     public static final RegistryObject<Item> WAVY_MOON_SAND = blockItem("wavy_moon_sand", GenesisBlocks.WAVY_MOON_SAND);
     public static final RegistryObject<Item> DARK_MOON_SAND = blockItem("dark_moon_sand", GenesisBlocks.DARK_MOON_SAND);
