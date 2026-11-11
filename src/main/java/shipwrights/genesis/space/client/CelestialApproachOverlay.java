@@ -16,13 +16,20 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.math.OBB;
+import shipwrights.genesis.space.travel.CelestialTravel;
 
-/// Fades the screen out as the camera, in space, nears the surface of a celestial that can be visited: one with a
-/// dimension of its own, sharing its id. Drawn over vanilla's freezing overlay, under the rest of the HUD.
+/// Fades the screen out as the camera nears where travel between space and a celestial's dimension happens: in space,
+/// the surface of a celestial that can be visited, one with a dimension of its own sharing its id; in a celestial's
+/// dimension, the {@linkplain GenesisCommonConfig#atmosphereExitHeight() exit height}. Drawn over vanilla's freezing
+/// overlay, under the rest of the HUD.
+///
+/// Below the exit height, the camera is taken to be as far from it as from the distance in space at which things
+/// arrive at a celestial, {@link CelestialTravel#ARRIVAL_DISTANCE}, so the screen fades the same way approaching either.
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class CelestialApproachOverlay {
 
@@ -45,7 +52,7 @@ public class CelestialApproachOverlay {
         });
     }
 
-    /// From 0 when no visitable celestial is near, to 1 within {@link #OPAQUE_DISTANCE} of a visitable celestial's surface
+    /// From 0 far from where travel happens, to 1 within {@link #OPAQUE_DISTANCE} of it
     private static float opacity(float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientLevel level = minecraft.level;
@@ -55,23 +62,43 @@ public class CelestialApproachOverlay {
         Time time = Time.get(level, partialTick);
         Vec3 cameraPos = minecraft.gameRenderer.getMainCamera().getPosition();
         Vector3d camera = new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z);
-        if (!(VantagePoint.get(level, time, camera) instanceof VantagePoint.InSpace)) return 0f;
 
+        VantagePoint vantagePoint = VantagePoint.get(level, time, camera);
+        double distance;
+        if (vantagePoint instanceof VantagePoint.InSpace) {
+            distance = distanceToVisitableCelestial(level, connection, time, camera);
+        } else if (vantagePoint instanceof VantagePoint.OnCelestial) {
+            distance = distanceToExitHeight(connection, camera.y);
+        } else {
+            return 0f;
+        }
+        float opacity = (float) Mth.clamp(1.0 - (distance - OPAQUE_DISTANCE) / FADE_DISTANCE, 0.0, 1.0);
+        // Ease in, so the fade starts gently and only closes in right at the surface
+        return opacity * opacity;
+    }
+
+    /// From the surface of the nearest celestial with a dimension of its own
+    private static double distanceToVisitableCelestial(ClientLevel level, ClientPacketListener connection, Time time,
+                                                       Vector3d camera) {
         Registry<Celestial> celestials = level.registryAccess().registry(Celestial.REGISTRY_KEY).orElse(null);
-        if (celestials == null) return 0f;
+        if (celestials == null) return Double.POSITIVE_INFINITY;
 
-        float opacity = 0f;
+        double nearest = Double.POSITIVE_INFINITY;
         for (var entry : celestials.entrySet()) {
             ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, entry.getKey().location());
             if (!connection.levels().contains(dimension)) continue;
-
-            Celestial celestial = entry.getValue();
-            double distance = distanceToSurface(celestial, celestials, time, camera);
-            float celestialOpacity = (float) Mth.clamp(1.0 - (distance - OPAQUE_DISTANCE) / FADE_DISTANCE, 0.0, 1.0);
-            opacity = Math.max(opacity, celestialOpacity);
+            nearest = Math.min(nearest, distanceToSurface(entry.getValue(), celestials, time, camera));
         }
-        // Ease in, so the fade starts gently and only closes in right at the surface
-        return opacity * opacity;
+        return nearest;
+    }
+
+    /// The exit height, as if it were {@link CelestialTravel#ARRIVAL_DISTANCE} from a celestial's surface in space.
+    /// Uses this client's copy of the common config, which the server doesn't send it
+    private static double distanceToExitHeight(ClientPacketListener connection, double cameraY) {
+        if (!connection.levels().contains(ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE))) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return GenesisCommonConfig.atmosphereExitHeight() - cameraY + CelestialTravel.ARRIVAL_DISTANCE;
     }
 
     /// Distance from {@code point} to the surface of the cube {@code celestial} is drawn as; 0 inside it
