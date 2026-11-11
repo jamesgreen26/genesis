@@ -4,16 +4,32 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.ThinIceBlock;
 
-/// Both of these run for players on the server too, from their movement packets
 @Mixin(Entity.class)
-public class EntityMixin {
+public abstract class EntityMixin {
+    @Shadow
+    public abstract Level level();
+
+    /// Space has no void: nothing that drifts below the bottom of the world is hurt (living entities) or removed
+    /// (everything else). Every entity's check for the void comes through here
+    @Inject(method = "checkBelowWorld", at = @At("HEAD"), cancellable = true)
+    private void genesis$noVoidInSpace(CallbackInfo ci) {
+        if (GenesisMod.isSpaceLikeDimension(level())) {
+            ci.cancel();
+        }
+    }
+
+    // The thin ice handling below runs for players on the server too, from their movement packets
+
     /// Vanilla only adds to the fall distance while still in the air, leaving out the last move, onto the ground. So
     /// something that has just broken through thin ice and hits more below it within a tick or two, as down a tower of
     /// it, would seem to have barely fallen, if at all, and land on it. Count that last move onto thin ice, so that it
