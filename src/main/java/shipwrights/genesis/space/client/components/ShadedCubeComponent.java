@@ -31,6 +31,7 @@ import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.Daylight;
 import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.client.CelestialPlacement;
@@ -42,7 +43,6 @@ import shipwrights.genesis.space.client.shading.ShadowRenderer;
 import shipwrights.genesis.space.math.AAPlane;
 import shipwrights.genesis.space.math.OBB;
 
-import java.util.Comparator;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -108,7 +108,7 @@ public record ShadedCubeComponent(
         Quaterniondc rotation = toRender.transformProvider().getRotation(registry, time);
 
         // Nothing to light the cube with
-        Optional<Vector3dc> starPosition = nearestLightSource(registry, toRender, position, time);
+        Optional<Vector3dc> starPosition = Daylight.nearestLightSource(registry, toRender, position, time);
         if (starPosition.isEmpty()) return;
 
         List<FaceShadow> shadows = drawShadows
@@ -123,17 +123,6 @@ public record ShadedCubeComponent(
         CelestialPlacement placement = CelestialPlacement.of(context);
         ResourceLocation id = registry.getKey(toRender);
         renderCubeAt(id, shadows, context.poseStack(), placement.position(), placement.halfExtent(), placement.rotation());
-    }
-
-    /// Where the light falling on a celestial at {@code position} comes from: itself if it casts light, otherwise the
-    /// nearest celestial that does
-    static Optional<Vector3dc> nearestLightSource(Registry<Celestial> registry, Celestial toRender, Vector3dc position, Time time) {
-        if (toRender.castsLight()) return Optional.of(position);
-
-        return registry.stream()
-                .filter(Celestial::castsLight)
-                .map(it -> it.transformProvider().getPosition(registry, time))
-                .min(Comparator.comparingDouble(it -> it.distanceSquared(position)));
     }
 
     private static List<FaceShadow> computeShadows(Registry<Celestial> registry, Celestial toRender, Vector3dc position,

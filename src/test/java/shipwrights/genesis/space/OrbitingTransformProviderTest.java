@@ -131,6 +131,19 @@ class OrbitingTransformProviderTest {
     }
 
     @Test
+    void parentSetsInTheWestAfterNoon() {
+        double dayLength = 2400;
+        register(PLANET, new Celestial(false, false, 5, 1e3, 0, new OrbitingTransformProvider(
+                STAR, 10000, 50000, 0, 0, 0, 0, 0,
+                new OrbitingTransformProvider.Rotation(Optional.of(dayLength), 0, 0))));
+
+        // Overhead on the -Z face at noon; a quarter of a day later, on the horizon at +X, which is west there (see
+        // VantagePoint)
+        assertEquals(0, localDirectionToParent(PLANET, STAR, at(dayLength / 4)).distance(1, 0, 0), 1e-3);
+        assertEquals(0, localDirectionToParent(PLANET, STAR, at(3 * dayLength / 4)).distance(-1, 0, 0), 1e-3);
+    }
+
+    @Test
     void nestedOrbitsFollowTheirParents() {
         double planetRadius = 10000, moonRadius = 100;
         register(PLANET, orbit(STAR, planetRadius, 50000, 0, 0, 0, 0, 0));

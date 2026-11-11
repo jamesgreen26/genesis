@@ -50,8 +50,9 @@ public record OrbitingTransformProvider(
     private static final double TOLERANCE = 1e-12;
 
     /**
-     * @param dayLength  ticks between the parent returning to the same place in the sky, negative for retrograde
-     *                   spin. Empty when tidally locked
+     * @param dayLength  ticks between the parent returning to the same place in the sky. Positive spins it east, as
+     *                   {@link VantagePoint} has it, so the parent rises in the east; negative the other way. Empty when
+     *                   tidally locked
      * @param axialTilt  tilt of the spin axis away from the orbit normal, about the ascending node
      * @param startAngle spin at tick 0, measured from the -Z face pointing at the parent
      */
@@ -96,17 +97,19 @@ public record OrbitingTransformProvider(
 
     @Override
     public Quaterniondc getRotation(Registry<Celestial> celestials, Time time) {
-        // Tidally locked bodies spin once per orbit, following the mean longitude so the same face points at the parent
-        double spin = Math.toRadians(periapsisAngle + rotation.startAngle()) + getMeanAnomaly(time);
+        // Tidally locked bodies turn once per orbit, in the same sense, following the mean longitude so the same face
+        // points at the parent. The extra quarter turn points -Z at the parent rather than +X away from it
+        double angle = Math.PI / 2.0 - Math.toRadians(periapsisAngle + rotation.startAngle()) - getMeanAnomaly(time);
+
+        // A day turns it from there the other way, right-handed about +Y, which is east on its surface
         if (rotation.dayLength().isPresent()) {
             double dayLength = rotation.dayLength().get();
-            spin += 2.0 * Math.PI * (time.simple() % dayLength) / dayLength;
+            angle += 2.0 * Math.PI * (time.simple() % dayLength) / dayLength;
         }
 
-        // Spin is in the same sense as the orbit; the extra quarter turn points -Z at the parent rather than +X away from it
         return getOrbitalPlane()
                 .rotateX(-Math.toRadians(rotation.axialTilt()))
-                .rotateY(Math.PI / 2.0 - spin);
+                .rotateY(angle);
     }
 
     @Override

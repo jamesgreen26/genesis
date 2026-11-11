@@ -41,7 +41,8 @@ public class CelestialTravelGameTests {
         Chicken chicken = helper.spawnWithNoFreeWill(EntityType.CHICKEN, new BlockPos(1, 2, 1));
         chicken.startRiding(pig, true);
         pig.moveTo(pig.getX(), GenesisCommonConfig.atmosphereExitHeight() + 5, pig.getZ());
-        pig.setDeltaMovement(0, 1, 0);
+        // Slowly, so it's still near where it arrives when it's checked, a tick or two later
+        pig.setDeltaMovement(0, 0.2, 0);
         UUID pigId = pig.getUUID();
         UUID chickenId = chicken.getUUID();
 
@@ -55,13 +56,14 @@ public class CelestialTravelGameTests {
             OBB overworldCube = cube(space, Level.OVERWORLD.location());
             Vector3d position = new Vector3d(arrived.getX(), arrived.getY(), arrived.getZ());
             double distance = overworldCube.closestPointTo(position).distance(position);
-            helper.assertTrue(Math.abs(distance - CelestialTravel.DEPARTURE_DISTANCE) < 1,
+            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 0.5
+                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 2,
                     "pig arrived " + distance + " blocks from the overworld");
 
             // Up, which it was moving, is out from the overworld's surface in space
             Vector3d outward = new Vector3d(position).sub(overworldCube.closestPointTo(position)).normalize();
             Vec3 velocity = arrived.getDeltaMovement();
-            helper.assertTrue(new Vector3d(velocity.x, velocity.y, velocity.z).dot(outward) > 0.5,
+            helper.assertTrue(new Vector3d(velocity.x, velocity.y, velocity.z).normalize().dot(outward) > 0.9,
                     "pig isn't moving away from the overworld: " + velocity);
 
             rider.discard();

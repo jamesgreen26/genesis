@@ -25,10 +25,12 @@
     "FallingBlockEntityGravityMixin",
     "FishingHookGravityMixin",
     "ItemEntityGravityMixin",
+    "LevelMixin",
     "LivingEntityMixin",
     "LlamaSpitGravityMixin",
     "PrimedTntGravityMixin",
-    "ThrowableProjectileGravityMixin"
+    "ThrowableProjectileGravityMixin",
+    "TimeCommandMixin"
   ],
   "injectors": {
     "defaultRequire": 1

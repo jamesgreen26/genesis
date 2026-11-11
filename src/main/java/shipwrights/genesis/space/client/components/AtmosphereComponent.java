@@ -24,6 +24,7 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
+import shipwrights.genesis.space.Daylight;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
@@ -92,7 +93,7 @@ public record AtmosphereComponent(
 
         Registry<Celestial> registry = context.clientLevel().registryAccess().registryOrThrow(Celestial.REGISTRY_KEY);
         Vector3dc position = context.toRender().transformProvider().getPosition(registry, context.time());
-        Optional<Vector3dc> lightSource = ShadedCubeComponent.nearestLightSource(registry, context.toRender(), position, context.time());
+        Optional<Vector3dc> lightSource = Daylight.nearestLightSource(registry, context.toRender(), position, context.time());
         if (lightSource.isEmpty()) return;
 
         Quaternionf rotation = new Quaternionf(placement.rotation());
