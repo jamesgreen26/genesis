@@ -3,8 +3,11 @@ package shipwrights.genesis;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.content.GenesisBlocks;
 import shipwrights.genesis.content.GenesisCreativeTabs;
 import shipwrights.genesis.content.GenesisEntityTypes;
@@ -31,6 +34,7 @@ public class GenesisMod {
         GenesisDensityFunctions.DENSITY_FUNCTION_TYPES.register(modBus);
         GenesisFeatures.FEATURES.register(modBus);
         modBus.addListener(GenesisOverridesPack::addPackFinders);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GenesisCommonConfig.SPEC);
     }
 
     public static ResourceLocation id(String location) {

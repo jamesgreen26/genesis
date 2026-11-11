@@ -11,8 +11,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.ThinIceBlock;
+import shipwrights.genesis.space.travel.CelestialTravel;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -25,6 +27,16 @@ public abstract class EntityMixin {
     private void genesis$noVoidInSpace(CallbackInfo ci) {
         if (GenesisMod.isSpaceLikeDimension(level())) {
             ci.cancel();
+        }
+    }
+
+    /// Vanilla won't let anything riding or ridden change dimension, but travel to and from space takes everything
+    /// riding along. While it checks what's riding, leave that out, keeping whatever else subclasses rule out, as they
+    /// add to this
+    @Inject(method = "canChangeDimensions", at = @At("HEAD"), cancellable = true)
+    private void genesis$travelWithRiders(CallbackInfoReturnable<Boolean> cir) {
+        if (CelestialTravel.isCheckingStack()) {
+            cir.setReturnValue(true);
         }
     }
 
