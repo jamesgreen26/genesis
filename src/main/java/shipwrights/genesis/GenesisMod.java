@@ -13,6 +13,7 @@ import shipwrights.genesis.content.GenesisCreativeTabs;
 import shipwrights.genesis.content.GenesisEntityTypes;
 import shipwrights.genesis.content.GenesisItems;
 import shipwrights.genesis.content.GenesisMobEffects;
+import shipwrights.genesis.network.GenesisNetwork;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.worldgen.GenesisDensityFunctions;
 import shipwrights.genesis.worldgen.GenesisFeatures;
@@ -35,6 +36,7 @@ public class GenesisMod {
         GenesisFeatures.FEATURES.register(modBus);
         modBus.addListener(GenesisOverridesPack::addPackFinders);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GenesisCommonConfig.SPEC);
+        GenesisNetwork.register();
     }
 
     public static ResourceLocation id(String location) {

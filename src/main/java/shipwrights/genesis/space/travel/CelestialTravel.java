@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -25,6 +26,8 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.config.GenesisCommonConfig;
+import shipwrights.genesis.network.CelestialTravelledPacket;
+import shipwrights.genesis.network.GenesisNetwork;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.math.OBB;
@@ -218,6 +221,10 @@ public final class CelestialTravel {
             return null;
         }
 
+        if (moved instanceof ServerPlayer player) {
+            GenesisNetwork.sendTo(player, new CelestialTravelledPacket());
+        }
+
         for (Entity passenger : passengers) {
             Entity movedPassenger = teleportStack(passenger, to, position, velocity, rotation);
             if (movedPassenger != null) {
@@ -307,7 +314,7 @@ public final class CelestialTravel {
         }
 
         @Override
-        public boolean playTeleportSound(net.minecraft.server.level.ServerPlayer player, ServerLevel sourceWorld,
+        public boolean playTeleportSound(ServerPlayer player, ServerLevel sourceWorld,
                                          ServerLevel destWorld) {
             return false;
         }

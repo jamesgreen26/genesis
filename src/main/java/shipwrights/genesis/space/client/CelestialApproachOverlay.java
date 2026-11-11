@@ -1,6 +1,7 @@
 package shipwrights.genesis.space.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.Registry;
@@ -10,8 +11,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Vector3d;
@@ -30,6 +33,9 @@ import shipwrights.genesis.space.travel.CelestialTravel;
 ///
 /// Below the exit height, the camera is taken to be as far from it as from the distance in space at which things
 /// arrive at a celestial, {@link CelestialTravel#ARRIVAL_DISTANCE}, so the screen fades the same way approaching either.
+///
+/// After travelling, the overlay also fades out over {@link #ARRIVAL_FADE_TICKS}, whatever the camera's position. The
+/// more opaque of the two shows.
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class CelestialApproachOverlay {
 
@@ -39,8 +45,19 @@ public class CelestialApproachOverlay {
     /// Over how many blocks, beyond {@link #OPAQUE_DISTANCE}, the overlay fades in
     private static final double FADE_DISTANCE = 12.0;
 
+    /// Over how many ticks after travelling the overlay fades out
+    private static final int ARRIVAL_FADE_TICKS = 40;
+
     /// RGB of the overlay
     private static final int COLOR = 0xC0C0C0;
+
+    /// Ticks left of the fade after travelling
+    private static int arrivalFadeTicks = 0;
+
+    /// Called when this client's player has just travelled between space and a celestial's dimension
+    public static void startArrivalFade() {
+        arrivalFadeTicks = ARRIVAL_FADE_TICKS;
+    }
 
     @SubscribeEvent
     public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
@@ -52,8 +69,15 @@ public class CelestialApproachOverlay {
         });
     }
 
-    /// From 0 far from where travel happens, to 1 within {@link #OPAQUE_DISTANCE} of it
     private static float opacity(float partialTick) {
+        float positional = positionalOpacity(partialTick);
+        float arrival = Mth.clamp((arrivalFadeTicks - partialTick) / ARRIVAL_FADE_TICKS, 0f, 1f);
+        // Ease out, so it clears gently at the end
+        return Math.max(positional, arrival * arrival);
+    }
+
+    /// From 0 far from where travel happens, to 1 within {@link #OPAQUE_DISTANCE} of it
+    private static float positionalOpacity(float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientLevel level = minecraft.level;
         ClientPacketListener connection = minecraft.getConnection();
@@ -107,5 +131,23 @@ public class CelestialApproachOverlay {
         OBB cube = OBB.createCube(celestial.size(), transform.getRotation(celestials, time),
                 transform.getPosition(celestials, time));
         return cube.closestPointTo(point).distance(point);
+    }
+
+    @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
+    public static class ArrivalFade {
+        @SubscribeEvent
+        public static void onClientTick(TickEvent.ClientTickEvent event) {
+            // Not while the new dimension is still loading, behind its loading screen
+            if (event.phase != TickEvent.Phase.END || arrivalFadeTicks <= 0
+                    || Minecraft.getInstance().screen instanceof ReceivingLevelScreen) {
+                return;
+            }
+            arrivalFadeTicks--;
+        }
+
+        @SubscribeEvent
+        public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+            arrivalFadeTicks = 0;
+        }
     }
 }
