@@ -57,7 +57,7 @@ public record StarComponent(
     @Override
     public void render(CelestialRenderContext context) {
         CelestialPlacement placement = CelestialPlacement.of(context);
-        float opacity = placement.alpha() * context.weatherVisibility();
+        float opacity = context.weatherVisibility();
         if (opacity < 0.01f) return;
 
         Quaternionf rotation = new Quaternionf(placement.rotation());

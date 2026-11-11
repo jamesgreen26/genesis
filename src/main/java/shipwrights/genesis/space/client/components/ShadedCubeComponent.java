@@ -30,7 +30,6 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.mixin.FogRendererAccessor;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.VantagePoint;
@@ -123,7 +122,7 @@ public record ShadedCubeComponent(
 
         CelestialPlacement placement = CelestialPlacement.of(context);
         ResourceLocation id = registry.getKey(toRender);
-        renderCubeAt(id, shadows, context.poseStack(), placement.position(), placement.halfExtent(), placement.rotation(), placement.alpha());
+        renderCubeAt(id, shadows, context.poseStack(), placement.position(), placement.halfExtent(), placement.rotation());
     }
 
     /// Where the light falling on a celestial at {@code position} comes from: itself if it casts light, otherwise the
@@ -153,7 +152,7 @@ public record ShadedCubeComponent(
     }
 
     private static void renderCubeAt(ResourceLocation planetID, List<FaceShadow> shadows, PoseStack poseStack,
-                                     Vector3dc position, double halfExtent, Quaterniondc localRotation, float alpha) {
+                                     Vector3dc position, double halfExtent, Quaterniondc localRotation) {
         // Get the texture for this planet
         ResourceLocation textureLocation = GenesisMod.id("celestials/" + planetID.getNamespace() + "/" + planetID.getPath());
 
@@ -174,12 +173,12 @@ public record ShadedCubeComponent(
         float third = 1.0f / 3.0f;
         float twoThirds = 2.0f / 3.0f;
 
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f, alpha);        // South face (+Z)
-        addTexturedCubeFace(matrix, buffer, rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f, alpha);        // North face (-Z)
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f, alpha);       // West face (-X)
-        addTexturedCubeFace(matrix, buffer, rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f, alpha);            // East face (+X)
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f, alpha);       // Down face (-Y)
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f, alpha);        // Up face (+Y)
+        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f);        // South face (+Z)
+        addTexturedCubeFace(matrix, buffer, rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f);        // North face (-Z)
+        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f);       // West face (-X)
+        addTexturedCubeFace(matrix, buffer, rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f);            // East face (+X)
+        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f);       // Down face (-Y)
+        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f);        // Up face (+Y)
 
         // End batch to flush planet rendering
         bufferSource.endBatch(renderType);
@@ -194,27 +193,22 @@ public record ShadedCubeComponent(
                                             float x2, float y2, float z2,
                                             float x3, float y3, float z3,
                                             float x4, float y4, float z4,
-                                            float u1, float v1, float u2, float v2, float alpha) {
-        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, rotation, alpha);
-        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, rotation, alpha);
-        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, rotation, alpha);
-        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, rotation, alpha);
+                                            float u1, float v1, float u2, float v2) {
+        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, rotation);
     }
 
     private static void addTexturedVertexWithLighting(Matrix4f matrix, VertexConsumer buffer,
                                                       float x, float y, float z,
                                                       float u, float v,
-                                                      Quaternionf rotation, float alpha) {
-        // Pass fog color in RGB and alpha in A for shader interpolation
-        int fogRed = (int) (255 * FogRendererAccessor.getFogRed());
-        int fogGreen = (int) (255 * FogRendererAccessor.getFogGreen());
-        int fogBlue = (int) (255 * FogRendererAccessor.getFogBlue());
-
+                                                      Quaternionf rotation) {
         Vector3f rotatedNormal = rotation.transform(new Vector3f(x, y, z).normalize());
 
         buffer.vertex(matrix, x, y, z)
                 .uv(u, v)
-                .color(fogRed, fogGreen, fogBlue, (int) (alpha * 255))
+                .color(255, 255, 255, 255)
                 .normal(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z)
                 .endVertex();
     }

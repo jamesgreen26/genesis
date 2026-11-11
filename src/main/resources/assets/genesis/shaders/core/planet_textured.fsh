@@ -1,7 +1,6 @@
 #version 150
 
 in vec2 texCoord;
-in vec4 vertexColor;
 in vec3 vNormal;
 in vec3 lightDir;
 
@@ -32,10 +31,7 @@ void main() {
     vec4 emissive = texture(Sampler1, texCoord);
     litTexColor += emissive.rgb * emissive.a;
 
-    // Interpolate between fog color and texture color based on alpha
-    vec3 finalColor = mix(vertexColor.rgb, litTexColor, vertexColor.a);
-
     // Planets are always fully opaque
-    frag_color = vec4(finalColor, 1.0);
+    frag_color = vec4(litTexColor, 1.0);
     // Depth is set by the depth range the celestial is drawn with
 }

@@ -36,12 +36,10 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /// Draws the {@link Skybox} and {@link Starfield}, then every celestial that has a {@link CelestialVisualizer}, furthest from the observer
-/// first.
+/// first. The celestial the observer is standing on isn't drawn; the level itself is its surface.
 ///
-/// Celestials in the sky are drawn just before the sky itself (see
-/// {@link shipwrights.genesis.mixin.LevelRendererMixin}), which is then blended over them, except for what shines
-/// through the sky, which is drawn just after it. The celestial the observer is standing on is drawn after the sky, so
-/// the sky doesn't tint the ground below.
+/// Celestials are drawn just before the sky itself (see {@link shipwrights.genesis.mixin.LevelRendererMixin}), which is
+/// then blended over them, except for what shines through the sky, which is drawn just after it.
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public class CelestialRenderDispatcher {
 
@@ -50,7 +48,7 @@ public class CelestialRenderDispatcher {
     /// The depth between one celestial and the next nearest, when drawn around the sky
     private static final double DEPTH_STEP = 1e-5;
 
-    /// Draws the stars and every celestial except the one underfoot, and except what {@linkplain
+    /// Draws the stars and every celestial except what {@linkplain
     /// CelestialVisualizer.Component#shinesThroughSky() shines through the sky}. Called from the sky renderer, before
     /// the sky is drawn.
     ///
@@ -62,7 +60,7 @@ public class CelestialRenderDispatcher {
     /// blended over them shows through instead. Celestials have no other way to fade, being opaque.
     public static void renderBehindSky(PoseStack poseStack, Camera camera, float partialTick) {
         renderStars(poseStack, camera, partialTick);
-        render(poseStack, camera, partialTick, false, component -> !component.shinesThroughSky(), 0, DEPTH_STEP);
+        render(poseStack, camera, partialTick, component -> !component.shinesThroughSky(), 0, DEPTH_STEP);
         renderedBehindSky = true;
 
         ClientLevel level = Minecraft.getInstance().level;
@@ -121,7 +119,7 @@ public class CelestialRenderDispatcher {
 
         if (renderedBehindSky) {
             // At the same depths as behind the sky, so the celestials in front hide them
-            render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), false,
+            render(event.getPoseStack(), event.getCamera(), event.getPartialTick(),
                     CelestialVisualizer.Component::shinesThroughSky, 0, DEPTH_STEP);
 
             // Nothing else has drawn depth yet, so this only puts back what the celestials around the sky changed
@@ -132,11 +130,9 @@ public class CelestialRenderDispatcher {
             // The sky isn't drawn when fog, blindness etc. obscure it, or in dimensions without a normal sky. Drawn
             // furthest first, nearer celestials already cover the ones behind them.
             renderStars(event.getPoseStack(), event.getCamera(), event.getPartialTick());
-            render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), false, component -> true, 1, 0);
+            render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), component -> true, 1, 0);
         }
         renderedBehindSky = false;
-
-        render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), true, component -> true, 1, 0);
     }
 
     /// The skybox and stars behind every celestial. Hidden by daylight, and the skybox by the air too, showing as the
@@ -164,7 +160,7 @@ public class CelestialRenderDispatcher {
 
     /// @param nearestDepth the depth the nearest celestial is drawn at; at 1 they're behind everything else in the level
     /// @param depthStep how much further each celestial is drawn than the next nearest
-    private static void render(PoseStack poseStack, Camera camera, float partialTick, boolean underfoot,
+    private static void render(PoseStack poseStack, Camera camera, float partialTick,
                                Predicate<CelestialVisualizer.Component> filter, double nearestDepth, double depthStep) {
         Minecraft minecraft = Minecraft.getInstance();
         ClientLevel level = minecraft.level;
@@ -189,7 +185,7 @@ public class CelestialRenderDispatcher {
 
         // Nearest first, so each celestial's depth doesn't depend on the filter
         List<Drawable> drawables = celestials.entrySet().stream()
-                .filter(entry -> (entry.getValue() == standingOn) == underfoot)
+                .filter(entry -> entry.getValue() != standingOn)
                 .flatMap(entry -> visualizers.getOptional(entry.getKey().location()).stream().map(visualizer -> new Drawable(
                         entry.getValue(),
                         visualizer,

@@ -78,8 +78,6 @@ public record StarGlowComponent(
     @Override
     public void render(CelestialRenderContext context) {
         boolean onPlanet = context.vantagePoint() instanceof VantagePoint.OnCelestial;
-        // Standing on a star isn't a view of it
-        if (onPlanet && ((VantagePoint.OnCelestial) context.vantagePoint()).celestial() == context.toRender()) return;
 
         Vector3d toStar = new Vector3d(CelestialPlacement.of(context).position());
         double distance = toStar.length();

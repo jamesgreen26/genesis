@@ -29,7 +29,8 @@ import shipwrights.genesis.space.VantagePoint;
 
 import java.util.OptionalDouble;
 
-/// While entity hitboxes are shown (F3+B), outlines every celestial where it's drawn, in front of everything else.
+/// While entity hitboxes are shown (F3+B), outlines every celestial where it's drawn, in front of everything else. The
+/// celestial the observer is standing on isn't drawn, so isn't outlined either.
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public class CelestialDebugRenderer {
 
@@ -65,7 +66,9 @@ public class CelestialDebugRenderer {
         MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
         VertexConsumer lines = bufferSource.getBuffer(DebugRenderTypes.CELESTIAL_OUTLINE);
 
+        Celestial standingOn = vantagePoint instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
         for (Celestial celestial : celestials) {
+            if (celestial == standingOn) continue;
             CelestialPlacement placement = CelestialPlacement.of(new CelestialRenderContext(celestial, vantagePoint, time, poseStack, camera, level));
             double h = placement.halfExtent();
 

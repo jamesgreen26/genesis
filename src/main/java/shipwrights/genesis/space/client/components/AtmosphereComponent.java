@@ -24,7 +24,6 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
-import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
@@ -49,8 +48,8 @@ public record AtmosphereComponent(
 ) implements CelestialVisualizer.Component {
     public static final ResourceLocation TYPE = GenesisMod.id("atmosphere");
 
-    /// Heights the atmosphere underfoot fades in between, as in the 1.20.1 branch, where the end was the configurable
-    /// atmosphere entry height
+    /// Heights the air thins out between, as in the 1.20.1 branch, where the end was the configurable atmosphere entry
+    /// height
     private static final double FADE_START_Y = 320.0;
     private static final double FADE_END_Y = 1440.0;
 
@@ -62,8 +61,8 @@ public record AtmosphereComponent(
                 DefaultVertexFormat.POSITION_COLOR), shader -> atmosphereShader = shader);
     }
 
-    /// How far the camera at {@code cameraY} has climbed out of the atmosphere underfoot, from 0 near the surface to 1
-    /// above it
+    /// How far the camera at {@code cameraY} has climbed out of the atmosphere of the celestial it's standing on, from 0
+    /// near the surface to 1 above it
     private static float altitudeFade(double cameraY) {
         return (float) Mth.clamp((cameraY - FADE_START_Y) / (FADE_END_Y - FADE_START_Y), 0.0, 1.0);
     }
@@ -89,13 +88,7 @@ public record AtmosphereComponent(
     @Override
     public void render(CelestialRenderContext context) {
         CelestialPlacement placement = CelestialPlacement.of(context);
-        boolean underfoot = context.vantagePoint() instanceof VantagePoint.OnCelestial oc && oc.celestial() == context.toRender();
-
-        // The atmosphere underfoot fades in as the camera climbs away from the surface. Elsewhere it's always at full
-        // density; from a planet's surface the sky is blended over it, hiding it by day.
-        float fade = underfoot ? altitudeFade(context.camera().getPosition().y) : 1f;
-        float effectiveDensity = (float) density * fade;
-        if (effectiveDensity < 0.01f) return;
+        if (density < 0.01) return;
 
         Registry<Celestial> registry = context.clientLevel().registryAccess().registryOrThrow(Celestial.REGISTRY_KEY);
         Vector3dc position = context.toRender().transformProvider().getPosition(registry, context.time());
@@ -120,13 +113,11 @@ public record AtmosphereComponent(
         shader.safeGetUniform("LightDirection").set((float) lightDirection.x, (float) lightDirection.y, (float) lightDirection.z);
         shader.safeGetUniform("HalfSize").set(halfSize);
         shader.safeGetUniform("AtmosphereThickness").set(relativeSize);
-        shader.safeGetUniform("Density").set(effectiveDensity);
+        shader.safeGetUniform("Density").set((float) density);
 
-        // Standing on the celestial is always inside its atmosphere. Testing the camera against the shell there would
-        // flicker as it crosses back and forth at high altitudes or low render distances.
         float limit = halfSize * relativeSize;
-        boolean inside = underfoot || (Math.abs(cameraPosition.x) < limit && Math.abs(cameraPosition.y) < limit
-                && Math.abs(cameraPosition.z) < limit);
+        boolean inside = Math.abs(cameraPosition.x) < limit && Math.abs(cameraPosition.y) < limit
+                && Math.abs(cameraPosition.z) < limit;
 
         // From outside, the shell is drawn at the atmosphere's edge, with the inner shell collapsed to nothing. From
         // inside, the near shell hugs the surface and the far one, mirrored so it faces inwards, is at the edge.
