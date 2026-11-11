@@ -115,14 +115,10 @@ public record AtmosphereComponent(
         shader.safeGetUniform("AtmosphereThickness").set(relativeSize);
         shader.safeGetUniform("Density").set((float) density);
 
-        float limit = halfSize * relativeSize;
-        boolean inside = Math.abs(cameraPosition.x) < limit && Math.abs(cameraPosition.y) < limit
-                && Math.abs(cameraPosition.z) < limit;
-
-        // From outside, the shell is drawn at the atmosphere's edge, with the inner shell collapsed to nothing. From
-        // inside, the near shell hugs the surface and the far one, mirrored so it faces inwards, is at the edge.
-        float nearScale = inside ? 1.001f : relativeSize;
-        float farScale = -relativeSize * (inside ? 1.0f : 1e-9f);
+        // A single shell at the atmosphere's edge, mirrored so it faces inwards. A ray through the atmosphere leaves it
+        // through exactly one of its inward-facing faces, whether the camera is outside the atmosphere or in it, so each
+        // ray is shaded once either way, and the shader traces the same path through it.
+        float scale = -relativeSize;
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = bufferSource.getBuffer(RenderTypes.ATMOSPHERE);
@@ -132,27 +128,25 @@ public record AtmosphereComponent(
                 .rotate(rotation);
 
         float h = halfSize;
-        addFace(matrix, buffer, -h, -h, h, h, -h, h, h, h, h, -h, h, h, h, nearScale, farScale, relativeSize);
-        addFace(matrix, buffer, -h, -h, -h, -h, h, -h, h, h, -h, h, -h, -h, h, nearScale, farScale, relativeSize);
-        addFace(matrix, buffer, -h, -h, -h, -h, -h, h, -h, h, h, -h, h, -h, h, nearScale, farScale, relativeSize);
-        addFace(matrix, buffer, h, -h, -h, h, h, -h, h, h, h, h, -h, h, h, nearScale, farScale, relativeSize);
-        addFace(matrix, buffer, -h, -h, -h, h, -h, -h, h, -h, h, -h, -h, h, h, nearScale, farScale, relativeSize);
-        addFace(matrix, buffer, -h, h, -h, -h, h, h, h, h, h, h, h, -h, h, nearScale, farScale, relativeSize);
+        addFace(matrix, buffer, -h, -h, h, h, -h, h, h, h, h, -h, h, h, h, scale, relativeSize);
+        addFace(matrix, buffer, -h, -h, -h, -h, h, -h, h, h, -h, h, -h, -h, h, scale, relativeSize);
+        addFace(matrix, buffer, -h, -h, -h, -h, -h, h, -h, h, h, -h, h, -h, h, scale, relativeSize);
+        addFace(matrix, buffer, h, -h, -h, h, h, -h, h, h, h, h, -h, h, h, scale, relativeSize);
+        addFace(matrix, buffer, -h, -h, -h, h, -h, -h, h, -h, h, -h, -h, h, h, scale, relativeSize);
+        addFace(matrix, buffer, -h, h, -h, -h, h, h, h, h, h, h, h, -h, h, scale, relativeSize);
 
         // Flush now, while the uniforms are still this celestial's
         bufferSource.endBatch(RenderTypes.ATMOSPHERE);
     }
 
-    /// One face of the near shell and the matching face of the far shell, each scaled from the cube's corners
+    /// One face of the shell, scaled from the cube's corners
     private static void addFace(Matrix4f matrix, VertexConsumer buffer, float x1, float y1, float z1, float x2, float y2, float z2,
                                 float x3, float y3, float z3, float x4, float y4, float z4, float halfSize,
-                                float nearScale, float farScale, float relativeSize) {
-        for (float scale : new float[]{nearScale, farScale}) {
-            addVertex(matrix, buffer, halfSize, relativeSize, x1 * scale, y1 * scale, z1 * scale);
-            addVertex(matrix, buffer, halfSize, relativeSize, x2 * scale, y2 * scale, z2 * scale);
-            addVertex(matrix, buffer, halfSize, relativeSize, x3 * scale, y3 * scale, z3 * scale);
-            addVertex(matrix, buffer, halfSize, relativeSize, x4 * scale, y4 * scale, z4 * scale);
-        }
+                                float scale, float relativeSize) {
+        addVertex(matrix, buffer, halfSize, relativeSize, x1 * scale, y1 * scale, z1 * scale);
+        addVertex(matrix, buffer, halfSize, relativeSize, x2 * scale, y2 * scale, z2 * scale);
+        addVertex(matrix, buffer, halfSize, relativeSize, x3 * scale, y3 * scale, z3 * scale);
+        addVertex(matrix, buffer, halfSize, relativeSize, x4 * scale, y4 * scale, z4 * scale);
     }
 
     /// The colour is the vertex's position within the atmosphere, from 0 at its {@code -X/Y/Z} edge to 255 at its
