@@ -20,6 +20,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL32;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
@@ -77,7 +79,10 @@ public class CelestialDebugRenderer {
         // Distant celestials would otherwise fade into the terrain fog
         float fogStart = RenderSystem.getShaderFogStart();
         FogRenderer.setupNoFog();
+        // Celestials are beyond the far plane, so draw the outlines unclipped by it, as the celestials are
+        GL11.glEnable(GL32.GL_DEPTH_CLAMP);
         bufferSource.endBatch(DebugRenderTypes.CELESTIAL_OUTLINE);
+        GL11.glDisable(GL32.GL_DEPTH_CLAMP);
         RenderSystem.setShaderFogStart(fogStart);
     }
 

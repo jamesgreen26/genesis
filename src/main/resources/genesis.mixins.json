@@ -10,7 +10,6 @@
   "client": [
     "ClientLevelMixin",
     "FogRendererAccessor",
-    "GameRendererMixin",
     "LevelRendererMixin",
     "ParticleAccessor",
     "ParticleEngineMixin"

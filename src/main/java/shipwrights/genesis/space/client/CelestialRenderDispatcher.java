@@ -24,6 +24,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL32;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
@@ -197,6 +198,9 @@ public class CelestialRenderDispatcher {
                 .sorted(Comparator.comparingDouble(Drawable::distanceSquared))
                 .toList();
 
+        // Celestials are far beyond the far plane. Depth clamping stops them being clipped by it, and as each is drawn
+        // at a single fixed depth anyway, the depth they're clamped to doesn't matter.
+        GL11.glEnable(GL32.GL_DEPTH_CLAMP);
         // Render types only ever turn depth writes off, expecting them to be on, but the sky renderer turns them off
         RenderSystem.depthMask(true);
         for (int i = drawables.size() - 1; i >= 0; i--) {
@@ -213,6 +217,7 @@ public class CelestialRenderDispatcher {
             bufferSource.endBatch();
         }
         GL11.glDepthRange(0, 1);
+        GL11.glDisable(GL32.GL_DEPTH_CLAMP);
     }
 
     private record Drawable(Celestial celestial, CelestialVisualizer visualizer, double distanceSquared) {}
