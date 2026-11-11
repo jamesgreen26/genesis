@@ -10,6 +10,7 @@
   "client": [
     "ClientLevelMixin",
     "LevelRendererMixin",
+    "MinecraftMixin",
     "ParticleAccessor",
     "ParticleEngineMixin"
   ],

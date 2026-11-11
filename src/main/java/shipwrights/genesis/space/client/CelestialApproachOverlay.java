@@ -1,7 +1,12 @@
 package shipwrights.genesis.space.client;
 
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.Registry;
@@ -13,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -34,8 +40,9 @@ import shipwrights.genesis.space.travel.CelestialTravel;
 /// Below the exit height, the camera is taken to be as far from it as from the distance in space at which things
 /// arrive at a celestial, {@link CelestialTravel#ARRIVAL_DISTANCE}, so the screen fades the same way approaching either.
 ///
-/// After travelling, the overlay also fades out over {@link #ARRIVAL_FADE_TICKS}, whatever the camera's position. The
-/// more opaque of the two shows.
+/// When travelling, the overlay is fully opaque through the change of dimension, which shows no loading screens, and
+/// until the new dimension has loaded around the camera, then fades out over {@link #ARRIVAL_FADE_TICKS}, whatever the
+/// camera's position. The more opaque of that and the overlay for the camera's position shows.
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class CelestialApproachOverlay {
 
@@ -54,9 +61,17 @@ public class CelestialApproachOverlay {
     /// Ticks left of the fade after travelling
     private static int arrivalFadeTicks = 0;
 
-    /// Called when this client's player has just travelled between space and a celestial's dimension
-    public static void startArrivalFade() {
+    /// How long to wait for the change of dimension after being told to expect it, in case it never comes
+    private static final int TRAVEL_TIMEOUT_TICKS = 100;
+
+    /// Ticks left to wait for the change of dimension, while it's expected
+    private static int travelTimeoutTicks = 0;
+
+    /// Called when this client's player is about to travel between space and a celestial's dimension, before the change
+    /// of dimension reaches it
+    public static void startTravel() {
         arrivalFadeTicks = ARRIVAL_FADE_TICKS;
+        travelTimeoutTicks = TRAVEL_TIMEOUT_TICKS;
     }
 
     @SubscribeEvent
@@ -137,17 +152,79 @@ public class CelestialApproachOverlay {
     public static class ArrivalFade {
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
-            // Not while the new dimension is still loading, behind its loading screen
-            if (event.phase != TickEvent.Phase.END || arrivalFadeTicks <= 0
-                    || Minecraft.getInstance().screen instanceof ReceivingLevelScreen) {
+            if (event.phase != TickEvent.Phase.END) return;
+            if (travelTimeoutTicks > 0) {
+                travelTimeoutTicks--;
                 return;
             }
-            arrivalFadeTicks--;
+            // Not while the new dimension is still loading, behind its (invisible) loading screen
+            if (arrivalFadeTicks > 0 && !(Minecraft.getInstance().screen instanceof ReceivingLevelScreen)) {
+                arrivalFadeTicks--;
+            }
+        }
+
+        /// Vanilla shows a progress screen as it changes the dimension, then a loading screen until the new one has
+        /// loaded around the camera. Show neither, so the overlay hides the change, but keep the loading screen's
+        /// waiting for the dimension to load, and keeping the player still meanwhile
+        @SubscribeEvent
+        public static void onScreenOpening(ScreenEvent.Opening event) {
+            if (travelTimeoutTicks <= 0) return;
+            Screen screen = event.getNewScreen();
+            if (screen instanceof ProgressScreen) {
+                event.setNewScreen(new InvisibleScreen());
+            } else if (screen instanceof ReceivingLevelScreen && !(screen instanceof InvisibleLoadingScreen)) {
+                event.setNewScreen(new InvisibleLoadingScreen());
+                travelTimeoutTicks = 0;
+            }
         }
 
         @SubscribeEvent
         public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
             arrivalFadeTicks = 0;
+            travelTimeoutTicks = 0;
+        }
+    }
+
+    /// A screen that opening doesn't free the mouse or let go of held keys for (see
+    /// {@link shipwrights.genesis.mixin.MinecraftMixin}), so the camera keeps turning and what's held keeps happening
+    /// while it's open. Keys let go of while it's open don't reach their bindings, so they're brought up to date as it
+    /// closes.
+    public interface KeepsInput {
+    }
+
+    private static final class InvisibleScreen extends Screen implements KeepsInput {
+        InvisibleScreen() {
+            super(CommonComponents.EMPTY);
+        }
+
+        @Override
+        public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        }
+
+        @Override
+        public boolean isPauseScreen() {
+            return false;
+        }
+
+        @Override
+        public boolean shouldCloseOnEsc() {
+            return false;
+        }
+
+        @Override
+        public void removed() {
+            KeyMapping.setAll();
+        }
+    }
+
+    private static final class InvisibleLoadingScreen extends ReceivingLevelScreen implements KeepsInput {
+        @Override
+        public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        }
+
+        @Override
+        public void removed() {
+            KeyMapping.setAll();
         }
     }
 }

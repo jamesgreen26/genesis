@@ -17,10 +17,10 @@ public final class GenesisNetwork {
     }
 
     public static void register() {
-        CHANNEL.messageBuilder(CelestialTravelledPacket.class, 0, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(CelestialTravelledPacket::encode)
-                .decoder(CelestialTravelledPacket::decode)
-                .consumerMainThread(CelestialTravelledPacket::handle)
+        CHANNEL.messageBuilder(CelestialTravelPacket.class, 0, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CelestialTravelPacket::encode)
+                .decoder(CelestialTravelPacket::decode)
+                .consumerMainThread(CelestialTravelPacket::handle)
                 .add();
     }
 

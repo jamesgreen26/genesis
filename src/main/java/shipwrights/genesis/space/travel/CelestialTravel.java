@@ -17,6 +17,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Quaterniond;
@@ -26,7 +28,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.config.GenesisCommonConfig;
-import shipwrights.genesis.network.CelestialTravelledPacket;
+import shipwrights.genesis.network.CelestialTravelPacket;
 import shipwrights.genesis.network.GenesisNetwork;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
@@ -64,6 +66,9 @@ public final class CelestialTravel {
     /// {@link shipwrights.genesis.mixin.EntityMixin})
     private static final ThreadLocal<Boolean> CHECKING_STACK = ThreadLocal.withInitial(() -> false);
 
+    /// What's being moved to another dimension, while it is
+    private static final ThreadLocal<Entity> MOVING = new ThreadLocal<>();
+
     /// Where each entity moved by its client was at the end of the last tick, as its server doesn't know its velocity
     private static final Map<Entity, LastPosition> LAST_POSITIONS = new WeakHashMap<>();
 
@@ -94,6 +99,15 @@ public final class CelestialTravel {
             if (!root.isRemoved() && root.level() == level && isMovedByClient(root)) {
                 LAST_POSITIONS.put(root, new LastPosition(level.dimension(), level.getGameTime(), root.position()));
             }
+        }
+    }
+
+    /// Warns the client of a player about to travel, once nothing has stopped it, before the dimension change
+    /// reaches it, so it can hide the change (see {@link CelestialTravelPacket})
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onTravelToDimension(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() == MOVING.get() && event.getEntity() instanceof ServerPlayer player) {
+            GenesisNetwork.sendTo(player, new CelestialTravelPacket());
         }
     }
 
@@ -213,16 +227,18 @@ public final class CelestialTravel {
         entity.ejectPassengers();
 
         float[] look = rotateLook(entity.getYRot(), entity.getXRot(), rotation);
-        Entity moved = entity.changeDimension(to, new Teleporter(position, velocity, look[0], look[1]));
+        Entity moved;
+        MOVING.set(entity);
+        try {
+            moved = entity.changeDimension(to, new Teleporter(position, velocity, look[0], look[1]));
+        } finally {
+            MOVING.remove();
+        }
         if (moved == null) {
             for (Entity passenger : passengers) {
                 passenger.startRiding(entity, true);
             }
             return null;
-        }
-
-        if (moved instanceof ServerPlayer player) {
-            GenesisNetwork.sendTo(player, new CelestialTravelledPacket());
         }
 
         for (Entity passenger : passengers) {
