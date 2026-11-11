@@ -19,7 +19,7 @@ public final class Gravity {
 
     /// Multiplier on vanilla gravity in this level: 0 in space, the celestial's mass on a celestial, otherwise 1
     public static double multiplier(Level level) {
-        if (GenesisMod.isSpaceDimension(level)) return 0;
+        if (GenesisMod.isSpaceLikeDimension(level)) return 0;
         // Tolerates the registry being absent rather than crashing a tick
         return level.registryAccess().registry(Celestial.REGISTRY_KEY)
                 .flatMap(celestials -> celestials.getOptional(level.dimension().location()))

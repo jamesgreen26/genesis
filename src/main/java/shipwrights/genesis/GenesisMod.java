@@ -37,7 +37,13 @@ public class GenesisMod {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, location);
     }
 
+    /// Returns true when the dimension is the main space dimension
     public static boolean isSpaceDimension(Level level) {
+        return level.dimension().location().equals(SPACE);
+    }
+
+    /// Returns true when the dimension should behave like space, with no void and no gravity
+    public static boolean isSpaceLikeDimension(Level level) {
         return level.dimension().location().equals(SPACE);
     }
 
