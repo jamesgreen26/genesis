@@ -42,7 +42,7 @@ public final class StarHeat {
             if (celestial.surfaceTemperature() <= 0 || !(celestial.size() > 0)) continue;
             Vector3dc position = celestial.transformProvider().getPosition(celestials, time);
             sources.add(new HeatSource(new Vec3(position.x(), position.y(), position.z()),
-                    celestial.surfaceTemperature(), celestial.size() / 2));
+                    celestial.surfaceTemperature(), celestial.size() / 2, celestial.heatFalloff()));
         }
         return sources;
     }

@@ -2,6 +2,7 @@ package shipwrights.genesis.space;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import g_mungus.zps.gas.api.HeatSource;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +22,8 @@ import java.util.Map;
 /// @param mass multiplier on vanilla gravity in its dimension, relative to the overworld's 1 (see {@link Gravity})
 /// @param surfaceTemperature temperature of open space at its surface in kelvin, which it heats space around it to
 ///                           (see {@link StarHeat}); 0 if it gives off no heat
+/// @param heatFalloff how steeply its heat drops with distance: the temperature it gives is in proportion to
+///                    `(radius / distance)^heatFalloff`. 0.5 is what radiation alone gives
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public record Celestial(
         boolean castsLight,
@@ -28,8 +31,15 @@ public record Celestial(
         double size,
         double mass,
         double surfaceTemperature,
+        double heatFalloff,
         TransformProvider transformProvider
 ) {
+    /// A celestial whose heat, if it has any, falls off radiatively
+    public Celestial(boolean castsLight, boolean castsShadows, double size, double mass, double surfaceTemperature,
+                     TransformProvider transformProvider) {
+        this(castsLight, castsShadows, size, mass, surfaceTemperature, HeatSource.RADIATIVE, transformProvider);
+    }
+
     public static final ResourceKey<Registry<Celestial>> REGISTRY_KEY
             = ResourceKey.createRegistryKey(GenesisMod.id("celestial"));
 
@@ -64,6 +74,7 @@ public record Celestial(
                 Codec.DOUBLE.fieldOf("size").forGetter(Celestial::size),
                 Codec.DOUBLE.fieldOf("mass").forGetter(Celestial::mass),
                 MoreCodecs.strictOptionalField(Codec.DOUBLE, "surfaceTemperature", 0.0).forGetter(Celestial::surfaceTemperature),
+                MoreCodecs.strictOptionalField(Codec.doubleRange(Double.MIN_VALUE, Double.MAX_VALUE), "heatFalloff", HeatSource.RADIATIVE).forGetter(Celestial::heatFalloff),
                 TransformProvider.DISPATCH_CODEC.fieldOf("transformProvider").forGetter(Celestial::transformProvider)
         ).apply(instance, Celestial::new)
     );

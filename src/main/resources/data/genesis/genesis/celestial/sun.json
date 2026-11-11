@@ -3,7 +3,8 @@
   "castsShadows": false,
   "size": 1440,
   "mass": 8,
-  "surfaceTemperature": 950,
+  "surfaceTemperature": 250000,
+  "heatFalloff": 3.983,
   "transformProvider": {
     "type": "genesis:static",
     "position": [0.0, 0.0, 0.0],
