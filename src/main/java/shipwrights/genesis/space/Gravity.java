@@ -1,9 +1,9 @@
 package shipwrights.genesis.space;
 
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import shipwrights.genesis.GenesisMod;
 
 /// Scales vanilla gravity by the {@linkplain Celestial#mass() mass} of the celestial a dimension represents. Space has
@@ -11,7 +11,7 @@ import shipwrights.genesis.GenesisMod;
 ///
 /// Applied to living entities, other falling entities (items, projectiles, falling blocks...), particles and fall damage
 /// through mixins and {@link #onLivingFall}.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public final class Gravity {
 
     private Gravity() {

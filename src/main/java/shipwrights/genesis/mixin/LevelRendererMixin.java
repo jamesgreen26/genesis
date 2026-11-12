@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -43,8 +44,11 @@ public abstract class LevelRendererMixin {
 
     // Before the sky disc is bound, since drawing it uses whatever vertex buffer is bound
     @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;bind()V", ordinal = 0))
-    private void genesis$renderCelestialsBehindSky(PoseStack poseStack, Matrix4f projectionMatrix, float partialTick, Camera camera,
+    private void genesis$renderCelestialsBehindSky(Matrix4f frustumMatrix, Matrix4f projectionMatrix, float partialTick, Camera camera,
                                                    boolean isFoggy, Runnable skyFogSetup, CallbackInfo ci) {
+        // As vanilla draws the sky
+        PoseStack poseStack = new PoseStack();
+        poseStack.mulPose(frustumMatrix);
         float[] skyColor = RenderSystem.getShaderColor().clone();
 
         // Nothing has been drawn yet this frame, so this only replaces the fog colour the screen was cleared to
@@ -88,12 +92,12 @@ public abstract class LevelRendererMixin {
 
     // Vanilla's sun and moon; celestials replace them. The first call draws the sunrise glow, which we keep.
     @WrapOperation(method = "renderSky", at = {
-            @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;drawWithShader(Lcom/mojang/blaze3d/vertex/BufferBuilder$RenderedBuffer;)V", ordinal = 1),
-            @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;drawWithShader(Lcom/mojang/blaze3d/vertex/BufferBuilder$RenderedBuffer;)V", ordinal = 2)
+            @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;drawWithShader(Lcom/mojang/blaze3d/vertex/MeshData;)V", ordinal = 1),
+            @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferUploader;drawWithShader(Lcom/mojang/blaze3d/vertex/MeshData;)V", ordinal = 2)
     })
-    private void genesis$skipSunAndMoon(BufferBuilder.RenderedBuffer buffer, Operation<Void> original) {
-        // Drawing would release the buffer; the builder can't be reused until it is
-        buffer.release();
+    private void genesis$skipSunAndMoon(MeshData mesh, Operation<Void> original) {
+        // Drawing would close the mesh, freeing its memory
+        mesh.close();
     }
 
     // Starfield replaces vanilla's stars wherever celestials are drawn. Skips drawing them rather than zeroing their
@@ -111,7 +115,7 @@ public abstract class LevelRendererMixin {
 
     // After the sunrise glow, before the stars: those are depth tested, so celestials hide them
     @Inject(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;blendFuncSeparate(Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;Lcom/mojang/blaze3d/platform/GlStateManager$SourceFactor;Lcom/mojang/blaze3d/platform/GlStateManager$DestFactor;)V", ordinal = 0))
-    private void genesis$depthTestSunMoonAndStars(PoseStack poseStack, Matrix4f projectionMatrix, float partialTick, Camera camera,
+    private void genesis$depthTestSunMoonAndStars(Matrix4f frustumMatrix, Matrix4f projectionMatrix, float partialTick, Camera camera,
                                                   boolean isFoggy, Runnable skyFogSetup, CallbackInfo ci) {
         RenderSystem.enableDepthTest();
     }
@@ -121,19 +125,18 @@ public abstract class LevelRendererMixin {
     @Unique
     private static VertexBuffer genesis$getBelowSkyDisc() {
         if (genesis$belowSkyDisc == null) {
-            BufferBuilder builder = Tesselator.getInstance().getBuilder();
-            builder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
-            builder.vertex(0.0D, -512.0D, 0.0D).endVertex();
+            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION);
+            builder.addVertex(0.0F, -512.0F, 0.0F);
 
             // Matches LevelRenderer.buildSkyDisc(builder, 16)
             for (int i = -180; i <= 180; i += 45) {
                 float angle = i * Mth.DEG_TO_RAD;
-                builder.vertex(512.0F * Mth.cos(angle), 16.0D, 512.0F * Mth.sin(angle)).endVertex();
+                builder.addVertex(512.0F * Mth.cos(angle), 16.0F, 512.0F * Mth.sin(angle));
             }
 
             genesis$belowSkyDisc = new VertexBuffer(VertexBuffer.Usage.STATIC);
             genesis$belowSkyDisc.bind();
-            genesis$belowSkyDisc.upload(builder.end());
+            genesis$belowSkyDisc.upload(builder.buildOrThrow());
             VertexBuffer.unbind();
         }
         return genesis$belowSkyDisc;

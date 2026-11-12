@@ -4,6 +4,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaterniond;
@@ -190,15 +191,13 @@ class OrbitingTransformProviderTest {
                 {"castsLight": false, "castsShadows": true, "size": 29, "mass": 1,
                  "transformProvider": {"type": "genesis:orbiting", "parent": "genesis:star", "distance": 750,
                                        "period": 184329, "rotation": {"dayLength": "tidally_locked"}}}"""))
-                .getOrThrow(false, error -> {
-                    throw new AssertionError(error);
-                });
+                .getOrThrow(AssertionError::new);
         assertEquals(new OrbitingTransformProvider(STAR, 750, 184329, 0, 0, 0, 0, 0,
                 OrbitingTransformProvider.Rotation.TIDALLY_LOCKED), celestial.transformProvider());
     }
 
     private void register(ResourceLocation id, Celestial celestial) {
-        celestials.register(ResourceKey.create(Celestial.REGISTRY_KEY, id), celestial, Lifecycle.stable());
+        celestials.register(ResourceKey.create(Celestial.REGISTRY_KEY, id), celestial, RegistrationInfo.BUILT_IN);
     }
 
     private Celestial.TransformProvider transform(ResourceLocation id) {
@@ -230,13 +229,11 @@ class OrbitingTransformProviderTest {
     }
 
     private static com.mojang.serialization.DataResult<OrbitingTransformProvider> decodeResult(String json) {
-        return OrbitingTransformProvider.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json));
+        return OrbitingTransformProvider.CODEC.codec().parse(JsonOps.INSTANCE, JsonParser.parseString(json));
     }
 
     private static OrbitingTransformProvider decode(String json) {
-        return decodeResult(json).getOrThrow(false, error -> {
-            throw new AssertionError(error);
-        });
+        return decodeResult(json).getOrThrow(AssertionError::new);
     }
 
     private static Time at(double t) {

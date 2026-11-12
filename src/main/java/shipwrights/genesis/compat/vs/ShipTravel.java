@@ -4,8 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -47,8 +47,8 @@ final class ShipTravel {
     private ShipTravel() {
     }
 
-    static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
+    static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
 
         boolean inSpace = GenesisMod.isSpaceDimension(level);
         Optional<Celestial> celestial = GenesisMod.celestial(level);
@@ -158,8 +158,8 @@ final class ShipTravel {
                              Quaterniondc rotation) {
         Set<Long> ids = new HashSet<>();
         for (LoadedServerShip member : group) ids.add(member.getId());
-        if (MinecraftForge.EVENT_BUS.post(new CelestialShipTravelEvent(ship, Set.copyOf(ids), celestial, direction, from,
-                to))) {
+        if (NeoForge.EVENT_BUS.post(new CelestialShipTravelEvent(ship, Set.copyOf(ids), celestial, direction, from,
+                to)).isCanceled()) {
             return;
         }
 
@@ -167,7 +167,7 @@ final class ShipTravel {
         List<Entity> inShipyards = new ArrayList<>();
         List<Entity> standingOn = new ArrayList<>();
         for (Entity entity : from.getAllEntities()) {
-            if (entity.isPassenger() || !CelestialTravel.canTravel(entity)) continue;
+            if (entity.isPassenger() || !CelestialTravel.canTravel(entity, from, to)) continue;
             Ship managing = VSGameUtilsKt.getShipManagingPos(from, entity.position());
             if (managing != null) {
                 if (ids.contains(managing.getId())) inShipyards.add(entity);

@@ -16,11 +16,12 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.lwjgl.opengl.GL11;
@@ -40,7 +41,7 @@ import java.util.function.Predicate;
 ///
 /// Celestials are drawn just before the sky itself (see {@link shipwrights.genesis.mixin.LevelRendererMixin}), which is
 /// then blended over them, except for what shines through the sky, which is drawn just after it.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public class CelestialRenderDispatcher {
 
     private static boolean renderedBehindSky = false;
@@ -90,20 +91,19 @@ public class CelestialRenderDispatcher {
         // A quad covering the screen, drawn directly in clip space
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(new Matrix4f(), VertexSorting.ORTHOGRAPHIC_Z);
-        PoseStack modelView = RenderSystem.getModelViewStack();
-        modelView.pushPose();
-        modelView.setIdentity();
+        Matrix4fStack modelView = RenderSystem.getModelViewStack();
+        modelView.pushMatrix();
+        modelView.identity();
         RenderSystem.applyModelViewMatrix();
 
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        builder.vertex(-1, -1, 0).endVertex();
-        builder.vertex(1, -1, 0).endVertex();
-        builder.vertex(1, 1, 0).endVertex();
-        builder.vertex(-1, 1, 0).endVertex();
-        BufferUploader.drawWithShader(builder.end());
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        builder.addVertex(-1, -1, 0);
+        builder.addVertex(1, -1, 0);
+        builder.addVertex(1, 1, 0);
+        builder.addVertex(-1, 1, 0);
+        BufferUploader.drawWithShader(builder.buildOrThrow());
 
-        modelView.popPose();
+        modelView.popMatrix();
         RenderSystem.applyModelViewMatrix();
         RenderSystem.restoreProjectionMatrix();
 
@@ -116,10 +116,14 @@ public class CelestialRenderDispatcher {
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
+        // The camera's rotation, as the sky is drawn with
+        PoseStack poseStack = new PoseStack();
+        poseStack.mulPose(event.getModelViewMatrix());
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
 
         if (renderedBehindSky) {
             // At the same depths as behind the sky, so the celestials in front hide them
-            render(event.getPoseStack(), event.getCamera(), event.getPartialTick(),
+            render(poseStack, event.getCamera(), partialTick,
                     CelestialVisualizer.Component::shinesThroughSky, 0, DEPTH_STEP);
 
             // Nothing else has drawn depth yet, so this only puts back what the celestials around the sky changed
@@ -129,8 +133,8 @@ public class CelestialRenderDispatcher {
         } else {
             // The sky isn't drawn when fog, blindness etc. obscure it, or in dimensions without a normal sky. Drawn
             // furthest first, nearer celestials already cover the ones behind them.
-            renderStars(event.getPoseStack(), event.getCamera(), event.getPartialTick());
-            render(event.getPoseStack(), event.getCamera(), event.getPartialTick(), component -> true, 1, 0);
+            renderStars(poseStack, event.getCamera(), partialTick);
+            render(poseStack, event.getCamera(), partialTick, component -> true, 1, 0);
         }
         renderedBehindSky = false;
     }

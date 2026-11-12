@@ -1,9 +1,0 @@
-{
-  "type": "zps:impact",
-  "ingredient": "#forge:ores_in_ground/moon_stone",
-  "results": [
-    { "block": "genesis:suspicious_dark_moon_sand",
-      "buried_drops": { "fortune": 2 },
-      "buried_item": { "tag": "genesis:moon_stone_ores_in_ground_drops" } }
-  ]
-}

@@ -4,15 +4,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import shipwrights.genesis.GenesisMod;
 
 /// Space has no atmosphere: no sky, no clouds, and black fog, so celestials are seen against black.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public class SpaceDimensionEffects extends DimensionSpecialEffects {
 
     public SpaceDimensionEffects() {
@@ -39,7 +39,7 @@ public class SpaceDimensionEffects extends DimensionSpecialEffects {
         return null;
     }
 
-    @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
     public static class FogColor {
         // Vanilla mixes the fog towards the biome's sky colour, so the fog colour above isn't enough on its own
         @SubscribeEvent

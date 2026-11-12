@@ -2,18 +2,17 @@ package shipwrights.genesis.compat.vs;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.bus.api.Event;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import shipwrights.genesis.space.travel.CelestialTravelEvent;
 
 import java.util.Set;
 
-/// Posted on the Forge event bus before a Valkyrien Skies ship, with the ships joined to it and the entities aboard,
+/// Posted on the NeoForge event bus before a Valkyrien Skies ship, with the ships joined to it and the entities aboard,
 /// travels between space and a celestial's dimension. Cancel it to keep them where they are; it's posted again each tick
 /// they're still in range. The ships' counterpart to {@link CelestialTravelEvent}
-@Cancelable
-public class CelestialShipTravelEvent extends Event {
+public class CelestialShipTravelEvent extends Event implements ICancellableEvent {
     private final ServerShip ship;
     private final Set<Long> group;
     private final ResourceLocation celestial;

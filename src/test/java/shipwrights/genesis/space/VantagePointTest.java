@@ -2,6 +2,7 @@ package shipwrights.genesis.space;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.resources.ResourceKey;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -100,7 +101,7 @@ class VantagePointTest {
 
     private VantagePoint.OnCelestial onPlanet(Vector3dc rotation, double latitude, double longitude) {
         var planet = new Celestial(false, false, SIZE, 1e3, 0, new StaticTransformProvider(PLANET_POSITION, rotation));
-        celestials.register(ResourceKey.create(Celestial.REGISTRY_KEY, GenesisMod.id("planet")), planet, Lifecycle.stable());
+        celestials.register(ResourceKey.create(Celestial.REGISTRY_KEY, GenesisMod.id("planet")), planet, RegistrationInfo.BUILT_IN);
         return new VantagePoint.OnCelestial(celestials, planet, new Time(0, 0), latitude, longitude);
     }
 

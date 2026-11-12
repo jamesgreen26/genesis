@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -11,10 +12,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
@@ -40,7 +41,7 @@ import java.io.IOException;
 /// @param fadeDistance distance from the star within which the glow fades out, in blocks
 /// @param skyColor     packed {@code 0xRRGGBB}, under a bright sky
 /// @param skyOpacity   opacity at the centre of the glow, under a bright sky
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public record StarGlowComponent(
         int color,
         double radius,
@@ -116,9 +117,9 @@ public record StarGlowComponent(
         Vector3d previous = rimPoint(center, right, upPerp, discRadius, 0);
         for (int i = 1; i <= SEGMENTS; i++) {
             Vector3d next = rimPoint(center, right, upPerp, discRadius, i);
-            buffer.vertex(matrix, (float) center.x, (float) center.y, (float) center.z).color(r, g, b, 0f).endVertex();
-            buffer.vertex(matrix, (float) previous.x, (float) previous.y, (float) previous.z).color(r, g, b, 1f).endVertex();
-            buffer.vertex(matrix, (float) next.x, (float) next.y, (float) next.z).color(r, g, b, 1f).endVertex();
+            buffer.addVertex(matrix, (float) center.x, (float) center.y, (float) center.z).setColor(r, g, b, 0f);
+            buffer.addVertex(matrix, (float) previous.x, (float) previous.y, (float) previous.z).setColor(r, g, b, 1f);
+            buffer.addVertex(matrix, (float) next.x, (float) next.y, (float) next.z).setColor(r, g, b, 1f);
             previous = next;
         }
 
@@ -167,7 +168,7 @@ public record StarGlowComponent(
                         .createCompositeState(false));
     }
 
-    public static final Codec<StarGlowComponent> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<StarGlowComponent> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.INT.fieldOf("color").forGetter(StarGlowComponent::color),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "radius", 3600.0).forGetter(StarGlowComponent::radius),

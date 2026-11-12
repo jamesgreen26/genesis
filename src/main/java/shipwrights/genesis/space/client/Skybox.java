@@ -78,13 +78,12 @@ public final class Skybox {
 
         for (Face face : FACES) {
             RenderSystem.setShaderTexture(0, face.texture());
-            BufferBuilder builder = Tesselator.getInstance().getBuilder();
-            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             vertex(builder, pose, face, 0, 0);
             vertex(builder, pose, face, 0, 1);
             vertex(builder, pose, face, 1, 1);
             vertex(builder, pose, face, 1, 0);
-            BufferUploader.drawWithShader(builder.end());
+            BufferUploader.drawWithShader(builder.buildOrThrow());
         }
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
@@ -100,6 +99,6 @@ public final class Skybox {
                 .fma(2 * u, face.u())
                 .fma(2 * v, face.v())
                 .mul(HALF_SIZE);
-        builder.vertex(pose, position.x, position.y, position.z).uv(u, v).endVertex();
+        builder.addVertex(pose, position.x, position.y, position.z).setUv(u, v);
     }
 }

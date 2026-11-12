@@ -1,30 +1,23 @@
 package shipwrights.genesis.network;
 
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-import shipwrights.genesis.GenesisMod;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class GenesisNetwork {
     private static final String PROTOCOL_VERSION = "1";
 
-    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            GenesisMod.id("main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
-
     private GenesisNetwork() {
     }
 
-    public static void register() {
-        CHANNEL.messageBuilder(CelestialTravelPacket.class, 0, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(CelestialTravelPacket::encode)
-                .decoder(CelestialTravelPacket::decode)
-                .consumerMainThread(CelestialTravelPacket::handle)
-                .add();
+    public static void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+        registrar.playToClient(CelestialTravelPacket.TYPE, CelestialTravelPacket.STREAM_CODEC, CelestialTravelPacket::handle);
     }
 
-    public static void sendTo(ServerPlayer player, Object packet) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    public static void sendTo(ServerPlayer player, CustomPacketPayload packet) {
+        PacketDistributor.sendToPlayer(player, packet);
     }
 }

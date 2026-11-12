@@ -12,15 +12,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.ITeleporter;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector2d;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
-import java.util.function.Function;
 
 /// Moves entities between space and the dimensions of celestials, along with everything riding them.
 ///
@@ -52,7 +50,7 @@ import java.util.function.Function;
 /// Velocity and facing turn with the frame of the surface where they cross, relative to the celestial, so that up in
 /// its dimension is out from its surface. What can travel is what could go through a nether portal, but riding or
 /// ridden: see {@link #canTravel}.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public final class CelestialTravel {
 
     /// How close to a celestial's surface something in space has to come to arrive at it
@@ -61,10 +59,6 @@ public final class CelestialTravel {
     /// How far from a celestial's surface what leaves it is placed in space. Further than {@link #ARRIVAL_DISTANCE},
     /// so it isn't sent straight back
     public static final double DEPARTURE_DISTANCE = 12;
-
-    /// While true, entities ignore riding and being ridden in deciding whether they can change dimensions (see
-    /// {@link shipwrights.genesis.mixin.EntityMixin})
-    private static final ThreadLocal<Boolean> CHECKING_STACK = ThreadLocal.withInitial(() -> false);
 
     /// What's being moved to another dimension, while it is
     private static final ThreadLocal<Entity> MOVING = new ThreadLocal<>();
@@ -75,13 +69,9 @@ public final class CelestialTravel {
     private CelestialTravel() {
     }
 
-    public static boolean isCheckingStack() {
-        return CHECKING_STACK.get();
-    }
-
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
 
         List<Entity> roots = new ArrayList<>();
         for (Entity entity : level.getAllEntities()) {
@@ -218,8 +208,8 @@ public final class CelestialTravel {
     /// @param rotation from the frame of {@code from} to that of {@code to}, which velocity and facing are turned by
     private static void travel(Entity root, ResourceLocation celestial, CelestialTravelEvent.Direction direction,
                                ServerLevel from, ServerLevel to, Vec3 position, Quaterniondc rotation) {
-        if (!canTravel(root)) return;
-        if (MinecraftForge.EVENT_BUS.post(new CelestialTravelEvent(root, celestial, direction, from, to))) return;
+        if (!canTravel(root, from, to)) return;
+        if (NeoForge.EVENT_BUS.post(new CelestialTravelEvent(root, celestial, direction, from, to)).isCanceled()) return;
         carry(root, from, to, position, rotation);
     }
 
@@ -239,14 +229,10 @@ public final class CelestialTravel {
     /// Whether {@code root} and everything riding it could each go through a nether portal, but for riding or being
     /// ridden, which vanilla doesn't allow: so not ender dragons, withers, fishing hooks or sleeping mobs. Nor
     /// spectators, which nether portals never touch
-    public static boolean canTravel(Entity root) {
+    public static boolean canTravel(Entity root, ServerLevel from, ServerLevel to) {
         if (root.getSelfAndPassengers().anyMatch(Entity::isSpectator)) return false;
-        CHECKING_STACK.set(true);
-        try {
-            return root.getSelfAndPassengers().allMatch(Entity::canChangeDimensions);
-        } finally {
-            CHECKING_STACK.set(false);
-        }
+        return root.getSelfAndPassengers().allMatch(entity ->
+                entity.canUsePortal(true) && entity.canChangeDimensions(from, to));
     }
 
     /// Moves {@code entity} and what rides it, all to {@code position}, and seats each again on what it rode
@@ -259,7 +245,8 @@ public final class CelestialTravel {
         Entity moved;
         MOVING.set(entity);
         try {
-            moved = entity.changeDimension(to, new Teleporter(position, velocity, look[0], look[1]));
+            moved = entity.changeDimension(new DimensionTransition(to, position, velocity, look[0], look[1],
+                    placed -> place(placed, velocity, look[0], look[1])));
         } finally {
             MOVING.remove();
         }
@@ -335,38 +322,14 @@ public final class CelestialTravel {
     private record LastPosition(ResourceKey<Level> level, long gameTime, Vec3 position) {
     }
 
-    /// Places what travels exactly where it's sent, moving and facing as given
-    private record Teleporter(Vec3 position, Vec3 velocity, float yRot, float xRot) implements ITeleporter {
-        @Override
-        public PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
-            return new PortalInfo(position, velocity, yRot, xRot);
-        }
-
-        @Override
-        public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw,
-                                  Function<Boolean, Entity> repositionEntity) {
-            Entity placed = repositionEntity.apply(false);
-            if (placed != null) {
-                // Vanilla keeps the pitch of entities other than players, and sets velocity only for those
-                placed.setXRot(xRot);
-                placed.setYHeadRot(yRot);
-                placed.setYBodyRot(yRot);
-                placed.setDeltaMovement(velocity);
-                // Sends the velocity to clients, including to the client of a player, which moves it
-                placed.hurtMarked = true;
-            }
-            return placed;
-        }
-
-        @Override
-        public boolean isVanilla() {
-            return false;
-        }
-
-        @Override
-        public boolean playTeleportSound(ServerPlayer player, ServerLevel sourceWorld,
-                                         ServerLevel destWorld) {
-            return false;
-        }
+    /// Faces and moves what has travelled exactly as given, once it's been placed in its new dimension
+    private static void place(Entity placed, Vec3 velocity, float yRot, float xRot) {
+        // Vanilla keeps the pitch of entities other than players
+        placed.setXRot(xRot);
+        placed.setYHeadRot(yRot);
+        placed.setYBodyRot(yRot);
+        placed.setDeltaMovement(velocity);
+        // Sends the velocity to clients, including to the client of a player, which moves it
+        placed.hurtMarked = true;
     }
 }

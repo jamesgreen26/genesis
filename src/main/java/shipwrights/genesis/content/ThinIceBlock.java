@@ -1,6 +1,8 @@
 package shipwrights.genesis.content;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,7 +34,7 @@ public class ThinIceBlock extends HalfTransparentBlock {
     @Override
     public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
         if (fallDistance <= BREAKING_FALL_DISTANCE || !(entity instanceof LivingEntity living)
-                || EnchantmentHelper.hasFrostWalker(living)) {
+                || hasFrostWalker(level, living)) {
             super.fallOn(level, state, pos, entity, fallDistance);
             return;
         }
@@ -83,5 +85,12 @@ public class ThinIceBlock extends HalfTransparentBlock {
         if (!brokeThrough(entity, entity.getOnPosLegacy())) {
             super.updateEntityAfterFallOn(level, entity);
         }
+    }
+
+    private static boolean hasFrostWalker(Level level, LivingEntity living) {
+        return level.registryAccess().lookup(Registries.ENCHANTMENT)
+                .flatMap(enchantments -> enchantments.get(Enchantments.FROST_WALKER))
+                .map(frostWalker -> EnchantmentHelper.getEnchantmentLevel(frostWalker, living) > 0)
+                .orElse(false);
     }
 }

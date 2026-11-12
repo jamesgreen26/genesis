@@ -4,16 +4,17 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -29,7 +30,7 @@ import java.io.IOException;
 ///
 /// Drawn as a cube whose shader traces the view ray through it; each vertex's colour carries its position within the
 /// cube.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public record StarComponent(
         int color0,
         int color1
@@ -105,9 +106,8 @@ public record StarComponent(
     /// The colour is the vertex's position within the cube, from 0 at {@code -halfSize} to 255 at {@code halfSize}
     private static void addVertex(Matrix4f matrix, VertexConsumer buffer, float halfSize, float x, float y, float z) {
         float size = 2 * halfSize;
-        buffer.vertex(matrix, x, y, z)
-                .color((int) (255 * (x + halfSize) / size), (int) (255 * (y + halfSize) / size), (int) (255 * (z + halfSize) / size), 255)
-                .endVertex();
+        buffer.addVertex(matrix, x, y, z)
+                .setColor((int) (255 * (x + halfSize) / size), (int) (255 * (y + halfSize) / size), (int) (255 * (z + halfSize) / size), 255);
     }
 
     private static float red(int color) {
@@ -142,7 +142,7 @@ public record StarComponent(
                         .createCompositeState(false));
     }
 
-    public static final Codec<StarComponent> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<StarComponent> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.INT.fieldOf("color0").forGetter(StarComponent::color0),
                     Codec.INT.fieldOf("color1").forGetter(StarComponent::color1)

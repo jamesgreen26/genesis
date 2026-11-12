@@ -84,8 +84,7 @@ public final class Starfield {
     /// 1600 attempts at a star, randomly oriented squares on a sphere of radius 100, as in vanilla
     private static VertexBuffer buildLayer(long seed) {
         RandomSource random = RandomSource.create(seed);
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 
         for (int i = 0; i < 1600; ++i) {
             double x = random.nextFloat() * 2.0F - 1.0F;
@@ -120,14 +119,14 @@ public final class Starfield {
                     double out = -rolledU * cosPitch;
                     double offsetX = out * sinYaw - rolledV * cosYaw;
                     double offsetZ = rolledV * sinYaw + out * cosYaw;
-                    builder.vertex(centerX + offsetX, centerY + up, centerZ + offsetZ).endVertex();
+                    builder.addVertex((float) (centerX + offsetX), (float) (centerY + up), (float) (centerZ + offsetZ));
                 }
             }
         }
 
         VertexBuffer buffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
         buffer.bind();
-        buffer.upload(builder.end());
+        buffer.upload(builder.buildOrThrow());
         VertexBuffer.unbind();
         return buffer;
     }

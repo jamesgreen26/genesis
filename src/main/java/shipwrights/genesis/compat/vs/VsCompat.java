@@ -1,7 +1,7 @@
 package shipwrights.genesis.compat.vs;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 import org.valkyrienskies.mod.api.ValkyrienSkies;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.EntityDraggingInformation;
@@ -16,9 +16,9 @@ public final class VsCompat {
     private VsCompat() {
     }
 
-    public static void init(IEventBus forgeBus) {
-        forgeBus.addListener(ShipTravel::onLevelTick);
-        forgeBus.addListener(VsCompat::onCelestialTravel);
+    public static void init(IEventBus gameBus) {
+        gameBus.addListener(ShipTravel::onLevelTick);
+        gameBus.addListener(VsCompat::onCelestialTravel);
         ValkyrienSkies.api().getPhysTickEvent().on(ShipConnections::onPhysTick);
     }
 

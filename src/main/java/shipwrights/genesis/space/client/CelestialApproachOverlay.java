@@ -3,26 +3,24 @@ package shipwrights.genesis.space.client;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import java.util.function.BooleanSupplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterDimensionTransitionScreenEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.config.GenesisCommonConfig;
@@ -43,7 +41,7 @@ import shipwrights.genesis.space.travel.CelestialTravel;
 /// When travelling, the overlay is fully opaque through the change of dimension, which shows no loading screens, and
 /// until the new dimension has loaded around the camera, then fades out over {@link #ARRIVAL_FADE_TICKS}, whatever the
 /// camera's position. The more opaque of that and the overlay for the camera's position shows.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public class CelestialApproachOverlay {
 
     /// How far from a celestial's surface, in blocks, the overlay becomes fully opaque
@@ -75,13 +73,28 @@ public class CelestialApproachOverlay {
     }
 
     @SubscribeEvent
-    public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
-        event.registerAbove(VanillaGuiOverlay.FROSTBITE.id(), "celestial_approach", (gui, guiGraphics, partialTick, screenWidth, screenHeight) -> {
-            float opacity = opacity(partialTick);
+    public static void registerGuiLayers(RegisterGuiLayersEvent event) {
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, GenesisMod.id("celestial_approach"), (guiGraphics, deltaTracker) -> {
+            float opacity = opacity(deltaTracker.getGameTimeDeltaPartialTick(true));
             if (opacity <= 0f) return;
             int alpha = Mth.clamp(Math.round(opacity * 255f), 0, 255);
-            guiGraphics.fill(0, 0, screenWidth, screenHeight, alpha << 24 | COLOR);
+            guiGraphics.fill(0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), alpha << 24 | COLOR);
         });
+    }
+
+    /// Travel always goes to or from space. While it's expected, the loading screens shown as the dimension changes are
+    /// replaced by invisible ones, so the overlay hides the change
+    @SubscribeEvent
+    public static void registerDimensionTransitionScreens(RegisterDimensionTransitionScreenEvent event) {
+        ResourceKey<Level> space = ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE);
+        event.registerIncomingEffect(space, CelestialApproachOverlay::loadingScreen);
+        event.registerOutgoingEffect(space, CelestialApproachOverlay::loadingScreen);
+    }
+
+    private static ReceivingLevelScreen loadingScreen(BooleanSupplier levelReceived, ReceivingLevelScreen.Reason reason) {
+        return travelTimeoutTicks > 0
+                ? new InvisibleLoadingScreen(levelReceived, reason)
+                : new ReceivingLevelScreen(levelReceived, reason);
     }
 
     private static float opacity(float partialTick) {
@@ -148,11 +161,14 @@ public class CelestialApproachOverlay {
         return cube.closestPointTo(point).distance(point);
     }
 
-    @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
     public static class ArrivalFade {
         @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase != TickEvent.Phase.END) return;
+        public static void onClientTick(ClientTickEvent.Post event) {
+            // The change of dimension has come: it opens the loading screen within the handling of one packet
+            if (Minecraft.getInstance().screen instanceof InvisibleLoadingScreen) {
+                travelTimeoutTicks = 0;
+            }
             if (travelTimeoutTicks > 0) {
                 travelTimeoutTicks--;
                 return;
@@ -160,21 +176,6 @@ public class CelestialApproachOverlay {
             // Not while the new dimension is still loading, behind its (invisible) loading screen
             if (arrivalFadeTicks > 0 && !(Minecraft.getInstance().screen instanceof ReceivingLevelScreen)) {
                 arrivalFadeTicks--;
-            }
-        }
-
-        /// Vanilla shows a progress screen as it changes the dimension, then a loading screen until the new one has
-        /// loaded around the camera. Show neither, so the overlay hides the change, but keep the loading screen's
-        /// waiting for the dimension to load, and keeping the player still meanwhile
-        @SubscribeEvent
-        public static void onScreenOpening(ScreenEvent.Opening event) {
-            if (travelTimeoutTicks <= 0) return;
-            Screen screen = event.getNewScreen();
-            if (screen instanceof ProgressScreen) {
-                event.setNewScreen(new InvisibleScreen());
-            } else if (screen instanceof ReceivingLevelScreen && !(screen instanceof InvisibleLoadingScreen)) {
-                event.setNewScreen(new InvisibleLoadingScreen());
-                travelTimeoutTicks = 0;
             }
         }
 
@@ -192,32 +193,13 @@ public class CelestialApproachOverlay {
     public interface KeepsInput {
     }
 
-    private static final class InvisibleScreen extends Screen implements KeepsInput {
-        InvisibleScreen() {
-            super(CommonComponents.EMPTY);
-        }
-
-        @Override
-        public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        }
-
-        @Override
-        public boolean isPauseScreen() {
-            return false;
-        }
-
-        @Override
-        public boolean shouldCloseOnEsc() {
-            return false;
-        }
-
-        @Override
-        public void removed() {
-            KeyMapping.setAll();
-        }
-    }
-
+    /// Vanilla's loading screen, waiting for the new dimension to load around the camera and keeping the player still
+    /// meanwhile, but drawing nothing
     private static final class InvisibleLoadingScreen extends ReceivingLevelScreen implements KeepsInput {
+        InvisibleLoadingScreen(BooleanSupplier levelReceived, Reason reason) {
+            super(levelReceived, reason);
+        }
+
         @Override
         public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         }

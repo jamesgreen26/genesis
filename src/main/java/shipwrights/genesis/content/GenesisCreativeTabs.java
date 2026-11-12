@@ -4,8 +4,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import shipwrights.genesis.GenesisMod;
 
 public final class GenesisCreativeTabs {
@@ -13,7 +13,7 @@ public final class GenesisCreativeTabs {
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GenesisMod.MOD_ID);
 
     /// Everything Genesis adds
-    public static final RegistryObject<CreativeModeTab> GENESIS_TAB = CREATIVE_MODE_TABS.register("genesis", () ->
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> GENESIS_TAB = CREATIVE_MODE_TABS.register("genesis", () ->
             CreativeModeTab.builder()
                     .title(Component.translatable("creativetab.genesis"))
                     .icon(() -> new ItemStack(GenesisItems.MOON_STONE.get()))

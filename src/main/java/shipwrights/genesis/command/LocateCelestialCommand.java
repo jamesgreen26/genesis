@@ -17,9 +17,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
@@ -28,7 +28,7 @@ import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.VantagePoint;
 
 /// {@code /locate celestial <id>}: where a celestial is in space right now, and how far away it is.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public class LocateCelestialCommand {
 
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_CELESTIAL = new DynamicCommandExceptionType(id ->

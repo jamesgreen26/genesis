@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 1.0,
+  "group": "lithium_ingot",
+  "ingredient": {
+    "item": "genesis:moon_lithium_ore"
+  },
+  "result": {
+    "id": "zps:lithium_ingot"
+  }
+}

@@ -11,7 +11,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,7 +43,7 @@ public abstract class ClientLevelMixin {
                 || !level.getBlockState(pos.above()).isAir() || !level.getBiome(pos).is(GENESIS$GEOTHERMAL_DEPTHS)) {
             return;
         }
-        if (!(ForgeRegistries.PARTICLE_TYPES.getValue(GENESIS$STEAM_PARTICLE) instanceof ParticleOptions steam)) {
+        if (!(BuiltInRegistries.PARTICLE_TYPE.get(GENESIS$STEAM_PARTICLE) instanceof ParticleOptions steam)) {
             return;
         }
         level.addParticle(steam,

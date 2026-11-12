@@ -7,9 +7,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import shipwrights.genesis.GenesisMod;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.Optional;
 /// The biome the client takes a dimension to have where it hasn't loaded the chunks, for the fog and sky colours there
 /// (see {@link shipwrights.genesis.mixin.ClientLevelMixin}), rather than vanilla's plains. Keyed by the dimension's id,
 /// and synced to clients, which are never sent the dimension's own definition.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public record FallbackBiome(ResourceKey<Biome> biome) {
     public static final ResourceKey<Registry<FallbackBiome>> REGISTRY_KEY =
             ResourceKey.createRegistryKey(GenesisMod.id("fallback_biome"));

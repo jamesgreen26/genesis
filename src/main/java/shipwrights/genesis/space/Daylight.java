@@ -3,9 +3,9 @@ package shipwrights.genesis.space;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.level.SleepFinishedTimeEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.level.SleepFinishedTimeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Quaterniond;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -22,7 +22,7 @@ import java.util.OptionalLong;
 ///
 /// Like what's drawn, it's seen from where {@link VantagePoint} puts the observer on the celestial, the same for the
 /// whole dimension.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public final class Daylight {
 
     /// How high vanilla's sun is when sleeping ends, at a time of day of about 0.785: a little above the horizon, as

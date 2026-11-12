@@ -1,0 +1,48 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "Apache 2.0"
+
+[[mods]]
+modId = "genesis"
+version = "${version}"
+displayName = "Genesis"
+authors = "G_Mungus, Quoissant, Cosmos, Frisk256, Acrogenous, BrickyBoy, Jcm, metafive, GuyApooye, ThePlasticPotato"
+description = '''
+A space mod.
+'''
+logoFile = "assets/genesis/icon.png"
+
+[[mixins]]
+config = "genesis.mixins.json"
+
+[[accessTransformers]]
+file = "META-INF/accesstransformer.cfg"
+
+[[dependencies.genesis]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "zps"
+type = "required"
+versionRange = "[1.21.1-2.7.0-pre4,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "valkyrienskies"
+type = "optional"
+versionRange = "[2.4.11,)"
+ordering = "NONE"
+side = "BOTH"

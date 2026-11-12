@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,11 +16,11 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Matrix4f;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
@@ -52,7 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /// A textured cube lit by the nearest light-casting celestial, optionally with shadows cast by other celestials.
 ///
 /// The texture is {@code genesis:celestials/<namespace>/<path>}, named after the celestial's id.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public record ShadedCubeComponent(
         boolean drawShadows
 ) implements CelestialVisualizer.Component {
@@ -195,11 +196,10 @@ public record ShadedCubeComponent(
                                                       Quaternionf rotation) {
         Vector3f rotatedNormal = rotation.transform(new Vector3f(x, y, z).normalize());
 
-        buffer.vertex(matrix, x, y, z)
-                .uv(u, v)
-                .color(255, 255, 255, 255)
-                .normal(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z)
-                .endVertex();
+        buffer.addVertex(matrix, x, y, z)
+                .setUv(u, v)
+                .setColor(255, 255, 255, 255)
+                .setNormal(rotatedNormal.x, rotatedNormal.y, rotatedNormal.z);
     }
 
     private static void renderShadows(List<FaceShadow> shadows, Matrix4f matrix, double halfExtent) {
@@ -346,7 +346,7 @@ public record ShadedCubeComponent(
         }
     }
 
-    public static final Codec<ShadedCubeComponent> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<ShadedCubeComponent> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.BOOL.fieldOf("drawShadows").forGetter(ShadedCubeComponent::drawShadows)
             ).apply(instance, ShadedCubeComponent::new)

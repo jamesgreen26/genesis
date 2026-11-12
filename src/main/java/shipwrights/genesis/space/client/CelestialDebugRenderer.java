@@ -14,10 +14,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.lwjgl.opengl.GL11;
@@ -31,19 +31,11 @@ import java.util.OptionalDouble;
 
 /// While entity hitboxes are shown (F3+B), outlines every celestial where it's drawn, in front of everything else. The
 /// celestial the observer is standing on isn't drawn, so isn't outlined either.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public class CelestialDebugRenderer {
-
-    private static final Quaternionf viewRotation = new Quaternionf();
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        // AFTER_LEVEL is given the projection's pose stack rather than the camera's, so keep the camera's rotation from
-        // earlier in the frame
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
-            event.getPoseStack().last().pose().getNormalizedRotation(viewRotation);
-            return;
-        }
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) return;
 
         Minecraft minecraft = Minecraft.getInstance();
@@ -56,13 +48,14 @@ public class CelestialDebugRenderer {
         if (celestials == null) return;
 
         Camera camera = event.getCamera();
-        Time time = Time.get(level, event.getPartialTick());
+        Time time = Time.get(level, event.getPartialTick().getGameTimeDeltaPartialTick(false));
         Vec3 cameraPos = camera.getPosition();
         VantagePoint vantagePoint = VantagePoint.get(level, time, new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z));
         if (!vantagePoint.isReal()) return;
 
         PoseStack poseStack = new PoseStack();
-        poseStack.mulPose(viewRotation);
+        // The camera's rotation
+        poseStack.mulPose(event.getModelViewMatrix());
         MultiBufferSource.BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
         VertexConsumer lines = bufferSource.getBuffer(DebugRenderTypes.CELESTIAL_OUTLINE);
 

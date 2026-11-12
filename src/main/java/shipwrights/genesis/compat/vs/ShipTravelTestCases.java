@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
@@ -22,7 +22,6 @@ import org.valkyrienskies.core.internal.world.VsiServerShipWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.assembly.ShipAssembler;
-import org.valkyrienskies.mod.common.block.TestHingeBlock;
 import org.valkyrienskies.mod.common.blockentity.TestHingeBlockEntity;
 import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.space.Celestial;
@@ -130,9 +129,8 @@ final class ShipTravelTestCases {
             overworld.setBlockAndUpdate(hinge, ValkyrienSkiesMod.TEST_HINGE.defaultBlockState());
             TestHingeBlockEntity hingeEntity = (TestHingeBlockEntity) overworld.getBlockEntity(hinge);
             helper.assertTrue(hingeEntity != null, "no test hinge");
-            TestHingeBlock.INSTANCE.use(ValkyrienSkiesMod.TEST_HINGE.defaultBlockState(), overworld, hinge,
+            ValkyrienSkiesMod.TEST_HINGE.defaultBlockState().useWithoutItem(overworld,
                     FakePlayerFactory.get(overworld, new GameProfile(UUID.randomUUID(), "genesis_test")),
-                    InteractionHand.MAIN_HAND,
                     new BlockHitResult(Vec3.atCenterOf(hinge), Direction.UP, hinge, false));
             BlockPos otherHinge = hingeEntity.getOtherHingePos();
             helper.assertTrue(otherHinge != null, "test hinge made no second ship");

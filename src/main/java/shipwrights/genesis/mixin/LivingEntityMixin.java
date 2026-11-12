@@ -5,6 +5,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import shipwrights.genesis.content.crawler.MoonCrawler;
 import shipwrights.genesis.space.Gravity;
 
@@ -23,11 +25,9 @@ public class LivingEntityMixin {
         return friction;
     }
 
-    /// Scales players' and mobs' gravity by {@link Gravity}. The first attribute read in {@code travel} is Forge's
-    /// entity gravity, which already includes Slow Falling, so that scales too
-    @ModifyExpressionValue(method = "travel", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/ai/attributes/AttributeInstance;getValue()D", ordinal = 0))
-    private double genesis$scaleGravity(double gravity) {
+    /// Slow Falling caps gravity, already scaled by {@link Gravity} (see {@link EntityMixin}), so scale the cap too
+    @ModifyConstant(method = "travel", constant = @Constant(doubleValue = 0.01))
+    private double genesis$scaleSlowFalling(double gravity) {
         return gravity * Gravity.multiplier(((LivingEntity) (Object) this).level());
     }
 }

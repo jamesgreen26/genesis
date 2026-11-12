@@ -195,13 +195,13 @@ public class ShadowRenderer {
 
             // Add vertices - reverse order for Y and X normal planes
             if (reverseWinding) {
-                buffer.vertex(matrix, (float)v0.x, (float)v0.y, (float)v0.z).color(r, g, b, a).endVertex();
-                buffer.vertex(matrix, (float)v2.x, (float)v2.y, (float)v2.z).color(r, g, b, a).endVertex();
-                buffer.vertex(matrix, (float)v1.x, (float)v1.y, (float)v1.z).color(r, g, b, a).endVertex();
+                buffer.addVertex(matrix, (float)v0.x, (float)v0.y, (float)v0.z).setColor(r, g, b, a);
+                buffer.addVertex(matrix, (float)v2.x, (float)v2.y, (float)v2.z).setColor(r, g, b, a);
+                buffer.addVertex(matrix, (float)v1.x, (float)v1.y, (float)v1.z).setColor(r, g, b, a);
             } else {
-                buffer.vertex(matrix, (float)v0.x, (float)v0.y, (float)v0.z).color(r, g, b, a).endVertex();
-                buffer.vertex(matrix, (float)v1.x, (float)v1.y, (float)v1.z).color(r, g, b, a).endVertex();
-                buffer.vertex(matrix, (float)v2.x, (float)v2.y, (float)v2.z).color(r, g, b, a).endVertex();
+                buffer.addVertex(matrix, (float)v0.x, (float)v0.y, (float)v0.z).setColor(r, g, b, a);
+                buffer.addVertex(matrix, (float)v1.x, (float)v1.y, (float)v1.z).setColor(r, g, b, a);
+                buffer.addVertex(matrix, (float)v2.x, (float)v2.y, (float)v2.z).setColor(r, g, b, a);
             }
             triangleCount++;
         }

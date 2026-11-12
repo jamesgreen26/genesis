@@ -1,5 +1,6 @@
 package shipwrights.genesis.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;
@@ -11,10 +12,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.ThinIceBlock;
-import shipwrights.genesis.space.travel.CelestialTravel;
+import shipwrights.genesis.space.Gravity;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -30,14 +30,12 @@ public abstract class EntityMixin {
         }
     }
 
-    /// Vanilla won't let anything riding or ridden change dimension, but travel to and from space takes everything
-    /// riding along. While it checks what's riding, leave that out, keeping whatever else subclasses rule out, as they
-    /// add to this
-    @Inject(method = "canChangeDimensions", at = @At("HEAD"), cancellable = true)
-    private void genesis$travelWithRiders(CallbackInfoReturnable<Boolean> cir) {
-        if (CelestialTravel.isCheckingStack()) {
-            cir.setReturnValue(true);
-        }
+    /// Scales the gravity of everything vanilla moves by it (living entities, items, projectiles, falling blocks,
+    /// minecarts, boats...) by {@link Gravity}. Slow Falling caps it afterwards, so that's scaled separately (see
+    /// {@link LivingEntityMixin})
+    @ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
+    private double genesis$scaleGravity(double gravity) {
+        return gravity * Gravity.multiplier(level());
     }
 
     // The thin ice handling below runs for players on the server too, from their movement packets

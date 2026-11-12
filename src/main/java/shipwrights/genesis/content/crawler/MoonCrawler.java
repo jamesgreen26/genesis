@@ -49,7 +49,7 @@ public class MoonCrawler extends CaveSpider {
             Difficulty difficulty = level().getDifficulty();
             int seconds = difficulty == Difficulty.NORMAL ? 7 : difficulty == Difficulty.HARD ? 15 : 0;
             if (seconds > 0) {
-                living.addEffect(new MobEffectInstance(GenesisMobEffects.WEBBED.get(), seconds * 20, 0), this);
+                living.addEffect(new MobEffectInstance(GenesisMobEffects.WEBBED, seconds * 20, 0), this);
             }
         }
         return true;

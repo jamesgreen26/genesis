@@ -5,9 +5,9 @@ import g_mungus.zps.gas.api.HeatSources;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
 
@@ -18,7 +18,7 @@ import java.util.List;
 /// Heats space around celestials with a {@linkplain Celestial#surfaceTemperature() surface temperature}, such as the
 /// sun, through ZPS's heat sources. ZPS only heats biomes using its {@code zps:space} temperature modifier, as
 /// {@code genesis:space} does.
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public final class StarHeat {
 
     private StarHeat() {

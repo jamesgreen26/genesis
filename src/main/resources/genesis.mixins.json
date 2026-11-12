@@ -1,8 +1,7 @@
 {
   "required": true,
   "package": "shipwrights.genesis.mixin",
-  "refmap": "mixins.shipwrights.genesis.refmap.json",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "mixinextras": {
     "minVersion": "0.5.0"
@@ -15,21 +14,13 @@
     "ParticleEngineMixin"
   ],
   "mixins": [
-    "AbstractArrowGravityMixin",
-    "AbstractMinecartGravityMixin",
     "BiomeMixin",
     "BlockEntityTypeMixin",
     "EntityMixin",
-    "BoatGravityMixin",
-    "ExperienceOrbGravityMixin",
-    "FallingBlockEntityGravityMixin",
     "FishingHookGravityMixin",
-    "ItemEntityGravityMixin",
+    "GameTestServerMixin",
     "LevelMixin",
     "LivingEntityMixin",
-    "LlamaSpitGravityMixin",
-    "PrimedTntGravityMixin",
-    "ThrowableProjectileGravityMixin",
     "TimeCommandMixin"
   ],
   "injectors": {

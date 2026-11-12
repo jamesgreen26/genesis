@@ -2,11 +2,10 @@ package shipwrights.genesis;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import shipwrights.genesis.compat.Compat;
 import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.content.GenesisBlocks;
@@ -26,8 +25,7 @@ public class GenesisMod {
     public static final String MOD_ID = "genesis";
     public static final ResourceLocation SPACE = id("great_unknown");
 
-    public GenesisMod() {
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public GenesisMod(IEventBus modBus, ModContainer container) {
         GenesisBlocks.BLOCKS.register(modBus);
         GenesisEntityTypes.ENTITY_TYPES.register(modBus);
         GenesisMobEffects.MOB_EFFECTS.register(modBus);
@@ -36,8 +34,8 @@ public class GenesisMod {
         GenesisDensityFunctions.DENSITY_FUNCTION_TYPES.register(modBus);
         GenesisFeatures.FEATURES.register(modBus);
         modBus.addListener(GenesisOverridesPack::addPackFinders);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GenesisCommonConfig.SPEC);
-        GenesisNetwork.register();
+        container.registerConfig(ModConfig.Type.COMMON, GenesisCommonConfig.SPEC);
+        modBus.addListener(GenesisNetwork::register);
         Compat.init();
     }
 

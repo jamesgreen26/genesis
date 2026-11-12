@@ -2,15 +2,15 @@ package shipwrights.genesis.compat.vs;
 
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.compat.Compat;
 
 /// Valkyrien Skies ships travelling between the overworld, which is a celestial with a dimension of its own, and space.
 /// Pass without Valkyrien Skies.
 ///
-/// Forge looks over every method of a test class, signatures and all, to find the tests. So this one names no Valkyrien
+/// NeoForge looks over every method of a test class, signatures and all, to find the tests. So this one names no Valkyrien
 /// Skies class, and leaves the tests themselves to {@link ShipTravelTestCases}
 @GameTestHolder(GenesisMod.MOD_ID)
 @PrefixGameTestTemplate(false)

@@ -1,0 +1,55 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_space_metal_ingot": {
+      "conditions": {
+        "items": [
+          {
+            "items": "zps:space_metal_ingot"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_space_metal_mesh": {
+      "conditions": {
+        "items": [
+          {
+            "items": "zps:space_metal_mesh"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_zircon": {
+      "conditions": {
+        "items": [
+          {
+            "items": "genesis:zircon"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "zps:beam_collector"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_space_metal_ingot",
+      "has_space_metal_mesh",
+      "has_zircon",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "zps:beam_collector"
+    ]
+  },
+  "sends_telemetry_event": false
+}

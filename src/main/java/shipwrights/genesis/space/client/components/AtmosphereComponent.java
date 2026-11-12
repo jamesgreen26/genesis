@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -12,10 +13,10 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Matrix4f;
 import org.joml.Quaterniond;
 import org.joml.Quaternionf;
@@ -41,7 +42,7 @@ import java.util.Optional;
 /// @param density   opacity of the haze, from 0 for none
 /// @param thickness how far the atmosphere extends beyond the surface, in units of 30% of the celestial's half size
 /// @param color     packed {@code 0xRRGGBB}; not used yet, the shader has fixed day, sunset and night colours
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID, value = Dist.CLIENT)
 public record AtmosphereComponent(
         double density,
         double thickness,
@@ -155,10 +156,9 @@ public record AtmosphereComponent(
     private static void addVertex(Matrix4f matrix, VertexConsumer buffer, float halfSize, float relativeSize,
                                   float x, float y, float z) {
         float size = 2 * halfSize;
-        buffer.vertex(matrix, x, y, z)
-                .color((int) (255 * (x / relativeSize + halfSize) / size), (int) (255 * (y / relativeSize + halfSize) / size),
-                        (int) (255 * (z / relativeSize + halfSize) / size), 255)
-                .endVertex();
+        buffer.addVertex(matrix, x, y, z)
+                .setColor((int) (255 * (x / relativeSize + halfSize) / size), (int) (255 * (y / relativeSize + halfSize) / size),
+                        (int) (255 * (z / relativeSize + halfSize) / size), 255);
     }
 
     // Vanilla render types rather than Lodestone's, like ShadedCubeComponent's
@@ -179,7 +179,7 @@ public record AtmosphereComponent(
                         .createCompositeState(false));
     }
 
-    public static final Codec<AtmosphereComponent> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<AtmosphereComponent> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     Codec.DOUBLE.fieldOf("density").forGetter(AtmosphereComponent::density),
                     Codec.DOUBLE.fieldOf("thickness").forGetter(AtmosphereComponent::thickness),

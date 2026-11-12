@@ -1,16 +1,16 @@
 package shipwrights.genesis.content.crawler;
 
 import g_mungus.zps.gas.api.GasEnvironmentEvent;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.content.GenesisEntityTypes;
 
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public final class MoonCrawlerEvents {
     private MoonCrawlerEvents() {
     }
@@ -24,7 +24,7 @@ public final class MoonCrawlerEvents {
         }
     }
 
-    @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = GenesisMod.MOD_ID)
     public static final class ModBus {
         private ModBus() {
         }
@@ -35,10 +35,10 @@ public final class MoonCrawlerEvents {
         }
 
         @SubscribeEvent
-        public static void onSpawnPlacementRegister(SpawnPlacementRegisterEvent event) {
-            event.register(GenesisEntityTypes.MOON_CRAWLER.get(), SpawnPlacements.Type.ON_GROUND,
+        public static void onSpawnPlacementRegister(RegisterSpawnPlacementsEvent event) {
+            event.register(GenesisEntityTypes.MOON_CRAWLER.get(), SpawnPlacementTypes.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MoonCrawler::checkMoonCrawlerSpawnRules,
-                    SpawnPlacementRegisterEvent.Operation.REPLACE);
+                    RegisterSpawnPlacementsEvent.Operation.REPLACE);
         }
     }
 }

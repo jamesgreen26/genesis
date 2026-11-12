@@ -1,7 +1,7 @@
 package shipwrights.genesis.compat;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.fml.ModList;
 import shipwrights.genesis.compat.vs.VsCompat;
 
 /// Where Genesis works with other mods it doesn't need. Each has a package of its own under this one, the only code
@@ -18,7 +18,7 @@ public final class Compat {
     /// Called as Genesis is constructed
     public static void init() {
         if (isVsLoaded()) {
-            VsCompat.init(MinecraftForge.EVENT_BUS);
+            VsCompat.init(NeoForge.EVENT_BUS);
         }
     }
 }

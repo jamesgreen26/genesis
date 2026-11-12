@@ -1,14 +1,17 @@
 package shipwrights.genesis;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
-import net.minecraftforge.event.AddPackFindersEvent;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.fml.ModList;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 /// A built-in data pack, from the {@code overrides} folder in our resources, that replaces other mods' data (such as
 /// ZPS's beam collector recipe). It's required and sits at the top, so it always outranks every mod's data pack, in
@@ -24,8 +27,10 @@ public final class GenesisOverridesPack {
             return;
         }
         Path root = ModList.get().getModFileById(GenesisMod.MOD_ID).getFile().findResource("overrides");
-        Pack pack = Pack.readMetaAndCreate(ID, Component.literal("Genesis Overrides"), true,
-                id -> new PathPackResources(id, root, true), PackType.SERVER_DATA, Pack.Position.TOP, PackSource.BUILT_IN);
+        PackLocationInfo info = new PackLocationInfo(ID, Component.literal("Genesis Overrides"), PackSource.BUILT_IN,
+                Optional.empty());
+        Pack pack = Pack.readMetaAndCreate(info, new PathPackResources.PathResourcesSupplier(root), PackType.SERVER_DATA,
+                new PackSelectionConfig(true, Pack.Position.TOP, false));
         if (pack != null) {
             event.addRepositorySource(consumer -> consumer.accept(pack));
         }

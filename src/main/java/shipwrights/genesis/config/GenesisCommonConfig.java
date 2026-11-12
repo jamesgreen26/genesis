@@ -1,16 +1,16 @@
 package shipwrights.genesis.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public final class GenesisCommonConfig {
-    private static final ForgeConfigSpec.IntValue ATMOSPHERE_EXIT_HEIGHT;
-    private static final ForgeConfigSpec.IntValue ATMOSPHERE_ENTRY_HEIGHT;
-    private static final ForgeConfigSpec.IntValue WORLD_SIZE;
+    private static final ModConfigSpec.IntValue ATMOSPHERE_EXIT_HEIGHT;
+    private static final ModConfigSpec.IntValue ATMOSPHERE_ENTRY_HEIGHT;
+    private static final ModConfigSpec.IntValue WORLD_SIZE;
 
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         ATMOSPHERE_EXIT_HEIGHT = builder
                 .comment("Height above which anything in a celestial's dimension leaves for space")
                 .defineInRange("atmosphereExitHeight", 840, -2048, 30_000_000);

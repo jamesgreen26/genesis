@@ -1,6 +1,7 @@
 package shipwrights.genesis.space;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +33,7 @@ public record StaticTransformProvider(
         return TYPE;
     }
 
-    public static final Codec<StaticTransformProvider> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<StaticTransformProvider> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     MoreCodecs.VECTOR3DC.fieldOf("position").forGetter(StaticTransformProvider::position),
                     MoreCodecs.VECTOR3DC.fieldOf("rotation").forGetter(StaticTransformProvider::rotation)

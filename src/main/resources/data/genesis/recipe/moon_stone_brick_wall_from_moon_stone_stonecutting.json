@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "genesis:moon_stone"
+  },
+  "result": {
+    "id": "genesis:moon_stone_brick_wall",
+    "count": 1
+  }
+}

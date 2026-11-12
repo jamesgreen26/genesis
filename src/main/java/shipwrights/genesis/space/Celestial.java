@@ -1,15 +1,16 @@
 package shipwrights.genesis.space;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import g_mungus.zps.gas.api.HeatSource;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.joml.Quaterniondc;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
@@ -24,7 +25,7 @@ import java.util.Map;
 ///                           (see {@link StarHeat}); 0 if it gives off no heat
 /// @param heatFalloff how steeply its heat drops with distance: the temperature it gives is in proportion to
 ///                    `(radius / distance)^heatFalloff`. 0.5 is what radiation alone gives
-@Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = GenesisMod.MOD_ID)
 public record Celestial(
         boolean castsLight,
         boolean castsShadows,
@@ -86,9 +87,9 @@ public record Celestial(
 
         ResourceLocation getType();
 
-        Map<ResourceLocation, Codec<? extends TransformProvider>> REGISTRY = new HashMap<>();
+        Map<ResourceLocation, MapCodec<? extends TransformProvider>> REGISTRY = new HashMap<>();
 
-        static void register(ResourceLocation type, Codec<? extends TransformProvider> codec) {
+        static void register(ResourceLocation type, MapCodec<? extends TransformProvider> codec) {
             REGISTRY.put(type, codec);
         }
 

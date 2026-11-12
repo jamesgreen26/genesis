@@ -2,7 +2,6 @@ package shipwrights.genesis;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
-import net.minecraftforge.network.NetworkHooks;
 
 public final class MinecraftBootstrap {
     private MinecraftBootstrap() {}
@@ -13,9 +12,9 @@ public final class MinecraftBootstrap {
         try {
             Bootstrap.bootStrap();
         } catch (ExceptionInInitializerError e) {
-            // Forge's NetworkHooks.init() is the final bootstrap step and needs ModLauncher's event transformer,
-            // which isn't present in unit tests. Vanilla bootstrapping has already completed by then.
-            if (!e.getStackTrace()[0].getClassName().equals(NetworkHooks.class.getName())) {
+            // NeoForge's own bootstrap steps come last and need the mod loader, which isn't present in unit tests.
+            // Vanilla bootstrapping has already completed by then.
+            if (!e.getStackTrace()[0].getClassName().startsWith("net.neoforged.")) {
                 throw e;
             }
         }
