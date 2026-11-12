@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "shipwrights.genesis.compat.sable.mixin",
+  "plugin": "shipwrights.genesis.compat.sable.SableMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "ServerSubLevelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

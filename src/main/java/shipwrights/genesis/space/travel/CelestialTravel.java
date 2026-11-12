@@ -215,15 +215,24 @@ public final class CelestialTravel {
 
     /// Moves {@code root} and everything riding it from {@code from} to {@code position} in {@code to}, turning its
     /// velocity and facing by {@code rotation}, without checking whether they {@linkplain #canTravel can}
-    public static void carry(Entity root, ServerLevel from, ServerLevel to, Vec3 position, Quaterniondc rotation) {
-        Vec3 velocity = rotate(velocity(root, from), rotation);
+    ///
+    /// @return what {@code root} became in {@code to}, or null if it didn't go
+    public static Entity carry(Entity root, ServerLevel from, ServerLevel to, Vec3 position, Quaterniondc rotation) {
+        return carry(root, from, to, position, rotation, velocity(root, from));
+    }
+
+    /// As {@link #carry(Entity, ServerLevel, ServerLevel, Vec3, Quaterniondc)}, but moving at {@code velocity}, in
+    /// blocks per tick in {@code from}'s frame, rather than as it was
+    public static Entity carry(Entity root, ServerLevel from, ServerLevel to, Vec3 position, Quaterniondc rotation,
+                               Vec3 velocity) {
+        velocity = rotate(velocity, rotation);
 
         // Keep the arrival loaded, as a nether portal does, so what arrives alone carries on moving
         BlockPos block = BlockPos.containing(position);
         to.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(block), 3, block);
 
         LAST_POSITIONS.remove(root);
-        teleportStack(root, to, position, velocity, rotation);
+        return teleportStack(root, to, position, velocity, rotation);
     }
 
     /// Whether {@code root} and everything riding it could each go through a nether portal, but for riding or being
@@ -267,13 +276,13 @@ public final class CelestialTravel {
     }
 
     /// Whether its client moves {@code root}, and the server only learns where it ends up
-    private static boolean isMovedByClient(Entity root) {
+    public static boolean isMovedByClient(Entity root) {
         return root instanceof Player || root.getControllingPassenger() instanceof Player;
     }
 
     /// Blocks per tick. The server doesn't know the velocity of what its client moves, so that's taken from how far it
     /// moved over the last tick
-    private static Vec3 velocity(Entity root, ServerLevel level) {
+    public static Vec3 velocity(Entity root, ServerLevel level) {
         if (isMovedByClient(root)) {
             LastPosition last = LAST_POSITIONS.get(root);
             if (last != null && last.level() == level.dimension() && last.gameTime() == level.getGameTime() - 1) {

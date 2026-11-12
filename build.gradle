@@ -107,6 +107,14 @@ dependencies {
     compileOnly("org.valkyrienskies:valkyrienskies-120-forge:${vs2_version}") { transitive = false }
     // endregion
 
+    // region Sable: optional. Only shipwrights.genesis.compat.sable may use its classes, which is only reached once
+    // Sable is known to be loaded. Its common code is the API it builds on; the companion carries the rest of its API
+    compileOnly("dev.ryanhcode.sable:sable-common-${minecraft_version}:${sable_version}") { transitive = false }
+    compileOnly("dev.ryanhcode.sable-companion:sable-companion-common-${minecraft_version}:${sable_companion_version}") {
+        transitive = false
+    }
+    // endregion
+
     // region VS deps
     // VS core's API is Kotlin and Jackson-annotated, so compiling against it needs these
     //noinspection DifferentStdlibGradleVersion

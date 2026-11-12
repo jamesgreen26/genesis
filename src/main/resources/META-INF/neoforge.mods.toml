@@ -16,6 +16,10 @@ logoFile = "assets/genesis/icon.png"
 [[mixins]]
 config = "genesis.mixins.json"
 
+# Into Sable, applied only when it's installed
+[[mixins]]
+config = "genesis.sable.mixins.json"
+
 [[accessTransformers]]
 file = "META-INF/accesstransformer.cfg"
 
@@ -44,5 +48,12 @@ side = "BOTH"
 modId = "valkyrienskies"
 type = "optional"
 versionRange = "[2.4.11,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.genesis]]
+modId = "sable"
+type = "optional"
+versionRange = "[2.0.5,)"
 ordering = "NONE"
 side = "BOTH"
