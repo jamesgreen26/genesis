@@ -16,6 +16,7 @@
   "mixins": [
     "BiomeMixin",
     "BlockEntityTypeMixin",
+    "ChunkAccessAccessor",
     "ChunkAccessMixin",
     "ChunkMapInvoker",
     "ChunkMapMixin",

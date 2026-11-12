@@ -157,6 +157,12 @@ dependencies {
     // Sable's POM pins an older Veil than the one it runs best with
     localRuntime("foundry.veil:veil-neoforge-${minecraft_version}:${veil_version}")
 
+    // Optional, and off unless asked for with -Pc2me: C2ME loads chunks in place of vanilla, so what Genesis does to
+    // chunk loading has to be tried with it too
+    if (project.hasProperty('c2me')) {
+        localRuntime("maven.modrinth:c2me-neoforge:${c2me_version}")
+    }
+
     localRuntime("maven.modrinth:spark:${spark_version}")
     localRuntime("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 

@@ -20,6 +20,10 @@ config = "genesis.mixins.json"
 [[mixins]]
 config = "genesis.sable.mixins.json"
 
+# Into C2ME, applied only when its chunk system is installed
+[[mixins]]
+config = "genesis.c2me.mixins.json"
+
 [[accessTransformers]]
 file = "META-INF/accesstransformer.cfg"
 

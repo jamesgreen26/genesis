@@ -1,0 +1,14 @@
+{
+  "required": false,
+  "package": "shipwrights.genesis.compat.c2me.mixin",
+  "plugin": "shipwrights.genesis.compat.c2me.C2meMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "ReadFromDiskAsyncMixin",
+    "ReadFromDiskMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
