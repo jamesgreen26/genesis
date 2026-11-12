@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "Genesis"
 authors = "G_Mungus, Quoissant, Cosmos, Frisk256, Acrogenous, BrickyBoy, Jcm, metafive, GuyApooye, ThePlasticPotato"
 description = '''
-A space mod.
+A space exploration addon for the Zero Point Systems mod.
 '''
 logoFile = "assets/genesis/icon.png"
 
