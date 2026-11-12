@@ -48,6 +48,7 @@ import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.config.GenesisCommonConfig;
+import shipwrights.genesis.mixin.ServerChunkCacheInvoker;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.math.OBB;
 import shipwrights.genesis.space.travel.CelestialTravel;
@@ -625,11 +626,17 @@ final class SubLevelTravelTestCases {
         for (ServerLevel level : server.getAllLevels()) {
             ServerSubLevelContainer container = SubLevelContainer.getContainer(level);
             if (container == null) continue;
+            boolean removed = false;
             for (SubLevel subLevel : List.copyOf(container.getAllSubLevels())) {
                 if (subLevel instanceof ServerSubLevel subLevelOnServer && !subLevelOnServer.isRemoved() && which.test(subLevelOnServer)) {
                     container.removeSubLevel(subLevelOnServer, SubLevelRemovalReason.REMOVED);
+                    removed = true;
                 }
             }
+            // The level's chunk cache may still hold a removed sub-level's chunks, until it forgets them when the tick
+            // ends. A test starting before then can be given the same plot, where the level would find it the removed
+            // sub-level's blocks rather than its own
+            if (removed) ((ServerChunkCacheInvoker) level.getChunkSource()).genesis$clearCache();
         }
     }
 
