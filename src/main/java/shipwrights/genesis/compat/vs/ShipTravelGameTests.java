@@ -42,6 +42,18 @@ public class ShipTravelGameTests {
         ShipTravelTestCases.staticShipStays(helper);
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void reactorTravelsWithShip(GameTestHelper helper) {
+        if (withoutVs(helper)) return;
+        ShipTravelTestCases.reactorTravelsWithShip(helper);
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void roomTravelsWithShip(GameTestHelper helper) {
+        if (withoutVs(helper)) return;
+        ShipTravelTestCases.roomTravelsWithShip(helper);
+    }
+
     /// Passes the test if Valkyrien Skies isn't loaded
     private static boolean withoutVs(GameTestHelper helper) {
         if (Compat.isVsLoaded()) return false;

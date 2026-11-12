@@ -1,9 +1,15 @@
 package shipwrights.genesis.compat.vs;
 
 import com.mojang.authlib.GameProfile;
+import g_mungus.zps.block.ModBlocks;
+import g_mungus.zps.reactor.Reactor;
+import g_mungus.zps.reactor.ReactorManager;
+import g_mungus.zps.room.Room;
+import g_mungus.zps.room.RoomManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayerFactory;
@@ -22,6 +29,7 @@ import org.valkyrienskies.core.internal.world.VsiServerShipWorld;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.assembly.ShipAssembler;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import org.valkyrienskies.mod.common.block.TestHingeBlock;
 import org.valkyrienskies.mod.common.blockentity.TestHingeBlockEntity;
 import shipwrights.genesis.config.GenesisCommonConfig;
@@ -31,12 +39,18 @@ import shipwrights.genesis.space.travel.CelestialTravel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 /// The tests of {@link ShipTravelGameTests}, apart so they're only loaded with Valkyrien Skies
 final class ShipTravelTestCases {
+
+    /// Corners of the hollow cubes the ZPS tests make ships of
+    private static final BlockPos SHELL_MIN = new BlockPos(0, 1, 0);
+    private static final BlockPos SHELL_MAX = new BlockPos(4, 5, 4);
+    private static final ResourceLocation FLUX = ResourceLocation.fromNamespaceAndPath("zps", "flux");
 
     static void shipLeavesForSpaceWithWhatsAboard(GameTestHelper helper) {
         ServerLevel overworld = helper.getLevel();
@@ -177,6 +191,97 @@ final class ShipTravelTestCases {
             ShipAssembler.INSTANCE.deleteShip(overworld, found, true, false);
             helper.succeed();
         });
+    }
+
+    static void reactorTravelsWithShip(GameTestHelper helper) {
+        ServerLevel overworld = helper.getLevel();
+        ServerLevel space = space(helper);
+        ServerShip ship = assembleShell(helper, ModBlocks.REINFORCED_PLATING.get().defaultBlockState());
+        BlockPos inside = centreInShip(ship);
+        helper.assertTrue(ReactorManager.get(overworld).reactorForInterior(inside) != null,
+                "the plating shell made no reactor in the ship");
+        lift(overworld, ship);
+
+        helper.succeedWhen(() -> {
+            ServerShip found = shipById(overworld, ship.getId());
+            helper.assertTrue(VSGameUtilsKt.getDimensionId(space).equals(found.getChunkClaimDimension()),
+                    "ship is in " + found.getChunkClaimDimension());
+            helper.assertTrue(ReactorManager.get(overworld).reactorForInterior(inside) == null,
+                    "the reactor was left behind in the overworld");
+            ReactorManager reactors = ReactorManager.get(space);
+            Reactor arrived = reactors.reactorForInterior(inside);
+            helper.assertTrue(arrived != null, "the reactor didn't arrive in space");
+            helper.assertTrue(reactors.reading(space, arrived) != null, "the reactor's chamber isn't simulated in space");
+
+            ShipAssembler.INSTANCE.deleteShip(space, found, true, false);
+        });
+    }
+
+    static void roomTravelsWithShip(GameTestHelper helper) {
+        ServerLevel overworld = helper.getLevel();
+        ServerLevel space = space(helper);
+        ServerShip ship = assembleShell(helper, Blocks.STONE.defaultBlockState());
+        BlockPos inside = centreInShip(ship);
+        addFlux(overworld, inside, 5.0);
+        Room sealed = RoomManager.get(overworld).roomAt(inside);
+        helper.assertTrue(sealed != null, "gas into the shell made no room");
+        double flux = sealed.massKg().getOrDefault(FLUX, 0.0);
+        helper.assertTrue(flux >= 5.0, "the room holds " + flux + " kg of flux");
+        lift(overworld, ship);
+
+        helper.succeedWhen(() -> {
+            ServerShip found = shipById(overworld, ship.getId());
+            helper.assertTrue(VSGameUtilsKt.getDimensionId(space).equals(found.getChunkClaimDimension()),
+                    "ship is in " + found.getChunkClaimDimension());
+            helper.assertTrue(RoomManager.get(overworld).knownRoomAt(inside) == null,
+                    "the room was left behind in the overworld");
+            Room arrived = RoomManager.get(space).roomAt(inside);
+            helper.assertTrue(arrived != null, "the room didn't arrive in space");
+            // It leaks toward space from the moment it's there, but slowly
+            double now = arrived.massKg().getOrDefault(FLUX, 0.0);
+            helper.assertTrue(now > flux * 0.9, "the room arrived with " + now + " kg of flux, of " + flux);
+
+            ShipAssembler.INSTANCE.deleteShip(space, found, true, false);
+        });
+    }
+
+    /// A ship of a hollow 5×5×5 cube of {@code wall}, in the test's structure
+    private static ServerShip assembleShell(GameTestHelper helper, BlockState wall) {
+        ServerLevel level = helper.getLevel();
+        List<BlockPos> blocks = new ArrayList<>();
+        for (BlockPos relative : BlockPos.betweenClosed(SHELL_MIN, SHELL_MAX)) {
+            boolean edge = relative.getX() == SHELL_MIN.getX() || relative.getX() == SHELL_MAX.getX()
+                    || relative.getY() == SHELL_MIN.getY() || relative.getY() == SHELL_MAX.getY()
+                    || relative.getZ() == SHELL_MIN.getZ() || relative.getZ() == SHELL_MAX.getZ();
+            BlockPos block = helper.absolutePos(relative);
+            level.setBlock(block, edge ? wall : Blocks.AIR.defaultBlockState(), 3);
+            if (edge) blocks.add(block);
+        }
+        return ShipAssembler.INSTANCE.assembleToShip(level, blocks, true, 1.0, false);
+    }
+
+    /// The middle of a hollow cube's cavity, in its ship's shipyard: where its centre of mass is
+    private static BlockPos centreInShip(ServerShip ship) {
+        return BlockPos.containing(VectorConversionsMCKt.toMinecraft(ship.getTransform().getPositionInShip()));
+    }
+
+    /// Puts {@code ship} above the exit height, for it to leave for space
+    private static void lift(ServerLevel overworld, ServerShip ship) {
+        Vector3dc start = ship.getTransform().getPositionInWorld();
+        moveShip(overworld, ship, overworld,
+                new Vector3d(start.x(), GenesisCommonConfig.atmosphereExitHeight() + 10, start.z()), new Vector3d());
+    }
+
+    /// Puts {@code kg} of ZPS's flux into the air at {@code pos}. By reflection, as the gas's type is Kelvin's, which
+    /// Genesis doesn't compile against
+    private static void addFlux(ServerLevel level, BlockPos pos, double kg) {
+        try {
+            Object flux = Class.forName("g_mungus.zps.gas.ModGases").getField("FLUX").get(null);
+            RoomManager.class.getMethod("addGas", ServerLevel.class, BlockPos.class, Map.class, double.class)
+                    .invoke(RoomManager.get(level), level, pos, Map.of(flux, kg), 300.0);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("couldn't put flux into the room", e);
+        }
     }
 
     /// A ship of a 3×3 stone platform at {@code relative} in the test's structure

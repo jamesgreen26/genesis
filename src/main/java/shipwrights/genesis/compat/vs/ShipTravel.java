@@ -1,5 +1,7 @@
 package shipwrights.genesis.compat.vs;
 
+import g_mungus.zps.gas.api.GridTransfer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -36,7 +38,8 @@ import java.util.Set;
 /// Moves Valkyrien Skies ships between space and the dimensions of celestials, as {@link CelestialTravel} moves
 /// entities: arriving at a celestial when any part comes within {@value CelestialTravel#ARRIVAL_DISTANCE} blocks of it,
 /// and leaving a celestial's dimension when any part rises above the exit height. Ships joined to it go with it (see
-/// {@link ShipConnections}), and so do the entities aboard them, all in the same tick.
+/// {@link ShipConnections}), and so do the entities aboard them and ZPS's reactors and rooms in them, all in the same
+/// tick.
 ///
 /// They keep their places relative to each other, turned as a whole by the frame of the surface where they cross, which
 /// turns their velocity and spin too. They arrive in a celestial's dimension with their top at the entry height, and in
@@ -176,6 +179,11 @@ final class ShipTravel {
             }
         }
 
+        // ZPS keeps its reactors and rooms per dimension, by position, so they're taken out before the blocks go, while
+        // their chambers and ports can still be read, and nothing aboard can fail as the old shipyard is cleared
+        GridTransfer.Cargo cargo = GridTransfer.detach(from, GridTransfer.Region.chunks(
+                chunk -> group.stream().anyMatch(member -> member.getChunkClaim().contains(chunk.x, chunk.z))));
+
         // Valkyrien Skies moves each ship, and its shipyard, to the new dimension within the call
         VsiServerShipWorld shipWorld = VSGameUtilsKt.getShipObjectWorld(from);
         VsiCore core = VSGameUtilsKt.getVsCore();
@@ -190,6 +198,8 @@ final class ShipTravel {
             shipWorld.teleportShip(member, core.newShipTeleportData(position, turned, velocity, omega, dimension,
                     null, null));
         }
+        // The shipyard keeps its coordinates, so they arrive where they were
+        cargo.attach(to, BlockPos.ZERO);
 
         // In their ships' own coordinates, which go with them unchanged
         for (Entity entity : inShipyards) {
