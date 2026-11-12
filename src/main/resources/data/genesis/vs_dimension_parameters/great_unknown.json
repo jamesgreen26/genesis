@@ -1,0 +1,7 @@
+{
+  "dimensionId": "minecraft:dimension:genesis:great_unknown",
+  "maxYPos": -1,
+  "seaLevel": 0,
+  "gravity": [0.0, 0.0, 0.0],
+  "priority": 0
+}

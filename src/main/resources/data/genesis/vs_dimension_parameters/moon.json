@@ -1,0 +1,7 @@
+{
+  "dimensionId": "minecraft:dimension:genesis:moon",
+  "maxYPos": -1,
+  "seaLevel": 110,
+  "gravity": [0.0, -2.5, 0.0],
+  "priority": 0
+}
