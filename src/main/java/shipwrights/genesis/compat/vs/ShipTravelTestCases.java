@@ -84,8 +84,9 @@ final class ShipTravelTestCases {
             OBB cube = cube(space);
             OBB shipObb = OBB.fromShip(found.getShipAABB(), found.getShipToWorld());
             double distance = cube.distanceTo(shipObb);
-            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 1
-                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 3,
+            // The overworld has moved on since, by up to a sixth of a block a tick
+            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 8
+                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 24,
                     "ship arrived " + distance + " blocks from the overworld");
 
             // Up, which it was moving, is out from the overworld in space

@@ -1,12 +1,12 @@
 {
   "castsLight": false,
   "castsShadows": true,
-  "size": 96,
+  "size": 768,
   "mass": 1,
   "transformProvider": {
     "type": "genesis:orbiting",
     "parent": "genesis:sun",
-    "distance": 15000,
+    "distance": 120000,
     "period": 4600000,
     "rotation": {
       "dayLength": 24000,

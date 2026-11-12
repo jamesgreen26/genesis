@@ -1,12 +1,12 @@
 {
   "castsLight": false,
   "castsShadows": true,
-  "size": 29,
+  "size": 232,
   "mass": 0.25,
   "transformProvider": {
     "type": "genesis:orbiting",
     "parent": "minecraft:overworld",
-    "distance": 750,
+    "distance": 6000,
     "period": 184329,
     "rotation": {
       "dayLength": "tidally_locked"

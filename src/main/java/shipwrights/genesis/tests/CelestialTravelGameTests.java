@@ -41,7 +41,7 @@ public class CelestialTravelGameTests {
         Chicken chicken = helper.spawnWithNoFreeWill(EntityType.CHICKEN, new BlockPos(1, 2, 1));
         chicken.startRiding(pig, true);
         pig.moveTo(pig.getX(), GenesisCommonConfig.atmosphereExitHeight() + 5, pig.getZ());
-        // Slowly, so it's still near where it arrives when it's checked, a tick or two later
+        // Slowly, so it's still near where it arrives when it's checked, some ticks later
         pig.setDeltaMovement(0, 0.2, 0);
         UUID pigId = pig.getUUID();
         UUID chickenId = chicken.getUUID();
@@ -56,8 +56,9 @@ public class CelestialTravelGameTests {
             OBB overworldCube = cube(space, Level.OVERWORLD.location());
             Vector3d position = new Vector3d(arrived.getX(), arrived.getY(), arrived.getZ());
             double distance = overworldCube.closestPointTo(position).distance(position);
-            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 0.5
-                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 2,
+            // The overworld has moved on since, by up to a sixth of a block a tick
+            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 4
+                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 16,
                     "pig arrived " + distance + " blocks from the overworld");
 
             // Up, which it was moving, is out from the overworld's surface in space
@@ -107,9 +108,10 @@ public class CelestialTravelGameTests {
             Entity rider = overworld.getEntity(chickenId);
             helper.assertTrue(rider != null && rider.getVehicle() == arrived, "chicken isn't riding the pig in the overworld");
 
-            // Within a few blocks on the cube, as the overworld moves on while the pig's chunk loads
+            // Within a couple of dozen blocks on the cube, as the overworld moves on, by up to a sixth of a block a
+            // tick, while the pig's chunk loads
             double blocksPerCubeBlock = GenesisCommonConfig.worldSize() / 8.0 / (celestial.size() / 2);
-            double tolerance = 3 * blocksPerCubeBlock;
+            double tolerance = 24 * blocksPerCubeBlock;
             helper.assertTrue(Math.abs(arrived.getX()) < tolerance && Math.abs(arrived.getZ()) < tolerance,
                     "pig arrived at " + arrived.position() + ", not near the origin");
             helper.assertTrue(Math.abs(arrived.getY() - GenesisCommonConfig.atmosphereEntryHeight()) < 5,
