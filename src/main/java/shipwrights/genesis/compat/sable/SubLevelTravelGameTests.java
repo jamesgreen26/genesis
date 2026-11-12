@@ -58,6 +58,18 @@ public class SubLevelTravelGameTests {
         SubLevelTravelTestCases.blockActorsWorkAfterTravel(helper);
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, batch = BATCH)
+    public static void reactorTravelsWithSubLevel(GameTestHelper helper) {
+        if (withoutSable(helper)) return;
+        SubLevelTravelTestCases.reactorTravelsWithSubLevel(helper);
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, batch = BATCH)
+    public static void roomTravelsWithSubLevel(GameTestHelper helper) {
+        if (withoutSable(helper)) return;
+        SubLevelTravelTestCases.roomTravelsWithSubLevel(helper);
+    }
+
     /// Passes the test if Sable isn't loaded
     private static boolean withoutSable(GameTestHelper helper) {
         if (Compat.isSableLoaded()) return false;

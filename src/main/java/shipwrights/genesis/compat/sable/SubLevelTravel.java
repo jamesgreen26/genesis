@@ -17,6 +17,7 @@ import dev.ryanhcode.sable.companion.math.Pose3d;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import dev.ryanhcode.sable.sublevel.plot.LevelPlot;
+import g_mungus.zps.gas.api.GridTransfer;
 import dev.ryanhcode.sable.sublevel.storage.SubLevelRemovalReason;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
@@ -63,7 +64,8 @@ import java.util.UUID;
 /// Moves Sable sub-levels between space and the dimensions of celestials, as {@link CelestialTravel} moves entities:
 /// arriving at a celestial when any part comes within {@value CelestialTravel#ARRIVAL_DISTANCE} blocks of it, and
 /// leaving a celestial's dimension when any part rises above the exit height. Sub-levels connected to it go with it (see
-/// {@link SubLevelHelper#getConnectedChain}), and so do the entities aboard them, all in the same tick.
+/// {@link SubLevelHelper#getConnectedChain}), and so do the entities aboard them and ZPS's reactors and rooms in them,
+/// all in the same tick.
 ///
 /// They keep their places relative to each other, turned as a whole by the frame of the surface where they cross, which
 /// turns their velocity and spin too. They arrive in a celestial's dimension with their top at the entry height, and in
@@ -402,7 +404,14 @@ final class SubLevelTravel {
             ((ChunkMapInvoker) to.getChunkSource().chunkMap).genesis$promoteChunkMap();
             ((ServerChunkCacheInvoker) to.getChunkSource()).genesis$clearCache();
 
-            if (!blocks.isEmpty()) moveBlocks(from, to, anchor, newAnchor, blocks);
+            if (!blocks.isEmpty()) {
+                // ZPS keeps its reactors and rooms per dimension, by position, so they're taken out before the blocks
+                // go, while their chambers and ports can still be read, and nothing in the plot can fail as it's
+                // emptied. Then they're put where the blocks went
+                GridTransfer.Cargo cargo = GridTransfer.detach(from, GridTransfer.Region.chunks(plot::contains));
+                moveBlocks(from, to, anchor, newAnchor, blocks);
+                cargo.attach(to, new BlockPos(offset));
+            }
         }
 
         rebuilt.setName(old.getName());

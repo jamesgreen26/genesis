@@ -3,6 +3,12 @@ package shipwrights.genesis.compat.sable;
 import g_mungus.zps.block.ModBlocks;
 import g_mungus.zps.entity.ModEntities;
 import g_mungus.zps.entity.OctoMountingEntity;
+import g_mungus.zps.reactor.Reactor;
+import g_mungus.zps.reactor.ReactorManager;
+import g_mungus.zps.room.Room;
+import g_mungus.zps.room.RoomManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -48,6 +54,7 @@ import shipwrights.genesis.space.travel.CelestialTravel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -61,6 +68,11 @@ final class SubLevelTravelTestCases {
 
     /// The names of the sub-levels of the tests running
     private static final Set<String> RUNNING = ConcurrentHashMap.newKeySet();
+
+    /// Corners of the hollow cubes the ZPS tests make sub-levels of, in the test's structure
+    private static final BlockPos SHELL_MIN = new BlockPos(0, 1, 0);
+    private static final BlockPos SHELL_MAX = new BlockPos(4, 5, 4);
+    private static final ResourceLocation FLUX = ResourceLocation.fromNamespaceAndPath("zps", "flux");
 
     static void subLevelLeavesForSpaceWithWhatsAboard(GameTestHelper helper) {
         ServerLevel overworld = helper.getLevel();
@@ -313,6 +325,119 @@ final class SubLevelTravelTestCases {
             if (actor == blockEntity) return true;
         }
         return false;
+    }
+
+    /// ZPS keeps the reactors of a level apart from its blocks: one in a sub-level's plot goes with it
+    static void reactorTravelsWithSubLevel(GameTestHelper helper) {
+        ServerLevel overworld = helper.getLevel();
+        ServerLevel space = space(helper);
+        String name = testName(helper);
+        // Plated over once it's a sub-level, as one is built aboard: Sable's assembly moves blocks without ZPS knowing,
+        // so a reactor built before wouldn't come along
+        ServerSubLevel subLevel = assembleShell(helper, Blocks.STONE.defaultBlockState(), name);
+        BoundingBox3ic bounds = subLevel.getPlot().getBoundingBox();
+        for (BlockPos pos : BlockPos.betweenClosed(bounds.minX(), bounds.minY(), bounds.minZ(),
+                bounds.maxX(), bounds.maxY(), bounds.maxZ())) {
+            if (overworld.getBlockState(pos).is(Blocks.STONE)) {
+                overworld.setBlock(pos, ModBlocks.REINFORCED_PLATING.get().defaultBlockState(), 3);
+            }
+        }
+        UUID id = subLevel.getUniqueId();
+        BlockPos inside = cavity(subLevel);
+        helper.assertTrue(ReactorManager.get(overworld).reactorForInterior(inside) != null,
+                "the plating shell made no reactor in the sub-level");
+        lift(overworld, subLevel);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(subLevel.isRemoved(), "sub-level is still in the overworld");
+            ServerSubLevel found = byName(space, name);
+            helper.assertTrue(found != null, "no sub-level arrived in space");
+            helper.assertTrue(found.getUniqueId().equals(id), "the sub-level arrived with a new id");
+            helper.assertTrue(ReactorManager.get(overworld).reactorForInterior(inside) == null,
+                    "the reactor was left behind in the overworld");
+            ReactorManager reactors = ReactorManager.get(space);
+            Reactor arrived = reactors.reactorForInterior(inside);
+            helper.assertTrue(arrived != null, "the reactor didn't arrive in space");
+            helper.assertTrue(reactors.reading(space, arrived) != null, "the reactor's chamber isn't simulated in space");
+        });
+    }
+
+    /// Likewise ZPS's rooms, and the gas in them
+    static void roomTravelsWithSubLevel(GameTestHelper helper) {
+        ServerLevel overworld = helper.getLevel();
+        ServerLevel space = space(helper);
+        String name = testName(helper);
+        ServerSubLevel subLevel = assembleShell(helper, Blocks.STONE.defaultBlockState(), name);
+        BlockPos inside = cavity(subLevel);
+        addFlux(overworld, inside, 5.0);
+        Room sealed = RoomManager.get(overworld).roomAt(inside);
+        helper.assertTrue(sealed != null, "gas into the shell made no room");
+        double flux = sealed.massKg().getOrDefault(FLUX, 0.0);
+        helper.assertTrue(flux >= 5.0, "the room holds " + flux + " kg of flux");
+        lift(overworld, subLevel);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(subLevel.isRemoved(), "sub-level is still in the overworld");
+            ServerSubLevel found = byName(space, name);
+            helper.assertTrue(found != null, "no sub-level arrived in space");
+            helper.assertTrue(RoomManager.get(overworld).knownRoomAt(inside) == null,
+                    "the room was left behind in the overworld");
+            Room arrived = RoomManager.get(space).roomAt(inside);
+            helper.assertTrue(arrived != null, "the room didn't arrive in space");
+            // It leaks toward space from the moment it's there, but slowly
+            double now = arrived.massKg().getOrDefault(FLUX, 0.0);
+            helper.assertTrue(now > flux * 0.9, "the room arrived with " + now + " kg of flux, of " + flux);
+        });
+    }
+
+    /// A sub-level of a hollow 5×5×5 cube of {@code wall}, in the test's structure, named {@code name}
+    private static ServerSubLevel assembleShell(GameTestHelper helper, BlockState wall, String name) {
+        ServerLevel level = helper.getLevel();
+        List<BlockPos> blocks = new ArrayList<>();
+        for (BlockPos relative : BlockPos.betweenClosed(SHELL_MIN, SHELL_MAX)) {
+            boolean edge = relative.getX() == SHELL_MIN.getX() || relative.getX() == SHELL_MAX.getX()
+                    || relative.getY() == SHELL_MIN.getY() || relative.getY() == SHELL_MAX.getY()
+                    || relative.getZ() == SHELL_MIN.getZ() || relative.getZ() == SHELL_MAX.getZ();
+            BlockPos block = helper.absolutePos(relative);
+            level.setBlock(block, edge ? wall : Blocks.AIR.defaultBlockState(), 3);
+            if (edge) blocks.add(block.immutable());
+        }
+        BlockPos min = helper.absolutePos(SHELL_MIN);
+        BlockPos max = helper.absolutePos(SHELL_MAX);
+        BoundingBox3ic bounds = new BoundingBox3i(
+                new BlockPos(Math.min(min.getX(), max.getX()), min.getY(), Math.min(min.getZ(), max.getZ())),
+                new BlockPos(Math.max(min.getX(), max.getX()), max.getY(), Math.max(min.getZ(), max.getZ())));
+        BlockPos centre = new BlockPos((min.getX() + max.getX()) / 2, (min.getY() + max.getY()) / 2,
+                (min.getZ() + max.getZ()) / 2);
+        ServerSubLevel subLevel = SubLevelAssemblyHelper.assembleBlocks(level, centre, blocks, bounds);
+        subLevel.setName(name);
+        return subLevel;
+    }
+
+    /// The middle of a hollow cube's cavity, in its sub-level's plot, which travelling keeps
+    private static BlockPos cavity(ServerSubLevel subLevel) {
+        BoundingBox3ic bounds = subLevel.getPlot().getBoundingBox();
+        return new BlockPos((bounds.minX() + bounds.maxX()) / 2, (bounds.minY() + bounds.maxY()) / 2,
+                (bounds.minZ() + bounds.maxZ()) / 2);
+    }
+
+    /// Puts {@code subLevel} above the exit height, rising, for it to leave for space
+    private static void lift(ServerLevel overworld, ServerSubLevel subLevel) {
+        Vector3dc start = subLevel.logicalPose().position();
+        moveSubLevel(overworld, subLevel, new Vector3d(start.x(), GenesisCommonConfig.atmosphereExitHeight() + 10,
+                start.z()), new Vector3d(0, 5, 0));
+    }
+
+    /// Puts {@code kg} of ZPS's flux into the air at {@code pos}. By reflection, as the gas's type is Kelvin's, which
+    /// Genesis doesn't compile against
+    private static void addFlux(ServerLevel level, BlockPos pos, double kg) {
+        try {
+            Object flux = Class.forName("g_mungus.zps.gas.ModGases").getField("FLUX").get(null);
+            RoomManager.class.getMethod("addGas", ServerLevel.class, BlockPos.class, Map.class, double.class)
+                    .invoke(RoomManager.get(level), level, pos, Map.of(flux, kg), 300.0);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("couldn't put flux into the room", e);
+        }
     }
 
     static void subLevelArrivesFromSpace(GameTestHelper helper) {
