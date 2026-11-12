@@ -20,6 +20,10 @@ config = "genesis.mixins.json"
 [[mixins]]
 config = "genesis.sable.mixins.json"
 
+# Into Catnip, which comes with Ponder and so with Create, applied only when it and Sable are installed
+[[mixins]]
+config = "genesis.catnip.mixins.json"
+
 # Into Simulated, which Create Aeronautics is built on, applied only when it's installed
 [[mixins]]
 config = "genesis.simulated.mixins.json"

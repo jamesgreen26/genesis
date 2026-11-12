@@ -4,6 +4,9 @@
   "plugin": "shipwrights.genesis.compat.sable.SableMixinPlugin",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
+  "client": [
+    "SublevelRenderOffsetHelperMixin"
+  ],
   "mixins": [
     "Rapier3DInvoker",
     "RapierBoxHandleMixin",

@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "shipwrights.genesis.compat.catnip.mixin",
+  "plugin": "shipwrights.genesis.compat.catnip.CatnipMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+    "OutlinerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
