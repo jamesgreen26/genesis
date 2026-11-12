@@ -144,8 +144,6 @@ dependencies {
     }
     // endregion
 
-    jarJar(modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge"))
-
     // ZPS requires it at runtime; Genesis has no Kotlin of its own
     modRuntimeOnly("thedarkcolour:kotlinforforge:4.11.0")
 
