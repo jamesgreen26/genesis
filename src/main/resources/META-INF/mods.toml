@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "Genesis"
 authors = "G_Mungus, Quoissant, Cosmos, Frisk256, Acrogenous, BrickyBoy, Jcm, metafive, GuyApooye, ThePlasticPotato"
 description = '''
-A space mod for Valkyrien Skies.
+A space mod.
 '''
 logoFile = "assets/genesis/icon.png"
 
@@ -36,8 +36,8 @@ side = "BOTH"
 
 [[dependencies.genesis]]
 modId = "valkyrienskies"
-mandatory = true
-versionRange = "[2.4.0,)"
+mandatory = false
+versionRange = "[2.4.11,)"
 ordering = "NONE"
 side = "BOTH"
 

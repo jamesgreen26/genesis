@@ -111,7 +111,8 @@ public final class CelestialTravel {
         }
     }
 
-    private static void tickSpace(ServerLevel space, List<Entity> roots) {
+    /// The celestials in {@code space} that can be arrived at, having dimensions of their own, as they are now
+    public static List<Destination> destinations(ServerLevel space) {
         Registry<Celestial> celestials = space.registryAccess().registryOrThrow(Celestial.REGISTRY_KEY);
         Time time = Time.get(space);
 
@@ -120,8 +121,23 @@ public final class CelestialTravel {
             ResourceLocation id = entry.getKey().location();
             ServerLevel level = space.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, id));
             if (level == null || level == space) continue;
-            destinations.add(new Destination(id, level, Placement.of(entry.getValue(), celestials, time)));
+            destinations.add(new Destination(id, level, entry.getValue(), Placement.of(entry.getValue(), celestials, time)));
         }
+        return destinations;
+    }
+
+    /// The space dimension, if there is one
+    public static Optional<ServerLevel> space(ServerLevel level) {
+        return Optional.ofNullable(level.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, GenesisMod.SPACE)));
+    }
+
+    /// Where a celestial in {@code space} is now
+    public static Placement placement(ServerLevel space, Celestial celestial) {
+        return Placement.of(celestial, space.registryAccess().registryOrThrow(Celestial.REGISTRY_KEY), Time.get(space));
+    }
+
+    private static void tickSpace(ServerLevel space, List<Entity> roots) {
+        List<Destination> destinations = destinations(space);
         if (destinations.isEmpty()) return;
 
         for (Entity root : roots) {
@@ -138,21 +154,29 @@ public final class CelestialTravel {
     }
 
     private static void arrive(Entity root, ServerLevel space, Destination destination, Vector3dc point) {
-        Placement placement = destination.placement();
+        Crossing crossing = intoDimension(destination.placement(), point, arrivalHeight());
+        travel(root, destination.id(), CelestialTravelEvent.Direction.TO_CELESTIAL, space, destination.level(),
+                crossing.position(), crossing.rotation());
+    }
+
+    /// The height what arrives in a celestial's dimension is placed at: never at or above the exit height, which would
+    /// send it straight back
+    public static double arrivalHeight() {
+        return Math.min(GenesisCommonConfig.atmosphereEntryHeight(), GenesisCommonConfig.atmosphereExitHeight() - 1);
+    }
+
+    /// Where {@code point}, in space, crosses into the dimension of the celestial at {@code placement}, at
+    /// {@code height}, and the rotation from space's frame there to the dimension's
+    public static Crossing intoDimension(Placement placement, Vector3dc point, double height) {
         Vector3d local = placement.rotation().conjugate(new Quaterniond())
                 .transform(new Vector3d(point).sub(placement.position()));
         Vector2d map = CelestialProjection.toMap(local);
 
         double scale = mapScale();
-        // Never at or above the exit height, which would send it straight back
-        double y = Math.min(GenesisCommonConfig.atmosphereEntryHeight(), GenesisCommonConfig.atmosphereExitHeight() - 1);
-        Vec3 target = new Vec3(map.x * scale, y, map.y * scale);
         Quaterniond toDimension = new Quaterniond(placement.rotation())
                 .mul(CelestialProjection.frame(map.x, map.y))
                 .conjugate();
-
-        travel(root, destination.id(), CelestialTravelEvent.Direction.TO_CELESTIAL, space, destination.level(), target,
-                toDimension);
+        return new Crossing(new Vec3(map.x * scale, height, map.y * scale), toDimension);
     }
 
     private static void tickCelestial(ServerLevel level, Celestial celestial, List<Entity> roots) {
@@ -163,27 +187,27 @@ public final class CelestialTravel {
         Placement placement = null;
         for (Entity root : roots) {
             if (root.isRemoved() || root.isPassenger() || root.getY() <= exitHeight) continue;
-            if (placement == null) {
-                placement = Placement.of(celestial, space.registryAccess().registryOrThrow(Celestial.REGISTRY_KEY),
-                        Time.get(space));
-            }
-            leave(root, level, space, celestial, placement);
+            if (placement == null) placement = placement(space, celestial);
+            Crossing crossing = intoSpace(placement, celestial, root.getX(), root.getZ(), DEPARTURE_DISTANCE);
+            travel(root, level.dimension().location(), CelestialTravelEvent.Direction.TO_SPACE, level, space,
+                    crossing.position(), crossing.rotation());
         }
     }
 
-    private static void leave(Entity root, ServerLevel level, ServerLevel space, Celestial celestial, Placement placement) {
+    /// Where {@code (x, z)}, in the dimension of {@code celestial} at {@code placement}, crosses into space,
+    /// {@code distance} blocks out from its surface, and the rotation from the dimension's frame to space's there,
+    /// which turns its up out from the surface
+    public static Crossing intoSpace(Placement placement, Celestial celestial, double x, double z, double distance) {
         double scale = mapScale();
-        double mapX = root.getX() / scale;
-        double mapZ = root.getZ() / scale;
+        double mapX = x / scale;
+        double mapZ = z / scale;
 
         Quaterniond frame = CelestialProjection.frame(mapX, mapZ);
         Vector3d local = CelestialProjection.toCube(mapX, mapZ).mul(celestial.size() / 2)
-                .add(frame.transform(new Vector3d(0, DEPARTURE_DISTANCE, 0)));
+                .add(frame.transform(new Vector3d(0, distance, 0)));
         Vector3d target = placement.rotation().transform(local).add(placement.position());
         Quaterniond toSpace = new Quaterniond(placement.rotation()).mul(frame);
-
-        travel(root, level.dimension().location(), CelestialTravelEvent.Direction.TO_SPACE, level, space,
-                new Vec3(target.x, target.y, target.z), toSpace);
+        return new Crossing(new Vec3(target.x, target.y, target.z), toSpace);
     }
 
     /// Blocks in a celestial's dimension per unit of {@link CelestialProjection}'s map
@@ -196,7 +220,12 @@ public final class CelestialTravel {
                                ServerLevel from, ServerLevel to, Vec3 position, Quaterniondc rotation) {
         if (!canTravel(root)) return;
         if (MinecraftForge.EVENT_BUS.post(new CelestialTravelEvent(root, celestial, direction, from, to))) return;
+        carry(root, from, to, position, rotation);
+    }
 
+    /// Moves {@code root} and everything riding it from {@code from} to {@code position} in {@code to}, turning its
+    /// velocity and facing by {@code rotation}, without checking whether they {@linkplain #canTravel can}
+    public static void carry(Entity root, ServerLevel from, ServerLevel to, Vec3 position, Quaterniondc rotation) {
         Vec3 velocity = rotate(velocity(root, from), rotation);
 
         // Keep the arrival loaded, as a nether portal does, so what arrives alone carries on moving
@@ -210,7 +239,7 @@ public final class CelestialTravel {
     /// Whether {@code root} and everything riding it could each go through a nether portal, but for riding or being
     /// ridden, which vanilla doesn't allow: so not ender dragons, withers, fishing hooks or sleeping mobs. Nor
     /// spectators, which nether portals never touch
-    private static boolean canTravel(Entity root) {
+    public static boolean canTravel(Entity root) {
         if (root.getSelfAndPassengers().anyMatch(Entity::isSpectator)) return false;
         CHECKING_STACK.set(true);
         try {
@@ -286,8 +315,12 @@ public final class CelestialTravel {
         return new float[]{newYRot, newXRot};
     }
 
+    /// Where something crosses into another dimension, and the rotation from the frame it leaves to the one it enters
+    public record Crossing(Vec3 position, Quaterniond rotation) {
+    }
+
     /// Where a celestial is in space, and how it's turned
-    private record Placement(Vector3dc position, Quaterniondc rotation, OBB obb) {
+    public record Placement(Vector3dc position, Quaterniondc rotation, OBB obb) {
         static Placement of(Celestial celestial, Registry<Celestial> celestials, Time time) {
             Vector3dc position = celestial.transformProvider().getPosition(celestials, time);
             Quaterniondc rotation = celestial.transformProvider().getRotation(celestials, time);
@@ -295,7 +328,8 @@ public final class CelestialTravel {
         }
     }
 
-    private record Destination(ResourceLocation id, ServerLevel level, Placement placement) {
+    /// A celestial that can be arrived at from space, which shares its id with its dimension, {@code level}
+    public record Destination(ResourceLocation id, ServerLevel level, Celestial celestial, Placement placement) {
     }
 
     private record LastPosition(ResourceKey<Level> level, long gameTime, Vec3 position) {

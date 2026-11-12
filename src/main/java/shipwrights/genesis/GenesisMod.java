@@ -7,6 +7,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import shipwrights.genesis.compat.Compat;
 import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.content.GenesisBlocks;
 import shipwrights.genesis.content.GenesisCreativeTabs;
@@ -37,6 +38,7 @@ public class GenesisMod {
         modBus.addListener(GenesisOverridesPack::addPackFinders);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GenesisCommonConfig.SPEC);
         GenesisNetwork.register();
+        Compat.init();
     }
 
     public static ResourceLocation id(String location) {
