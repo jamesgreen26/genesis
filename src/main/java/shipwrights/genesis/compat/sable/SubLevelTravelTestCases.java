@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.animal.Chicken;
 import dev.ryanhcode.sable.api.SubLevelAssemblyHelper;
+import dev.ryanhcode.sable.api.block.BlockEntitySubLevelActor;
 import dev.ryanhcode.sable.api.physics.PhysicsPipeline;
 import dev.ryanhcode.sable.api.physics.handle.RigidBodyHandle;
 import dev.ryanhcode.sable.api.sublevel.ServerSubLevelContainer;
@@ -274,6 +275,44 @@ final class SubLevelTravelTestCases {
         helper.assertTrue(plot.x - overworldPlots.getOrigin().x != nextX || plot.z - overworldPlots.getOrigin().y != nextZ,
                 "the overworld gave out plot " + nextX + ", " + nextZ + ", which space has");
         helper.succeed();
+    }
+
+    /// Sable runs physics for the block entities in a sub-level's plot that ask it to, as ZPS's thrusters do, and the
+    /// swivel bearings of Create Aeronautics: they still do so once it's travelled
+    static void blockActorsWorkAfterTravel(GameTestHelper helper) {
+        ServerLevel overworld = helper.getLevel();
+        ServerLevel space = space(helper);
+        String name = testName(helper);
+        BlockPos centre = helper.absolutePos(new BlockPos(1, 1, 1));
+        BlockPos thrusterPos = centre.above();
+        overworld.setBlock(thrusterPos, ModBlocks.THRUSTER.get().defaultBlockState(), 3);
+        ServerSubLevel subLevel = assemble(overworld, centre, name, false, List.of(thrusterPos));
+
+        BlockPos inPlot = find(overworld, subLevel, ModBlocks.THRUSTER.get());
+        helper.assertTrue(inPlot != null, "the thruster isn't in the sub-level");
+        helper.assertTrue(isActor(subLevel, overworld.getBlockEntity(inPlot)),
+                "the thruster isn't one of the sub-level's actors before travelling");
+
+        Vector3dc start = subLevel.logicalPose().position();
+        moveSubLevel(overworld, subLevel, new Vector3d(start.x(), GenesisCommonConfig.atmosphereExitHeight() + 10,
+                start.z()), new Vector3d(0, 5, 0));
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(subLevel.isRemoved(), "sub-level is still in the overworld");
+            ServerSubLevel found = byName(space, name);
+            helper.assertTrue(found != null, "no sub-level arrived in space");
+            BlockPos arrived = find(space, found, ModBlocks.THRUSTER.get());
+            helper.assertTrue(arrived != null, "the thruster didn't go with the sub-level");
+            helper.assertTrue(isActor(found, space.getBlockEntity(arrived)),
+                    "the thruster isn't one of the sub-level's actors after travelling");
+        });
+    }
+
+    private static boolean isActor(ServerSubLevel subLevel, BlockEntity blockEntity) {
+        for (BlockEntitySubLevelActor actor : subLevel.getPlot().getBlockEntityActors()) {
+            if (actor == blockEntity) return true;
+        }
+        return false;
     }
 
     static void subLevelArrivesFromSpace(GameTestHelper helper) {

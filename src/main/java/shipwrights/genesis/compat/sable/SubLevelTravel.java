@@ -42,6 +42,8 @@ import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBi;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.config.GenesisCommonConfig;
+import shipwrights.genesis.mixin.ChunkMapInvoker;
+import shipwrights.genesis.mixin.ServerChunkCacheInvoker;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.math.OBB;
 import shipwrights.genesis.space.travel.CelestialTravel;
@@ -393,6 +395,12 @@ final class SubLevelTravel {
                     if (newPlot.getChunkHolder(newPlot.toLocal(chunk)) == null) newPlot.newEmptyChunk(chunk);
                 }
             }
+            // Sable's new chunks are only found in the level once its chunk map next shows the chunks it's been given,
+            // and its chunk cache forgets what it last found there, as both do each tick. Until then, finding a block
+            // entity there finds none, so Sable's assembly wouldn't load the moved ones' data into them, nor keep track
+            // of those that act on the sub-level, as a swivel bearing's plate does to drive its joint. Do both now
+            ((ChunkMapInvoker) to.getChunkSource().chunkMap).genesis$promoteChunkMap();
+            ((ServerChunkCacheInvoker) to.getChunkSource()).genesis$clearCache();
 
             if (!blocks.isEmpty()) moveBlocks(from, to, anchor, newAnchor, blocks);
         }

@@ -52,6 +52,12 @@ public class SubLevelTravelGameTests {
         SubLevelTravelTestCases.plotsAreUniqueAcrossDimensions(helper);
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, batch = BATCH)
+    public static void blockActorsWorkAfterTravel(GameTestHelper helper) {
+        if (withoutSable(helper)) return;
+        SubLevelTravelTestCases.blockActorsWorkAfterTravel(helper);
+    }
+
     /// Passes the test if Sable isn't loaded
     private static boolean withoutSable(GameTestHelper helper) {
         if (Compat.isSableLoaded()) return false;

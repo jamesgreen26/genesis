@@ -16,11 +16,13 @@
   "mixins": [
     "BiomeMixin",
     "BlockEntityTypeMixin",
+    "ChunkMapInvoker",
     "EntityMixin",
     "FishingHookGravityMixin",
     "GameTestServerMixin",
     "LevelMixin",
     "LivingEntityMixin",
+    "ServerChunkCacheInvoker",
     "TimeCommandMixin"
   ],
   "injectors": {
