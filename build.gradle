@@ -85,15 +85,8 @@ repositories {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
     }
-    maven { url = 'https://maven.blamejared.com/' }
-    maven {
-        name 'Curios maven'
-        url = "https://maven.theillusivec4.top/"
-    }
 
     maven { url = "https://maven.ithundxr.dev/mirror" }
-
-    maven { url = "https://maven.bawnorton.com/releases" }
 
     maven { url = "https://maven.enjarai.dev/mirrors" }
 
@@ -105,14 +98,6 @@ dependencies {
 
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0"))
     implementation("io.github.llamalad7:mixinextras-forge:0.5.0")
-
-    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.6-beta.1"))
-    jarJar(implementation("com.github.bawnorton.mixinsquared:mixinsquared-forge:0.3.6-beta.1")) {
-        version {
-            strictly "[0.3.6-beta.1,)"
-            prefer "0.3.6-beta.1"
-        }
-    }
 
 
     // region Valkyrien Skies: optional. Compiled against, and in dev runs and gametests unless -PwithoutVs is passed,
@@ -139,7 +124,11 @@ dependencies {
     // endregion
 
     // region VS deps
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.13.3"
+    // VS core's API is Kotlin and Jackson-annotated, so compiling against it needs these. At runtime they come from
+    // KFF and ZPS
+    //noinspection DifferentStdlibGradleVersion
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
+    compileOnly("com.fasterxml.jackson.core:jackson-annotations:2.13.3")
     compileOnly("org.joml:joml:1.10.4")
     // Genesis's own geometry uses it. Bundled, as VS also bundles it, which JarJar settles to one copy. In dev, VS's
     // copy is the only one when it's there, as two would clash
@@ -153,14 +142,12 @@ dependencies {
             prefer "1.10.0"
         }
     }
-    modApi("thedarkcolour:kotlinforforge:4.11.0")
     // endregion
-
-    modImplementation("maven.modrinth:curios:5.14.1+1.20.1")
 
     jarJar(modImplementation("maven.modrinth:pehkui:3.8.2+1.20.1-forge"))
 
-    modImplementation("ace.actually.radios:radios:1.2.0")
+    // ZPS requires it at runtime; Genesis has no Kotlin of its own
+    modRuntimeOnly("thedarkcolour:kotlinforforge:4.11.0")
 
     additionalRuntimeClasspath("org.maplibre:earcut4j:3.0.0")
     jarJar(implementation("org.maplibre:earcut4j:3.0.0")) {
@@ -169,9 +156,6 @@ dependencies {
             prefer "3.0.0"
         }
     }
-
-    //noinspection DifferentStdlibGradleVersion
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
 
     // Test dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
@@ -187,9 +171,6 @@ dependencies {
     modRuntimeOnly("mezz.jei:jei-1.20.1-forge:15.20.0.129")
 
     clientOnlyMods("maven.modrinth:forge-config-screens:v8.0.2-1.20.1-Forge")
-
-
-
 }
 
 afterEvaluate {

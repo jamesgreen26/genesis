@@ -40,10 +40,3 @@ mandatory = false
 versionRange = "[2.4.11,)"
 ordering = "NONE"
 side = "BOTH"
-
-[[dependencies.genesis]]
-modId = "create"
-mandatory = false
-versionRange = "[6.0.8,)"
-ordering = "NONE"
-side = "BOTH"
