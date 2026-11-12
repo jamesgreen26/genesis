@@ -6,7 +6,6 @@ import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,10 +46,7 @@ public abstract class ChunkMapMixin {
     /// isn't, unless one is on disk in its place
     @Inject(method = "save(Lnet/minecraft/world/level/chunk/ChunkAccess;)Z", at = @At("HEAD"), cancellable = true)
     private void genesis$leaveVoidUnsaved(ChunkAccess chunk, CallbackInfoReturnable<Boolean> cir) {
-        if (!chunk.isUnsaved()) return;
-        // A whole chunk that hasn't been through its last step yet is still wrapped as one being generated
-        ChunkAccess whole = chunk instanceof ImposterProtoChunk imposter ? imposter.getWrapped() : chunk;
-        if (VoidChunks.leaveUnsaved(level, whole)) {
+        if (chunk.isUnsaved() && VoidChunks.leaveUnsaved(chunk)) {
             chunk.setUnsaved(false);
             cir.setReturnValue(false);
         }

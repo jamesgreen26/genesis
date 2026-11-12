@@ -6,16 +6,22 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.util.Mth;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.config.GenesisCommonConfig;
 import shipwrights.genesis.mixin.ChunkMapInvoker;
 import shipwrights.genesis.space.VoidChunks;
+
+import java.util.function.Consumer;
 
 /// Space's chunks are kept cheap (see {@link VoidChunks}), and no other dimension's are touched
 @GameTestHolder(GenesisMod.MOD_ID)
@@ -71,7 +77,25 @@ public class VoidChunksGameTests {
 
         // Never loaded before, so it isn't on disk
         BlockPos fresh = IN_SPACE.offset(4096, 0, 4096);
-        LevelChunk chunk = space.getChunkAt(fresh);
+        ChunkPos freshChunk = new ChunkPos(fresh);
+        // Whether it was loaded, and whether as one newly generated
+        boolean[] loaded = {false};
+        boolean[] generated = {false};
+        Consumer<ChunkEvent.Load> listener = event -> {
+            if (event.getLevel() == space && event.getChunk().getPos().equals(freshChunk)) {
+                loaded[0] = true;
+                generated[0] = event.isNewChunk();
+            }
+        };
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, ChunkEvent.Load.class, listener);
+        LevelChunk chunk;
+        try {
+            chunk = space.getChunkAt(fresh);
+        } finally {
+            MinecraftForge.EVENT_BUS.unregister(listener);
+        }
+        helper.assertTrue(loaded[0], "a new chunk of space was never loaded");
+        helper.assertTrue(!generated[0], "a new chunk of space was generated");
         helper.assertTrue(VoidChunks.isVoid(space, chunk), "a new chunk of space isn't empty");
         var expected = ((FlatLevelSource) space.getChunkSource().getGenerator()).settings().getBiome()
                 .unwrapKey().orElseThrow();
@@ -89,15 +113,16 @@ public class VoidChunksGameTests {
         ServerLevel space = space(helper);
         ChunkMapInvoker chunkMap = (ChunkMapInvoker) space.getChunkSource().chunkMap;
 
-        // Never holds anything, so it's never on disk, however often this runs in the same world
-        LevelChunk empty = space.getChunkAt(IN_SPACE.offset(-8192, 0, -8192));
+        // Never holds anything, so it's never on disk, however often this runs in the same world. If empty space is
+        // ever saved, though, it's on disk in that world from then on, and has to be moved here once that's put right
+        LevelChunk empty = space.getChunkAt(IN_SPACE.offset(-12288, 0, -12288));
         helper.assertTrue(!((VoidChunks.OnDisk) empty).genesis$isOnDisk(), "a chunk that was never saved is on disk");
         empty.setUnsaved(true);
         helper.assertTrue(!chunkMap.genesis$save(empty), "an empty chunk of space was saved");
         helper.assertTrue(!empty.isUnsaved(), "an empty chunk of space is still waiting to be saved");
 
         // Saved by this before, if it has run in this world, and then known to be on disk from being read
-        BlockPos pos = IN_SPACE.offset(-8192, 0, -8192 + 16);
+        BlockPos pos = IN_SPACE.offset(-12288, 0, -12288 + 16);
         LevelChunk chunk = space.getChunkAt(pos);
         space.setBlockAndUpdate(pos, Blocks.STONE.defaultBlockState());
         helper.assertTrue(chunkMap.genesis$save(chunk), "a chunk of space holding a block wasn't saved");

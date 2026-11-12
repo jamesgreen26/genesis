@@ -65,7 +65,7 @@ public final class VoidChunks {
     /// empty but for its biomes, and whole, as one read from disk is. A chunk that has to be generated needs those
     /// around it part generated first, eleven chunks out, each in a dozen steps. One that's whole already only needs
     /// its neighbours loaded
-    public static ChunkAccess empty(ServerLevel level, ChunkPos pos) {
+    public static ImposterProtoChunk empty(ServerLevel level, ChunkPos pos) {
         ChunkGenerator generator = level.getChunkSource().getGenerator();
         LevelChunk chunk = new LevelChunk(level, pos);
         chunk.fillBiomesFromNoise(generator.getBiomeSource(), level.getChunkSource().randomState().sampler());
@@ -75,12 +75,17 @@ public final class VoidChunks {
         return new ImposterProtoChunk(chunk, false);
     }
 
-    /// Whether {@code chunk}, about to be saved in {@code level}, should be left unsaved instead: it's
-    /// {@linkplain #isVoid void}, and there's nothing on disk in its place, which may have held something that has to
-    /// be saved as gone. Otherwise it's about to be on disk, and is from then on
-    public static boolean leaveUnsaved(ServerLevel level, ChunkAccess chunk) {
-        OnDisk onDisk = (OnDisk) chunk;
-        if (isVoid(level, chunk) && !onDisk.genesis$isOnDisk()) return true;
+    /// Whether {@code chunk}, about to be saved, should be left unsaved instead: it's {@linkplain #isVoid void}, and
+    /// there's nothing on disk in its place, which may have held something that has to be saved as gone. Otherwise
+    /// it's about to be on disk, and is from then on
+    public static boolean leaveUnsaved(ChunkAccess chunk) {
+        // A whole chunk that hasn't been through its last step yet is still wrapped as one being generated
+        ChunkAccess whole = chunk instanceof ImposterProtoChunk imposter ? imposter.getWrapped() : chunk;
+        OnDisk onDisk = (OnDisk) whole;
+        if (!onDisk.genesis$isOnDisk() && whole instanceof LevelChunk levelChunk
+                && levelChunk.getLevel() instanceof ServerLevel level && isVoid(level, whole)) {
+            return true;
+        }
         onDisk.genesis$setOnDisk();
         return false;
     }
