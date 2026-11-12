@@ -14,8 +14,8 @@ import java.util.UUID;
 /// aboard, travels between space and a celestial's dimension. Cancel it to keep them where they are; it's posted again
 /// each tick they're still in range. The sub-levels' counterpart to {@link CelestialTravelEvent}.
 ///
-/// Sable can't move a sub-level to another dimension, so each is rebuilt there as a new sub-level, with a new id, and
-/// the old one removed
+/// Sable can't move a sub-level to another dimension, so each is rebuilt there and the old one removed. The new one
+/// keeps the old one's id where it can (see {@link SubLevelTravel})
 public class CelestialSubLevelTravelEvent extends Event implements ICancellableEvent {
     private final ServerSubLevel subLevel;
     private final Set<UUID> group;

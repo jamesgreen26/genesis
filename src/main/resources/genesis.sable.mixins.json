@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "mixins": [
-    "ServerSubLevelMixin"
+    "ServerSubLevelMixin",
+    "SubLevelContainerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

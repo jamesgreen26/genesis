@@ -46,6 +46,12 @@ public class SubLevelTravelGameTests {
         SubLevelTravelTestCases.noHeightLimitsInSpace(helper);
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 100, batch = BATCH)
+    public static void plotsAreUniqueAcrossDimensions(GameTestHelper helper) {
+        if (withoutSable(helper)) return;
+        SubLevelTravelTestCases.plotsAreUniqueAcrossDimensions(helper);
+    }
+
     /// Passes the test if Sable isn't loaded
     private static boolean withoutSable(GameTestHelper helper) {
         if (Compat.isSableLoaded()) return false;

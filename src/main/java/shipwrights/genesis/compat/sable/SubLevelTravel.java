@@ -67,11 +67,11 @@ import java.util.UUID;
 /// turns their velocity and spin too. They arrive in a celestial's dimension with their top at the entry height, and in
 /// space with their nearest part {@value CelestialTravel#DEPARTURE_DISTANCE} blocks out.
 ///
-/// Sable can only move a sub-level within its own dimension. So each is rebuilt in the other: a new sub-level is made
+/// Sable can only move a sub-level within its own dimension. So each is rebuilt in the other: a sub-level is made
 /// there, and Sable's own assembly moves the blocks into its plot, telling the blocks that listen for it (see
 /// {@link dev.ryanhcode.sable.api.block.BlockSubLevelAssemblyListener}) where they went. The old one is then removed. The
-/// new sub-level has a new id, and its plot is elsewhere in the plot grid, so what's in the plot moves by the same
-/// offset.
+/// new one has the same plot and id, and its blocks the same places in it, so what refers to them, as joined sub-levels
+/// do, still finds them: see {@link #allocate}. Where that can't be, what's in the plot moves by the same offset.
 ///
 /// Sable doesn't know which sub-levels are held to the world, as constraints are kept by whatever makes them, so unlike
 /// Valkyrien Skies ships, those still travel
@@ -368,10 +368,15 @@ final class SubLevelTravel {
         Pose3d arrivalPose = new Pose3d(oldPose);
         arrivalPose.position().set(rotation.transform(new Vector3d(oldPose.position()).sub(reference)).add(target));
         arrivalPose.orientation().set(orientation);
-        ServerSubLevel rebuilt = (ServerSubLevel) toContainer.allocateNewSubLevel(arrivalPose);
+        ServerSubLevel rebuilt = allocate(old, toContainer, arrivalPose);
         LevelPlot newPlot = rebuilt.getPlot();
         BlockPos anchor = plot.getCenterBlock();
-        BlockPos newAnchor = newPlot.getCenterBlock();
+        // In the same plot, its blocks stay where they were in it, so what refers to them by where they are still
+        // finds them, unless the new dimension is too short for them
+        boolean samePlot = newPlot.plotPos.equals(plot.plotPos);
+        boolean fits = bounds == BoundingBox3i.EMPTY
+                || (bounds.minY() >= to.getMinBuildHeight() && bounds.maxY() < to.getMaxBuildHeight());
+        BlockPos newAnchor = samePlot && fits ? anchor : newPlot.getCenterBlock();
         Vec3i offset = newAnchor.subtract(anchor);
 
         if (bounds != BoundingBox3i.EMPTY) {
@@ -422,6 +427,24 @@ final class SubLevelTravel {
 
         keepLoaded(toContainer, rebuilt, to.getGameTime());
         return new Rebuilt(rebuilt, offset);
+    }
+
+    /// A sub-level for {@code old} in {@code container}: in the same plot, with the same id, so whatever refers to it by
+    /// them, as joined sub-levels do, still finds it. Plots are given out where no dimension has one (see
+    /// {@link shipwrights.genesis.compat.sable.mixin.SubLevelContainerMixin}), so that one is free there, unless it
+    /// was given out before Genesis did so. Then it's a new sub-level, elsewhere
+    private static ServerSubLevel allocate(ServerSubLevel old, ServerSubLevelContainer container, Pose3d pose) {
+        ChunkPos plotPos = old.getPlot().plotPos;
+        int x = plotPos.x - container.getOrigin().x;
+        int z = plotPos.z - container.getOrigin().y;
+        int side = 1 << container.getLogSideLength();
+        boolean free = x >= 0 && x < side && z >= 0 && z < side
+                && !container.getOccupancy().get(container.getIndex(x, z))
+                && container.getSubLevel(x, z) == null
+                && container.getSubLevel(old.getUniqueId()) == null;
+        return (ServerSubLevel) (free
+                ? container.allocateSubLevel(old.getUniqueId(), x, z, pose)
+                : container.allocateNewSubLevel(pose));
     }
 
     /// Keeps {@code subLevel} loaded for a while after arriving, as a nether portal keeps its arrival loaded, so one

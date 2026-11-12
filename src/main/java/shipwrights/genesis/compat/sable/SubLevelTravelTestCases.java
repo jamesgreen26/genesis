@@ -66,6 +66,11 @@ final class SubLevelTravelTestCases {
         ServerLevel space = space(helper);
         String name = testName(helper);
         ServerSubLevel subLevel = assemble(overworld, helper.absolutePos(new BlockPos(1, 1, 1)), name, true);
+        // What another sub-level joined to it would know it and its blocks by
+        UUID id = subLevel.getUniqueId();
+        ChestBlockEntity chestBefore = chest(overworld, subLevel);
+        helper.assertTrue(chestBefore != null, "no chest in the sub-level");
+        BlockPos chestPos = chestBefore.getBlockPos();
 
         // Just below the exit height, falling, with an armor stand landing on it beside the chest
         Vector3dc start = subLevel.logicalPose().position();
@@ -99,8 +104,11 @@ final class SubLevelTravelTestCases {
             ServerSubLevel found = byName(space, name);
             helper.assertTrue(found != null, "no sub-level arrived in space");
 
+            helper.assertTrue(found.getUniqueId().equals(id), "the sub-level arrived with a new id");
             ChestBlockEntity chest = chest(space, found);
             helper.assertTrue(chest != null, "the chest didn't go with the sub-level");
+            helper.assertTrue(chest.getBlockPos().equals(chestPos),
+                    "the chest moved in the plot, to " + chest.getBlockPos() + " from " + chestPos);
             helper.assertTrue(chest.getItem(0).is(Items.DIAMOND), "the chest's contents didn't go with it");
 
             Entity arrived = space.getEntity(standId);
@@ -227,6 +235,45 @@ final class SubLevelTravelTestCases {
             helper.assertTrue(sunk.isRemoved(), "the sub-level far below in the overworld wasn't removed");
             helper.succeed();
         });
+    }
+
+    /// Each new sub-level's plot is free in every dimension, so that one travelling keeps it, and its id. A plot is
+    /// taken in space that the overworld would otherwise give the next sub-level there
+    static void plotsAreUniqueAcrossDimensions(GameTestHelper helper) {
+        ServerLevel overworld = helper.getLevel();
+        ServerLevel space = space(helper);
+        ServerSubLevelContainer overworldPlots = SubLevelContainer.getContainer(overworld);
+        ServerSubLevelContainer spacePlots = SubLevelContainer.getContainer(space);
+
+        int side = 1 << overworldPlots.getLogSideLength();
+        int nextX = -1;
+        int nextZ = -1;
+        search:
+        for (int x = 0; x < side; x++) {
+            for (int z = 0; z < side; z++) {
+                int index = overworldPlots.getIndex(x, z);
+                if (!overworldPlots.getOccupancy().get(index) && !spacePlots.getOccupancy().get(index)) {
+                    nextX = x;
+                    nextZ = z;
+                    break search;
+                }
+            }
+        }
+        helper.assertTrue(nextX >= 0, "no plot free in both dimensions");
+
+        // Taken in space, for as long as it takes the overworld to give out its next plot
+        ServerSubLevel taken = (ServerSubLevel) spacePlots.allocateSubLevel(UUID.randomUUID(), nextX, nextZ,
+                new dev.ryanhcode.sable.companion.math.Pose3d());
+        ServerSubLevel next;
+        try {
+            next = assemble(overworld, helper.absolutePos(new BlockPos(1, 1, 1)), testName(helper), false);
+        } finally {
+            spacePlots.removeSubLevel(taken, SubLevelRemovalReason.REMOVED);
+        }
+        ChunkPos plot = next.getPlot().plotPos;
+        helper.assertTrue(plot.x - overworldPlots.getOrigin().x != nextX || plot.z - overworldPlots.getOrigin().y != nextZ,
+                "the overworld gave out plot " + nextX + ", " + nextZ + ", which space has");
+        helper.succeed();
     }
 
     static void subLevelArrivesFromSpace(GameTestHelper helper) {
