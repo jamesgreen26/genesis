@@ -5,6 +5,11 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "mixins": [
+    "RapierBoxHandleMixin",
+    "RapierConstraintCreationMixin",
+    "RapierConstraintHandleMixin",
+    "RapierPhysicsPipelineMixin",
+    "RapierRopeHandleMixin",
     "ServerSubLevelMixin",
     "SubLevelContainerMixin"
   ],

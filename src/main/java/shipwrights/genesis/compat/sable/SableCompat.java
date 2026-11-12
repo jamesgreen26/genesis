@@ -14,7 +14,8 @@ import net.neoforged.bus.api.IEventBus;
 import shipwrights.genesis.space.travel.CelestialTravelEvent;
 
 /// Genesis with Sable: sub-levels travel between space and celestials' dimensions too (see {@link SubLevelTravel}),
-/// taking along the sub-levels connected to them and the entities aboard. Only reached when Sable is loaded (see
+/// taking along the sub-levels connected to them and the entities aboard, and in space they carry on drifting however
+/// slowly (see {@link Drift}), as precisely as they would near its origin (see {@link PhysicsFrames}). Only reached when Sable is loaded (see
 /// {@link shipwrights.genesis.compat.Compat}), so this package alone may use its classes
 public final class SableCompat {
 
@@ -23,6 +24,9 @@ public final class SableCompat {
 
     public static void init(IEventBus gameBus) {
         SubLevelTravel.init(gameBus);
+        Drift.init(gameBus);
+        // After sub-levels have travelled, so those arriving together share a frame before they next move
+        PhysicsFrames.init(gameBus);
         gameBus.addListener(SableCompat::onCelestialTravel);
         gameBus.addListener(EventPriority.LOWEST, SableCompat::onTravelToDimension);
     }

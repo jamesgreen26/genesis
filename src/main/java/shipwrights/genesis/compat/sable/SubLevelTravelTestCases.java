@@ -476,7 +476,7 @@ final class SubLevelTravelTestCases {
 
     /// A sub-level of a 3×3 stone platform centred on {@code centre}, with a chest of a diamond in its middle if
     /// {@code withChest}, named {@code name} to find it again once it's been rebuilt
-    private static ServerSubLevel assemble(ServerLevel level, BlockPos centre, String name, boolean withChest) {
+    static ServerSubLevel assemble(ServerLevel level, BlockPos centre, String name, boolean withChest) {
         return assemble(level, centre, name, withChest, List.of());
     }
 
@@ -507,7 +507,7 @@ final class SubLevelTravelTestCases {
     }
 
     /// Puts {@code subLevel} at {@code position}, moving at {@code velocity} blocks a second
-    private static void moveSubLevel(ServerLevel level, ServerSubLevel subLevel, Vector3dc position,
+    static void moveSubLevel(ServerLevel level, ServerSubLevel subLevel, Vector3dc position,
                                      Vector3dc velocity) {
         ServerSubLevelContainer container = SubLevelContainer.getContainer(level);
         PhysicsPipeline pipeline = container.physicsSystem().getPipeline();
@@ -539,7 +539,7 @@ final class SubLevelTravelTestCases {
         return null;
     }
 
-    private static Vector3d velocity(ServerSubLevel subLevel) {
+    static Vector3d velocity(ServerSubLevel subLevel) {
         RigidBodyHandle handle = RigidBodyHandle.of(subLevel);
         return handle == null ? new Vector3d() : handle.getLinearVelocity(new Vector3d());
     }
@@ -548,7 +548,7 @@ final class SubLevelTravelTestCases {
     /// Meanwhile, any others a test left behind are removed when found: the game test world is kept, and since the
     /// tests are all far beyond the world size, whatever they send to space arrives at much the same place there,
     /// where those left behind would be in the way
-    private static String testName(GameTestHelper helper) {
+    static String testName(GameTestHelper helper) {
         String name = TEST_PREFIX + UUID.randomUUID();
         RUNNING.add(name);
         MinecraftServer server = helper.getLevel().getServer();
@@ -581,7 +581,7 @@ final class SubLevelTravelTestCases {
     }
 
     /// Keeps the chunks within {@code radius} of {@code centre} in {@code level} loaded until {@code helper}'s test ends
-    private static void forceLoad(GameTestHelper helper, ServerLevel level, BlockPos centre, int radius) {
+    static void forceLoad(GameTestHelper helper, ServerLevel level, BlockPos centre, int radius) {
         ChunkPos middle = new ChunkPos(centre);
         List<ChunkPos> chunks = new ArrayList<>();
         for (int x = -radius; x <= radius; x++) {
@@ -632,7 +632,7 @@ final class SubLevelTravelTestCases {
         }
     }
 
-    private static ServerLevel space(GameTestHelper helper) {
+    static ServerLevel space(GameTestHelper helper) {
         Optional<ServerLevel> space = CelestialTravel.space(helper.getLevel());
         helper.assertTrue(space.isPresent(), "no space dimension");
         return space.get();
