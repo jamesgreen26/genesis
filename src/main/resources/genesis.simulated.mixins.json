@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "package": "shipwrights.genesis.compat.simulated.mixin",
+  "plugin": "shipwrights.genesis.compat.simulated.SimulatedMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "PhysicsStaffDragSessionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

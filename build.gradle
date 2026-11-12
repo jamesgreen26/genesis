@@ -163,6 +163,12 @@ dependencies {
         localRuntime("maven.modrinth:c2me-neoforge:${c2me_version}")
     }
 
+    // Likewise Create Aeronautics, with -Paeronautics, for Simulated, which it's built on and carries: its physics staff
+    // holds sub-levels to the world in ways Genesis has to know of
+    if (project.hasProperty('aeronautics')) {
+        localRuntime("maven.modrinth:create-aeronautics:${aeronautics_version}")
+    }
+
     localRuntime("maven.modrinth:spark:${spark_version}")
     localRuntime("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 

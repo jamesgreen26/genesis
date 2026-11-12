@@ -20,6 +20,10 @@ config = "genesis.mixins.json"
 [[mixins]]
 config = "genesis.sable.mixins.json"
 
+# Into Simulated, which Create Aeronautics is built on, applied only when it's installed
+[[mixins]]
+config = "genesis.simulated.mixins.json"
+
 # Into C2ME, applied only when its chunk system is installed
 [[mixins]]
 config = "genesis.c2me.mixins.json"

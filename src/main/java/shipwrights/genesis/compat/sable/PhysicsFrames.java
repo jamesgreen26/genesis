@@ -24,6 +24,7 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBd;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.compat.sable.mixin.Rapier3DInvoker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,10 +61,14 @@ import java.util.WeakHashMap;
 ///
 /// Each of these moves sub-levels in the engine by a whole number of blocks, and not at all in the level.
 ///
-/// The engine holds more than sub-levels: ropes, boxes, and joints that hold a sub-level to the world rather than to
-/// another. Those it's told of as where they are, which can't be changed afterwards. So they keep to the world's
-/// frame, as everything did before, and so does any sub-level near them or held by them, for as long as it is. There
-/// they're no worse off than they were.
+/// A joint that holds a sub-level to the world, rather than to another, is told of as where it holds it in the
+/// sub-level's frame, and told again each time that changes (see {@link #worldJoint}). Where what uses such a joint
+/// drives it by positions of its own, it's left to tell the engine all of them in the frame (see
+/// {@link #localJoints}).
+///
+/// The engine holds more besides: ropes, boxes, and hinges to the world. Those it's told of as where they are, which
+/// can't be changed afterwards. So they keep to the world's frame, as everything did before, and so does any
+/// sub-level near them or held by them, for as long as it is. There they're no worse off than they were.
 ///
 /// Only where the engine has no terrain, which is also where it is: in space, with Sable told to ignore its chunks
 public final class PhysicsFrames {
@@ -104,6 +109,15 @@ public final class PhysicsFrames {
     /// What holds a sub-level to the world's frame, by whatever it is that holds it and which part of it does
     private static final Map<Object, Map<Object, Pin>> PINS = new WeakHashMap<>();
 
+    /// The joints that hold sub-levels to the world, each by Sable's own handle for it
+    private static final Map<Object, WorldJoint> WORLD_JOINTS = new WeakHashMap<>();
+
+    /// The joint to the world the engine has just been told of, until Sable has made its handle for it
+    private static WorldJoint pendingWorldJoint;
+
+    /// Whether what's making joints now tells the engine where they are in their sub-levels' frames itself
+    private static boolean localJoints;
+
     private final ServerLevel level;
 
     /// Where the world is: the frame of everything the engine can't be told has moved
@@ -117,6 +131,9 @@ public final class PhysicsFrames {
 
     /// How many things hold each sub-level to the world's frame, by its id in the engine
     private final Int2IntOpenHashMap pinned = new Int2IntOpenHashMap();
+
+    /// The joints holding each sub-level to the world, by its id in the engine
+    private final Int2ObjectOpenHashMap<List<WorldJoint>> worldJoints = new Int2ObjectOpenHashMap<>();
 
     /// Whether sub-levels are being moved in the engine without moving in the level
     private boolean shifting;
@@ -201,6 +218,7 @@ public final class PhysicsFrames {
         frames.frames.remove(id);
         frames.bounds.remove(id);
         frames.pinned.remove(id);
+        frames.worldJoints.remove(id);
     }
 
     // What the engine is told of the rest, which keeps to the world's frame
@@ -212,19 +230,87 @@ public final class PhysicsFrames {
         if (frames != null) frames.toWorld(box);
     }
 
-    /// {@code first} and {@code second} are being joined, or one of them held to the world if the other is null: they
-    /// share a frame first, which is the world's if either is held to it
+    /// {@code first} and {@code second} are being joined: they share a frame first, rather than by the next tick.
+    /// Nothing to do if either is null, and the other is being held to the world
     public static void joining(ServerLevel level, PhysicsPipelineBody first, PhysicsPipelineBody second) {
         PhysicsFrames frames = BY_LEVEL.get(level);
-        if (frames == null) return;
-        Frame a = first == null ? frames.world : frames.frames.get(first.getRuntimeId());
-        Frame b = second == null ? frames.world : frames.frames.get(second.getRuntimeId());
+        if (frames == null || first == null || second == null) return;
+        Frame a = frames.frames.get(first.getRuntimeId());
+        Frame b = frames.frames.get(second.getRuntimeId());
         if (a == null || b == null || a == b) return;
         if (a.world) {
             frames.merge(b, a);
         } else {
             frames.merge(a, b);
         }
+    }
+
+    /// {@code body} is about to be held to the world by something the engine can't be told has moved: it joins the
+    /// world's frame first, with all that share its own
+    public static void toWorldFrame(ServerLevel level, PhysicsPipelineBody body) {
+        PhysicsFrames frames = BY_LEVEL.get(level);
+        if (frames == null || body == null || localJoints) return;
+        Frame frame = frames.frames.get(body.getRuntimeId());
+        if (frame != null && !frame.world) frames.merge(frame, frames.world);
+    }
+
+    /// Whether the engine is to be told where a joint holds a sub-level of {@code level} to the world in that
+    /// sub-level's frame, by {@link #worldJoint}
+    public static boolean movesWorldJoints(ServerLevel level) {
+        return !localJoints && BY_LEVEL.get(level) != null;
+    }
+
+    /// The engine has been told of {@code joint}, which holds the sub-level {@code body} to the world at a position
+    /// in {@code level}, turned by a quaternion: on its {@code side}, the first being 0. It's told where that is in
+    /// the sub-level's frame from now on
+    public static void worldJoint(ServerLevel level, long scene, long joint, int body, int side,
+                                  double x, double y, double z, double qx, double qy, double qz, double qw) {
+        PhysicsFrames frames = BY_LEVEL.get(level);
+        if (frames == null) return;
+        pendingWorldJoint = new WorldJoint(frames, scene, joint, body, side, new Vector3d(x, y, z),
+                new double[]{qx, qy, qz, qw});
+    }
+
+    /// Sable has made {@code handle} for the joint that holds {@code body} to the world: one it was just
+    /// {@linkplain #worldJoint told of in the sub-level's frame}, or else one that holds it to the world's frame
+    /// until it's {@linkplain #unpin let go}
+    public static void heldToWorld(ServerLevel level, PhysicsPipelineBody body, Object handle) {
+        WorldJoint joint = pendingWorldJoint;
+        pendingWorldJoint = null;
+        if (localJoints || handle == null) return;
+        if (joint == null) {
+            pin(level, body, handle, "");
+            return;
+        }
+        WORLD_JOINTS.put(handle, joint);
+        joint.frames.worldJoints.computeIfAbsent(joint.body, id -> new ArrayList<>()).add(joint);
+    }
+
+    /// The joint Sable has {@code handle} for is being told where, on its {@code side}, it holds what it does. If
+    /// that's where it holds a sub-level to the world, it's a position in the level
+    ///
+    /// @return how far the engine is to be told it is from there
+    public static Vector3dc worldJointMoved(Object handle, int side, double x, double y, double z,
+                                            double qx, double qy, double qz, double qw) {
+        WorldJoint joint = WORLD_JOINTS.get(handle);
+        if (joint == null || joint.side != side) return ZERO;
+        joint.at.set(x, y, z);
+        joint.rotation[0] = qx;
+        joint.rotation[1] = qy;
+        joint.rotation[2] = qz;
+        joint.rotation[3] = qw;
+        Frame frame = joint.frames.frames.get(joint.body);
+        return frame == null ? ZERO : frame.offset;
+    }
+
+    /// Has whatever makes joints to the world within {@code local} tell the engine where they are itself: at the
+    /// origin of a sub-level's frame, say, with what drives them measured from there too
+    ///
+    /// @return whether that was so already, to be put back by another call once done
+    public static boolean localJoints(boolean local) {
+        boolean was = localJoints;
+        localJoints = local;
+        return was;
     }
 
     /// {@code body} is held to the world's frame by {@code slot} of {@code owner}, until that's
@@ -247,8 +333,13 @@ public final class PhysicsFrames {
         if (pin != null && pin.frames.pinned.addTo(pin.id, -1) <= 1) pin.frames.pinned.remove(pin.id);
     }
 
-    /// Lets go of everything {@code owner} holds
+    /// Lets go of everything {@code owner} holds, and forgets it if it's a joint to the world
     public static void unpin(Object owner) {
+        WorldJoint joint = WORLD_JOINTS.remove(owner);
+        if (joint != null) {
+            List<WorldJoint> joints = joint.frames.worldJoints.get(joint.body);
+            if (joints != null) joints.remove(joint);
+        }
         Map<Object, Pin> pins = PINS.get(owner);
         if (pins == null) return;
         for (Object slot : List.copyOf(pins.keySet())) unpin(owner, slot);
@@ -343,6 +434,18 @@ public final class PhysicsFrames {
         } finally {
             shifting = false;
         }
+        // And what holds them to the world holds them where it did in the level
+        for (ServerSubLevel subLevel : subLevels) {
+            int id = subLevel.getRuntimeId();
+            List<WorldJoint> joints = worldJoints.get(id);
+            Frame frame = frames.get(id);
+            if (joints == null || frame == null) continue;
+            for (WorldJoint joint : joints) {
+                Rapier3DInvoker.genesis$setConstraintFrame(joint.scene, joint.joint, joint.side,
+                        joint.at.x - frame.offset.x, joint.at.y - frame.offset.y, joint.at.z - frame.offset.z,
+                        joint.rotation[0], joint.rotation[1], joint.rotation[2], joint.rotation[3]);
+            }
+        }
     }
 
     private List<ServerSubLevel> subLevels() {
@@ -377,6 +480,7 @@ public final class PhysicsFrames {
         // Whatever went without the engine being told
         frames.keySet().retainAll(seen.keySet());
         pinned.keySet().retainAll(seen.keySet());
+        worldJoints.keySet().retainAll(seen.keySet());
         bounds.clear();
         bounds.putAll(seen);
         if (count == 0) return;
@@ -603,5 +707,12 @@ public final class PhysicsFrames {
     }
 
     private record Pin(PhysicsFrames frames, int id) {
+    }
+
+    /// A joint holding the sub-level {@code body} to the world {@code at} a position in its level, turned by
+    /// {@code rotation}, on its {@code side}: by the engine's handles for the level's {@code scene} and the
+    /// {@code joint}
+    private record WorldJoint(PhysicsFrames frames, long scene, long joint, int body, int side, Vector3d at,
+                              double[] rotation) {
     }
 }

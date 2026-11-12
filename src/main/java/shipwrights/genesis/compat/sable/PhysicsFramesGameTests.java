@@ -57,7 +57,7 @@ public class PhysicsFramesGameTests {
         PhysicsFramesTestCases.partingGoSeparateWays(helper);
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 200, batch = BATCH + "heldToWorldStaysPut")
+    @GameTest(template = TEMPLATE, timeoutTicks = 300, batch = BATCH + "heldToWorldStaysPut")
     public static void heldToWorldStaysPut(GameTestHelper helper) {
         if (withoutSable(helper)) return;
         PhysicsFramesTestCases.heldToWorldStaysPut(helper);
@@ -67,6 +67,12 @@ public class PhysicsFramesGameTests {
     public static void boxJoinsWhatItCanTouch(GameTestHelper helper) {
         if (withoutSable(helper)) return;
         PhysicsFramesTestCases.boxJoinsWhatItCanTouch(helper);
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200, batch = BATCH + "draggedToWhereItShouldBe")
+    public static void draggedToWhereItShouldBe(GameTestHelper helper) {
+        if (withoutSable(helper)) return;
+        PhysicsFramesTestCases.draggedToWhereItShouldBe(helper);
     }
 
     /// Passes the test if Sable isn't loaded

@@ -1,8 +1,11 @@
 package shipwrights.genesis.compat.sable;
 
 import dev.ryanhcode.sable.api.physics.PhysicsPipeline;
+import dev.ryanhcode.sable.api.physics.constraint.ConstraintJointAxis;
 import dev.ryanhcode.sable.api.physics.constraint.FixedConstraintConfiguration;
 import dev.ryanhcode.sable.api.physics.constraint.FixedConstraintHandle;
+import dev.ryanhcode.sable.api.physics.constraint.FreeConstraintConfiguration;
+import dev.ryanhcode.sable.api.physics.constraint.FreeConstraintHandle;
 import dev.ryanhcode.sable.api.physics.object.box.BoxPhysicsObject;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
 import dev.ryanhcode.sable.companion.math.Pose3d;
@@ -136,27 +139,79 @@ final class PhysicsFramesTestCases {
         });
     }
 
-    /// What's held to the world is held where it is in space, not where the engine has it, and is in a frame of its
-    /// own again once it's let go
+    /// What's held to the world is held where it is in space, though the engine has it near its own origin, and is
+    /// still held there when its frame is taken into another's, and when it's given one of its own again: here by
+    /// three joined sub-levels flying past
     static void heldToWorldStaysPut(GameTestHelper helper) {
         ServerLevel space = space(helper);
         ServerSubLevel subLevel = subLevel(helper, space, 0, FAR, new Vector3d());
         FixedConstraintHandle joint = pipeline(space).addConstraint(subLevel, null, new FixedConstraintConfiguration(
                 new Vector3d(subLevel.logicalPose().rotationPoint()), new Vector3d(FAR), new Quaterniond()));
         helper.assertTrue(joint != null, "it wasn't held");
-        helper.assertTrue(PhysicsFrames.inWorldFrame(subLevel), "it's held to the world, but not in the world's frame");
+        helper.assertTrue(!PhysicsFrames.inWorldFrame(subLevel), "held to the world, it's in the world's frame");
         pipeline(space).addLinearAndAngularVelocity(subLevel, new Vector3d(0, 0, 3), new Vector3d());
 
-        helper.runAfterDelay(40, () -> {
+        // Past it 24 blocks off, from 200 blocks away
+        Vector3d velocity = new Vector3d(40, 0, 0);
+        Vector3d passingFrom = new Vector3d(FAR).add(-200, 0, 24);
+        ServerSubLevel[] passing = new ServerSubLevel[3];
+        for (int i = 0; i < passing.length; i++) {
+            passing[i] = subLevel(helper, space, i + 1, new Vector3d(passingFrom).add(0, 0, i * 6), new Vector3d());
+            if (i > 0) join(helper, space, passing[0], passing[i], passingFrom);
+        }
+        for (ServerSubLevel one : passing) pipeline(space).addLinearAndAngularVelocity(one, velocity, new Vector3d());
+
+        boolean[] shared = {false};
+        helper.onEachTick(() -> {
+            if (subLevel.isRemoved() || passing[0].isRemoved()) return;
+            shared[0] |= PhysicsFrames.shareFrame(subLevel, passing[0]);
             double moved = subLevel.logicalPose().position().distance(FAR);
-            helper.assertTrue(moved < 0.25, "held to the world, it moved " + moved + " blocks");
-            joint.remove();
+            helper.assertTrue(moved < 0.1, "held to the world, it's " + moved + " blocks from where it's held");
         });
-        helper.runAfterDelay(45, () -> {
-            helper.assertTrue(!PhysicsFrames.inWorldFrame(subLevel), "let go, it's still in the world's frame");
+        helper.runAfterDelay(200, () -> {
+            helper.assertTrue(shared[0], "it never shared a frame with what passed it");
+            helper.assertTrue(!PhysicsFrames.shareFrame(subLevel, passing[0]), "it still shares a frame with what passed it");
             assertNearEngineOrigin(helper, subLevel);
-            double moved = subLevel.logicalPose().position().distance(FAR);
-            helper.assertTrue(moved < 0.5, "let go, it's " + moved + " blocks from where it was held");
+            joint.remove();
+            helper.succeed();
+        });
+    }
+
+    /// As Simulated's physics staff drags a sub-level, with Genesis's change to it (see
+    /// {@link shipwrights.genesis.compat.simulated.mixin.PhysicsStaffDragSessionMixin}): by a joint to the origin of
+    /// the sub-level's frame, driven to where in the frame it should be. Ten million blocks out, where a position in
+    /// the level only comes in whole blocks to the engine
+    static void draggedToWhereItShouldBe(GameTestHelper helper) {
+        ServerLevel space = space(helper);
+        Vector3d start = new Vector3d(10_000_000.5, 64, 3000.5);
+        ServerSubLevel subLevel = subLevel(helper, space, 0, start, new Vector3d());
+        // By steps finer than a position this far out can be told to the engine at all
+        Vector3d goal = new Vector3d(start).add(0, 0.3, 0);
+        double mass = subLevel.getMassTracker().getMass();
+        FreeConstraintHandle[] joint = {null};
+        helper.onEachTick(() -> {
+            if (subLevel.isRemoved()) return;
+            // Made again whenever the engine has let go of it, as the staff does
+            if (joint[0] == null || !joint[0].isValid()) {
+                boolean was = PhysicsFrames.localJoints(true);
+                try {
+                    joint[0] = pipeline(space).addConstraint(null, subLevel, new FreeConstraintConfiguration(
+                            new Vector3d(), new Vector3d(subLevel.logicalPose().rotationPoint()), new Quaterniond()));
+                } finally {
+                    PhysicsFrames.localJoints(was);
+                }
+            }
+            goal.add(0.011, 0, 0.007);
+            Vector3d inFrame = new Vector3d(goal).sub(PhysicsFrames.offset(space, subLevel.getRuntimeId()));
+            joint[0].setMotor(ConstraintJointAxis.LINEAR_X, inFrame.x, 400 * mass, 40 * mass, false, 0);
+            joint[0].setMotor(ConstraintJointAxis.LINEAR_Y, inFrame.y, 400 * mass, 40 * mass, false, 0);
+            joint[0].setMotor(ConstraintJointAxis.LINEAR_Z, inFrame.z, 400 * mass, 40 * mass, false, 0);
+        });
+        helper.runAfterDelay(100, () -> {
+            double from = subLevel.logicalPose().position().distance(goal);
+            helper.assertTrue(from < 0.05, "it's " + from + " blocks from where it's dragged to");
+            helper.assertTrue(!PhysicsFrames.inWorldFrame(subLevel), "dragged, it's in the world's frame");
+            if (joint[0].isValid()) joint[0].remove();
             helper.succeed();
         });
     }
