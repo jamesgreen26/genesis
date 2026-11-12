@@ -6,6 +6,7 @@ public final class GenesisCommonConfig {
     private static final ModConfigSpec.IntValue ATMOSPHERE_EXIT_HEIGHT;
     private static final ModConfigSpec.IntValue ATMOSPHERE_ENTRY_HEIGHT;
     private static final ModConfigSpec.IntValue WORLD_SIZE;
+    private static final ModConfigSpec.IntValue SPACE_VIEW_DISTANCE;
 
     public static final ModConfigSpec SPEC;
 
@@ -20,6 +21,9 @@ public final class GenesisCommonConfig {
         WORLD_SIZE = builder
                 .comment("Width, in blocks, of the square around the origin of a celestial's dimension that its whole surface maps onto. Arriving from space lands within it, and leaving from outside it leaves from its nearest edge")
                 .defineInRange("worldSize", 20_000, 8, 60_000_000);
+        SPACE_VIEW_DISTANCE = builder
+                .comment("The most chunks around a player that are loaded and sent in space, whatever the server's view distance. Space has no terrain to see, so this only limits how far away entities that aren't aboard anything are seen, at 16 blocks a chunk. Lower is cheaper to fly through. Takes effect when the server starts or its view distance next changes")
+                .defineInRange("spaceViewDistance", 6, 2, 32);
         SPEC = builder.build();
     }
 
@@ -36,5 +40,9 @@ public final class GenesisCommonConfig {
 
     public static int worldSize() {
         return WORLD_SIZE.get();
+    }
+
+    public static int spaceViewDistance() {
+        return SPACE_VIEW_DISTANCE.get();
     }
 }

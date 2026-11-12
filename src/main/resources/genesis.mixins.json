@@ -16,7 +16,9 @@
   "mixins": [
     "BiomeMixin",
     "BlockEntityTypeMixin",
+    "ChunkAccessMixin",
     "ChunkMapInvoker",
+    "ChunkMapMixin",
     "EntityMixin",
     "FishingHookGravityMixin",
     "GameTestServerMixin",

@@ -3,5 +3,6 @@
   "priority": 0,
   "base_gravity": [0.0, 0.0, 0.0],
   "universal_drag": 0.0,
-  "base_pressure": 0.0
+  "base_pressure": 0.0,
+  "ignore_chunks": true
 }
