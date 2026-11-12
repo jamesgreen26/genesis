@@ -54,11 +54,12 @@ import java.util.WeakHashMap;
 public final class CelestialTravel {
 
     /// How close to a celestial's surface something in space has to come to arrive at it
-    public static final double ARRIVAL_DISTANCE = 8;
+    public static final double ARRIVAL_DISTANCE = 32;
 
     /// How far from a celestial's surface what leaves it is placed in space. Further than {@link #ARRIVAL_DISTANCE},
-    /// so it isn't sent straight back
-    public static final double DEPARTURE_DISTANCE = 12;
+    /// so it isn't sent straight back: by enough that a celestial, which moves through space as it orbits, takes some
+    /// seconds to catch up with what it has left standing
+    public static final double DEPARTURE_DISTANCE = 48;
 
     /// What's being moved to another dimension, while it is
     private static final ThreadLocal<Entity> MOVING = new ThreadLocal<>();

@@ -24,11 +24,11 @@ import org.joml.Vector3dc;
 /// slower than a block and a half a second, nor at any speed between multiples of nearly three
 final class PhysicsFramesTestCases {
 
-    /// As far out as the overworld would be in a solar system four times the size
-    private static final Vector3dc FAR = new Vector3d(60_000.5, 64, 3000.5);
+    /// Half as far out as the overworld
+    private static final Vector3dc FAR = new Vector3d(60_000.5, 64, 30_000.5);
 
     /// Where the tests' sub-levels are made, before they're moved out: far from every celestial
-    private static final BlockPos ASSEMBLY = new BlockPos(3000, 64, 3000);
+    private static final BlockPos ASSEMBLY = new BlockPos(30_000, 64, 30_000);
 
     /// Slower than anything can move a thousand blocks from the engine's origin, let alone this far
     private static final double SLOW = 0.03;
@@ -183,7 +183,7 @@ final class PhysicsFramesTestCases {
     /// the level only comes in whole blocks to the engine
     static void draggedToWhereItShouldBe(GameTestHelper helper) {
         ServerLevel space = space(helper);
-        Vector3d start = new Vector3d(10_000_000.5, 64, 3000.5);
+        Vector3d start = new Vector3d(10_000_000.5, 64, 30_000.5);
         ServerSubLevel subLevel = subLevel(helper, space, 0, start, new Vector3d());
         // By steps finer than a position this far out can be told to the engine at all
         Vector3d goal = new Vector3d(start).add(0, 0.3, 0);

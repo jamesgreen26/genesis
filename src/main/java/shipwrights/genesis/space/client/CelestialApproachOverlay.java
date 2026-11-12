@@ -45,10 +45,10 @@ import shipwrights.genesis.space.travel.CelestialTravel;
 public class CelestialApproachOverlay {
 
     /// How far from a celestial's surface, in blocks, the overlay becomes fully opaque
-    private static final double OPAQUE_DISTANCE = 12.0;
+    private static final double OPAQUE_DISTANCE = 48.0;
 
     /// Over how many blocks, beyond {@link #OPAQUE_DISTANCE}, the overlay fades in
-    private static final double FADE_DISTANCE = 12.0;
+    private static final double FADE_DISTANCE = 48.0;
 
     /// Over how many ticks after travelling the overlay fades out
     private static final int ARRIVAL_FADE_TICKS = 40;

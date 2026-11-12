@@ -1,6 +1,6 @@
 {
   "components": [
-    { "type": "genesis:star_glow", "color": 15981185 },
+    { "type": "genesis:star_glow", "color": 15981185, "radius": 28800, "fadeDistance": 24000 },
     { "type": "genesis:star", "color0": 16711680, "color1": 16764966 }
   ]
 }

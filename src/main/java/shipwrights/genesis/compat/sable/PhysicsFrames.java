@@ -38,8 +38,8 @@ import java.util.WeakHashMap;
 /// Has Sable's physics engine keep the sub-levels of space near its own origin, wherever in space they are.
 ///
 /// The engine keeps positions as 32-bit floats, and moves everything 720 times a second. Far from its origin a float
-/// is too coarse for steps that small: 15,000 blocks out, where the overworld is, nothing can move slower than a third
-/// of a block a second, and at 60,000, slower than a block and a half. Within a thousand blocks, anything faster than
+/// is too coarse for steps that small: 120,000 blocks out, where the overworld is, nothing can move slower than nearly
+/// three blocks a second, and at 60,000, slower than a block and a half. Within a thousand blocks, anything faster than
 /// a fiftieth of a block a second can, and the nearer the finer: within a hundred, speeds come in steps of a
 /// two-hundredth of a block a second.
 ///

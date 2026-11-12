@@ -20,9 +20,9 @@ import java.util.UUID;
 /// everything here is half a block from the nearest
 final class PhysicsStaffTestCases {
 
-    private static final Vector3dc FAR = new Vector3d(10_000_000.5, 64.5, 3000.5);
+    private static final Vector3dc FAR = new Vector3d(10_000_000.5, 64.5, 30_000.5);
 
-    private static final BlockPos ASSEMBLY = new BlockPos(3000, 64, 3000);
+    private static final BlockPos ASSEMBLY = new BlockPos(30_000, 64, 30_000);
 
     private static final String HANDLER = "dev.simulated_team.simulated.content.physics_staff.PhysicsStaffServerHandler";
 

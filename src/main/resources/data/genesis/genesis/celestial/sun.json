@@ -1,7 +1,7 @@
 {
   "castsLight": true,
   "castsShadows": false,
-  "size": 1440,
+  "size": 11520,
   "mass": 8,
   "surfaceTemperature": 250000,
   "heatFalloff": 3.983,

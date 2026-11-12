@@ -134,8 +134,9 @@ final class SubLevelTravelTestCases {
             OBB obb = SubLevelTravel.obb(found);
             helper.assertTrue(obb != null, "sub-level arrived without blocks");
             double distance = cube.distanceTo(obb);
-            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 1
-                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 3,
+            // The overworld has moved on since, by up to a sixth of a block a tick
+            helper.assertTrue(distance > CelestialTravel.DEPARTURE_DISTANCE - 8
+                            && distance < CelestialTravel.DEPARTURE_DISTANCE + 24,
                     "sub-level arrived " + distance + " blocks from the overworld");
 
             // Up, which it was moving, is out from the overworld in space
@@ -228,14 +229,14 @@ final class SubLevelTravelTestCases {
         ServerLevel space = space(helper);
 
         // Far from every celestial, so nothing arrives anywhere
-        BlockPos centre = new BlockPos(3000, 64, 3000);
+        BlockPos centre = new BlockPos(30_000, 64, 30_000);
         forceLoad(helper, space, centre, 1);
         String below = testName(helper);
         String above = testName(helper);
         ServerSubLevel low = assemble(space, centre, below, false);
-        moveSubLevel(space, low, new Vector3d(3000.5, -20_000, 3000.5), new Vector3d());
+        moveSubLevel(space, low, new Vector3d(30_000.5, -20_000, 30_000.5), new Vector3d());
         ServerSubLevel high = assemble(space, centre.offset(5, 0, 0), above, false);
-        moveSubLevel(space, high, new Vector3d(3005.5, 200_000, 3000.5), new Vector3d());
+        moveSubLevel(space, high, new Vector3d(30_005.5, 200_000, 30_000.5), new Vector3d());
 
         String inOverworld = testName(helper);
         ServerSubLevel sunk = assemble(overworld, helper.absolutePos(new BlockPos(1, 1, 1)), inOverworld, false);
