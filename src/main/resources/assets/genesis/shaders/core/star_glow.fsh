@@ -1,5 +1,7 @@
 #version 150
 
+#moj_import <genesis:dither.glsl>
+
 in vec4 v_color;
 
 uniform vec4 ColorModulator;
@@ -12,5 +14,8 @@ void main() {
     float falloff = 1.0 - t;
     float alpha = BaseAlpha * falloff * falloff * falloff;
     vec3 color = v_color.rgb * ColorModulator.rgb;
-    frag_color = vec4(color, alpha * ColorModulator.a);
+    alpha *= ColorModulator.a;
+
+    // Premultiplied, so the dithering isn't faded out along with the glow
+    frag_color = vec4(dither(color * alpha), alpha);
 }

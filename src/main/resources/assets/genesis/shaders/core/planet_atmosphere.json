@@ -1,7 +1,7 @@
 {
   "blend": {
     "func": "add",
-    "srcrgb": "srcalpha",
+    "srcrgb": "1",
     "dstrgb": "1-srcalpha"
   },
   "vertex": "genesis:planet_atmosphere",

@@ -135,7 +135,7 @@ public record StarComponent(
         static final RenderType STAR = create("genesis_star", DefaultVertexFormat.POSITION_COLOR,
                 VertexFormat.Mode.QUADS, 256, false, false, CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> sunShader))
-                        .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                        .setTransparencyState(PremultipliedTransparency.ADDITIVE)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setCullState(CULL)

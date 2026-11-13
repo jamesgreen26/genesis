@@ -160,7 +160,7 @@ public record StarGlowComponent(
         static final RenderType GLOW = create("genesis_star_glow", DefaultVertexFormat.POSITION_COLOR,
                 VertexFormat.Mode.TRIANGLES, 256, false, false, CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> glowShader))
-                        .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                        .setTransparencyState(PremultipliedTransparency.ADDITIVE)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setCullState(NO_CULL)

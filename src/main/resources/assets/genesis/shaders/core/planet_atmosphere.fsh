@@ -1,5 +1,7 @@
 #version 150
 
+#moj_import <genesis:dither.glsl>
+
 in vec3 v_camera_pos;
 in vec3 v_entry_position;
 in float v_half_size;
@@ -222,6 +224,9 @@ void main() {
     frag_color = mix(mix(sunsetCol,nightCol,nightFact),dayCol,dayFact);
     frag_color.a *= alpha;
     frag_color.a *= Density;
+
+    // Premultiplied, so the dithering isn't faded out along with the atmosphere
+    frag_color.rgb = dither(frag_color.rgb * frag_color.a);
 
     //frag_color = vec4(localRayDir * 0.5 + 0.5,0.3);
 

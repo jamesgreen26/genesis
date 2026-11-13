@@ -1,5 +1,7 @@
 #version 150
 
+#moj_import <genesis:dither.glsl>
+
 in vec4 vertexColor;
 in vec3 localPos;
 
@@ -52,5 +54,8 @@ void main() {
     float edgeT = clamp(minEdgeDist / ShadowEdgeWidth, 0.0, 1.0);
     float falloff = smoothstep(0.0, 1.0, edgeT);
 
-    fragColor = vec4(vertexColor.rgb, vertexColor.a * falloff);
+    float alpha = vertexColor.a * falloff;
+
+    // Premultiplied, so the dithering isn't faded out along with the shadow
+    fragColor = vec4(ditherUpwards(vertexColor.rgb * alpha), alpha);
 }

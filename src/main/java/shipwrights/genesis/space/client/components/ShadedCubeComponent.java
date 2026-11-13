@@ -324,7 +324,7 @@ public record ShadedCubeComponent(
         static final RenderType SHADOW = create("genesis_shaded_cube_shadow", DefaultVertexFormat.POSITION_COLOR,
                 VertexFormat.Mode.TRIANGLES, 256, false, false, CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> shadowShader))
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setTransparencyState(PremultipliedTransparency.TRANSLUCENT)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setCullState(CULL)
