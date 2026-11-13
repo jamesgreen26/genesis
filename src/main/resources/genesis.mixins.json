@@ -8,6 +8,7 @@
   },
   "client": [
     "ClientLevelMixin",
+    "GuiMixin",
     "LevelRendererMixin",
     "MinecraftMixin",
     "ParticleAccessor",

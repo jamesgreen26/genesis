@@ -1,5 +1,7 @@
 #version 150
 
+#moj_import <genesis:dither.glsl>
+
 in vec2 texCoord;
 in vec3 vNormal;
 in vec3 lightDir;
@@ -32,6 +34,6 @@ void main() {
     litTexColor += emissive.rgb * emissive.a;
 
     // Planets are always fully opaque
-    frag_color = vec4(litTexColor, 1.0);
+    frag_color = vec4(dither(litTexColor), 1.0);
     // Depth is set by the depth range the celestial is drawn with
 }

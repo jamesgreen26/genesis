@@ -1,5 +1,7 @@
 #version 150
 
+#moj_import <genesis:dither.glsl>
+
 in vec3 v_camera_pos;
 in vec3 v_entry_position;
 in float v_half_size;
@@ -189,5 +191,8 @@ void main() {
 
     vec3 color = temperatureToColor(pow(0.5 * sin(3.1415 * (sqrt(2 * brightness + 0.25) - 1)) + 0.5, 0.3));
 
-    frag_color = vec4(color, clamp(pow(5 * brightness, 2), 0, 1) * Opacity);
+    float alpha = clamp(pow(5 * brightness, 2), 0, 1) * Opacity;
+
+    // Premultiplied, so the dithering isn't faded out along with the glow
+    frag_color = vec4(dither(color * alpha), alpha);
 }

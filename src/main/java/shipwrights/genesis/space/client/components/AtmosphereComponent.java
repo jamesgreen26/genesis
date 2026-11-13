@@ -172,7 +172,7 @@ public record AtmosphereComponent(
         static final RenderType ATMOSPHERE = create("genesis_atmosphere", DefaultVertexFormat.POSITION_COLOR,
                 VertexFormat.Mode.QUADS, 256, false, false, CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> atmosphereShader))
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setTransparencyState(PremultipliedTransparency.TRANSLUCENT)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setCullState(CULL)

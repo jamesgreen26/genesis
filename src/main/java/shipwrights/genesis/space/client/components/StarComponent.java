@@ -129,13 +129,12 @@ public record StarComponent(
             super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
         }
 
-        // Additive, like vanilla's sun, so the sky behind it brightens it towards white. The shader's own blend mode
-        // matches, since applying the shader applies that instead.
+        // Additive, like vanilla's sun, so the sky behind it brightens it towards white
         // Doesn't write depth: the glow fades out towards the cube's edges, which shouldn't hide what's behind them
         static final RenderType STAR = create("genesis_star", DefaultVertexFormat.POSITION_COLOR,
                 VertexFormat.Mode.QUADS, 256, false, false, CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> sunShader))
-                        .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                        .setTransparencyState(PremultipliedTransparency.ADDITIVE)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setCullState(CULL)

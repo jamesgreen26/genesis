@@ -154,14 +154,13 @@ public record StarGlowComponent(
         }
 
         // Additive, like vanilla's sun and StarComponent: over black space that's the same as blending it over, and
-        // over the sky it brightens towards white. The shader's own blend mode matches, since applying the shader
-        // applies that instead.
+        // over the sky it brightens towards white
         // Doesn't write depth, so it doesn't hide what's behind it. Depth tested, so celestials in front of the star
         // hide the glow too.
         static final RenderType GLOW = create("genesis_star_glow", DefaultVertexFormat.POSITION_COLOR,
                 VertexFormat.Mode.TRIANGLES, 256, false, false, CompositeState.builder()
                         .setShaderState(new ShaderStateShard(() -> glowShader))
-                        .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                        .setTransparencyState(PremultipliedTransparency.ADDITIVE)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setCullState(NO_CULL)
