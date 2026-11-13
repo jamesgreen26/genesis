@@ -20,12 +20,14 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Time;
 import shipwrights.genesis.space.VantagePoint;
+import shipwrights.genesis.space.math.OBB;
 
 /// {@code /locate celestial <id>}: where a celestial is in space right now, and how far away it is.
 @EventBusSubscriber(modid = GenesisMod.MOD_ID)
@@ -33,6 +35,9 @@ public class LocateCelestialCommand {
 
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_CELESTIAL = new DynamicCommandExceptionType(id ->
             Component.translatableWithFallback("commands.genesis.locate.celestial.unknown", "There is no celestial with id %s", id));
+
+    /// How far above the top of a celestial's bounding box the suggested teleport command puts the player, in blocks
+    private static final int TELEPORT_CLEARANCE = 100;
 
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
@@ -59,8 +64,15 @@ public class LocateCelestialCommand {
         Vector3dc position = celestial.value().transformProvider().getPosition(celestials, time);
 
         long x = Math.round(position.x()), y = Math.round(position.y()), z = Math.round(position.z());
-        // Celestial positions are coordinates in space
-        String teleport = "/execute in " + GenesisMod.SPACE + " run tp @s " + x + " " + y + " " + z;
+        // Celestial positions are coordinates in space. Teleporting to one would put the player inside the celestial,
+        // so the suggested command goes above the top of its bounding box instead
+        Quaterniondc rotation = celestial.value().transformProvider().getRotation(celestials, time);
+        double top = Double.NEGATIVE_INFINITY;
+        for (Vector3dc corner : OBB.createCube(celestial.value().size(), rotation, position).getCorners()) {
+            top = Math.max(top, corner.y());
+        }
+        long teleportY = (long) Math.ceil(top) + TELEPORT_CLEARANCE;
+        String teleport = "/execute in " + GenesisMod.SPACE + " run tp @s " + x + " " + teleportY + " " + z;
         Component coordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", x, y, z))
                 .withStyle(style -> style
                         .withColor(ChatFormatting.GREEN)
