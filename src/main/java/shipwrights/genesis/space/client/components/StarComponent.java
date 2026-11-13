@@ -18,6 +18,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.space.client.BlendedShaderInstance;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
@@ -40,8 +41,8 @@ public record StarComponent(
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), GenesisMod.id("sun"),
-                DefaultVertexFormat.POSITION_COLOR), shader -> sunShader = shader);
+        event.registerShader(new BlendedShaderInstance(event.getResourceProvider(), GenesisMod.id("sun"),
+                DefaultVertexFormat.POSITION_COLOR, PremultipliedTransparency.ADDITIVE::setupRenderState), shader -> sunShader = shader);
     }
 
     @Override

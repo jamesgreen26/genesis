@@ -30,8 +30,12 @@ public final class DitheredVignette {
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), GenesisMod.id("vignette"),
-                DefaultVertexFormat.POSITION_TEX), loaded -> shader = loaded);
+        // The shader's colour is only its dithering, added to the screen darkened by its alpha. The screen's own alpha
+        // is left alone.
+        event.registerShader(new BlendedShaderInstance(event.getResourceProvider(), GenesisMod.id("vignette"),
+                DefaultVertexFormat.POSITION_TEX, () -> RenderSystem.blendFuncSeparate(
+                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE)), loaded -> shader = loaded);
     }
 
     /// Whether the vignette as vanilla has set it up can be drawn dithered. The world border's warning can't: it
@@ -47,10 +51,6 @@ public final class DitheredVignette {
     /// @param u0 the texture coordinates of the corner at `x0, y0`, with `v0`, from 0 to 1
     public static void draw(Matrix4f pose, ResourceLocation texture, float x0, float y0, float x1, float y1, float z,
                             float u0, float v0, float u1, float v1) {
-        // The shader's colour is only its dithering, added to the screen darkened by its alpha. The screen's own alpha
-        // is left alone. The shader's own blend mode matches, since applying the shader applies that instead.
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
         RenderSystem.setShaderTexture(0, texture);
         RenderSystem.setShader(() -> shader);
 

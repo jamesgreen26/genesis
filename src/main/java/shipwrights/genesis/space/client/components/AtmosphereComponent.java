@@ -25,6 +25,7 @@ import org.joml.Vector3f;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Daylight;
+import shipwrights.genesis.space.client.BlendedShaderInstance;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
@@ -58,8 +59,8 @@ public record AtmosphereComponent(
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), GenesisMod.id("planet_atmosphere"),
-                DefaultVertexFormat.POSITION_COLOR), shader -> atmosphereShader = shader);
+        event.registerShader(new BlendedShaderInstance(event.getResourceProvider(), GenesisMod.id("planet_atmosphere"),
+                DefaultVertexFormat.POSITION_COLOR, PremultipliedTransparency.TRANSLUCENT::setupRenderState), shader -> atmosphereShader = shader);
     }
 
     /// How far the camera at {@code cameraY} has climbed out of the atmosphere of the celestial it's standing on, from 0

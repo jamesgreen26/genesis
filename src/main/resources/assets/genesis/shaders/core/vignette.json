@@ -1,10 +1,8 @@
 {
   "blend": {
     "func": "add",
-    "srcrgb": "1",
-    "dstrgb": "1-srcalpha",
-    "srcalpha": "0",
-    "dstalpha": "1"
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
   },
   "vertex": "position_tex",
   "fragment": "genesis:vignette",

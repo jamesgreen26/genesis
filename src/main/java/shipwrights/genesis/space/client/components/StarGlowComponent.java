@@ -19,6 +19,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.VantagePoint;
+import shipwrights.genesis.space.client.BlendedShaderInstance;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
@@ -61,8 +62,8 @@ public record StarGlowComponent(
 
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), GenesisMod.id("star_glow"),
-                DefaultVertexFormat.POSITION_COLOR), shader -> glowShader = shader);
+        event.registerShader(new BlendedShaderInstance(event.getResourceProvider(), GenesisMod.id("star_glow"),
+                DefaultVertexFormat.POSITION_COLOR, PremultipliedTransparency.ADDITIVE::setupRenderState), shader -> glowShader = shader);
     }
 
     @Override

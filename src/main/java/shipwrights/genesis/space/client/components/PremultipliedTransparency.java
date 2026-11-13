@@ -7,6 +7,9 @@ import net.minecraft.client.renderer.RenderStateShard;
 /// Blending for the celestial shaders, which output premultiplied alpha: colour already multiplied by alpha. They
 /// dither their output to hide colour banding (see `shaders/include/dither.glsl`), and the dithering must reach the
 /// screen at full strength, where vanilla's blending would multiply it by alpha along with the colour.
+///
+/// A render type's shader needs it as well, as a {@link shipwrights.genesis.space.client.BlendedShaderInstance}: the
+/// shader is applied after the render type's state is set up, and may set the blending back to vanilla's.
 final class PremultipliedTransparency {
     private PremultipliedTransparency() {
     }

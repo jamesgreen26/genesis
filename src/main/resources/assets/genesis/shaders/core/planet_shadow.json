@@ -1,7 +1,7 @@
 {
   "blend": {
     "func": "add",
-    "srcrgb": "1",
+    "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
   "vertex": "genesis:planet_shadow",
