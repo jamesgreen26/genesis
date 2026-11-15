@@ -63,7 +63,6 @@ jar {
 }
 
 repositories {
-    flatDir { dir 'libs'}
     maven {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
@@ -161,7 +160,10 @@ dependencies {
     testImplementation("org.joml:joml-primitives:1.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
-    modImplementation("g_mungus:zps:1.20.1-2.7.0-pre4") // libs/zps-1.20.1-2.7.0-pre4.jar
+    modImplementation("maven.modrinth:zps:1.20.1-2.7.0")
+    // ZPS requires it at runtime but no longer bundles it. Genesis only reaches it by reflection or registry id.
+    // Not transitive: it bundles its own Architectury, and its other deps come from ZPS and KFF
+    modRuntimeOnly("org.valkyrienskies.kelvin:kelvin-forge:1.20.1-0.5.2+07b1d96c76") { transitive = false }
     // Optional, but needed in dev: ZPS gametests reference Create classes, and Forge loads every gametest class in dev
     modRuntimeOnly("maven.modrinth:create:mc1.20.1-6.0.8")
 
