@@ -52,7 +52,7 @@ side = "BOTH"
 [[dependencies.genesis]]
 modId = "zps"
 type = "required"
-versionRange = "[1.21.1-2.7.0-pre4,)"
+versionRange = "[1.21.1-2.7.0,)"
 ordering = "AFTER"
 side = "BOTH"
 

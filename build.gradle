@@ -57,7 +57,6 @@ neoForge {
 }
 
 repositories {
-    flatDir { dir 'libs' }
     mavenCentral()
 
     maven { url = "https://maven.createmod.net" }
@@ -139,7 +138,10 @@ dependencies {
     }
     additionalRuntimeClasspath("org.maplibre:earcut4j:3.0.0")
 
-    implementation("g_mungus:zps:${zps_version}") // libs/zps-${zps_version}.jar
+    implementation("maven.modrinth:zps:${zps_version}")
+    // ZPS requires it at runtime but no longer bundles it. Genesis only reaches it by reflection or registry id.
+    // Not transitive: it bundles its own Architectury, and its other deps come from ZPS and KFF
+    localRuntime("org.valkyrienskies.kelvin:kelvin-forge:${kelvin_version}") { transitive = false }
     // ZPS's Kotlin dependencies (Kelvin) need KFF at runtime
     localRuntime("thedarkcolour:kotlinforforge-neoforge:5.8.0")
     // Optional, but needed in dev: ZPS gametests reference Create classes, and NeoForge loads every gametest class

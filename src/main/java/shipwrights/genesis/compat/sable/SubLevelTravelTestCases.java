@@ -151,7 +151,7 @@ final class SubLevelTravelTestCases {
         });
     }
 
-    /// As in front of a ZPS controller, whose seat Sable keeps in the sub-level's plot while what rides it stays out in
+    /// As at a ZPS controller, whose seat Sable keeps in the sub-level's plot while what rides it stays out in
     /// the world
     static void seatedRiderLeavesForSpace(GameTestHelper helper) {
         ServerLevel overworld = helper.getLevel();
@@ -163,10 +163,9 @@ final class SubLevelTravelTestCases {
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH), 3);
         ServerSubLevel subLevel = assemble(overworld, centre, name, false, List.of(controllerPos));
 
-        // The seat in front of the controller, where it faces, in the plot
-        BlockPos inPlot = find(overworld, subLevel, ModBlocks.OCTO_CONTROLLER.get());
-        helper.assertTrue(inPlot != null, "the controller isn't in the sub-level");
-        BlockPos seatPos = inPlot.relative(Direction.NORTH);
+        // The seat, in the controller's own block in the plot, where ZPS puts it
+        BlockPos seatPos = find(overworld, subLevel, ModBlocks.OCTO_CONTROLLER.get());
+        helper.assertTrue(seatPos != null, "the controller isn't in the sub-level");
         OctoMountingEntity seat = ModEntities.OCTO_MOUNTING.get().create(overworld);
         helper.assertTrue(seat != null, "couldn't create a seat");
         seat.moveTo(seatPos.getX() + 0.5, seatPos.getY(), seatPos.getZ() + 0.5);
