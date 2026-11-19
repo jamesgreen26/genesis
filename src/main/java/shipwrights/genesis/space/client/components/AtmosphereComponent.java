@@ -22,6 +22,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
+import shipwrights.genesis.util.MoreCodecs;
+import shipwrights.genesis.util.schema.Schema;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.Celestial;
 import shipwrights.genesis.space.Daylight;
@@ -33,20 +35,22 @@ import shipwrights.genesis.space.client.CelestialVisualizer;
 import java.io.IOException;
 import java.util.Optional;
 
-/// A haze around a cube-shaped celestial, lit by the nearest light-casting celestial: blue on the day side, reddening
-/// towards the terminator and dim purple at night.
+/// A haze around a cube-shaped celestial, lit by the nearest light-casting celestial: {@code color0} on the day side,
+/// turning {@code color1} towards the terminator and dim purple at night. Colours are packed {@code 0xRRGGBB} values.
 ///
 /// Drawn as a shell whose shader traces the view ray through it; each vertex's colour carries its position within the
 /// atmosphere.
 ///
 /// @param density   opacity of the haze, from 0 for none
 /// @param thickness how far the atmosphere extends beyond the surface, in units of 30% of the celestial's half size
-/// @param color     packed {@code 0xRRGGBB}; not used yet, the shader has fixed day, sunset and night colours
+/// @param color0    colour of the day side
+/// @param color1    colour towards the terminator, at sunset
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public record AtmosphereComponent(
         double density,
         double thickness,
-        int color
+        int color0,
+        int color1
 ) implements CelestialVisualizer.Component {
     public static final ResourceLocation TYPE = GenesisMod.id("atmosphere");
 
@@ -92,7 +96,7 @@ public record AtmosphereComponent(
         CelestialPlacement placement = CelestialPlacement.of(context);
         if (density < 0.01) return;
 
-        Registry<Celestial> registry = context.clientLevel().registryAccess().registryOrThrow(Celestial.REGISTRY_KEY);
+        Registry<Celestial> registry = context.celestials();
         Vector3dc position = context.toRender().transformProvider().getPosition(registry, context.time());
         Optional<Vector3dc> lightSource = Daylight.nearestLightSource(registry, context.toRender(), position, context.time());
         if (lightSource.isEmpty()) return;
@@ -116,6 +120,8 @@ public record AtmosphereComponent(
         shader.safeGetUniform("HalfSize").set(halfSize);
         shader.safeGetUniform("AtmosphereThickness").set(relativeSize);
         shader.safeGetUniform("Density").set((float) density);
+        shader.safeGetUniform("Color0").set(red(color0), green(color0), blue(color0));
+        shader.safeGetUniform("Color1").set(red(color1), green(color1), blue(color1));
 
         // A single shell at the atmosphere's edge, mirrored so it faces inwards. A ray through the atmosphere leaves it
         // through exactly one of its inward-facing faces, whether the camera is outside the atmosphere or in it, so each
@@ -162,6 +168,18 @@ public record AtmosphereComponent(
                 .endVertex();
     }
 
+    private static float red(int color) {
+        return (color >> 16 & 0xFF) / 255f;
+    }
+
+    private static float green(int color) {
+        return (color >> 8 & 0xFF) / 255f;
+    }
+
+    private static float blue(int color) {
+        return (color & 0xFF) / 255f;
+    }
+
     // Vanilla render types rather than Lodestone's, like ShadedCubeComponent's
     private static final class RenderTypes extends RenderType {
         private RenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling,
@@ -182,9 +200,10 @@ public record AtmosphereComponent(
 
     public static final Codec<AtmosphereComponent> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.DOUBLE.fieldOf("density").forGetter(AtmosphereComponent::density),
-                    Codec.DOUBLE.fieldOf("thickness").forGetter(AtmosphereComponent::thickness),
-                    Codec.INT.fieldOf("color").forGetter(AtmosphereComponent::color)
+                    MoreCodecs.doubleRange(Schema.Range.atLeast(0)).fieldOf("density").forGetter(AtmosphereComponent::density),
+                    MoreCodecs.doubleRange(Schema.Range.atLeast(0)).fieldOf("thickness").forGetter(AtmosphereComponent::thickness),
+                    MoreCodecs.RGB.fieldOf("color0").forGetter(AtmosphereComponent::color0),
+                    MoreCodecs.RGB.fieldOf("color1").forGetter(AtmosphereComponent::color1)
             ).apply(instance, AtmosphereComponent::new)
     );
 }

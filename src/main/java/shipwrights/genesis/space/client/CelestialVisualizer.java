@@ -10,15 +10,18 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.util.CodecRegistry;
 import shipwrights.genesis.space.client.components.AtmosphereComponent;
 import shipwrights.genesis.space.client.components.ShadedCubeComponent;
 import shipwrights.genesis.space.client.components.StarComponent;
 import shipwrights.genesis.space.client.components.StarGlowComponent;
+import shipwrights.genesis.space.client.components.TexturedRingComponent;
 import shipwrights.genesis.util.ResourcePackRegistry;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 
 /// How a celestial looks, loaded from {@code assets/<namespace>/genesis/celestial/<path>.json}. Shares its id with
@@ -26,7 +29,7 @@ import java.util.function.Predicate;
 @Mod.EventBusSubscriber(modid = GenesisMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public record CelestialVisualizer(List<Component> components) {
     public interface Component {
-        Map<ResourceLocation, Codec<? extends Component>> REGISTRY = new HashMap<>();
+        Map<ResourceLocation, Codec<? extends Component>> REGISTRY = new CodecRegistry<>();
 
         static void register(ResourceLocation type, Codec<? extends Component> codec) {
             REGISTRY.put(type, codec);
@@ -43,6 +46,33 @@ public record CelestialVisualizer(List<Component> components) {
         default boolean shinesThroughSky() {
             return false;
         }
+
+        /// The textures this draws the celestial {@code celestialId} with, which aren't named in its JSON
+        default List<TextureSlot> textures(ResourceLocation celestialId) {
+            return List.of();
+        }
+    }
+
+    private static final List<Runnable> TEXTURE_LISTENERS = new CopyOnWriteArrayList<>();
+
+    /// Every texture the components draw the celestial {@code celestialId} with, once each
+    public List<TextureSlot> textures(ResourceLocation celestialId) {
+        Map<ResourceLocation, TextureSlot> slots = new LinkedHashMap<>();
+        for (Component component : components) {
+            for (TextureSlot slot : component.textures(celestialId)) slots.putIfAbsent(slot.location(), slot);
+        }
+        return List.copyOf(slots.values());
+    }
+
+    /// Runs {@code listener} whenever celestial textures are put in place or taken away other than by a resource
+    /// reload, as editors do to preview them. For components that remember what textures there are.
+    public static void onTexturesChanged(Runnable listener) {
+        TEXTURE_LISTENERS.add(listener);
+    }
+
+    /// Tells {@linkplain #onTexturesChanged listeners} that celestial textures have been put in place or taken away
+    public static void texturesChanged() {
+        TEXTURE_LISTENERS.forEach(Runnable::run);
     }
 
     public void render(CelestialRenderContext context, Predicate<Component> filter) {
@@ -69,6 +99,7 @@ public record CelestialVisualizer(List<Component> components) {
         Component.register(ShadedCubeComponent.TYPE, ShadedCubeComponent.CODEC);
         Component.register(StarComponent.TYPE, StarComponent.CODEC);
         Component.register(StarGlowComponent.TYPE, StarGlowComponent.CODEC);
+        Component.register(TexturedRingComponent.TYPE, TexturedRingComponent.CODEC);
 
         event.registerReloadListener(REGISTRY);
     }

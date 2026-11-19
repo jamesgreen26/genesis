@@ -13,9 +13,10 @@ import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.joml.Quaterniondc;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
+import shipwrights.genesis.util.CodecRegistry;
 import shipwrights.genesis.util.MoreCodecs;
+import shipwrights.genesis.util.schema.Schema;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /// @param size diameter in blocks
@@ -70,11 +71,11 @@ public record Celestial(
     public static final Codec<Celestial> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
                 Codec.BOOL.fieldOf("castsLight").forGetter(Celestial::castsLight),
-                Codec.BOOL.fieldOf("castsShadows").forGetter(Celestial::castsShadows),
-                Codec.DOUBLE.fieldOf("size").forGetter(Celestial::size),
-                Codec.DOUBLE.fieldOf("mass").forGetter(Celestial::mass),
+                MoreCodecs.bool(true).fieldOf("castsShadows").forGetter(Celestial::castsShadows),
+                MoreCodecs.doubleRange(Schema.Range.above(0)).fieldOf("size").forGetter(Celestial::size),
+                MoreCodecs.doubleRange(Schema.Range.atLeast(0)).fieldOf("mass").forGetter(Celestial::mass),
                 MoreCodecs.strictOptionalField(Codec.DOUBLE, "surfaceTemperature", 0.0).forGetter(Celestial::surfaceTemperature),
-                MoreCodecs.strictOptionalField(Codec.doubleRange(Double.MIN_VALUE, Double.MAX_VALUE), "heatFalloff", HeatSource.RADIATIVE).forGetter(Celestial::heatFalloff),
+                MoreCodecs.strictOptionalField(MoreCodecs.doubleRange(Schema.Range.above(0)), "heatFalloff", HeatSource.RADIATIVE).forGetter(Celestial::heatFalloff),
                 TransformProvider.DISPATCH_CODEC.fieldOf("transformProvider").forGetter(Celestial::transformProvider)
         ).apply(instance, Celestial::new)
     );
@@ -86,7 +87,7 @@ public record Celestial(
 
         ResourceLocation getType();
 
-        Map<ResourceLocation, Codec<? extends TransformProvider>> REGISTRY = new HashMap<>();
+        Map<ResourceLocation, Codec<? extends TransformProvider>> REGISTRY = new CodecRegistry<>();
 
         static void register(ResourceLocation type, Codec<? extends TransformProvider> codec) {
             REGISTRY.put(type, codec);

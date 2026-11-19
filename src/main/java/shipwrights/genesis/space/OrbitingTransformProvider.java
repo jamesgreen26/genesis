@@ -2,7 +2,6 @@ package shipwrights.genesis.space;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -12,7 +11,10 @@ import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.util.MoreCodecs;
+import shipwrights.genesis.util.schema.Schema;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -46,6 +48,12 @@ public record OrbitingTransformProvider(
 
     static ResourceLocation TYPE = GenesisMod.id("orbiting");
 
+    /// What a new orbit starts out around
+    private static final ResourceLocation DEFAULT_PARENT = GenesisMod.id("sun");
+
+    /// What a new orbit's period and day length start as, in ticks: a Minecraft day, rather than an instant
+    private static final double ONE_DAY = 24000;
+
     private static final int MAX_ITERATIONS = 32;
     private static final double TOLERANCE = 1e-12;
 
@@ -61,15 +69,19 @@ public record OrbitingTransformProvider(
 
         private static final String TIDALLY_LOCKED_NAME = "tidally_locked";
 
-        private static final Codec<Optional<Double>> DAY_LENGTH_CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).comapFlatMap(
-                either -> either.map(
-                        dayLength -> DataResult.success(Optional.of(dayLength)),
-                        name -> name.equals(TIDALLY_LOCKED_NAME)
-                                ? DataResult.success(Optional.empty())
-                                : DataResult.error(() -> "Expected a day length or \"" + TIDALLY_LOCKED_NAME + "\", got \"" + name + "\"")
-                ),
-                dayLength -> dayLength.<Either<Double, String>>map(Either::left).orElseGet(() -> Either.right(TIDALLY_LOCKED_NAME))
-        );
+        private static final Schema.NumberSchema DAY_LENGTH_SCHEMA =
+                new Schema.NumberSchema(Schema.NumberKind.DOUBLE, Schema.Range.nonZero(), BigDecimal.valueOf(ONE_DAY));
+
+        // Declared as a whole: probing the either would stop at the number, which declares itself, and never see the word
+        private static final Codec<Optional<Double>> DAY_LENGTH_CODEC = MoreCodecs.declaring(
+                Codec.either(MoreCodecs.ranged(Codec.DOUBLE, DAY_LENGTH_SCHEMA, BigDecimal::doubleValue),
+                                MoreCodecs.oneOf(TIDALLY_LOCKED_NAME))
+                        .xmap(
+                                either -> either.map(Optional::of, name -> Optional.empty()),
+                                dayLength -> dayLength.<Either<Double, String>>map(Either::left)
+                                        .orElseGet(() -> Either.right(TIDALLY_LOCKED_NAME))),
+                new Schema.UnionSchema(List.of(DAY_LENGTH_SCHEMA, new Schema.ChoiceSchema(List.of(TIDALLY_LOCKED_NAME)))),
+                Optional.empty());
 
         public static final Codec<Rotation> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
@@ -170,35 +182,19 @@ public record OrbitingTransformProvider(
         return e;
     }
 
-    private static DataResult<OrbitingTransformProvider> validate(OrbitingTransformProvider provider) {
-        if (!(provider.distance > 0.0)) {
-            return DataResult.error(() -> "Orbit distance must be positive, got " + provider.distance);
-        }
-        if (!(provider.eccentricity >= 0.0 && provider.eccentricity < 1.0)) {
-            return DataResult.error(() -> "Orbit eccentricity must be at least 0 and less than 1, got " + provider.eccentricity);
-        }
-        if (provider.period == 0.0) {
-            return DataResult.error(() -> "Orbit period must not be 0");
-        }
-        if (provider.rotation.dayLength().filter(dayLength -> dayLength == 0.0).isPresent()) {
-            return DataResult.error(() -> "Day length must not be 0");
-        }
-        return DataResult.success(provider);
-    }
-
-    // Validated as a MapCodec so it stays a MapCodecCodec: the type dispatch codec only inlines fields alongside "type" for
-    // MapCodecCodecs, and otherwise looks for them under a separate "value" key
+    // Kept a MapCodecCodec: the type dispatch codec only inlines fields alongside "type" for MapCodecCodecs, and
+    // otherwise looks for them under a separate "value" key
     public static final Codec<OrbitingTransformProvider> CODEC = RecordCodecBuilder.<OrbitingTransformProvider>mapCodec(instance ->
             instance.group(
-                    ResourceLocation.CODEC.fieldOf("parent").forGetter(OrbitingTransformProvider::parent),
-                    Codec.DOUBLE.fieldOf("distance").forGetter(OrbitingTransformProvider::distance),
-                    Codec.DOUBLE.fieldOf("period").forGetter(OrbitingTransformProvider::period),
-                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "eccentricity", 0.0).forGetter(OrbitingTransformProvider::eccentricity),
+                    MoreCodecs.registryId(Celestial.REGISTRY_KEY, DEFAULT_PARENT).fieldOf("parent").forGetter(OrbitingTransformProvider::parent),
+                    MoreCodecs.doubleRange(Schema.Range.above(0)).fieldOf("distance").forGetter(OrbitingTransformProvider::distance),
+                    MoreCodecs.doubleRange(Schema.Range.nonZero(), ONE_DAY).fieldOf("period").forGetter(OrbitingTransformProvider::period),
+                    MoreCodecs.strictOptionalField(MoreCodecs.doubleRange(Schema.Range.from(0, 1)), "eccentricity", 0.0).forGetter(OrbitingTransformProvider::eccentricity),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "inclination", 0.0).forGetter(OrbitingTransformProvider::inclination),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "inclinationDirection", 0.0).forGetter(OrbitingTransformProvider::inclinationDirection),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "periapsisAngle", 0.0).forGetter(OrbitingTransformProvider::periapsisAngle),
                     MoreCodecs.strictOptionalField(Codec.DOUBLE, "startAngle", 0.0).forGetter(OrbitingTransformProvider::startAngle),
                     MoreCodecs.strictOptionalField(Rotation.CODEC, "rotation", Rotation.TIDALLY_LOCKED).forGetter(OrbitingTransformProvider::rotation)
             ).apply(instance, OrbitingTransformProvider::new)
-    ).flatXmap(OrbitingTransformProvider::validate, OrbitingTransformProvider::validate).codec();
+    ).codec();
 }

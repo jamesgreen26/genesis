@@ -1,6 +1,6 @@
 {
   "components": [
     { "type": "genesis:shaded_cube", "drawShadows": true },
-    { "type": "genesis:atmosphere", "density": 0.1, "thickness": 0.2, "color": 328970 }
+    { "type": "genesis:atmosphere", "density": 0.1, "thickness": 0.2, "color0": "#4DB3E6", "color1": "#B34D1A" }
   ]
 }

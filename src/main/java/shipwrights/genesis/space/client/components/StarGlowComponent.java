@@ -18,12 +18,12 @@ import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import shipwrights.genesis.GenesisMod;
-import shipwrights.genesis.space.VantagePoint;
 import shipwrights.genesis.space.client.BlendedShaderInstance;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
 import shipwrights.genesis.util.MoreCodecs;
+import shipwrights.genesis.util.schema.Schema;
 
 import java.io.IOException;
 
@@ -78,8 +78,6 @@ public record StarGlowComponent(
 
     @Override
     public void render(CelestialRenderContext context) {
-        boolean onPlanet = context.vantagePoint() instanceof VantagePoint.OnCelestial;
-
         Vector3d toStar = new Vector3d(CelestialPlacement.of(context).position());
         double distance = toStar.length();
         if (distance < 1e-6) return;
@@ -87,9 +85,7 @@ public record StarGlowComponent(
         float alpha = (float) (opacity * Mth.clamp(distance / fadeDistance, 0.0, 1.0));
         float r = red(color), g = green(color), b = blue(color);
 
-        float skyBrightness = onPlanet
-                ? CelestialPlacement.skyBrightness(context.clientLevel(), context.camera().getPosition(), context.time().partialTick())
-                : 0f;
+        float skyBrightness = context.skyBrightness();
         if (skyBrightness > 0f) {
             alpha = Mth.lerp(skyBrightness, alpha, (float) skyOpacity);
             r = Mth.lerp(skyBrightness, r, red(skyColor));
@@ -170,12 +166,12 @@ public record StarGlowComponent(
 
     public static final Codec<StarGlowComponent> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.INT.fieldOf("color").forGetter(StarGlowComponent::color),
-                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "radius", 3600.0).forGetter(StarGlowComponent::radius),
-                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "opacity", 0.3).forGetter(StarGlowComponent::opacity),
-                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "fadeDistance", 3000.0).forGetter(StarGlowComponent::fadeDistance),
-                    MoreCodecs.strictOptionalField(Codec.INT, "skyColor", 0xFFFFFF).forGetter(StarGlowComponent::skyColor),
-                    MoreCodecs.strictOptionalField(Codec.DOUBLE, "skyOpacity", 0.5).forGetter(StarGlowComponent::skyOpacity)
+                    MoreCodecs.RGB.fieldOf("color").forGetter(StarGlowComponent::color),
+                    MoreCodecs.strictOptionalField(MoreCodecs.doubleRange(Schema.Range.above(0)), "radius", 3600.0).forGetter(StarGlowComponent::radius),
+                    MoreCodecs.strictOptionalField(MoreCodecs.doubleRange(Schema.Range.between(0, 1)), "opacity", 0.3).forGetter(StarGlowComponent::opacity),
+                    MoreCodecs.strictOptionalField(MoreCodecs.doubleRange(Schema.Range.above(0)), "fadeDistance", 3000.0).forGetter(StarGlowComponent::fadeDistance),
+                    MoreCodecs.strictOptionalField(MoreCodecs.RGB, "skyColor", 0xFFFFFF).forGetter(StarGlowComponent::skyColor),
+                    MoreCodecs.strictOptionalField(MoreCodecs.doubleRange(Schema.Range.between(0, 1)), "skyOpacity", 0.5).forGetter(StarGlowComponent::skyOpacity)
             ).apply(instance, StarGlowComponent::new)
     );
 }

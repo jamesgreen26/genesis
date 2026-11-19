@@ -1,16 +1,25 @@
 #version 150
 
 #moj_import <genesis:dither.glsl>
+#moj_import <genesis:shadow_volumes.glsl>
+
+// Light that reaches the whole surface, whether or not it faces the star
+const float AMBIENT_LIGHT = 0.1;
+// How much of the star's light a shadow blocks
+const float SHADOW_STRENGTH = 0.77;
 
 in vec2 texCoord;
-in vec3 vNormal;
 in vec3 lightDir;
 
 in vec3 v_entry_position;
+in vec3 surfacePos;
 
 uniform sampler2D Sampler0;
 // Emissive texture (1x1 transparent black if the planet has none)
 uniform sampler2D Sampler1;
+
+// The centre of the cube, in the same space as surfacePos and the shadow planes
+uniform vec3 ShadowOrigin;
 
 out vec4 frag_color;
 
@@ -24,12 +33,14 @@ void main() {
 
     ndotl = 1. - 1. / (ndotl * ndotl * 5. + 1.);
 
-    float ambient = 0.1;
-    float lighting = clamp(ambient + ndotl, 0.0, 1.0);
+    // A shadow takes away the star's light and leaves the rest
+    ndotl *= 1.0 - SHADOW_STRENGTH * shadowCoverage(surfacePos - ShadowOrigin);
+
+    float lighting = clamp(AMBIENT_LIGHT + ndotl, 0.0, 1.0);
 
     vec3 litTexColor = texColor.rgb * lighting;
 
-    // Emissive light is unaffected by lighting; alpha controls its strength
+    // Emissive light is unaffected by lighting and shadows; alpha controls its strength
     vec4 emissive = texture(Sampler1, texCoord);
     litTexColor += emissive.rgb * emissive.a;
 

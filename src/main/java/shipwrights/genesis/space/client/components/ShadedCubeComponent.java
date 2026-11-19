@@ -1,6 +1,5 @@
 package shipwrights.genesis.space.client.components;
 
-import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,7 +24,6 @@ import org.joml.Matrix4f;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Quaternionf;
-import org.joml.Vector2dc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
@@ -38,11 +37,12 @@ import shipwrights.genesis.space.client.BlendedShaderInstance;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
 import shipwrights.genesis.space.client.CelestialVisualizer;
-import shipwrights.genesis.space.client.shading.FaceShadow;
-import shipwrights.genesis.space.client.shading.ShadowProjection;
-import shipwrights.genesis.space.client.shading.ShadowRenderer;
-import shipwrights.genesis.space.math.AAPlane;
+import shipwrights.genesis.space.client.CubeFace;
+import shipwrights.genesis.space.client.TextureSlot;
+import shipwrights.genesis.space.client.shading.CelestialShadows;
+import shipwrights.genesis.space.client.shading.ShadowVolume;
 import shipwrights.genesis.space.math.OBB;
+import shipwrights.genesis.util.MoreCodecs;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,7 +60,6 @@ public record ShadedCubeComponent(
     public static final ResourceLocation TYPE = GenesisMod.id("shaded_cube");
 
     private static ShaderInstance texturedShader;
-    private static ShaderInstance shadowShader;
 
     // Bound in place of the emissive texture when a planet doesn't have one, so it emits nothing
     private static final ResourceLocation NO_EMISSIVE_TEXTURE = GenesisMod.id("textures/celestials/no_emissive.png");
@@ -71,14 +70,32 @@ public record ShadedCubeComponent(
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
         event.registerShader(new ShaderInstance(event.getResourceProvider(), GenesisMod.id("planet_textured"),
                 DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL), shader -> texturedShader = shader);
-        event.registerShader(new BlendedShaderInstance(event.getResourceProvider(), GenesisMod.id("planet_shadow"),
-                DefaultVertexFormat.POSITION_COLOR, PremultipliedTransparency.TRANSLUCENT::setupRenderState), shader -> shadowShader = shader);
     }
 
     @SubscribeEvent
     public static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
         // Textured render types check whether an emissive texture exists, so must be rebuilt when resource packs change
         event.registerReloadListener((ResourceManagerReloadListener) resourceManager -> TEXTURED_RENDER_TYPES.clear());
+        // Likewise when an editor puts textures in place to preview them
+        CelestialVisualizer.onTexturesChanged(TEXTURED_RENDER_TYPES::clear);
+    }
+
+    @Override
+    public List<TextureSlot> textures(ResourceLocation celestialId) {
+        ResourceLocation texture = textureLocation(celestialId);
+        return List.of(
+                new TextureSlot(texture.withPath(path -> "textures/" + path + ".png"),
+                        Component.translatable("genesis.texture.shaded_cube"), true,
+                        Component.translatable("genesis.texture.shaded_cube.hint"), true),
+                new TextureSlot(texture.withPath(path -> "textures/" + path + "_emissive.png"),
+                        Component.translatable("genesis.texture.shaded_cube_emissive"), false,
+                        Component.translatable("genesis.texture.shaded_cube_emissive.hint"))
+        );
+    }
+
+    /// The cube's texture for the celestial {@code id}, without the {@code textures/} prefix or {@code .png} extension
+    private static ResourceLocation textureLocation(ResourceLocation id) {
+        return GenesisMod.id("celestials/" + id.getNamespace() + "/" + id.getPath());
     }
 
     @Override
@@ -104,7 +121,7 @@ public record ShadedCubeComponent(
         VantagePoint vantagePoint = context.vantagePoint();
         Time time = context.time();
 
-        Registry<Celestial> registry = context.clientLevel().registryAccess().registryOrThrow(Celestial.REGISTRY_KEY);
+        Registry<Celestial> registry = context.celestials();
         Vector3dc position = toRender.transformProvider().getPosition(registry, time);
         Quaterniondc rotation = toRender.transformProvider().getRotation(registry, time);
 
@@ -112,7 +129,7 @@ public record ShadedCubeComponent(
         Optional<Vector3dc> starPosition = Daylight.nearestLightSource(registry, toRender, position, time);
         if (starPosition.isEmpty()) return;
 
-        List<FaceShadow> shadows = drawShadows
+        List<ShadowVolume> shadows = drawShadows
                 ? computeShadows(registry, toRender, position, rotation, starPosition.get(), time)
                 : List.of();
 
@@ -126,25 +143,17 @@ public record ShadedCubeComponent(
         renderCubeAt(id, shadows, context.poseStack(), placement.position(), placement.halfExtent(), placement.rotation());
     }
 
-    private static List<FaceShadow> computeShadows(Registry<Celestial> registry, Celestial toRender, Vector3dc position,
-                                                   Quaterniondc rotation, Vector3dc starPosition, Time time) {
+    /// The volumes that other celestials shade, where they could reach the cube
+    private static List<ShadowVolume> computeShadows(Registry<Celestial> registry, Celestial toRender, Vector3dc position,
+                                                     Quaterniondc rotation, Vector3dc starPosition, Time time) {
         OBB selfOBB = OBB.createCube(toRender.size(), rotation, position);
-        List<OBB> otherOBBs = registry.stream()
-                .filter(it -> it.castsShadows() && it != toRender)
-                .map(it -> OBB.createCube(
-                        it.size(),
-                        it.transformProvider().getRotation(registry, time),
-                        it.transformProvider().getPosition(registry, time)
-                ))
-                .toList();
-
-        return ShadowProjection.computeShadows(selfOBB, otherOBBs, starPosition);
+        return ShadowVolume.compute(selfOBB, CelestialShadows.casters(registry, toRender, time), starPosition);
     }
 
-    private static void renderCubeAt(ResourceLocation planetID, List<FaceShadow> shadows, PoseStack poseStack,
+    private static void renderCubeAt(ResourceLocation planetID, List<ShadowVolume> shadows, PoseStack poseStack,
                                      Vector3dc position, double halfExtent, Quaterniondc localRotation) {
         // Get the texture for this planet
-        ResourceLocation textureLocation = GenesisMod.id("celestials/" + planetID.getNamespace() + "/" + planetID.getPath());
+        ResourceLocation textureLocation = textureLocation(planetID);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         var renderType = getTexturedRenderType(textureLocation);
@@ -157,37 +166,29 @@ public record ShadedCubeComponent(
 
         float halfSize = (float) halfExtent;
 
-        // UV layout (3x2 grid):
-        // | north (0,0)     | west (1/3,0)   | south (2/3,0)  |
-        // | east (0,0.5)    | down (1/3,0.5) | up (2/3,0.5)   |
-        float third = 1.0f / 3.0f;
-        float twoThirds = 2.0f / 3.0f;
+        // Laid out in the texture as CubeFace has them, as the texture generator draws them too
+        for (CubeFace face : CubeFace.values()) {
+            addTexturedCubeFace(matrix, buffer, rotation,
+                    face.point(0, 1).mul(halfSize), face.point(1, 1).mul(halfSize),
+                    face.point(1, 0).mul(halfSize), face.point(0, 0).mul(halfSize),
+                    face.u0(), face.v0(), face.u1(), face.v1());
+        }
 
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, twoThirds, 0.0f, 1.0f, 0.5f);        // South face (+Z)
-        addTexturedCubeFace(matrix, buffer, rotation, halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, 0.0f, 0.0f, third, 0.5f);        // North face (-Z)
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, -halfSize, third, 0.0f, twoThirds, 0.5f);       // West face (-X)
-        addTexturedCubeFace(matrix, buffer, rotation, halfSize, -halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, halfSize, -halfSize, halfSize, halfSize, halfSize, 0.0f, 0.5f, third, 1.0f);            // East face (+X)
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, -halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, halfSize, -halfSize, -halfSize, halfSize, third, 0.5f, twoThirds, 1.0f);       // Down face (-Y)
-        addTexturedCubeFace(matrix, buffer, rotation, -halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, halfSize, -halfSize, -halfSize, halfSize, -halfSize, twoThirds, 0.5f, 1.0f, 1.0f);        // Up face (+Y)
+        setShadowUniforms(shadows, matrix);
 
         // End batch to flush planet rendering
         bufferSource.endBatch(renderType);
         bufferSource.endBatch();
-
-        renderShadows(shadows, matrix, halfExtent);
-        bufferSource.endBatch();
     }
 
+    /// A face from its corners: bottom left, bottom right, top right and top left as the texture has them
     private static void addTexturedCubeFace(Matrix4f matrix, VertexConsumer buffer, Quaternionf rotation,
-                                            float x1, float y1, float z1,
-                                            float x2, float y2, float z2,
-                                            float x3, float y3, float z3,
-                                            float x4, float y4, float z4,
+                                            Vector3f bottomLeft, Vector3f bottomRight, Vector3f topRight, Vector3f topLeft,
                                             float u1, float v1, float u2, float v2) {
-        addTexturedVertexWithLighting(matrix, buffer, x1, y1, z1, u1, v2, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x2, y2, z2, u2, v2, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x3, y3, z3, u2, v1, rotation);
-        addTexturedVertexWithLighting(matrix, buffer, x4, y4, z4, u1, v1, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, bottomLeft.x, bottomLeft.y, bottomLeft.z, u1, v2, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, bottomRight.x, bottomRight.y, bottomRight.z, u2, v2, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, topRight.x, topRight.y, topRight.z, u2, v1, rotation);
+        addTexturedVertexWithLighting(matrix, buffer, topLeft.x, topLeft.y, topLeft.z, u1, v1, rotation);
     }
 
     private static void addTexturedVertexWithLighting(Matrix4f matrix, VertexConsumer buffer,
@@ -203,100 +204,15 @@ public record ShadedCubeComponent(
                 .endVertex();
     }
 
-    private static void renderShadows(List<FaceShadow> shadows, Matrix4f matrix, double halfExtent) {
-        if (shadows.isEmpty()) {
-            return;
-        }
+    /// Tells the cube's shader what shades it, for the cube that's about to be drawn with {@code matrix}
+    private static void setShadowUniforms(List<ShadowVolume> shadows, Matrix4f matrix) {
+        ShaderInstance shader = texturedShader;
 
-        // Use a single edgeWidth across all face shadows so that the soft
-        // falloff scale is consistent across cube edges.
-        float sharedEdgeWidth = 0.0001f;
-        for (FaceShadow shadow : shadows) {
-            sharedEdgeWidth = Math.max(sharedEdgeWidth, ShadowRenderer.computeEdgeWidth(shadow));
-        }
-
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-
-        // Render each shadow in its own batch so we can upload
-        // per-shadow projection vertices to the shader.
-        for (FaceShadow shadow : shadows) {
-            VertexConsumer shadowBuffer = bufferSource.getBuffer(RenderTypes.SHADOW);
-
-            // Compute up to 8 vertices for this shadow from the projected
-            // polygon, transform them with the same matrix used for
-            // rendering, and upload them as uniforms. This keeps the
-            // shader's ShadowVertexN positions in the same space as the
-            // Position/localPos attribute.
-            ShaderInstance shader = shadowShader;
-            if (shader != null) {
-                List<Vector2dc> polygon = shadow.polygon();
-                AAPlane plane = shadow.plane();
-
-                int count = Math.min(polygon.size(), 8);
-
-                Uniform countUniform = shader.getUniform("ShadowVertexCount");
-                if (countUniform != null) {
-                    countUniform.set((float) count);
-                }
-
-                // Build a bitmask of edges that lie on cube face clipping boundaries.
-                // These are artifacts of Sutherland-Hodgman clipping, not real shadow
-                // silhouette edges, so they must not contribute to the fade falloff.
-                int boundaryMask = 0;
-                double eps = halfExtent * 1e-4;
-                for (int i = 0; i < count; i++) {
-                    int j = (i + 1) % count;
-                    Vector2dc a = polygon.get(i);
-                    Vector2dc b = polygon.get(j);
-                    boolean onBoundary =
-                            (Math.abs(a.x() - halfExtent) < eps && Math.abs(b.x() - halfExtent) < eps) ||
-                            (Math.abs(a.x() + halfExtent) < eps && Math.abs(b.x() + halfExtent) < eps) ||
-                            (Math.abs(a.y() - halfExtent) < eps && Math.abs(b.y() - halfExtent) < eps) ||
-                            (Math.abs(a.y() + halfExtent) < eps && Math.abs(b.y() + halfExtent) < eps);
-                    if (onBoundary) {
-                        boundaryMask |= (1 << i);
-                    }
-                }
-                Uniform maskUniform = shader.getUniform("ShadowEdgeMask");
-                if (maskUniform != null) {
-                    maskUniform.set((float) boundaryMask);
-                }
-
-                Uniform edgeWidthUniform = shader.getUniform("ShadowEdgeWidth");
-                if (edgeWidthUniform != null) {
-                    edgeWidthUniform.set(sharedEdgeWidth);
-                }
-
-                for (int i = 0; i < 8; i++) {
-                    Uniform u = shader.getUniform("ShadowVertex[" + i + "]");
-                    if (u != null) {
-                        if (i < count) {
-                            // Start from local-space projection and apply
-                            // the same z-fighting offset and matrix that
-                            // the geometry uses.
-                            Vector3d v3d = ShadowRenderer.applyZFightingOffset(
-                                    ShadowRenderer.convertPlaneToLocal3D(polygon.get(i), plane),
-                                    plane,
-                                    halfExtent
-                            );
-
-                            Vector3f transformed = new Vector3f((float) v3d.x, (float) v3d.y, (float) v3d.z);
-                            matrix.transformPosition(transformed);
-
-                            u.set(transformed.x, transformed.y, transformed.z);
-                        } else {
-                            u.set(0.0F, 0.0F, 0.0F);
-                        }
-                    }
-                }
-            }
-
-            ShadowRenderer.renderShadow(shadow, matrix, shadowBuffer, halfExtent);
-
-            // Flush this shadow's batch so its uniforms apply only to it
-            bufferSource.endBatch(RenderTypes.SHADOW);
-            bufferSource.endBatch();
-        }
+        // The shader works in the space the vertices are uploaded in, which is the cube's local space transformed by
+        // the matrix
+        Vector3f origin = matrix.transformPosition(new Vector3f());
+        shader.safeGetUniform("ShadowOrigin").set(origin.x, origin.y, origin.z);
+        CelestialShadows.setUniforms(shader, shadows, matrix);
     }
 
     /// If a texture with the {@code _emissive} suffix exists next to the cube's texture, it is bound to Sampler1 and
@@ -307,7 +223,7 @@ public record ShadedCubeComponent(
         return TEXTURED_RENDER_TYPES.computeIfAbsent(textureLocation, loc -> {
             ResourceLocation fullTexturePath = loc.withPath(path -> "textures/" + path + ".png");
             ResourceLocation emissiveTexturePath = loc.withPath(path -> "textures/" + path + "_emissive.png");
-            if (Minecraft.getInstance().getResourceManager().getResource(emissiveTexturePath).isEmpty()) {
+            if (!TextureSlot.exists(emissiveTexturePath)) {
                 emissiveTexturePath = NO_EMISSIVE_TEXTURE;
             }
             return RenderTypes.textured(loc, fullTexturePath, emissiveTexturePath);
@@ -321,15 +237,6 @@ public record ShadedCubeComponent(
                             boolean sortOnUpload, Runnable setupState, Runnable clearState) {
             super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
         }
-
-        static final RenderType SHADOW = create("genesis_shaded_cube_shadow", DefaultVertexFormat.POSITION_COLOR,
-                VertexFormat.Mode.TRIANGLES, 256, false, false, CompositeState.builder()
-                        .setShaderState(new ShaderStateShard(() -> shadowShader))
-                        .setTransparencyState(PremultipliedTransparency.TRANSLUCENT)
-                        .setDepthTestState(LEQUAL_DEPTH_TEST)
-                        .setWriteMaskState(COLOR_WRITE)
-                        .setCullState(CULL)
-                        .createCompositeState(false));
 
         static RenderType textured(ResourceLocation id, ResourceLocation texture, ResourceLocation emissiveTexture) {
             return create("genesis_shaded_cube_" + id.getNamespace() + "_" + id.getPath().replace("/", "_"),
@@ -349,7 +256,7 @@ public record ShadedCubeComponent(
 
     public static final Codec<ShadedCubeComponent> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.BOOL.fieldOf("drawShadows").forGetter(ShadedCubeComponent::drawShadows)
+                    MoreCodecs.bool(true).fieldOf("drawShadows").forGetter(ShadedCubeComponent::drawShadows)
             ).apply(instance, ShadedCubeComponent::new)
     );
 }

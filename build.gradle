@@ -146,14 +146,6 @@ dependencies {
     // ZPS requires it at runtime; Genesis has no Kotlin of its own
     modRuntimeOnly("thedarkcolour:kotlinforforge:4.11.0")
 
-    additionalRuntimeClasspath("org.maplibre:earcut4j:3.0.0")
-    jarJar(implementation("org.maplibre:earcut4j:3.0.0")) {
-        version {
-            strictly "[3.0.0,)"
-            prefer "3.0.0"
-        }
-    }
-
     // Test dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.joml:joml:1.10.4")
