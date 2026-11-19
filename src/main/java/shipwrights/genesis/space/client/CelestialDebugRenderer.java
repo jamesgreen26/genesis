@@ -62,7 +62,7 @@ public class CelestialDebugRenderer {
         Celestial standingOn = vantagePoint instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
         for (Celestial celestial : celestials) {
             if (celestial == standingOn) continue;
-            CelestialPlacement placement = CelestialPlacement.of(new CelestialRenderContext(celestial, vantagePoint, time, poseStack, camera, level));
+            CelestialPlacement placement = CelestialPlacement.of(new CelestialRenderContext(celestial, celestials, vantagePoint, time, poseStack, cameraPos, level));
             double h = placement.halfExtent();
 
             poseStack.pushPose();

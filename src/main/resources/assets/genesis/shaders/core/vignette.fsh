@@ -16,8 +16,9 @@ void main() {
     float darkening = texture(Sampler0, texCoord0).r * ColorModulator.r;
 
     // The screen is scaled by one minus the alpha, and the colour is added to it: only the dithering. The vignette
-    // darkens, so the noise can only go upwards (see ditherUpwards() in dither.glsl). It fades in over the first 8-bit
-    // step of darkening, leaving the middle of the screen, which the vignette doesn't reach, exactly as it was.
+    // darkens, and its own colour is black, so the noise has nowhere to go but up: a whole step upwards rather than
+    // half a step either way. It fades in over the first 8-bit step of darkening, leaving the middle of the screen,
+    // which the vignette doesn't reach, exactly as it was.
     float noise = ditherPattern() / 255.0 * min(darkening * 255.0, 1.0);
 
     fragColor = vec4(vec3(noise), darkening);

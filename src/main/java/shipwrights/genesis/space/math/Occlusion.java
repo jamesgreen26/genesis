@@ -126,15 +126,18 @@ public class Occlusion {
         double proj = sunToCandidate.dot(sunToTarget);
         if (proj <= 0.0 || proj >= targetDist) return false;
 
-        // Step 2: cone test
-        double targetRadius = target.boundingSphereRadius();
-        double sinTheta = Math.min(1.0, targetRadius / targetDist);
-        double cosTheta = Math.sqrt(1.0 - sinTheta * sinTheta);
+        // Step 2: cone test. Seen from the light, the two bounding spheres overlap if their centres are no further
+        // apart than their angular radii added together.
+        double targetAngle = Math.asin(Math.min(1.0, target.boundingSphereRadius() / targetDist));
+        double candidateAngle = Math.asin(Math.min(1.0, candidate.boundingSphereRadius() / candidateDist));
 
-        double candidateRadius = candidate.boundingSphereRadius();
+        // From the cross product rather than the cosine alone, which can't tell small angles apart, and a celestial
+        // is a small angle across from its star
+        double separation = Math.atan2(
+                sunToCandidate.cross(sunToTarget, new Vector3d()).length(),
+                proj
+        );
 
-        double dot = proj / candidateDist;
-
-        return dot >= cosTheta - (candidateRadius / candidateDist) * sinTheta;
+        return separation <= targetAngle + candidateAngle;
     }
 }

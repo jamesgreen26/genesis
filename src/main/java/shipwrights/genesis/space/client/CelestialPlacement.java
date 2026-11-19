@@ -1,6 +1,5 @@
 package shipwrights.genesis.space.client;
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Registry;
@@ -45,9 +44,8 @@ public record CelestialPlacement(Vector3dc position, Quaterniondc rotation, doub
     public static CelestialPlacement of(CelestialRenderContext context) {
         Celestial toRender = context.toRender();
         VantagePoint vantagePoint = context.vantagePoint();
-        Camera camera = context.camera();
 
-        Registry<Celestial> registry = context.clientLevel().registryAccess().registryOrThrow(Celestial.REGISTRY_KEY);
+        Registry<Celestial> registry = context.celestials();
         Vector3dc position = toRender.transformProvider().getPosition(registry, context.time());
         Quaterniondc rotation = toRender.transformProvider().getRotation(registry, context.time());
 
@@ -55,7 +53,7 @@ public record CelestialPlacement(Vector3dc position, Quaterniondc rotation, doub
 
         // In space: celestials are at absolute positions, so subtract camera position
         if (vantagePoint instanceof VantagePoint.InSpace) {
-            Vec3 cameraPos = camera.getPosition();
+            Vec3 cameraPos = context.cameraPosition();
             return new CelestialPlacement(new Vector3d(position).sub(cameraPos.x, cameraPos.y, cameraPos.z), rotation, halfExtent);
         }
 

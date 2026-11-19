@@ -9,9 +9,9 @@ in vec3 lightDir;
 
 uniform float AtmosphereThickness;
 uniform float Density;
+uniform vec3 Color0;
+uniform vec3 Color1;
 
-const vec4 dayCol = vec4(0.3,0.7,0.9,0.7);
-const vec4 sunsetCol = vec4(0.7,0.3,0.1,0.5);
 const vec4 nightCol = vec4(0.2,0.1,0.4,0.1);
 
 out vec4 frag_color;
@@ -220,6 +220,9 @@ void main() {
 
     float dayFact = clamp(lightDot * 3.0,0.0,1.0);
     float nightFact = clamp(lightDot * -4.0,0.0,1.0);
+
+    vec4 dayCol = vec4(Color0, 0.7);
+    vec4 sunsetCol = vec4(Color1, 0.5);
 
     frag_color = mix(mix(sunsetCol,nightCol,nightFact),dayCol,dayFact);
     frag_color.a *= alpha;

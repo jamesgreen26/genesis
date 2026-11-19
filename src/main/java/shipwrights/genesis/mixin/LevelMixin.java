@@ -29,7 +29,7 @@ public abstract class LevelMixin {
         Level level = (Level) (Object) this;
         long dayTime = level.getDayTime();
         if (dayTime != genesis$cachedDayTime || partialTick != genesis$cachedPartialTick) {
-            genesis$cachedTimeOfDay = Daylight.timeOfDay(level, Time.of(dayTime, partialTick))
+            genesis$cachedTimeOfDay = Daylight.timeOfDay(level, Time.get(level, partialTick))
                     .orElseGet(() -> level.dimensionType().timeOfDay(dayTime));
             genesis$cachedDayTime = dayTime;
             genesis$cachedPartialTick = partialTick;

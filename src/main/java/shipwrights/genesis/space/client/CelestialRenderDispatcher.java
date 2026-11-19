@@ -24,6 +24,7 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL32;
 import shipwrights.genesis.GenesisMod;
@@ -47,7 +48,7 @@ public class CelestialRenderDispatcher {
     private static boolean renderedBehindSky = false;
 
     /// The depth between one celestial and the next nearest, when drawn around the sky
-    private static final double DEPTH_STEP = 1e-5;
+    public static final double DEPTH_STEP = 1e-5;
 
     /// Draws the stars and every celestial except what {@linkplain
     /// CelestialVisualizer.Component#shinesThroughSky() shines through the sky}. Called from the sky renderer, before
@@ -166,8 +167,7 @@ public class CelestialRenderDispatcher {
     /// @param depthStep how much further each celestial is drawn than the next nearest
     private static void render(PoseStack poseStack, Camera camera, float partialTick,
                                Predicate<CelestialVisualizer.Component> filter, double nearestDepth, double depthStep) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ClientLevel level = minecraft.level;
+        ClientLevel level = Minecraft.getInstance().level;
         if (level == null) return;
 
         Registry<Celestial> celestials = level.registryAccess().registry(Celestial.REGISTRY_KEY).orElse(null);
@@ -175,17 +175,33 @@ public class CelestialRenderDispatcher {
 
         Time time = Time.get(level, partialTick);
         Vec3 cameraPos = camera.getPosition();
-        Vector3dc cameraPosition = new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z);
-
-        VantagePoint vantagePoint = VantagePoint.get(level, time, cameraPosition);
+        VantagePoint vantagePoint = VantagePoint.get(level, time, new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z));
         if (!vantagePoint.isReal()) return;
 
-        // In space the camera is already at its real position; on a celestial it's on that celestial's surface
-        Vector3dc observer = vantagePoint instanceof VantagePoint.OnCelestial ? vantagePoint.getPosition() : cameraPosition;
-        Celestial standingOn = vantagePoint instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
-        Registry<CelestialVisualizer> visualizers = CelestialVisualizer.REGISTRY.registry();
+        renderCelestials(poseStack, cameraPos, celestials, CelestialVisualizer.REGISTRY.registry(), time, vantagePoint, level, filter, nearestDepth, depthStep);
+    }
 
-        var bufferSource = minecraft.renderBuffers().bufferSource();
+    /// Draws every celestial that has a {@link CelestialVisualizer}, furthest from the observer first, each at its own
+    /// fixed depth. Needs no level, so it can be drawn away from one, as on the
+    /// {@linkplain shipwrights.genesis.space.client.map.SolarSystemScreen solar system map}.
+    ///
+    /// @param poseStack      holding the camera's rotation only; celestials are placed relative to the camera
+    /// @param cameraPosition where the camera is, in the level when on a celestial, or in space otherwise
+    /// @param visualizers    how each celestial looks, by its id; those without one aren't drawn
+    /// @param level          the level viewed from, if any; needed only for {@link VantagePoint.OnCelestial}
+    /// @param nearestDepth   the depth the nearest celestial is drawn at
+    /// @param depthStep      how much further each celestial is drawn than the next nearest
+    public static void renderCelestials(PoseStack poseStack, Vec3 cameraPosition, Registry<Celestial> celestials,
+                                        Registry<CelestialVisualizer> visualizers, Time time, VantagePoint vantagePoint, @Nullable ClientLevel level,
+                                        Predicate<CelestialVisualizer.Component> filter,
+                                        double nearestDepth, double depthStep) {
+        // In space the camera is already at its real position; on a celestial it's on that celestial's surface
+        Vector3dc observer = vantagePoint instanceof VantagePoint.OnCelestial
+                ? vantagePoint.getPosition()
+                : new Vector3d(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+        Celestial standingOn = vantagePoint instanceof VantagePoint.OnCelestial oc ? oc.celestial() : null;
+
+        var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         // Nearest first, so each celestial's depth doesn't depend on the filter
         List<Drawable> drawables = celestials.entrySet().stream()
@@ -209,7 +225,7 @@ public class CelestialRenderDispatcher {
             GL11.glDepthRange(depth, depth);
 
             drawable.visualizer().render(new CelestialRenderContext(
-                    drawable.celestial(), vantagePoint, time, poseStack, camera, level
+                    drawable.celestial(), celestials, vantagePoint, time, poseStack, cameraPosition, level
             ), filter);
 
             // Celestial shaders rely on per-object uniforms. Flush any leftover batched geometry before the next

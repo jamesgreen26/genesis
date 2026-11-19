@@ -257,6 +257,29 @@ class OcclusionTest {
     }
 
     @Test
+    void testLargeCandidateOverlappingSmallTargetOffAxisOccludes() {
+        // A candidate much larger than the target still shades it when the target is off to one side of the
+        // candidate's shadow, well outside the cone from the light to the target itself
+        Vector3d referencePoint = new Vector3d(0, 0, 0);
+        OBB target = createOBB(0, 0, 1000, 2);    // bounding radius ~1.7, seen 0.0017 across
+        OBB candidate = createOBB(40, 0, 500, 60); // bounding radius ~52, so reaches from x = -12 to x = 92
+
+        assertTrue(Occlusion.couldOcclude(candidate, target, referencePoint),
+                "Large candidate whose bounding sphere covers the line to the target should occlude");
+    }
+
+    @Test
+    void testLargeCandidateJustMissingSmallTargetDoesNotOcclude() {
+        Vector3d referencePoint = new Vector3d(0, 0, 0);
+        OBB target = createOBB(0, 0, 1000, 2);
+        // Bounding radius ~52 again, but 60 from the line to the target
+        OBB candidate = createOBB(60, 0, 500, 60);
+
+        assertFalse(Occlusion.couldOcclude(candidate, target, referencePoint),
+                "Large candidate whose bounding sphere misses the cone to the target should not occlude");
+    }
+
+    @Test
     void testSmallCandidateSlightlyOffAxisDoesNotOcclude() {
         Vector3d referencePoint = new Vector3d(0, 0, 0);
         OBB target = createOBB(0, 0, 1000, 10);

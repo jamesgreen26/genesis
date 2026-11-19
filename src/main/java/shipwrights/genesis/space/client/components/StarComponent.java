@@ -18,6 +18,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import shipwrights.genesis.util.MoreCodecs;
 import shipwrights.genesis.GenesisMod;
 import shipwrights.genesis.space.client.CelestialPlacement;
 import shipwrights.genesis.space.client.CelestialRenderContext;
@@ -143,8 +144,8 @@ public record StarComponent(
 
     public static final MapCodec<StarComponent> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                    Codec.INT.fieldOf("color0").forGetter(StarComponent::color0),
-                    Codec.INT.fieldOf("color1").forGetter(StarComponent::color1)
+                    MoreCodecs.RGB.fieldOf("color0").forGetter(StarComponent::color0),
+                    MoreCodecs.RGB.fieldOf("color1").forGetter(StarComponent::color1)
             ).apply(instance, StarComponent::new)
     );
 }

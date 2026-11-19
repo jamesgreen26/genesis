@@ -130,14 +130,6 @@ dependencies {
     }
     additionalRuntimeClasspath("org.joml:joml-primitives:1.10.0")
 
-    jarJar(implementation("org.maplibre:earcut4j:3.0.0")) {
-        version {
-            strictly "[3.0.0,)"
-            prefer "3.0.0"
-        }
-    }
-    additionalRuntimeClasspath("org.maplibre:earcut4j:3.0.0")
-
     implementation("maven.modrinth:zps:${zps_version}")
     // ZPS requires it at runtime but no longer bundles it. Genesis only reaches it by reflection or registry id.
     // Not transitive: it bundles its own Architectury, and its other deps come from ZPS and KFF

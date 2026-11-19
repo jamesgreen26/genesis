@@ -14,9 +14,3 @@ float ditherPattern() {
 vec3 dither(vec3 color) {
     return color + (ditherPattern() - 0.5) / 255.0;
 }
-
-// As dither(), for colours that darken what's behind them and may be black themselves, such as shadows. The noise
-// then has nowhere to go but up: it's a whole step upwards instead, making the result half a step brighter.
-vec3 ditherUpwards(vec3 color) {
-    return color + ditherPattern() / 255.0;
-}

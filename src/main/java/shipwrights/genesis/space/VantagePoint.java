@@ -33,7 +33,7 @@ public sealed interface VantagePoint {
     Quaterniondc getRotation();
 
     record InSpace () implements VantagePoint {
-        static final InSpace INSTANCE = new InSpace();
+        public static final InSpace INSTANCE = new InSpace();
 
         @Override
         public boolean isReal() { return true; }
