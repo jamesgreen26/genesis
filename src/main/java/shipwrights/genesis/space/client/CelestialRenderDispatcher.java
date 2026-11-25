@@ -138,6 +138,15 @@ public class CelestialRenderDispatcher {
             render(poseStack, event.getCamera(), partialTick, component -> true, 1, 0);
         }
         renderedBehindSky = false;
+
+        // Over everything in the sky, so the celestial below hides even what shines through the sky
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level != null) {
+            Vec3 cameraPos = event.getCamera().getPosition();
+            VantagePoint vantagePoint = VantagePoint.get(level, Time.get(level, partialTick),
+                    new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z));
+            PlanetDisc.render(poseStack, level, vantagePoint, cameraPos.y);
+        }
     }
 
     /// The skybox and stars behind every celestial. Hidden by daylight, and the skybox by the air too, showing as the
