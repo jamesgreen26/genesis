@@ -54,11 +54,12 @@ legacyForge {
 mixin {
     add sourceSets.main, "mixins.shipwrights.genesis.refmap.json"
     config 'genesis.mixins.json' // This can be done for multiple configs
+    config 'genesis.vs.mixins.json' // Mixins into Valkyrien Skies, applied only when it's loaded
 }
 
 jar {
     manifest.attributes([
-            "MixinConfigs": "genesis.mixins.json"
+            "MixinConfigs": "genesis.mixins.json,genesis.vs.mixins.json"
     ])
 }
 
